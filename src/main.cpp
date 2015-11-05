@@ -50,5 +50,8 @@ int main (int parArgc, char* parArgv[]) {
 	std::cout << pn2.path() << '\n';
 	std::cout << pn3.path() << '\n';
 	std::cout << pn4.path() << '\n';
+
+	pn1.join(pn2);
+	std::cout << pn1.path() << '\n';
 	return 0;
 }

@@ -20,6 +20,8 @@
 
 #include <vector>
 #include <string>
+#include <boost/utility/string_ref.hpp>
+#include <map>
 
 namespace din {
 	class PathName {
@@ -29,9 +31,16 @@ namespace din {
 
 		bool is_absolute ( void ) const;
 		std::string path ( void ) const;
+		const std::string& original_path ( void ) const { return m_original_path; }
+		std::size_t atom_count ( void ) const { return m_atoms.size(); }
+		const boost::string_ref operator[] ( std::size_t parIndex ) const { return m_atoms[parIndex]; }
+		void join ( const PathName& parOther );
 
 	private:
-		std::vector<std::string> m_atoms;
+		typedef std::vector<boost::string_ref> AtomList;
+		std::map<std::string, std::size_t> m_pool;
+		AtomList m_atoms;
+		std::string m_original_path;
 		bool m_absolute;
 	};
 } //namespace din
