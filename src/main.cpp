@@ -52,6 +52,14 @@ int main (int parArgc, char* parArgv[]) {
 	std::cout << pn4.path() << '\n';
 
 	pn1.join(pn2);
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("..");
+	pn1.join("code");
 	std::cout << pn1.path() << '\n';
 	return 0;
 }

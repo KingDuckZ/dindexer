@@ -18,6 +18,7 @@
 #ifndef id279E04E31E2C4D98B8C902781A3CE018
 #define id279E04E31E2C4D98B8C902781A3CE018
 
+#include "stringpool.hpp"
 #include <vector>
 #include <string>
 #include <boost/utility/string_ref.hpp>
@@ -31,16 +32,17 @@ namespace din {
 
 		bool is_absolute ( void ) const;
 		std::string path ( void ) const;
-		const std::string& original_path ( void ) const { return m_original_path; }
-		std::size_t atom_count ( void ) const { return m_atoms.size(); }
-		const boost::string_ref operator[] ( std::size_t parIndex ) const { return m_atoms[parIndex]; }
+		const std::string& original_path ( void ) const { return (m_original_path ? *m_original_path : m_empty_str); }
+		std::size_t atom_count ( void ) const;
+		const boost::string_ref operator[] ( std::size_t parIndex ) const;
 		void join ( const PathName& parOther );
+		void join ( const char* parOther );
 
 	private:
-		typedef std::vector<boost::string_ref> AtomList;
-		std::map<std::string, std::size_t> m_pool;
-		AtomList m_atoms;
-		std::string m_original_path;
+		static const std::string m_empty_str;
+
+		StringPool<char> m_pool;
+		const std::string* m_original_path;
 		bool m_absolute;
 	};
 } //namespace din

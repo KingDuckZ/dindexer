@@ -20,9 +20,9 @@
 #include <functional>
 #include <ciso646>
 
-#include <iostream>
-
 namespace din {
+	const std::string PathName::m_empty_str("");
+
 	namespace {
 		bool ptr_between (const char* parPtr, const char* parBeg, const char* parEnd) {
 			std::less<const char*> less;
@@ -31,8 +31,17 @@ namespace din {
 			return lesseq(parBeg, parPtr) and less(parPtr, parEnd);
 		}
 
+		std::size_t count_grouped (boost::string_ref parIn, char parDelim) {
+			std::size_t retval = 0;
+			char prev = '\0';
+			for (auto c : parIn) {
+				retval += (parDelim == c and prev != parDelim ? 1 : 0);
+				prev = c;
+			}
+			return retval;
+		}
+
 		void split_path (std::vector<boost::string_ref>* parOut, boost::string_ref parPath) {
-			parOut->clear();
 			auto from = parPath.begin();
 			boost::string_ref::const_iterator next;
 			const auto end = parPath.end();
@@ -50,17 +59,27 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	PathName::PathName (const char* parPath) :
-		m_original_path(parPath)
-	{
-		if (not m_original_path.empty()) {
+	PathName::PathName (const char* parPath) {
+		if (nullptr != parPath && *parPath != '\0') {
 			m_absolute = ('/' == *parPath);
-			split_path(&m_atoms, m_original_path);
+			std::string path(parPath);
+
+			const auto count = count_grouped(path, '/');
+			const std::size_t trailing = (path.back() == '/' ? 1 : 0);
+			const std::size_t absolute = (m_absolute ? 1 : 0);
+			const auto res = count + 1 - trailing - absolute;
+			std::vector<boost::string_ref> atoms;
+			atoms.reserve(res);
+			split_path(&atoms, path);
+			m_pool.insert(atoms, &path);
+		}
+		else {
+			m_original_path = nullptr;
 		}
 	}
 
 	std::string PathName::path() const {
-		if (m_atoms.empty()) {
+		if (m_pool.empty()) {
 			if (m_absolute) {
 				return std::string("/");
 			}
@@ -70,15 +89,15 @@ namespace din {
 		}
 
 		std::size_t reserve = (m_absolute ? 1 : 0);
-		for (const auto& itm : m_atoms) {
+		for (const auto& itm : m_pool) {
 			reserve += itm.size();
 		}
-		reserve += m_atoms.size() - 1;
+		reserve += m_pool.size() - 1;
 
 		std::string out;
 		out.reserve(reserve);
 		const char* slash = (m_absolute ? "/" : "");
-		for (const auto& itm : m_atoms) {
+		for (const auto& itm : m_pool) {
 			out += slash;
 			out.insert(out.end(), itm.begin(), itm.end());
 			slash = "/";
@@ -87,31 +106,20 @@ namespace din {
 	}
 
 	void PathName::join (const PathName& parOther) {
-		typedef std::pair<std::string, std::size_t> PairType;
-		using boost::string_ref;
+		m_pool.update(parOther.m_pool);
+	}
 
-		for (const auto& itm : parOther.m_pool) {
-			m_pool[itm.first] += itm.second;
-		}
-		const auto& other_path = parOther.original_path();
-		const auto it_other_path = m_pool.insert(PairType(other_path, 0)).first;
+	const boost::string_ref PathName::operator[] (std::size_t parIndex) const {
+		return *(m_pool.begin() + parIndex);
+	}
 
-		for (auto str : parOther.m_atoms) {
-			if (ptr_between(str.data(), other_path.data(), other_path.data() + other_path.size())) {
-				it_other_path->second++;
-				auto offset = str.data() - other_path.data();
-				m_atoms.push_back(string_ref(it_other_path->first).substr(offset, str.size()));
-			}
-			else {
-			}
-		}
-		if (not it_other_path->second) {
-			m_pool.erase(it_other_path);
-		}
+	std::size_t PathName::atom_count ( void ) const {
+		return m_pool.size();
+	}
 
-		std::cout << "    --------------- content -----------------\n";
-		for (const auto& itm : m_pool) {
-			std::cout << itm.first << " - " << itm.second << '\n';
-		}
+	void PathName::join (const char* parOther) {
+		const std::string src(parOther);
+		const boost::string_ref ref(src);
+		m_pool.insert(ref, &src);
 	}
 } //namespace din
