@@ -55,6 +55,7 @@ namespace din {
 		bool empty ( void ) const { return m_strings.empty(); }
 		const_iterator begin ( void ) const;
 		const_iterator end ( void ) const;
+		const string_type* get_stringref_source ( std::size_t parIndex ) const;
 
 	private:
 		PoolType m_pool;

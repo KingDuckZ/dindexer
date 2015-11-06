@@ -107,4 +107,9 @@ namespace din {
 		dummy.push_back(StringListPair(parString, parBaseString));
 		this->update(dummy.begin(), dummy.end());
 	}
+
+	template <typename C, typename Str, typename StrRef>
+	auto StringPool<C, Str, StrRef>::get_stringref_source (std::size_t parIndex) const -> const string_type* {
+		return m_strings[parIndex].second;
+	}
 } //namespace din

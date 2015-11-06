@@ -59,10 +59,10 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	PathName::PathName (const char* parPath) {
-		if (nullptr != parPath && *parPath != '\0') {
-			m_absolute = ('/' == *parPath);
-			std::string path(parPath);
+	PathName::PathName (boost::string_ref parPath) {
+		if (not parPath.empty()) {
+			m_absolute = ('/' == parPath.front());
+			std::string path(parPath.begin(), parPath.end());
 
 			const auto count = count_grouped(path, '/');
 			const std::size_t trailing = (path.back() == '/' ? 1 : 0);
@@ -75,6 +75,7 @@ namespace din {
 		}
 		else {
 			m_original_path = nullptr;
+			m_absolute = false;
 		}
 	}
 
@@ -121,5 +122,9 @@ namespace din {
 		const std::string src(parOther);
 		const boost::string_ref ref(src);
 		m_pool.insert(ref, &src);
+	}
+
+	void PathName::join (boost::string_ref parOther, const std::string* parSource) {
+		m_pool.insert(parOther, parSource);
 	}
 } //namespace din

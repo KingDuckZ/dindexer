@@ -27,16 +27,20 @@
 namespace din {
 	class PathName {
 	public:
-		explicit PathName ( const char* parPath );
+		PathName ( PathName&& ) = default;
+		PathName ( const PathName& ) = default;
+		explicit PathName ( boost::string_ref parPath );
 		~PathName ( void ) noexcept = default;
 
-		bool is_absolute ( void ) const;
+		bool is_absolute ( void ) const { return m_absolute; }
 		std::string path ( void ) const;
 		const std::string& original_path ( void ) const { return (m_original_path ? *m_original_path : m_empty_str); }
 		std::size_t atom_count ( void ) const;
 		const boost::string_ref operator[] ( std::size_t parIndex ) const;
 		void join ( const PathName& parOther );
 		void join ( const char* parOther );
+		void join ( boost::string_ref parOther, const std::string* parSource );
+		const std::string* get_stringref_source ( std::size_t parIndex ) const;
 
 	private:
 		static const std::string m_empty_str;
