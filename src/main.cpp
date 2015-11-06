@@ -18,48 +18,26 @@
 #include <iostream>
 #include <ciso646>
 #include "filesearcher.hpp"
-#include "pathname.hpp"
-
-bool my_callback (const char* parPath, int parLevel, bool parDir, bool parSymlink) {
-	if (parLevel > 0 and not parDir)
-		std::cout << parPath << '\n';
-	return true;
-}
+#include "indexer.hpp"
 
 int main (int parArgc, char* parArgv[]) {
+	using std::placeholders::_1;
+	using std::placeholders::_2;
+	using std::placeholders::_3;
+	using std::placeholders::_4;
 	std::cout << "argc: " << parArgc << '\n';
 	for (int z = 0; z < parArgc; ++z) {
 		std::cout << "argv[" << z << "]: " << parArgv[z] << '\n';
 	}
 	std::cout << std::endl;
 
+	din::Indexer indexer;
 	fastf::FileSearcher searcher("/home/duckz/dev/code/cpp/dindexer/test");
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
-	searcher.SetCallback(fastf::FileSearcher::CallbackType(&my_callback));
-	//searcher.Search(ext, ignore);
+	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2, _3, _4)));
+	searcher.Search(ext, ignore);
 
-	din::PathName pn("/home/duckz/dev/code/cpp/dindexer/test");
-	din::PathName pn1("///home/duckz/dev/code/cpp/dindexer/test");
-	din::PathName pn2("home/duckz////dev/code/cpp/dindexer/test");
-	din::PathName pn3("/home/duckz/dev/code/cpp/dindexer/test/");
-	din::PathName pn4("/home/duckz/dev/code/cpp/dindexer/test////");
-
-	std::cout << pn.path() << '\n';
-	std::cout << pn1.path() << '\n';
-	std::cout << pn2.path() << '\n';
-	std::cout << pn3.path() << '\n';
-	std::cout << pn4.path() << '\n';
-
-	pn1.join(pn2);
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("..");
-	pn1.join("code");
-	std::cout << pn1.path() << '\n';
+	indexer.dump();
 	return 0;
 }

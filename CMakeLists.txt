@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
 	src/main.cpp
 	src/filesearcher.cpp
 	src/pathname.cpp
+	src/indexer.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
