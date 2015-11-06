@@ -127,4 +127,39 @@ namespace din {
 	void PathName::join (boost::string_ref parOther, const std::string* parSource) {
 		m_pool.insert(parOther, parSource);
 	}
+
+	PathName make_relative_path (const PathName& parBasePath, const PathName& parOtherPath) {
+		if (not parBasePath.is_absolute() and parOtherPath.is_absolute()) {
+			return parOtherPath;
+		}
+
+		std::size_t common_atoms = 0;
+		{
+			const std::size_t shortest = std::min(parOtherPath.atom_count(), parBasePath.atom_count());
+			for (std::size_t z = 0; z < shortest; ++z) {
+				if (parOtherPath[z] == parBasePath[z]) {
+					++common_atoms;
+				}
+				else {
+					break;
+				}
+			}
+		}
+
+		PathName retval("");
+		const auto ellipses_count = parBasePath.atom_count() - common_atoms;
+		for (std::size_t z = 0; z < ellipses_count; ++z) {
+			retval.join("..");
+		}
+
+		const auto remaining_atoms = parOtherPath.atom_count() - common_atoms;
+		for (std::size_t z = 0; z < remaining_atoms; ++z) {
+			retval.join(parOtherPath[z + common_atoms], parOtherPath.get_stringref_source(z + common_atoms));
+		}
+		return std::move(retval);
+	}
+
+	const std::string* PathName::get_stringref_source (std::size_t parIndex) const {
+		return m_pool.get_stringref_source(parIndex);
+	}
 } //namespace din

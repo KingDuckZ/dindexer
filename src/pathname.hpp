@@ -49,6 +49,8 @@ namespace din {
 		const std::string* m_original_path;
 		bool m_absolute;
 	};
+
+	PathName make_relative_path ( const PathName& parBasePath, const PathName& parOtherPath );
 } //namespace din
 
 #endif
