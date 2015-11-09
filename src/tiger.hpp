@@ -15,33 +15,32 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idE555EF56730442C1ADDC7B2AE7A9340E
-#define idE555EF56730442C1ADDC7B2AE7A9340E
+#ifndef idBE93AF97FA4343ECA2BC8FB1FD3E5E60
+#define idBE93AF97FA4343ECA2BC8FB1FD3E5E60
 
-#include <memory>
+#include <cstdint>
+#include <string>
 
 namespace din {
-	class Indexer {
-	public:
-		Indexer ( void );
-		Indexer ( Indexer&& ) = default;
-		Indexer ( const Indexer& ) = delete;
-		~Indexer ( void ) noexcept;
+	struct TigerHash {
+		TigerHash ( void ) = default;
 
-		bool add_path ( const char* parPath, int parLevel, bool parIsDir, bool parIsSymlink );
-#if !defined(NDEBUG)
-		void dump ( void ) const;
-#endif
-
-		std::size_t total_items ( void ) const;
-		std::size_t processed_items ( void ) const;
-		void calculate_hash ( void );
-
-	private:
-		struct LocalData;
-
-		std::unique_ptr<LocalData> m_local_data;
+		union {
+			struct {
+				uint64_t part_a;
+				uint64_t part_b;
+				uint64_t part_c;
+			};
+			uint64_t data[3];
+			uint8_t byte_data[sizeof(uint64_t) * 3];
+		};
 	};
+
+	static_assert(sizeof(TigerHash) == 24, "Wrong struct size");
+
+	void tiger_file ( const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir );
+	void tiger_init_hash ( TigerHash& parHash );
+	std::string tiger_to_string ( const TigerHash& parHash );
 } //namespace din
 
 #endif

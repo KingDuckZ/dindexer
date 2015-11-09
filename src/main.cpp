@@ -32,12 +32,13 @@ int main (int parArgc, char* parArgv[]) {
 	std::cout << std::endl;
 
 	din::Indexer indexer;
-	fastf::FileSearcher searcher("/home/duckz/dev/code/cpp/dindexer/test");
+	fastf::FileSearcher searcher("/home/michele/dev/code/cpp/dindexer/test");
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
 	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2, _3, _4)));
 	searcher.Search(ext, ignore);
 
+	indexer.calculate_hash();
 	indexer.dump();
 	return 0;
 }
