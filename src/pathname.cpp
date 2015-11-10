@@ -19,11 +19,14 @@
 #include <algorithm>
 #include <functional>
 #include <ciso646>
+#include <iostream>
 
 namespace din {
 	const std::string PathName::m_empty_str("");
 
 	namespace {
+		std::string get_joint_atoms ( const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight=0 );
+
 		bool ptr_between (const char* parPtr, const char* parBeg, const char* parEnd) {
 			std::less<const char*> less;
 			std::less_equal<const char*> lesseq;
@@ -57,6 +60,36 @@ namespace din {
 				parOut->push_back(parPath.substr(from - beg, next - from));
 			}
 		}
+
+		std::string get_joint_atoms (const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight) {
+			const auto orig_atom_count = parPool.size();
+			const auto atom_count = (parSkipRight >= orig_atom_count ? 0 : orig_atom_count - parSkipRight);
+			if (not atom_count) {
+				if (parPool.empty() and parAbs) {
+					return std::string("/");
+				}
+				else {
+					return std::string("");
+				}
+			}
+
+			std::size_t reserve = (parAbs ? 1 : 0);
+			for (std::size_t z = 0; z < atom_count; ++z) {
+				reserve += parPool[z].size();
+			}
+			reserve += atom_count - 1;
+
+			std::string out;
+			out.reserve(reserve);
+			const char* slash = (parAbs ? "/" : "");
+			for (std::size_t z = 0; z < atom_count; ++z) {
+				out += slash;
+				const auto& curr_itm = parPool[z];
+				out.insert(out.end(), curr_itm.begin(), curr_itm.end());
+				slash = "/";
+			}
+			return std::move(out);
+		}
 	} //unnamed namespace
 
 	PathName::PathName (boost::string_ref parPath) {
@@ -80,30 +113,7 @@ namespace din {
 	}
 
 	std::string PathName::path() const {
-		if (m_pool.empty()) {
-			if (m_absolute) {
-				return std::string("/");
-			}
-			else {
-				return std::string("");
-			}
-		}
-
-		std::size_t reserve = (m_absolute ? 1 : 0);
-		for (const auto& itm : m_pool) {
-			reserve += itm.size();
-		}
-		reserve += m_pool.size() - 1;
-
-		std::string out;
-		out.reserve(reserve);
-		const char* slash = (m_absolute ? "/" : "");
-		for (const auto& itm : m_pool) {
-			out += slash;
-			out.insert(out.end(), itm.begin(), itm.end());
-			slash = "/";
-		}
-		return std::move(out);
+		return get_joint_atoms(m_pool, m_absolute);
 	}
 
 	void PathName::join (const PathName& parOther) {
@@ -161,5 +171,50 @@ namespace din {
 
 	const std::string* PathName::get_stringref_source (std::size_t parIndex) const {
 		return m_pool.get_stringref_source(parIndex);
+	}
+
+	std::string PathName::dirname() const {
+		if (this->atom_count() == 0)
+			return std::string();
+
+		return get_joint_atoms(m_pool, m_absolute, 1);
+	}
+
+	std::ostream& operator<< (std::ostream& parStream, const PathName& parPath) {
+		parStream << parPath.path();
+		return parStream;
+	}
+
+	PathName& PathName::pop_right() {
+		m_pool.pop();
+		return *this;
+	}
+
+	bool PathName::operator!= (const PathName& parOther) const {
+		const auto count = atom_count();
+		if (count != parOther.atom_count()) {
+			return true;
+		}
+
+		for (std::size_t z = 0; z < count; ++z) {
+			if ((*this)[z] != parOther[z]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool PathName::operator== (const PathName& parOther) const {
+		const auto count = atom_count();
+		if (count != parOther.atom_count()) {
+			return false;
+		}
+
+		for (std::size_t z = 0; z < count; ++z) {
+			if ((*this)[z] != parOther[z]) {
+				return false;
+			}
+		}
+		return true;
 	}
 } //namespace din

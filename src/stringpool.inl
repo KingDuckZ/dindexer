@@ -112,4 +112,29 @@ namespace din {
 	auto StringPool<C, Str, StrRef>::get_stringref_source (std::size_t parIndex) const -> const string_type* {
 		return m_strings[parIndex].second;
 	}
+
+	template <typename C, typename Str, typename StrRef>
+	auto StringPool<C, Str, StrRef>::operator[] (std::size_t parIndex) const -> const stringref_type& {
+		return m_strings[parIndex].first;
+	}
+
+	template <typename C, typename Str, typename StrRef>
+	void StringPool<C, Str, StrRef>::pop() {
+		if (m_strings.empty()) {
+			return;
+		}
+
+		for (auto z = m_pool.size(); z > 0; --z) {
+			auto& pool_itm = m_pool[z - 1];
+			if (&pool_itm.first == m_strings.back().second) {
+				m_strings.resize(m_strings.size() - 1);
+				--pool_itm.second;
+				if (0 == pool_itm.second) {
+					m_pool.erase(m_pool.begin() + (z - 1));
+				}
+				break;
+			}
+		}
+		return;
+	}
 } //namespace din

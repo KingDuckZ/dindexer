@@ -23,6 +23,7 @@
 #include <string>
 #include <boost/utility/string_ref.hpp>
 #include <map>
+#include <iostream>
 
 namespace din {
 	class PathName {
@@ -41,6 +42,10 @@ namespace din {
 		void join ( const char* parOther );
 		void join ( boost::string_ref parOther, const std::string* parSource );
 		const std::string* get_stringref_source ( std::size_t parIndex ) const;
+		std::string dirname ( void ) const;
+		PathName& pop_right ( void );
+		bool operator!= ( const PathName& parOther ) const;
+		bool operator== ( const PathName& parOther ) const;
 
 	private:
 		static const std::string m_empty_str;
@@ -51,6 +56,7 @@ namespace din {
 	};
 
 	PathName make_relative_path ( const PathName& parBasePath, const PathName& parOtherPath );
+	std::ostream& operator<< ( std::ostream& parStream, const PathName& parPath );
 } //namespace din
 
 #endif

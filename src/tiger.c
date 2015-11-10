@@ -808,7 +808,7 @@ void tiger_sse2_chunk(const char *str1, const char *str2, t_word length, t_res r
         #endif
     }
 }
-void tiger_sse2_last_chunk (const char *str1, const char *str2, t_word length, t_word reallength, t_res res1, t_res res2, char pad)
+void tiger_sse2_last_chunk (const char *str1, const char *str2, t_word length, t_word reallength1, t_word reallength2, t_res res1, t_res res2, char pad)
 {
     t_word i;
     t_block tmp1;
@@ -828,8 +828,8 @@ void tiger_sse2_last_chunk (const char *str1, const char *str2, t_word length, t
     }
     memset(uc(tmp1)+i,0,(size_t)(56-i));
     memset(uc(tmp2)+i,0,(size_t)(56-i));
-    tmp1[7]=reallength<<(t_word)3;
-    tmp2[7]=reallength<<(t_word)3;
+    tmp1[7]=reallength1<<(t_word)3;
+    tmp2[7]=reallength2<<(t_word)3;
     tiger_block_sse2(tmp1, tmp2, res1, res2);
 }
 
@@ -844,7 +844,7 @@ void tiger_sse2(const char *str1, const char *str2, t_word length, t_res res1, t
     res2[2]=0xF096A5B4C3B2E187ULL;
 
 	tiger_sse2_chunk(str1, str2, aligned_length, res1, res2);
-	tiger_sse2_last_chunk(str1 + aligned_length, str2 + aligned_length, length - aligned_length, length, res1, res2, pad);
+	tiger_sse2_last_chunk(str1 + aligned_length, str2 + aligned_length, length - aligned_length, length, length, res1, res2, pad);
 }
 #endif
 

@@ -21,11 +21,13 @@
 #include <memory>
 #include <cassert>
 #include <algorithm>
+#include <utility>
 #include <sstream>
 
 #if defined(__SSE2__)
 extern "C" void tiger_sse2_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRes1[3], uint64_t parRes2[3] );
-extern "C" void tiger_sse2_last_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRealLength, uint64_t parRes1[3], uint64_t parRes2[3], char pad );
+extern "C" void tiger_sse2_last_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRealLength1, uint64_t parRealLength2, uint64_t parRes1[3], uint64_t parRes2[3], char parPadding );
+extern "C" void tiger ( const char* parStr, uint64_t parLength, uint64_t parHash[3], char parPadding );
 
 #else
 #	error "Not implemented without SSE2"
@@ -51,6 +53,7 @@ namespace din {
 	}
 
 	void tiger_file (const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir) {
+		typedef decltype(std::declval<std::ifstream>().tellg()) FileSizeType;
 		tiger_init_hash(parHashFile);
 
 		std::ifstream src(parPath, std::ios::binary);
@@ -58,10 +61,21 @@ namespace din {
 		const auto file_size = src.tellg();
 		src.seekg(0, std::ios_base::beg);
 
-		const uint32_t buffsize = static_cast<uint32_t>(std::min<decltype(file_size)>(file_size, g_buff_size));
+		const FileSizeType hash_size = (sizeof(TigerHash) + 63) & -64;
+		const uint32_t buffsize = static_cast<uint32_t>(std::max(hash_size, std::min<FileSizeType>(file_size, g_buff_size)));
 		std::unique_ptr<char[]> buff(new char[63 + buffsize]);
 		char* const buff_ptr = reinterpret_cast<char*>(reinterpret_cast<std::intptr_t>(buff.get() + 63) & (-64));
 		assert(buff_ptr >= buff.get() and buff_ptr + buffsize <= buff.get() + 63 + buffsize);
+
+		//Use the initial value of the dir's hash as if it was part of the data to hash and start
+		//by processing that value. Hash is reset to the initial value before the call to tiger.
+		{
+			std::copy(parHashDir.byte_data, parHashDir.byte_data + sizeof(parHashDir), buff_ptr);
+			std::fill(buff_ptr + sizeof(parHashDir), buff_ptr + hash_size, 0);
+			TigerHash dummy = {};
+			tiger_init_hash(parHashDir);
+			tiger_sse2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, parHashDir.data);
+		}
 
 		auto remaining = file_size;
 		while (remaining > buffsize) {
@@ -80,7 +94,9 @@ namespace din {
 				tiger_sse2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, parHashDir.data);
 			}
 
-			tiger_sse2_last_chunk(buff_ptr + aligned_size, buff_ptr + aligned_size, remaining - aligned_size, file_size, parHashFile.data, parHashDir.data, g_tiger_padding);
+			//Remember to pass the augmented data size for the second reallength value: we passed the initial
+			//dir's hash value (64 bytes) as if they were part of the data.
+			tiger_sse2_last_chunk(buff_ptr + aligned_size, buff_ptr + aligned_size, remaining - aligned_size, file_size, file_size + hash_size, parHashFile.data, parHashDir.data, g_tiger_padding);
 		}
 	}
 
@@ -88,5 +104,13 @@ namespace din {
 		std::ostringstream oss;
 		oss << std::hex << swap_long(parHash.part_a) << swap_long(parHash.part_b) << swap_long(parHash.part_c);
 		return oss.str();
+	}
+
+	void tiger_data (const std::string& parData, TigerHash& parHash) {
+		tiger (parData.data(), parData.size(), parHash.data, g_tiger_padding);
+	}
+
+	void tiger_data (const std::vector<char>& parData, TigerHash& parHash) {
+		tiger (parData.data(), parData.size(), parHash.data, g_tiger_padding);
 	}
 } //namespace din
