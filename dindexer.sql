@@ -34,7 +34,7 @@ SET search_path = public, pg_catalog;
 
 --
 -- TOC entry 191 (class 1255 OID 31290)
--- Name: upcase_hash(); Type: FUNCTION; Schema: public; Owner: michele
+-- Name: upcase_hash(); Type: FUNCTION; Schema: public; Owner: @USERNAME@
 --
 
 CREATE FUNCTION upcase_hash() RETURNS trigger
@@ -47,7 +47,7 @@ CREATE FUNCTION upcase_hash() RETURNS trigger
 $$;
 
 
-ALTER FUNCTION public.upcase_hash() OWNER TO michele;
+ALTER FUNCTION public.upcase_hash() OWNER TO @USERNAME@;
 
 SET default_tablespace = '';
 
@@ -55,7 +55,7 @@ SET default_with_oids = false;
 
 --
 -- TOC entry 175 (class 1259 OID 31281)
--- Name: files; Type: TABLE; Schema: public; Owner: michele; Tablespace: 
+-- Name: files; Type: TABLE; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 CREATE TABLE files (
@@ -72,11 +72,11 @@ CREATE TABLE files (
 );
 
 
-ALTER TABLE files OWNER TO michele;
+ALTER TABLE files OWNER TO @USERNAME@;
 
 --
 -- TOC entry 174 (class 1259 OID 31279)
--- Name: files_id_seq; Type: SEQUENCE; Schema: public; Owner: michele
+-- Name: files_id_seq; Type: SEQUENCE; Schema: public; Owner: @USERNAME@
 --
 
 CREATE SEQUENCE files_id_seq
@@ -87,12 +87,12 @@ CREATE SEQUENCE files_id_seq
     CACHE 1;
 
 
-ALTER TABLE files_id_seq OWNER TO michele;
+ALTER TABLE files_id_seq OWNER TO @USERNAME@;
 
 --
 -- TOC entry 2036 (class 0 OID 0)
 -- Dependencies: 174
--- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: michele
+-- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
 
 ALTER SEQUENCE files_id_seq OWNED BY files.id;
@@ -100,7 +100,7 @@ ALTER SEQUENCE files_id_seq OWNED BY files.id;
 
 --
 -- TOC entry 177 (class 1259 OID 31411)
--- Name: sets; Type: TABLE; Schema: public; Owner: michele; Tablespace: 
+-- Name: sets; Type: TABLE; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 CREATE TABLE sets (
@@ -110,11 +110,11 @@ CREATE TABLE sets (
 );
 
 
-ALTER TABLE sets OWNER TO michele;
+ALTER TABLE sets OWNER TO @USERNAME@;
 
 --
 -- TOC entry 176 (class 1259 OID 31409)
--- Name: sets_id_seq; Type: SEQUENCE; Schema: public; Owner: michele
+-- Name: sets_id_seq; Type: SEQUENCE; Schema: public; Owner: @USERNAME@
 --
 
 CREATE SEQUENCE sets_id_seq
@@ -125,12 +125,12 @@ CREATE SEQUENCE sets_id_seq
     CACHE 1;
 
 
-ALTER TABLE sets_id_seq OWNER TO michele;
+ALTER TABLE sets_id_seq OWNER TO @USERNAME@;
 
 --
 -- TOC entry 2037 (class 0 OID 0)
 -- Dependencies: 176
--- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: michele
+-- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
 
 ALTER SEQUENCE sets_id_seq OWNED BY sets.id;
@@ -138,7 +138,7 @@ ALTER SEQUENCE sets_id_seq OWNED BY sets.id;
 
 --
 -- TOC entry 1904 (class 2604 OID 31284)
--- Name: id; Type: DEFAULT; Schema: public; Owner: michele
+-- Name: id; Type: DEFAULT; Schema: public; Owner: @USERNAME@
 --
 
 ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regclass);
@@ -146,7 +146,7 @@ ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regcl
 
 --
 -- TOC entry 1907 (class 2604 OID 31414)
--- Name: id; Type: DEFAULT; Schema: public; Owner: michele
+-- Name: id; Type: DEFAULT; Schema: public; Owner: @USERNAME@
 --
 
 ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclass);
@@ -154,7 +154,7 @@ ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclas
 
 --
 -- TOC entry 1912 (class 2606 OID 31289)
--- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: michele; Tablespace: 
+-- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 ALTER TABLE ONLY files
@@ -163,7 +163,7 @@ ALTER TABLE ONLY files
 
 --
 -- TOC entry 1916 (class 2606 OID 31420)
--- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: michele; Tablespace: 
+-- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 ALTER TABLE ONLY sets
@@ -172,7 +172,7 @@ ALTER TABLE ONLY sets
 
 --
 -- TOC entry 1914 (class 2606 OID 31294)
--- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: michele; Tablespace: 
+-- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 ALTER TABLE ONLY files
@@ -181,7 +181,7 @@ ALTER TABLE ONLY files
 
 --
 -- TOC entry 1909 (class 1259 OID 31426)
--- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: michele; Tablespace: 
+-- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 CREATE INDEX fki_files_sets ON files USING btree (group_id);
@@ -189,7 +189,7 @@ CREATE INDEX fki_files_sets ON files USING btree (group_id);
 
 --
 -- TOC entry 1910 (class 1259 OID 31292)
--- Name: idx_paths; Type: INDEX; Schema: public; Owner: michele; Tablespace: 
+-- Name: idx_paths; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
 CREATE INDEX idx_paths ON files USING btree (path);
@@ -197,7 +197,7 @@ CREATE INDEX idx_paths ON files USING btree (path);
 
 --
 -- TOC entry 1918 (class 2620 OID 31291)
--- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: michele
+-- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @USERNAME@
 --
 
 CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW EXECUTE PROCEDURE upcase_hash();
@@ -205,7 +205,7 @@ CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW E
 
 --
 -- TOC entry 1917 (class 2606 OID 31421)
--- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: michele
+-- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @USERNAME@
 --
 
 ALTER TABLE ONLY files
