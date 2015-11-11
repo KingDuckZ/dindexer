@@ -38,7 +38,7 @@ namespace din {
 		std::size_t total_items ( void ) const;
 		std::size_t processed_items ( void ) const;
 		void calculate_hash ( void );
-		void add_to_db ( const std::string& parSetName ) const;
+		void add_to_db ( const std::string& parSetName, char parType ) const;
 		bool empty ( void ) const;
 
 	private:

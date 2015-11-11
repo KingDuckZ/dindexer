@@ -22,6 +22,7 @@
 #include <string>
 #include <cstdint>
 #include <memory>
+#include <boost/utility/string_ref.hpp>
 
 namespace pq {
 	class Connection {
@@ -37,6 +38,7 @@ namespace pq {
 		ResultSet query ( const std::string& parQuery );
 
 		std::string escaped_literal ( const std::string& parString );
+		std::string escaped_literal ( boost::string_ref parString );
 
 	private:
 		struct LocalData;

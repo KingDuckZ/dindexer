@@ -26,16 +26,17 @@ namespace din {
 	namespace {
 		const std::size_t g_batch_size = 100;
 
-		std::string make_set_insert_query (pq::Connection& parConn, const std::string& parSetName) {
+		std::string make_set_insert_query (pq::Connection& parConn, const SetRecordData& parSetData) {
 			std::ostringstream oss;
-			oss << "INSERT INTO \"sets\" (\"desc\") VALUES ("
-				<< parConn.escaped_literal(parSetName)
+			oss << "INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ("
+				<< parConn.escaped_literal(parSetData.name) << ','
+				<< '\'' << parSetData.type << '\''
 				<< ");";
 			return oss.str();
 		}
 	} //unnamed namespace
 
-	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const std::string& parSetName) {
+	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
 		if (parData.empty()) {
 			return;
 		}
@@ -44,7 +45,7 @@ namespace din {
 		conn.connect();
 
 		conn.query_void("BEGIN;");
-		conn.query_void(make_set_insert_query(conn, parSetName));
+		conn.query_void(make_set_insert_query(conn, parSetData));
 		//TODO: use COPY instead of INSERT INTO
 		for (std::size_t z = 0; z < parData.size(); z += g_batch_size) {
 			std::ostringstream query;

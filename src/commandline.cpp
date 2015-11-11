@@ -19,14 +19,30 @@
 #include "dindexerConfig.h"
 #include <boost/program_options.hpp>
 #include <iostream>
+#include <algorithm>
 
 #define STRINGIZE_IMPL(s) #s
 #define STRINGIZE(s) STRINGIZE_IMPL(s)
+
+#if defined(lengthof)
+#	undef lengthof
+#endif
+//http://stackoverflow.com/questions/4415524/common-array-length-macro-for-c#4415646
+#define lengthof(x) ((sizeof(x)/sizeof(0[x])) / ((std::size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 namespace po = boost::program_options;
 
 namespace din {
 	namespace {
+		const char g_allowed_types[] = {
+			'D', //Directory
+			'V', //DVD
+			'B', //BluRay
+			'F', //Floppy Disk
+			'H', //Hard Disk
+			'Z', //Iomega Zip
+			'O'  //Other
+		};
 		const char* const g_version_string =
 			PROGRAM_NAME " v"
 			STRINGIZE(VERSION_MAJOR) "."
@@ -48,6 +64,7 @@ namespace din {
 		po::options_description set_options("Set options");
 		set_options.add_options()
 			("setname,n", po::value<std::string>()->default_value("New set"), "Name to be given to the new set being scanned.")
+			("type,t", po::value<char>()->default_value('V'), "Default set type. Valid values are B, D, F, H, O, V, Z.")
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()
@@ -91,6 +108,9 @@ namespace din {
 
 		if (parVarMap.count("search-path") == 0) {
 			throw std::invalid_argument("No search path specified");
+		}
+		if (g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
+			throw std::invalid_argument("Invalid value for parameter \"type\"");
 		}
 		return false;
 	}

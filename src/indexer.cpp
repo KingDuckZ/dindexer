@@ -235,7 +235,8 @@ namespace din {
 #endif
 	}
 
-	void Indexer::add_to_db (const std::string& parSetName) const {
+	void Indexer::add_to_db (const std::string& parSetName, char parType) const {
+		assert(m_local_data->done_count == m_local_data->paths.size());
 		PathName base_path(m_local_data->paths.front().path);
 		std::vector<FileRecordData> data;
 		data.reserve(m_local_data->paths.size());
@@ -249,7 +250,9 @@ namespace din {
 				itm.is_symlink
 			});
 		}
-		write_to_db(m_local_data->db_settings, data, parSetName);
+
+		SetRecordData set_data {parSetName, parType};
+		write_to_db(m_local_data->db_settings, data, set_data);
 	}
 
 	bool Indexer::add_path (const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) {

@@ -125,9 +125,13 @@ namespace pq {
 	}
 
 	std::string Connection::escaped_literal (const std::string& parString) {
+		return this->escaped_literal(boost::string_ref(parString));
+	}
+
+	std::string Connection::escaped_literal (boost::string_ref parString) {
 		typedef std::unique_ptr<char[], void(*)(void*)> PQArrayType;
 
-		PQArrayType clean_str(PQescapeLiteral(m_localData->connection, parString.c_str(), parString.size()), &PQfreemem);
+		PQArrayType clean_str(PQescapeLiteral(m_localData->connection, parString.data(), parString.size()), &PQfreemem);
 		return std::string(clean_str.get());
 	}
 } //namespace pq

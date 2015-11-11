@@ -63,7 +63,7 @@ int main (int parArgc, char* parArgv[]) {
 	}
 	else {
 		indexer.calculate_hash();
-		indexer.add_to_db(vm["setname"].as<std::string>());
+		indexer.add_to_db(vm["setname"].as<std::string>(), vm["type"].as<char>());
 	}
 	return 0;
 }

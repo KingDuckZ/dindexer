@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <boost/utility/string_ref.hpp>
 
 namespace din {
 	struct DinDBSettings;
@@ -34,7 +35,12 @@ namespace din {
 		const bool is_symlink;
 	};
 
-	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const std::string& parSetName );
+	struct SetRecordData {
+		const boost::string_ref name;
+		const char type;
+	};
+
+	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
 } //namespace din
 
 #endif
