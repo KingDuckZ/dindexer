@@ -124,7 +124,7 @@ namespace pq {
 		}
 	}
 
-	std::string Connection::escape_literal (const std::string& parString) {
+	std::string Connection::escaped_literal (const std::string& parString) {
 		typedef std::unique_ptr<char[], void(*)(void*)> PQArrayType;
 
 		PQArrayType clean_str(PQescapeLiteral(m_localData->connection, parString.c_str(), parString.size()), &PQfreemem);

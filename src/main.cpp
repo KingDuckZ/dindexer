@@ -20,19 +20,27 @@
 #include "filesearcher.hpp"
 #include "indexer.hpp"
 #include "settings.hpp"
+#include "commandline.hpp"
 
 int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
 	using std::placeholders::_2;
 	using std::placeholders::_3;
 	using std::placeholders::_4;
-	std::cout << "argc: " << parArgc << '\n';
-	for (int z = 0; z < parArgc; ++z) {
-		std::cout << "argv[" << z << "]: " << parArgv[z] << '\n';
-	}
-	std::cout << std::endl;
+	using boost::program_options::variables_map;
 
-	fastf::FileSearcher searcher("/home/michele/dev/code/cpp/dindexer/test");
+	variables_map vm;
+	try {
+		if (din::parse_commandline(parArgc, parArgv, vm)) {
+			return 0;
+		}
+	}
+	catch (const std::invalid_argument& err) {
+		std::cerr << err.what() << "\nUse --help for help" << std::endl;
+		return 2;
+	}
+	const std::string search_path(vm["search-path"].as<std::string>());
+
 	din::DinDBSettings settings;
 	{
 		const bool loaded = din::load_settings("dindexerrc.yml", settings);
@@ -43,11 +51,19 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	din::Indexer indexer(settings);
+	fastf::FileSearcher searcher(search_path);
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
 	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2, _3, _4)));
 	searcher.Search(ext, ignore);
 
-	indexer.calculate_hash();
+	if (indexer.empty()) {
+		std::cerr << "Nothing found at the given location, quitting\n";
+		return 1;
+	}
+	else {
+		indexer.calculate_hash();
+		indexer.add_to_db(vm["setname"].as<std::string>());
+	}
 	return 0;
 }

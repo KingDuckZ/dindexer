@@ -36,7 +36,7 @@ namespace pq {
 		void query_void ( const std::string& parQuery );
 		ResultSet query ( const std::string& parQuery );
 
-		std::string escape_literal ( const std::string& parString );
+		std::string escaped_literal ( const std::string& parString );
 
 	private:
 		struct LocalData;

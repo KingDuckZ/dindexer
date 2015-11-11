@@ -25,9 +25,17 @@
 namespace din {
 	namespace {
 		const std::size_t g_batch_size = 100;
+
+		std::string make_set_insert_query (pq::Connection& parConn, const std::string& parSetName) {
+			std::ostringstream oss;
+			oss << "INSERT INTO \"sets\" (\"desc\") VALUES ("
+				<< parConn.escaped_literal(parSetName)
+				<< ");";
+			return oss.str();
+		}
 	} //unnamed namespace
 
-	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData) {
+	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const std::string& parSetName) {
 		if (parData.empty()) {
 			return;
 		}
@@ -36,7 +44,7 @@ namespace din {
 		conn.connect();
 
 		conn.query_void("BEGIN;");
-		conn.query_void("INSERT INTO \"sets\" (\"desc\") VALUES ('test group');");
+		conn.query_void(make_set_insert_query(conn, parSetName));
 		//TODO: use COPY instead of INSERT INTO
 		for (std::size_t z = 0; z < parData.size(); z += g_batch_size) {
 			std::ostringstream query;
@@ -46,7 +54,7 @@ namespace din {
 			for (auto i = z; i < std::min(z + g_batch_size, parData.size()); ++i) {
 				const auto& itm = parData[i];
 				query << comma;
-				query << '(' << conn.escape_literal(itm.path) << ",'" << itm.hash << "',"
+				query << '(' << conn.escaped_literal(itm.path) << ",'" << itm.hash << "',"
 					<< itm.level << ','
 					<< "currval('\"sets_id_seq\"')" << ','
 					<< (itm.is_directory ? "true" : "false") << ','

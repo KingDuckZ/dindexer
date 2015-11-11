@@ -15,26 +15,13 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id842AF56BD80A4CF59957451DF9082AA2
-#define id842AF56BD80A4CF59957451DF9082AA2
+#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
+#define id1B7A42F6E46547A6AB0F914E2A91399F
 
-#include <string>
-#include <vector>
-#include <cstdint>
+#include <boost/program_options/variables_map.hpp>
 
 namespace din {
-	struct DinDBSettings;
-
-	struct FileRecordData {
-		const std::string path;
-		const std::string hash;
-		const uint16_t level;
-		const uint64_t size;
-		const bool is_directory;
-		const bool is_symlink;
-	};
-
-	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const std::string& parSetName );
+	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
 } //namespace din
 
 #endif

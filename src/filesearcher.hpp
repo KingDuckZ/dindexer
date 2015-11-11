@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <functional>
+#include <boost/utility/string_ref.hpp>
 
 namespace fastf {
   struct StringWithLength {
@@ -38,7 +39,7 @@ namespace fastf {
     typedef std::vector<StringWithLength> ConstCharVecType;
 	typedef std::function<bool(const char*, int, bool, bool)> CallbackType;
 
-    explicit FileSearcher ( const char* parBaseDir );
+    explicit FileSearcher ( boost::string_ref parBaseDir );
     ~FileSearcher ( void ) noexcept;
 
     void Search ( const ConstCharVecType& parExtensions, const ConstCharVecType& parIgnorePaths );
@@ -51,7 +52,7 @@ namespace fastf {
 
   private:
   	CallbackType callback_;
-    const char* const baseDir_;
+    const std::string baseDir_;
     bool followSymlinks_;
     bool remainInFilesystem_;
   };

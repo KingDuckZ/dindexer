@@ -126,9 +126,9 @@ namespace fastf {
     }
   } //unnamed namespace
 
-  FileSearcher::FileSearcher (const char* parBaseDir) :
+  FileSearcher::FileSearcher (boost::string_ref parBaseDir) :
     callback_(&print_def_callback),
-    baseDir_(parBaseDir),
+    baseDir_(parBaseDir.begin(), parBaseDir.end()),
     followSymlinks_(false),
     remainInFilesystem_(true)
   {
@@ -147,7 +147,7 @@ namespace fastf {
     g_searchOptions.extensions = &parExtensions;
     g_searchOptions.ignorePaths = &parIgnorePaths;
     g_searchOptions.callback = &callback_;
-    nftw(baseDir_, &PrintName, 15, g_searchOptions.search_flags);
+    nftw(baseDir_.c_str(), &PrintName, 15, g_searchOptions.search_flags);
   }
 
   void FileSearcher::SetCallback (CallbackType parCallback) {

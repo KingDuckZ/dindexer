@@ -233,22 +233,23 @@ namespace din {
 			assert(not (1 == itm.hash.part_a and 1 == itm.hash.part_b and 1 == itm.hash.part_c));
 		}
 #endif
+	}
 
-		{
-			std::vector<FileRecordData> data;
-			data.reserve(m_local_data->paths.size());
-			for (const auto& itm : m_local_data->paths) {
-				data.push_back(FileRecordData {
-					make_relative_path(base_path, PathName(itm.path)).path(),
-					tiger_to_string(itm.hash),
-					itm.level,
-					itm.file_size,
-					itm.is_dir,
-					itm.is_symlink
-				});
-			}
-			write_to_db(m_local_data->db_settings, data);
+	void Indexer::add_to_db (const std::string& parSetName) const {
+		PathName base_path(m_local_data->paths.front().path);
+		std::vector<FileRecordData> data;
+		data.reserve(m_local_data->paths.size());
+		for (const auto& itm : m_local_data->paths) {
+			data.push_back(FileRecordData {
+				make_relative_path(base_path, PathName(itm.path)).path(),
+				tiger_to_string(itm.hash),
+				itm.level,
+				itm.file_size,
+				itm.is_dir,
+				itm.is_symlink
+			});
 		}
+		write_to_db(m_local_data->db_settings, data, parSetName);
 	}
 
 	bool Indexer::add_path (const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) {
@@ -279,4 +280,8 @@ namespace din {
 		}
 	}
 #endif
+
+	bool Indexer::empty() const {
+		return m_local_data->paths.size() < 2;
+	}
 } //namespace din
