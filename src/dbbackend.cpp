@@ -35,10 +35,11 @@ namespace din {
 		conn.connect();
 
 		conn.query_void("BEGIN;");
+		conn.query_void("INSERT INTO \"sets\" (\"desc\") VALUES ('test group');");
 		//TODO: use COPY instead of INSERT INTO
 		for (std::size_t z = 0; z < parData.size(); z += g_batch_size) {
 			std::ostringstream query;
-			query << "INSERT INTO \"Files\" (path, hash, level, group_id, is_directory, is_symlink, size) VALUES ";
+			query << "INSERT INTO \"files\" (path, hash, level, group_id, is_directory, is_symlink, size) VALUES ";
 
 			const char* comma = "";
 			for (auto i = z; i < std::min(z + g_batch_size, parData.size()); ++i) {
@@ -46,7 +47,8 @@ namespace din {
 				query << comma;
 				query << '(' << conn.escape_literal(itm.path) << ",'" << itm.hash << "',"
 					<< itm.level << ','
-					<< 10 << ',' << (itm.is_directory ? "true" : "false") << ','
+					<< "currval('\"sets_id_seq\"')" << ','
+					<< (itm.is_directory ? "true" : "false") << ','
 					<< (itm.is_symlink ? "true" : "false") << ',' << itm.size << ')'
 				;
 				comma = ",";
