@@ -19,8 +19,12 @@
 #include "pq/connection.hpp"
 #include <string>
 #include <sstream>
+#include <utility>
 
 namespace din {
+	namespace {
+	} //unnamed namespace
+
 	void write_to_db (const std::vector<FileRecordData>& parData) {
 		if (parData.empty()) {
 			return;
@@ -30,10 +34,14 @@ namespace din {
 		query << "BEGIN;\n";
 		query << "INSERT INTO \"Files\" (path, hash, level, group_id, is_directory, is_symlink, size) VALUES ";
 
+		pq::Connection conn("michele", "password", "dindexer", "100.200.100.200", 5432);
+		conn.connect();
+
 		const char* comma = "";
 		for (const auto& itm : parData) {
 			query << comma;
-			query << "('" << itm.path << "','" << itm.hash << "'," << itm.level << ','
+			query << '(' << conn.escape_literal(itm.path) << ",'" << itm.hash << "',"
+				<< itm.level << ','
 				<< 10 << ',' << (itm.is_directory ? "true" : "false") << ','
 				<< (itm.is_symlink ? "true" : "false") << ',' << itm.size << ')'
 			;
@@ -42,8 +50,6 @@ namespace din {
 		query << ';';
 		query << "\nCOMMIT;";
 
-		pq::Connection conn("michele", "password", "dindexer", "100.200.100.200", 5432);
-		conn.connect();
 		conn.query_void(query.str());
 	}
 } //namespace din

@@ -53,45 +53,61 @@ namespace din {
 
 		std::string path;
 		HashType hash;
+		uint64_t file_size;
 		uint16_t level;
 		bool is_dir;
 		bool is_symlink;
 	};
 
 	namespace {
-		void hash_dir (std::vector<FileEntry>::iterator parEntry, std::vector<FileEntry>::iterator parEnd, const PathName& parCurrDir) {
+		void hash_dir (std::vector<FileEntry>::iterator parEntry, std::vector<FileEntry>::iterator parEnd, const PathName& parCurrDir, std::atomic<std::size_t>& parDone) {
+			assert(parEntry != parEnd);
+			assert(parEntry->is_dir);
 			FileEntry& curr_entry = *parEntry;
+			auto& curr_entry_it = parEntry;
 
 			//Build a blob with the hashes and filenames of every directory that
 			//is a direct child of current entry
 			{
 				std::vector<char> dir_blob;
-				auto it_entry = parEntry;
+				auto it_entry = curr_entry_it;
 
 				while (
-					it_entry != parEnd
-					and (not it_entry->is_dir or (it_entry->level <= curr_entry.level
-					and parCurrDir != PathName(it_entry->path).pop_right()))
-				) {
+					it_entry != parEnd and (
+						it_entry->level == curr_entry.level
+						or parCurrDir != PathName(it_entry->path).pop_right()
+					//and (not it_entry->is_dir or (it_entry->level <= curr_entry.level
+					//and parCurrDir != PathName(it_entry->path).pop_right()))
+				)) {
+					assert(it_entry->level >= curr_entry.level);
 					++it_entry;
 				}
 
 #if !defined(NDEBUG)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
-				while (parEnd != it_entry and it_entry->is_dir and it_entry->level == parEntry->level + 1) {
+				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
-					hash_dir(it_entry, parEnd, curr_subdir);
+					if (it_entry->is_dir) {
+						hash_dir(it_entry, parEnd, curr_subdir, parDone);
 
-					std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
-					const auto old_size = dir_blob.size();
-					dir_blob.resize(old_size + sizeof(HashType) + relpath.size());
-					std::copy(it_entry->hash.byte_data, it_entry->hash.byte_data + sizeof(HashType), dir_blob.begin() + old_size);
-					std::copy(relpath.begin(), relpath.end(), dir_blob.begin() + old_size + sizeof(HashType));
+						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
+						const auto old_size = dir_blob.size();
+						dir_blob.resize(old_size + sizeof(HashType) + relpath.size());
+						std::copy(it_entry->hash.byte_data, it_entry->hash.byte_data + sizeof(HashType), dir_blob.begin() + old_size);
+						std::copy(relpath.begin(), relpath.end(), dir_blob.begin() + old_size + sizeof(HashType));
+					}
+					else {
+						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
+						const auto old_size = dir_blob.size();
+						dir_blob.resize(old_size + relpath.size());
+						std::copy(relpath.begin(), relpath.end(), dir_blob.begin() + old_size);
+					}
 					++it_entry;
 				}
 
 				tiger_data(dir_blob, curr_entry.hash);
+				curr_entry.file_size = 0;
 #if !defined(NDEBUG)
 				std::cout << "Got intermediate hash for dir " << parCurrDir << ": " << tiger_to_string(curr_entry.hash) << '\n';
 #endif
@@ -99,22 +115,24 @@ namespace din {
 
 			//Now with the initial hash ready, let's start hashing files, if any
 			{
-				auto it_entry = parEntry;
+				auto it_entry = curr_entry_it;
 				while (
 					it_entry != parEnd
 					and (it_entry->is_dir
-						or it_entry->level != parEntry->level + 1
+						or it_entry->level != curr_entry_it->level + 1
 						or PathName(it_entry->path).pop_right() != parCurrDir
 					)
 				) {
 					++it_entry;
 				}
 
-				while (it_entry != parEnd and not it_entry->is_dir and it_entry->level == parEntry->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
+				while (it_entry != parEnd and not it_entry->is_dir and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
+					assert(not it_entry->is_dir);
 #if !defined(NDEBUG)
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
-					tiger_file(it_entry->path, it_entry->hash, parEntry->hash);
+					tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
+					++parDone;
 #if !defined(NDEBUG)
 					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
 #endif
@@ -123,8 +141,9 @@ namespace din {
 			}
 
 #if !defined(NDEBUG)
-			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(parEntry->hash) << '\n';
+			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
+			++parDone;
 		}
 	} //unnamed namespace
 
@@ -201,7 +220,10 @@ namespace din {
 		std::cout << "-----------------------------------------------------\n";
 #endif
 
-		hash_dir(m_local_data->paths.begin(), m_local_data->paths.end(), base_path);
+		m_local_data->done_count = 0;
+		hash_dir(m_local_data->paths.begin(), m_local_data->paths.end(), base_path, m_local_data->done_count);
+
+		assert(m_local_data->done_count == m_local_data->paths.size());
 
 #if !defined(NDEBUG)
 		for (const auto& itm : m_local_data->paths) {
@@ -214,10 +236,10 @@ namespace din {
 			data.reserve(m_local_data->paths.size());
 			for (const auto& itm : m_local_data->paths) {
 				data.push_back(FileRecordData {
-					boost::string_ref(itm.path),
+					make_relative_path(base_path, PathName(itm.path)).path(),
 					tiger_to_string(itm.hash),
 					itm.level,
-					0,
+					itm.file_size,
 					itm.is_dir,
 					itm.is_symlink
 				});

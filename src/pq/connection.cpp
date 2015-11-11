@@ -123,4 +123,11 @@ namespace pq {
 			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
 		}
 	}
+
+	std::string Connection::escape_literal (const std::string& parString) {
+		typedef std::unique_ptr<char[], void(*)(void*)> PQArrayType;
+
+		PQArrayType clean_str(PQescapeLiteral(m_localData->connection, parString.c_str(), parString.size()), &PQfreemem);
+		return std::string(clean_str.get());
+	}
 } //namespace pq

@@ -36,6 +36,8 @@ namespace pq {
 		void query_void ( const std::string& parQuery );
 		ResultSet query ( const std::string& parQuery );
 
+		std::string escape_literal ( const std::string& parString );
+
 	private:
 		struct LocalData;
 
@@ -46,6 +48,7 @@ namespace pq {
 		const uint16_t m_port;
 		std::unique_ptr<LocalData> m_localData;
 	};
+
 } //namespace pq
 
 #endif

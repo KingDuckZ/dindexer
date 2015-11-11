@@ -39,7 +39,7 @@ namespace din {
 
 	static_assert(sizeof(TigerHash) == 24, "Wrong struct size");
 
-	void tiger_file ( const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir );
+	void tiger_file ( const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir, uint64_t& parSizeOut );
 	void tiger_init_hash ( TigerHash& parHash );
 	std::string tiger_to_string ( const TigerHash& parHash );
 	void tiger_data ( const std::string& parData, TigerHash& parHash );

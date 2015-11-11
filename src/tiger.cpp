@@ -53,7 +53,7 @@ namespace din {
 		parHash.part_c = 0xF096A5B4C3B2E187ULL;
 	}
 
-	void tiger_file (const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir) {
+	void tiger_file (const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir, uint64_t& parSizeOut) {
 		typedef decltype(std::declval<std::ifstream>().tellg()) FileSizeType;
 		tiger_init_hash(parHashFile);
 
@@ -99,6 +99,8 @@ namespace din {
 			//dir's hash value (64 bytes) as if they were part of the data.
 			tiger_sse2_last_chunk(buff_ptr + aligned_size, buff_ptr + aligned_size, remaining - aligned_size, file_size, file_size + hash_size, parHashFile.data, parHashDir.data, g_tiger_padding);
 		}
+
+		parSizeOut = static_cast<uint64_t>(file_size);
 	}
 
 	std::string tiger_to_string (const TigerHash& parHash) {

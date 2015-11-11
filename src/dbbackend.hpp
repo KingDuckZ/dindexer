@@ -18,16 +18,16 @@
 #ifndef id842AF56BD80A4CF59957451DF9082AA2
 #define id842AF56BD80A4CF59957451DF9082AA2
 
-#include <boost/utility/string_ref.hpp>
+#include <string>
 #include <vector>
-#include <utility>
+#include <cstdint>
 
 namespace din {
 	struct FileRecordData {
-		const boost::string_ref path;
+		const std::string path;
 		const std::string hash;
 		const uint16_t level;
-		const std::size_t size;
+		const uint64_t size;
 		const bool is_directory;
 		const bool is_symlink;
 	};
