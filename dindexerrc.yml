@@ -1,0 +1,8 @@
+%YAML 1.2
+---
+db_settings:
+    username: your_username
+    password: your_password
+    dbname: dindexer
+    port: 5432
+    address: 200.100.200.100

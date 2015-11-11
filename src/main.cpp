@@ -19,6 +19,7 @@
 #include <ciso646>
 #include "filesearcher.hpp"
 #include "indexer.hpp"
+#include "settings.hpp"
 
 int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
@@ -31,8 +32,17 @@ int main (int parArgc, char* parArgv[]) {
 	}
 	std::cout << std::endl;
 
-	din::Indexer indexer;
 	fastf::FileSearcher searcher("/home/michele/dev/code/cpp/dindexer/test");
+	din::DinDBSettings settings;
+	{
+		const bool loaded = din::load_settings("dindexerrc.yml", settings);
+		if (not loaded) {
+			std::cerr << "Can't load settings from dindexerrc.yml, quitting\n";
+			return 1;
+		}
+	}
+
+	din::Indexer indexer(settings);
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
 	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2, _3, _4)));

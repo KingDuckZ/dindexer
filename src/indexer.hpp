@@ -21,9 +21,11 @@
 #include <memory>
 
 namespace din {
+	struct DinDBSettings;
+
 	class Indexer {
 	public:
-		Indexer ( void );
+		explicit Indexer ( const DinDBSettings& parDBSettings );
 		Indexer ( Indexer&& ) = default;
 		Indexer ( const Indexer& ) = delete;
 		~Indexer ( void ) noexcept;

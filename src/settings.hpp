@@ -15,26 +15,25 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id842AF56BD80A4CF59957451DF9082AA2
-#define id842AF56BD80A4CF59957451DF9082AA2
+#ifndef idDC29E3C667BD4793BA0644AE7DC5BD3F
+#define idDC29E3C667BD4793BA0644AE7DC5BD3F
 
 #include <string>
-#include <vector>
 #include <cstdint>
 
 namespace din {
-	struct DinDBSettings;
-
-	struct FileRecordData {
-		const std::string path;
-		const std::string hash;
-		const uint16_t level;
-		const uint64_t size;
-		const bool is_directory;
-		const bool is_symlink;
+	struct DinDBSettings {
+		std::string address;
+		std::string username;
+		std::string password;
+		std::string dbname;
+		uint16_t port;
 	};
 
-	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData );
+	//struct DinSettings {
+	//};
+
+	bool load_settings ( const std::string& parPath, DinDBSettings& parOut );
 } //namespace din
 
 #endif

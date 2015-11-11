@@ -17,6 +17,7 @@
 
 #include "dbbackend.hpp"
 #include "pq/connection.hpp"
+#include "settings.hpp"
 #include <string>
 #include <sstream>
 #include <utility>
@@ -26,12 +27,12 @@ namespace din {
 		const std::size_t g_batch_size = 100;
 	} //unnamed namespace
 
-	void write_to_db (const std::vector<FileRecordData>& parData) {
+	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData) {
 		if (parData.empty()) {
 			return;
 		}
 
-		pq::Connection conn("michele", "password", "dindexer", "100.200.100.200", 5432);
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
 		conn.query_void("BEGIN;");

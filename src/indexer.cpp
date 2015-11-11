@@ -19,6 +19,7 @@
 #include "pathname.hpp"
 #include "tiger.hpp"
 #include "dbbackend.hpp"
+#include "settings.hpp"
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -150,6 +151,7 @@ namespace din {
 	struct Indexer::LocalData {
 		typedef std::vector<FileEntry> PathList;
 
+		DinDBSettings db_settings;
 		PathList paths;
 		std::atomic<std::size_t> done_count;
 		std::size_t file_count;
@@ -172,7 +174,7 @@ namespace din {
 		;
 	}
 
-	Indexer::Indexer() :
+	Indexer::Indexer (const DinDBSettings& parDBSettings) :
 		m_local_data(new LocalData)
 	{
 #if !defined(NDEBUG)
@@ -189,6 +191,7 @@ namespace din {
 #endif
 		m_local_data->done_count = 0;
 		m_local_data->file_count = 0;
+		m_local_data->db_settings = parDBSettings;
 	}
 
 	Indexer::~Indexer() {
@@ -244,7 +247,7 @@ namespace din {
 					itm.is_symlink
 				});
 			}
-			write_to_db(data);
+			write_to_db(m_local_data->db_settings, data);
 		}
 	}
 
