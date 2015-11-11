@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <utility>
 #include <sstream>
+#include <iomanip>
 
 #if defined(__SSE2__)
 extern "C" void tiger_sse2_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRes1[3], uint64_t parRes2[3] );
@@ -102,7 +103,13 @@ namespace din {
 
 	std::string tiger_to_string (const TigerHash& parHash) {
 		std::ostringstream oss;
-		oss << std::hex << swap_long(parHash.part_a) << swap_long(parHash.part_b) << swap_long(parHash.part_c);
+		oss << std::hex << std::setfill('0') << std::setw(2 * sizeof(uint64_t))
+			<< swap_long(parHash.part_a)
+			<< std::hex << std::setfill('0') << std::setw(2 * sizeof(uint64_t))
+			<< swap_long(parHash.part_b)
+			<< std::hex << std::setfill('0') << std::setw(2 * sizeof(uint64_t))
+			<< swap_long(parHash.part_c)
+		;
 		return oss.str();
 	}
 

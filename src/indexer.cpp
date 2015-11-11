@@ -18,6 +18,7 @@
 #include "indexer.hpp"
 #include "pathname.hpp"
 #include "tiger.hpp"
+#include "dbbackend.hpp"
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -207,6 +208,22 @@ namespace din {
 			assert(not (1 == itm.hash.part_a and 1 == itm.hash.part_b and 1 == itm.hash.part_c));
 		}
 #endif
+
+		{
+			std::vector<FileRecordData> data;
+			data.reserve(m_local_data->paths.size());
+			for (const auto& itm : m_local_data->paths) {
+				data.push_back(FileRecordData {
+					boost::string_ref(itm.path),
+					tiger_to_string(itm.hash),
+					itm.level,
+					0,
+					itm.is_dir,
+					itm.is_symlink
+				});
+			}
+			write_to_db(data);
+		}
 	}
 
 	bool Indexer::add_path (const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) {
