@@ -206,9 +206,9 @@ namespace din {
 	}
 
 	void Indexer::calculate_hash() {
+		PathName base_path(m_local_data->paths.front().path);
 #if !defined(NDEBUG)
 		std::sort(m_local_data->paths.begin(), m_local_data->paths.end());
-		PathName base_path(m_local_data->paths.front().path);
 		for (auto& itm : m_local_data->paths) {
 			itm.hash.part_a = 1;
 			itm.hash.part_b = 1;

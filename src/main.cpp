@@ -49,6 +49,5 @@ int main (int parArgc, char* parArgv[]) {
 	searcher.Search(ext, ignore);
 
 	indexer.calculate_hash();
-	indexer.dump();
 	return 0;
 }
