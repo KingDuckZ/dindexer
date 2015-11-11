@@ -28,7 +28,7 @@
 #include <ciso646>
 #include <cassert>
 
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 #	include <iostream>
 #endif
 
@@ -84,7 +84,7 @@ namespace din {
 					++it_entry;
 				}
 
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
@@ -109,7 +109,7 @@ namespace din {
 
 				tiger_data(dir_blob, curr_entry.hash);
 				curr_entry.file_size = 0;
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 				std::cout << "Got intermediate hash for dir " << parCurrDir << ": " << tiger_to_string(curr_entry.hash) << '\n';
 #endif
 			}
@@ -129,19 +129,19 @@ namespace din {
 
 				while (it_entry != parEnd and not it_entry->is_dir and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
 					assert(not it_entry->is_dir);
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
 					tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
 					++parDone;
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
 #endif
 					++it_entry;
 				}
 			}
 
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
 			++parDone;
@@ -207,7 +207,7 @@ namespace din {
 
 	void Indexer::calculate_hash() {
 		PathName base_path(m_local_data->paths.front().path);
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 		std::sort(m_local_data->paths.begin(), m_local_data->paths.end());
 		for (auto& itm : m_local_data->paths) {
 			itm.hash.part_a = 1;
@@ -228,7 +228,7 @@ namespace din {
 
 		assert(m_local_data->done_count == m_local_data->paths.size());
 
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 		for (const auto& itm : m_local_data->paths) {
 			assert(not (1 == itm.hash.part_a and 1 == itm.hash.part_b and 1 == itm.hash.part_c));
 		}
@@ -263,7 +263,7 @@ namespace din {
 		return true;
 	}
 
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 	void Indexer::dump() const {
 		PathName base_path(m_local_data->paths.front().path);
 

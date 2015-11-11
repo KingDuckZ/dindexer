@@ -20,6 +20,10 @@
 
 #include <memory>
 
+#if !defined(NDEBUG)
+#	define INDEXER_VERBOSE
+#endif
+
 namespace din {
 	struct DinDBSettings;
 
@@ -31,7 +35,7 @@ namespace din {
 		~Indexer ( void ) noexcept;
 
 		bool add_path ( const char* parPath, int parLevel, bool parIsDir, bool parIsSymlink );
-#if !defined(NDEBUG)
+#if defined(INDEXER_VERBOSE)
 		void dump ( void ) const;
 #endif
 
