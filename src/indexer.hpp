@@ -24,6 +24,12 @@
 #	define INDEXER_VERBOSE
 #endif
 
+#if defined(WITH_PROGRESS_FEEDBACK)
+namespace std {
+	class condition_variable;
+} //namespace std
+#endif
+
 namespace din {
 	struct DinDBSettings;
 
@@ -40,7 +46,10 @@ namespace din {
 #endif
 
 		std::size_t total_items ( void ) const;
+#if defined(WITH_PROGRESS_FEEDBACK)
 		std::size_t processed_items ( void ) const;
+		std::condition_variable& step_notify ( void );
+#endif
 		void calculate_hash ( void );
 		void add_to_db ( const std::string& parSetName, char parType ) const;
 		bool empty ( void ) const;

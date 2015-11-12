@@ -17,10 +17,19 @@
 
 #include <iostream>
 #include <ciso646>
+#if defined(WITH_PROGRESS_FEEDBACK)
+#	include <thread>
+#	include <mutex>
+#	include <condition_variable>
+#endif
 #include "filesearcher.hpp"
 #include "indexer.hpp"
 #include "settings.hpp"
 #include "commandline.hpp"
+
+namespace {
+	void run_hash_calculation ( din::Indexer& parIndexer, bool parShowProgress );
+} //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
@@ -62,8 +71,43 @@ int main (int parArgc, char* parArgv[]) {
 		return 1;
 	}
 	else {
-		indexer.calculate_hash();
+#if defined(WITH_PROGRESS_FEEDBACK)
+		const bool verbose = (0 == vm.count("quiet"));
+#else
+		const bool verbose = false;
+#endif
+		run_hash_calculation(indexer, verbose);
 		indexer.add_to_db(vm["setname"].as<std::string>(), vm["type"].as<char>());
 	}
 	return 0;
 }
+
+namespace {
+	void run_hash_calculation (din::Indexer& parIndexer, bool parShowProgress) {
+#if !defined(WITH_PROGRESS_FEEDBACK)
+		parShowProgress = false;
+#endif
+		if (not parShowProgress) {
+			parIndexer.calculate_hash();
+		}
+#if defined(WITH_PROGRESS_FEEDBACK)
+		else {
+			std::cout << "Fetching items list...\n";
+			const auto total_items = parIndexer.total_items();
+			std::thread hash_thread(&din::Indexer::calculate_hash, &parIndexer);
+			std::mutex progress_print;
+			while (parIndexer.processed_items() != total_items) {
+				std::unique_lock<std::mutex> lk(progress_print);
+				parIndexer.step_notify().wait(lk);
+				std::cout << "Processed " << parIndexer.processed_items() << " of " << total_items << '\r';
+				std::cout.flush();
+			};
+
+			hash_thread.join();
+			if (parIndexer.processed_items() > 0) {
+				std::cout << '\n';
+			}
+		}
+#endif
+	}
+} //unnamed namespace

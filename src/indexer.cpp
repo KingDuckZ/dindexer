@@ -21,9 +21,13 @@
 #include "dbbackend.hpp"
 #include "settings.hpp"
 #include <algorithm>
+#include <functional>
 #include <vector>
 #include <string>
-#include <atomic>
+#if defined(WITH_PROGRESS_FEEDBACK)
+#	include <atomic>
+#	include <condition_variable>
+#endif
 #include <cstdint>
 #include <ciso646>
 #include <cassert>
@@ -61,7 +65,7 @@ namespace din {
 	};
 
 	namespace {
-		void hash_dir (std::vector<FileEntry>::iterator parEntry, std::vector<FileEntry>::iterator parEnd, const PathName& parCurrDir, std::atomic<std::size_t>& parDone) {
+		void hash_dir (std::vector<FileEntry>::iterator parEntry, std::vector<FileEntry>::iterator parEnd, const PathName& parCurrDir, std::function<void()> parItemDoneCallback) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_dir);
 			FileEntry& curr_entry = *parEntry;
@@ -90,7 +94,7 @@ namespace din {
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
 					if (it_entry->is_dir) {
-						hash_dir(it_entry, parEnd, curr_subdir, parDone);
+						hash_dir(it_entry, parEnd, curr_subdir, parItemDoneCallback);
 
 						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 						const auto old_size = dir_blob.size();
@@ -133,7 +137,7 @@ namespace din {
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
 					tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
-					++parDone;
+					parItemDoneCallback();
 #if defined(INDEXER_VERBOSE)
 					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
 #endif
@@ -144,7 +148,7 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
-			++parDone;
+			//parItemDoneCallback();
 		}
 	} //unnamed namespace
 
@@ -153,7 +157,10 @@ namespace din {
 
 		DinDBSettings db_settings;
 		PathList paths;
+#if defined(WITH_PROGRESS_FEEDBACK)
 		std::atomic<std::size_t> done_count;
+		std::condition_variable step_notify;
+#endif
 		std::size_t file_count;
 	};
 
@@ -189,7 +196,9 @@ namespace din {
 		//assert(not (FileEntry("/a/b/1.txt", 3, false, false) < FileEntry("/a/b/c/f.txt", 4, true, false)));
 		//assert(not (FileEntry("/a/b/c/file.c", 4, false, false) < FileEntry("/a/b/c", 3, true, false)));
 #endif
+#if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;
+#endif
 		m_local_data->file_count = 0;
 		m_local_data->db_settings = parDBSettings;
 	}
@@ -201,9 +210,11 @@ namespace din {
 		return m_local_data->file_count;
 	}
 
+#if defined(WITH_PROGRESS_FEEDBACK)
 	std::size_t Indexer::processed_items() const {
 		return m_local_data->done_count;
 	}
+#endif
 
 	void Indexer::calculate_hash() {
 		PathName base_path(m_local_data->paths.front().path);
@@ -223,10 +234,27 @@ namespace din {
 		std::cout << "-----------------------------------------------------\n";
 #endif
 
+#if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;
-		hash_dir(m_local_data->paths.begin(), m_local_data->paths.end(), base_path, m_local_data->done_count);
+		hash_dir(
+			m_local_data->paths.begin(),
+			m_local_data->paths.end(),
+			base_path,
+			[=]() {
+				++m_local_data->done_count;
+				m_local_data->step_notify.notify_all();
+			}
+		);
 
 		assert(m_local_data->done_count == m_local_data->paths.size());
+#else
+		hash_dir(
+			m_local_data->paths.begin(),
+			m_local_data->paths.end(),
+			base_path,
+			[]() {}
+		);
+#endif
 
 #if defined(INDEXER_VERBOSE)
 		for (const auto& itm : m_local_data->paths) {
@@ -236,7 +264,9 @@ namespace din {
 	}
 
 	void Indexer::add_to_db (const std::string& parSetName, char parType) const {
+#if defined(WITH_PROGRESS_FEEDBACK)
 		assert(m_local_data->done_count == m_local_data->paths.size());
+#endif
 		PathName base_path(m_local_data->paths.front().path);
 		std::vector<FileRecordData> data;
 		data.reserve(m_local_data->paths.size());
@@ -287,4 +317,10 @@ namespace din {
 	bool Indexer::empty() const {
 		return m_local_data->paths.size() < 2;
 	}
+
+#if defined(WITH_PROGRESS_FEEDBACK)
+	std::condition_variable& Indexer::step_notify() {
+		return m_local_data->step_notify;
+	}
+#endif
 } //namespace din

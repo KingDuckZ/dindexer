@@ -60,6 +60,9 @@ namespace din {
 			("help,h", "Produces this help message")
 			("version", "Prints the program's version and quits")
 			//("dump-raw,D", po::value<std::string>(), "Saves the retrieved html to the named file; use - for stdout")
+#if defined(WITH_PROGRESS_FEEDBACK)
+			("quiet,q", "Hide progress messages and print nothing at all")
+#endif
 		;
 		po::options_description set_options("Set options");
 		set_options.add_options()

@@ -47,3 +47,7 @@ target_link_libraries(${PROJECT_NAME}
 	${YAMLCPP_LIBRARY}
 	${Boost_LIBRARIES}
 )
+
+target_compile_definitions(${PROJECT_NAME}
+	PUBLIC WITH_PROGRESS_FEEDBACK
+)
