@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
-#include <string>
+#include <stdexcept>
 #if defined(WITH_PROGRESS_FEEDBACK)
 #	include <atomic>
 #	include <condition_variable>
@@ -31,6 +31,9 @@
 #include <cstdint>
 #include <ciso646>
 #include <cassert>
+#include <boost/iterator/filter_iterator.hpp>
+#include <sstream>
+#include <iterator>
 
 #if defined(INDEXER_VERBOSE)
 #	include <iostream>
@@ -65,7 +68,9 @@ namespace din {
 	};
 
 	namespace {
-		void hash_dir (std::vector<FileEntry>::iterator parEntry, std::vector<FileEntry>::iterator parEnd, const PathName& parCurrDir, std::function<void()> parItemDoneCallback) {
+		typedef std::vector<FileEntry>::iterator FileEntryIt;
+
+		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_dir);
 			FileEntry& curr_entry = *parEntry;
@@ -94,7 +99,7 @@ namespace din {
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
 					if (it_entry->is_dir) {
-						hash_dir(it_entry, parEnd, curr_subdir, parItemDoneCallback);
+						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback);
 
 						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 						const auto old_size = dir_blob.size();
@@ -136,8 +141,8 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
+					parNextItemCallback(it_entry - parBegin);
 					tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
-					parItemDoneCallback();
 #if defined(INDEXER_VERBOSE)
 					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
 #endif
@@ -148,8 +153,12 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
-			//parItemDoneCallback();
 		}
+
+		template <bool FileTrue=true>
+		struct IsFile {
+			bool operator() ( const FileEntry& parEntry ) const { return parEntry.is_dir xor FileTrue; }
+		};
 	} //unnamed namespace
 
 	struct Indexer::LocalData {
@@ -159,6 +168,7 @@ namespace din {
 		PathList paths;
 #if defined(WITH_PROGRESS_FEEDBACK)
 		std::atomic<std::size_t> done_count;
+		std::atomic<std::size_t> processing_index;
 		std::condition_variable step_notify;
 #endif
 		std::size_t file_count;
@@ -198,6 +208,7 @@ namespace din {
 #endif
 #if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;
+		m_local_data->processing_index = 0;
 #endif
 		m_local_data->file_count = 0;
 		m_local_data->db_settings = parDBSettings;
@@ -238,10 +249,12 @@ namespace din {
 		m_local_data->done_count = 0;
 		hash_dir(
 			m_local_data->paths.begin(),
+			m_local_data->paths.begin(),
 			m_local_data->paths.end(),
 			base_path,
-			[=]() {
+			[=](std::size_t parNext) {
 				++m_local_data->done_count;
+				m_local_data->processing_index = parNext;
 				m_local_data->step_notify.notify_all();
 			}
 		);
@@ -250,9 +263,10 @@ namespace din {
 #else
 		hash_dir(
 			m_local_data->paths.begin(),
+			m_local_data->paths.begin(),
 			m_local_data->paths.end(),
 			base_path,
-			[]() {}
+			[](std::size_t) {}
 		);
 #endif
 
@@ -323,4 +337,28 @@ namespace din {
 		return m_local_data->step_notify;
 	}
 #endif
+
+#if defined(WITH_PROGRESS_FEEDBACK)
+	std::string Indexer::current_item() const {
+		if (m_local_data->paths.empty() or 0 == m_local_data->processing_index)
+			return std::string();
+
+		PathName base_path(m_local_data->paths.front().path);
+		PathName ret_path(m_local_data->paths[m_local_data->processing_index].path);
+		return make_relative_path(base_path, ret_path).path();
+	}
+#endif
+
+	std::string Indexer::operator[] (std::size_t parIndex) const {
+		if (parIndex >= m_local_data->file_count) {
+			std::ostringstream oss;
+			oss << "Requested index " << parIndex << " is out of range: only " << m_local_data->file_count << " items are available";
+			throw std::out_of_range(oss.str());
+		}
+
+		auto it = boost::make_filter_iterator<IsFile<>>(m_local_data->paths.begin(), m_local_data->paths.end());
+		assert(not m_local_data->paths.empty());
+		std::advance(it, parIndex);
+		return make_relative_path(PathName(m_local_data->paths.front().path), PathName(it->path)).path();
+	}
 } //namespace din

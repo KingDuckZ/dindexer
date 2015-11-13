@@ -19,6 +19,7 @@
 #define idE555EF56730442C1ADDC7B2AE7A9340E
 
 #include <memory>
+#include <string>
 
 #if !defined(NDEBUG)
 #	define INDEXER_VERBOSE
@@ -46,8 +47,10 @@ namespace din {
 #endif
 
 		std::size_t total_items ( void ) const;
+		std::string operator[] ( std::size_t parIndex ) const;
 #if defined(WITH_PROGRESS_FEEDBACK)
 		std::size_t processed_items ( void ) const;
+		std::string current_item ( void ) const;
 		std::condition_variable& step_notify ( void );
 #endif
 		void calculate_hash ( void );
