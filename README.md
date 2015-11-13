@@ -28,6 +28,13 @@ The program will go through every file in the path you specify. Hashing everythi
 You can run dindexer --help to see a list of available switches.
 
 #   Build instructions   #
+##  Dependencies  ##
+The following libraries must be available on your system:
+
+- PostgreSQL (libpq)
+- Boost 1.53 or later
+- yaml-cpp 0.5.1 or later
+
 ##  Linux  ##
 
     mkdir dindexer_build
