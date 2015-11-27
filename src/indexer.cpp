@@ -259,7 +259,7 @@ namespace din {
 			}
 		);
 
-		assert(m_local_data->done_count == m_local_data->paths.size());
+		assert(m_local_data->done_count == m_local_data->file_count);
 #else
 		hash_dir(
 			m_local_data->paths.begin(),
@@ -279,7 +279,7 @@ namespace din {
 
 	void Indexer::add_to_db (const std::string& parSetName, char parType) const {
 #if defined(WITH_PROGRESS_FEEDBACK)
-		assert(m_local_data->done_count == m_local_data->paths.size());
+		assert(m_local_data->done_count == m_local_data->file_count);
 #endif
 		PathName base_path(m_local_data->paths.front().path);
 		std::vector<FileRecordData> data;
