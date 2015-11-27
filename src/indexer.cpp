@@ -277,10 +277,21 @@ namespace din {
 #endif
 	}
 
-	void Indexer::add_to_db (const std::string& parSetName, char parType) const {
+	bool Indexer::add_to_db (const std::string& parSetName, char parType, bool parForce) const {
 #if defined(WITH_PROGRESS_FEEDBACK)
 		assert(m_local_data->done_count == m_local_data->file_count);
 #endif
+
+		if (not parForce) {
+			std::string first_hash(tiger_to_string(m_local_data->paths.front().hash, true));
+			FileRecordData itm;
+			SetRecordDataFull set;
+			const bool already_in_db = read_from_db(itm, set, m_local_data->db_settings, std::move(first_hash));
+			if (already_in_db) {
+				return false;
+			}
+		}
+
 		PathName base_path(m_local_data->paths.front().path);
 		std::vector<FileRecordData> data;
 		data.reserve(m_local_data->paths.size());
@@ -297,6 +308,7 @@ namespace din {
 
 		SetRecordData set_data {parSetName, parType};
 		write_to_db(m_local_data->db_settings, data, set_data);
+		return true;
 	}
 
 	bool Indexer::add_path (const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) {

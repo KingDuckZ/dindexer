@@ -94,7 +94,9 @@ int main (int parArgc, char* parArgv[]) {
 		if (verbose) {
 			std::cout << "Writing to database...\n";
 		}
-		indexer.add_to_db(vm["setname"].as<std::string>(), vm["type"].as<char>());
+		if (not indexer.add_to_db(vm["setname"].as<std::string>(), vm["type"].as<char>())) {
+			std::cerr << "Not written to DB, likely because a set with the same hash already exists\n";
+		}
 	}
 	return 0;
 }

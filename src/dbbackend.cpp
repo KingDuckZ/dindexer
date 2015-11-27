@@ -21,6 +21,8 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <boost/lexical_cast.hpp>
+#include <exception>
 
 namespace din {
 	namespace {
@@ -35,6 +37,53 @@ namespace din {
 			return oss.str();
 		}
 	} //unnamed namespace
+
+	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const DinDBSettings& parDB, std::string&& parHash) {
+		using boost::lexical_cast;
+
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		uint32_t group_id;
+		{
+			std::ostringstream oss;
+			oss << "SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash=" <<
+				conn.escaped_literal(parHash) <<
+				" LIMIT 1;";
+
+			auto resultset = conn.query(oss.str());
+			if (resultset.empty()) {
+				return false;
+			}
+
+			auto row = resultset[0];
+			parItem.path = row["path"];
+			parItem.hash = std::move(parHash);
+			parItem.level = lexical_cast<uint16_t>(row["level"]);
+			parItem.size = lexical_cast<uint64_t>(row["size"]);
+			parItem.is_directory = (row["is_directory"] == "t" ? true : false);
+			parItem.is_symlink = (row["is_symlink"] == "t" ? true : false);
+			group_id = lexical_cast<uint32_t>(row["group_id"]);
+		}
+
+		{
+			std::ostringstream oss;
+			oss << "SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=" << group_id << ';';
+
+			auto resultset = conn.query(oss.str());
+			if (resultset.empty()) {
+				std::ostringstream err_msg;
+				err_msg << "Missing set: found a record with group_id=" << group_id;
+				err_msg << " but there is no such id in table \"sets\"";
+				throw std::length_error(err_msg.str());
+			}
+			auto row = resultset[0];
+			parSet.type = lexical_cast<char>(row["type"]);
+			parSet.name = row["desc"];
+			parSet.disk_number = lexical_cast<uint32_t>(row["disk_number"]);
+		}
+		return true;
+	}
 
 	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
 		if (parData.empty()) {

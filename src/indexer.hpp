@@ -54,7 +54,7 @@ namespace din {
 		std::condition_variable& step_notify ( void );
 #endif
 		void calculate_hash ( void );
-		void add_to_db ( const std::string& parSetName, char parType ) const;
+		bool add_to_db ( const std::string& parSetName, char parType, bool parForce=false ) const;
 		bool empty ( void ) const;
 
 	private:

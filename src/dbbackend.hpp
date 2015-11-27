@@ -27,12 +27,18 @@ namespace din {
 	struct DinDBSettings;
 
 	struct FileRecordData {
-		const std::string path;
-		const std::string hash;
-		const uint16_t level;
-		const uint64_t size;
-		const bool is_directory;
-		const bool is_symlink;
+		std::string path;
+		std::string hash;
+		uint16_t level;
+		uint64_t size;
+		bool is_directory;
+		bool is_symlink;
+	};
+
+	struct SetRecordDataFull {
+		std::string name;
+		uint32_t disk_number;
+		char type;
 	};
 
 	struct SetRecordData {
@@ -41,6 +47,7 @@ namespace din {
 	};
 
 	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
+	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const DinDBSettings& parDB, std::string&& parHash );
 } //namespace din
 
 #endif
