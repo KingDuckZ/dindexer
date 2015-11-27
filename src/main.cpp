@@ -15,6 +15,10 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(WITH_PROGRESS_FEEDBACK) && !defined(NDEBUG)
+#	undef WITH_PROGRESS_FEEDBACK
+#endif
+
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
