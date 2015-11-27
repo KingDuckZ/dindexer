@@ -41,7 +41,7 @@ namespace din {
 
 	void tiger_file ( const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir, uint64_t& parSizeOut );
 	void tiger_init_hash ( TigerHash& parHash );
-	std::string tiger_to_string ( const TigerHash& parHash );
+	std::string tiger_to_string ( const TigerHash& parHash, bool parUpcase=false );
 	void tiger_data ( const std::string& parData, TigerHash& parHash );
 	void tiger_data ( const std::vector<char>& parData, TigerHash& parHash );
 } //namespace din

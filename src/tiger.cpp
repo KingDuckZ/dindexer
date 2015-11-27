@@ -103,8 +103,11 @@ namespace din {
 		parSizeOut = static_cast<uint64_t>(file_size);
 	}
 
-	std::string tiger_to_string (const TigerHash& parHash) {
+	std::string tiger_to_string (const TigerHash& parHash, bool parUpcase) {
 		std::ostringstream oss;
+		if (parUpcase) {
+			oss << std::uppercase;
+		}
 		oss << std::hex << std::setfill('0') << std::setw(2 * sizeof(uint64_t))
 			<< swap_long(parHash.part_a)
 			<< std::hex << std::setfill('0') << std::setw(2 * sizeof(uint64_t))
