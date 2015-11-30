@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-11-11 20:03:40 GMT
+-- Started on 2015-11-30 18:28:52 GMT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,7 +22,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2037 (class 0 OID 0)
+-- TOC entry 2038 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
@@ -90,7 +90,7 @@ CREATE SEQUENCE files_id_seq
 ALTER TABLE files_id_seq OWNER TO @USERNAME@;
 
 --
--- TOC entry 2038 (class 0 OID 0)
+-- TOC entry 2039 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
@@ -106,8 +106,9 @@ ALTER SEQUENCE files_id_seq OWNED BY files.id;
 CREATE TABLE sets (
     id integer NOT NULL,
     "desc" text NOT NULL,
-    creation time with time zone DEFAULT now() NOT NULL,
     type character(1) DEFAULT 'D'::bpchar NOT NULL,
+    disk_number integer DEFAULT 0 NOT NULL,
+    creation timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT chk_sets_type CHECK ((((((((type = 'D'::bpchar) OR (type = 'V'::bpchar)) OR (type = 'B'::bpchar)) OR (type = 'F'::bpchar)) OR (type = 'H'::bpchar)) OR (type = 'Z'::bpchar)) OR (type = 'O'::bpchar)))
 );
 
@@ -115,7 +116,7 @@ CREATE TABLE sets (
 ALTER TABLE sets OWNER TO @USERNAME@;
 
 --
--- TOC entry 2039 (class 0 OID 0)
+-- TOC entry 2040 (class 0 OID 0)
 -- Dependencies: 177
 -- Name: COLUMN sets.type; Type: COMMENT; Schema: public; Owner: @USERNAME@
 --
@@ -145,7 +146,7 @@ CREATE SEQUENCE sets_id_seq
 ALTER TABLE sets_id_seq OWNER TO @USERNAME@;
 
 --
--- TOC entry 2040 (class 0 OID 0)
+-- TOC entry 2041 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
@@ -170,7 +171,7 @@ ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclas
 
 
 --
--- TOC entry 1914 (class 2606 OID 31289)
+-- TOC entry 1915 (class 2606 OID 31289)
 -- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -179,7 +180,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1918 (class 2606 OID 31420)
+-- TOC entry 1919 (class 2606 OID 31420)
 -- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -188,7 +189,7 @@ ALTER TABLE ONLY sets
 
 
 --
--- TOC entry 1916 (class 2606 OID 31294)
+-- TOC entry 1917 (class 2606 OID 31294)
 -- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -197,7 +198,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1911 (class 1259 OID 31426)
+-- TOC entry 1912 (class 1259 OID 31426)
 -- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -205,7 +206,7 @@ CREATE INDEX fki_files_sets ON files USING btree (group_id);
 
 
 --
--- TOC entry 1912 (class 1259 OID 31292)
+-- TOC entry 1913 (class 1259 OID 31292)
 -- Name: idx_paths; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -213,7 +214,7 @@ CREATE INDEX idx_paths ON files USING btree (path);
 
 
 --
--- TOC entry 1920 (class 2620 OID 31291)
+-- TOC entry 1921 (class 2620 OID 31291)
 -- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @USERNAME@
 --
 
@@ -221,7 +222,7 @@ CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW E
 
 
 --
--- TOC entry 1919 (class 2606 OID 31421)
+-- TOC entry 1920 (class 2606 OID 31421)
 -- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @USERNAME@
 --
 
@@ -230,7 +231,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 2036 (class 0 OID 0)
+-- TOC entry 2037 (class 0 OID 0)
 -- Dependencies: 8
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -241,7 +242,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2015-11-11 20:03:45 GMT
+-- Completed on 2015-11-30 18:28:54 GMT
 
 --
 -- PostgreSQL database dump complete
