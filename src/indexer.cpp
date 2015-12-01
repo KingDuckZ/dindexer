@@ -44,12 +44,15 @@ namespace din {
 	typedef TigerHash HashType;
 
 	struct FileEntry {
-		FileEntry ( const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) :
+		FileEntry ( const char* parPath, const fastf::FileStats& parSt ) :
 			path(parPath),
 			hash {},
-			level(static_cast<uint16_t>(parLevel)),
-			is_dir(parIsDir),
-			is_symlink(parIsSymLink)
+			access_time(parSt.atime),
+			modify_time(parSt.mtime),
+			//file_size(0),
+			level(static_cast<uint16_t>(parSt.level)),
+			is_dir(parSt.is_dir),
+			is_symlink(parSt.is_symlink)
 		{
 		}
 
@@ -62,6 +65,8 @@ namespace din {
 
 		std::string path;
 		HashType hash;
+		std::time_t access_time;
+		std::time_t modify_time;
 		uint64_t file_size;
 		uint16_t level;
 		bool is_dir;
@@ -300,6 +305,8 @@ namespace din {
 			data.push_back(FileRecordData {
 				make_relative_path(base_path, PathName(itm.path)).path(),
 				tiger_to_string(itm.hash),
+				itm.access_time,
+				itm.modify_time,
 				itm.level,
 				itm.file_size,
 				itm.is_dir,

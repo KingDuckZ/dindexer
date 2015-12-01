@@ -23,6 +23,8 @@
 #include <utility>
 #include <boost/lexical_cast.hpp>
 #include <exception>
+#include <memory>
+#include <boost/utility/string_ref.hpp>
 
 namespace din {
 	namespace {
@@ -35,6 +37,12 @@ namespace din {
 				<< '\'' << parSetData.type << '\''
 				<< ");";
 			return oss.str();
+		}
+
+		boost::string_ref time_to_str (const std::time_t parTime, char* parBuff, std::size_t parLength) {
+			const auto gtm = std::gmtime(&parTime);
+			const auto len = std::strftime(parBuff, parLength, "%F %T%z", gtm);
+			return boost::string_ref(parBuff, len);
 		}
 	} //unnamed namespace
 
@@ -90,6 +98,9 @@ namespace din {
 			return;
 		}
 
+		const std::size_t strtime_buff_size = 512;
+		std::unique_ptr<char[]> strtime_buff(new char[strtime_buff_size]);
+
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -98,7 +109,10 @@ namespace din {
 		//TODO: use COPY instead of INSERT INTO
 		for (std::size_t z = 0; z < parData.size(); z += g_batch_size) {
 			std::ostringstream query;
-			query << "INSERT INTO \"files\" (path, hash, level, group_id, is_directory, is_symlink, size) VALUES ";
+			query << "INSERT INTO \"files\" " <<
+				"(path, hash, level, group_id, is_directory, is_symlink, size, " <<
+				"access_time, modify_time) VALUES "
+			;
 
 			const char* comma = "";
 			for (auto i = z; i < std::min(z + g_batch_size, parData.size()); ++i) {
@@ -108,8 +122,10 @@ namespace din {
 					<< itm.level << ','
 					<< "currval('\"sets_id_seq\"')" << ','
 					<< (itm.is_directory ? "true" : "false") << ','
-					<< (itm.is_symlink ? "true" : "false") << ',' << itm.size << ')'
-				;
+					<< (itm.is_symlink ? "true" : "false") << ',' << itm.size
+					<< ',' << '\'' << time_to_str(itm.atime, strtime_buff.get(), strtime_buff_size) << '\''
+					<< ',' << '\'' << time_to_str(itm.mtime, strtime_buff.get(), strtime_buff_size) << '\''
+				<< ')';
 				comma = ",";
 			}
 			query << ';';

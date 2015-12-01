@@ -22,6 +22,7 @@
 #include <vector>
 #include <cstdint>
 #include <boost/utility/string_ref.hpp>
+#include <ctime>
 
 namespace din {
 	struct DinDBSettings;
@@ -29,6 +30,8 @@ namespace din {
 	struct FileRecordData {
 		std::string path;
 		std::string hash;
+		std::time_t atime;
+		std::time_t mtime;
 		uint16_t level;
 		uint64_t size;
 		bool is_directory;

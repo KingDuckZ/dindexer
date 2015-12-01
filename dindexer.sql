@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-11-30 18:28:52 GMT
+-- Started on 2015-12-01 16:35:15 GMT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -68,6 +68,8 @@ CREATE TABLE files (
     size bigint,
     hash character(48) NOT NULL,
     is_hash_valid boolean DEFAULT true NOT NULL,
+    access_time timestamp with time zone,
+    modify_time timestamp with time zone,
     CONSTRAINT chk_files_dirsize_zero CHECK (((is_directory = false) OR (size = 0)))
 );
 
@@ -242,7 +244,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2015-11-30 18:28:54 GMT
+-- Completed on 2015-12-01 16:35:18 GMT
 
 --
 -- PostgreSQL database dump complete
