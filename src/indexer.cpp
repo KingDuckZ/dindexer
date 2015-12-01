@@ -20,6 +20,7 @@
 #include "tiger.hpp"
 #include "dbbackend.hpp"
 #include "settings.hpp"
+#include "filestats.hpp"
 #include <algorithm>
 #include <functional>
 #include <vector>
@@ -311,9 +312,10 @@ namespace din {
 		return true;
 	}
 
-	bool Indexer::add_path (const char* parPath, int parLevel, bool parIsDir, bool parIsSymLink) {
-		m_local_data->paths.push_back(FileEntry(parPath, parLevel, parIsDir, parIsSymLink));
-		if (not parIsDir) {
+	bool Indexer::add_path (const char* parPath, const fastf::FileStats& parStats) {
+		m_local_data->paths.push_back(
+			FileEntry(parPath, parStats));
+		if (not parStats.is_dir) {
 			++m_local_data->file_count;
 		}
 		return true;

@@ -39,21 +39,28 @@ namespace fastf {
 
     __thread SearchOptions g_searchOptions;
 
-    bool print_def_callback (const char* parPath, int parLevel, bool parDir, bool parSymlink) {
+    bool print_def_callback (const char* parPath, const FileStats& parStats) {
       std::cout << parPath;
-      if (parDir) {
+      if (parStats.is_dir) {
         std::cout << '/';
       }
-      if (parSymlink) {
+      if (parStats.is_symlink) {
         std::cout << " (symlink)";
       }
-      std::cout << " (" << parLevel << ')';
+      std::cout << " (" << parStats.level << ')';
 	  std::cout << '\n';
       return true;
     }
 
-    int HandleDir (const char* parPath, const struct stat*, FTW* parBuff, bool parCanBeRead, bool parSymlink) {
-      if (not (*g_searchOptions.callback)(parPath, parBuff->level, true, parSymlink))
+    int HandleDir (const char* parPath, const struct stat* parStat, FTW* parBuff, bool parCanBeRead, bool parSymlink) {
+      FileStats st;
+      st.level = parBuff->level;
+      st.is_dir = true;
+      st.is_symlink = parSymlink;
+      st.atime = parStat->st_atime;
+      st.mtime = parStat->st_mtime;
+
+      if (not (*g_searchOptions.callback)(parPath, st))
         return FTW_STOP;
       if (!parCanBeRead)
         return FTW_SKIP_SUBTREE;
@@ -66,10 +73,17 @@ namespace fastf {
       return FTW_CONTINUE;
     }
 
-    int HandleFile (const char* parPath, const struct stat*, FTW* parBuff, bool parSymlink) {
+    int HandleFile (const char* parPath, const struct stat* parStat, FTW* parBuff, bool parSymlink) {
       const FileSearcher::ConstCharVecType& extensions = *g_searchOptions.extensions;
+      FileStats st;
+      st.level = parBuff->level;
+      st.is_dir = false;
+      st.is_symlink = parSymlink;
+      st.atime = parStat->st_atime;
+      st.mtime = parStat->st_mtime;
+
       if (extensions.empty()) {
-        if (not (*g_searchOptions.callback)(parPath, parBuff->level, false, parSymlink)) {
+        if (not (*g_searchOptions.callback)(parPath, st)) {
           return FTW_STOP;
         }
       }
@@ -78,7 +92,7 @@ namespace fastf {
           const int& extLen = extensions[z].len;
           const int pathLen = parBuff->base + std::strlen(parPath + parBuff->base);
           if (std::strncmp(extensions[z].str, parPath + pathLen - extLen, extensions[z].len) == 0) {
-            if (not (*g_searchOptions.callback)(parPath, parBuff->level, false, parSymlink)) {
+            if (not (*g_searchOptions.callback)(parPath, st)) {
               return FTW_STOP;
             }
             break;

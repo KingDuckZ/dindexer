@@ -18,6 +18,7 @@
 #ifndef idB6D385B7779240308449D6081CB790F1
 #define idB6D385B7779240308449D6081CB790F1
 
+#include "filestats.hpp"
 #include <vector>
 #include <functional>
 #include <boost/utility/string_ref.hpp>
@@ -37,7 +38,7 @@ namespace fastf {
   class FileSearcher {
   public:
     typedef std::vector<StringWithLength> ConstCharVecType;
-	typedef std::function<bool(const char*, int, bool, bool)> CallbackType;
+	typedef std::function<bool(const char*, const FileStats&)> CallbackType;
 
     explicit FileSearcher ( boost::string_ref parBaseDir );
     ~FileSearcher ( void ) noexcept;

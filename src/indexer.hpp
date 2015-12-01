@@ -31,6 +31,10 @@ namespace std {
 } //namespace std
 #endif
 
+namespace fastf {
+	struct FileStats;
+} //namespace fastf
+
 namespace din {
 	struct DinDBSettings;
 
@@ -41,7 +45,7 @@ namespace din {
 		Indexer ( const Indexer& ) = delete;
 		~Indexer ( void ) noexcept;
 
-		bool add_path ( const char* parPath, int parLevel, bool parIsDir, bool parIsSymlink );
+		bool add_path ( const char* parPath, const fastf::FileStats& parStats );
 #if defined(INDEXER_VERBOSE)
 		void dump ( void ) const;
 #endif

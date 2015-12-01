@@ -45,8 +45,6 @@ namespace {
 int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
 	using std::placeholders::_2;
-	using std::placeholders::_3;
-	using std::placeholders::_4;
 	using boost::program_options::variables_map;
 
 	variables_map vm;
@@ -79,7 +77,7 @@ int main (int parArgc, char* parArgv[]) {
 	fastf::FileSearcher searcher(search_path);
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
-	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2, _3, _4)));
+	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2)));
 	searcher.Search(ext, ignore);
 	if (verbose) {
 		std::cout << "Fetching items list...\n";
