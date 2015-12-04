@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-12-01 16:35:15 GMT
+-- Started on 2015-12-04 12:29:56 GMT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -111,7 +111,7 @@ CREATE TABLE sets (
     type character(1) DEFAULT 'D'::bpchar NOT NULL,
     disk_number integer DEFAULT 0 NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT chk_sets_type CHECK ((((((((type = 'D'::bpchar) OR (type = 'V'::bpchar)) OR (type = 'B'::bpchar)) OR (type = 'F'::bpchar)) OR (type = 'H'::bpchar)) OR (type = 'Z'::bpchar)) OR (type = 'O'::bpchar)))
+    CONSTRAINT chk_sets_type CHECK (((((((((type = 'C'::bpchar) OR (type = 'D'::bpchar)) OR (type = 'V'::bpchar)) OR (type = 'B'::bpchar)) OR (type = 'F'::bpchar)) OR (type = 'H'::bpchar)) OR (type = 'Z'::bpchar)) OR (type = 'O'::bpchar)))
 );
 
 
@@ -244,7 +244,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2015-12-01 16:35:18 GMT
+-- Completed on 2015-12-04 12:29:59 GMT
 
 --
 -- PostgreSQL database dump complete

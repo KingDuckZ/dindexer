@@ -35,6 +35,7 @@ namespace po = boost::program_options;
 namespace din {
 	namespace {
 		const char g_allowed_types[] = {
+			'C', //CD-Rom
 			'D', //Directory
 			'V', //DVD
 			'B', //BluRay
