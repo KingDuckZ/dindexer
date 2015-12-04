@@ -51,6 +51,18 @@ namespace din {
 	} //unnamed namespace
 
 	bool parse_commandline (int parArgc, char* parArgv[], po::variables_map& parVarMap) {
+		std::string type_param_help;
+		{
+			std::ostringstream oss;
+			oss << "Default set type. Valid values are ";
+			oss << g_allowed_types[0];
+			for (std::size_t z = 1; z < lengthof(g_allowed_types); ++z) {
+				oss << ", " << g_allowed_types[z];
+			}
+			oss << '.';
+			type_param_help = oss.str();
+		}
+
 		po::options_description desc("General");
 		desc.add_options()
 			("help,h", "Produces this help message")
@@ -63,7 +75,7 @@ namespace din {
 		po::options_description set_options("Set options");
 		set_options.add_options()
 			("setname,n", po::value<std::string>()->default_value("New set"), "Name to be given to the new set being scanned.")
-			("type,t", po::value<char>()->default_value('V'), "Default set type. Valid values are B, D, F, H, O, V, Z.")
+			("type,t", po::value<char>()->default_value('V'), type_param_help.c_str())
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()

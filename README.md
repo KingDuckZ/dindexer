@@ -65,5 +65,17 @@ List all duplicate files belonging to different sets:
     on t.hash = files.hash
     group by files.hash, group_id, t.ct order by files.hash;
 
-#### Set number ####
+### Set number ###
 In the sets table you can find a disk_number column that is currently not used. This is in case you have numbered discs, so you are free to put any number you like in that column.
+
+### Disc type ###
+For your convenience, you can store the type of the disc you are going to index. Currently this has no impact on the program's behaviour. Available types are:
+
+* **C** - CD-Rom
+* **D** - Directory
+* **V** - DVD
+* **B** - BluRay
+* **F** - Floppy Disk
+* **H** - Hard Disk
+* **Z** - Iomega Zip
+* **O** - Other
