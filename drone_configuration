@@ -1,0 +1,17 @@
+Configuration for drone.io
+
+cd ..
+wget --no-check-certificate --quiet https://cmake.org/files/v3.4/cmake-3.4.1-Linux-x86_64.sh
+echo y > cmake.input
+echo n >> cmake.input
+sudo sh cmake-3.4.1-Linux-x86_64.sh --prefix=/opt < cmake.input > /dev/null
+export PATH=/opt/bin:$PATH
+sudo add-apt-repository ppa:smfengler/ppa > /dev/null 2>&1
+sudo add-apt-repository ppa:boost-latest/ppa > /dev/null 2>&1
+sudo apt-get -qq update
+sudo apt-get -qq install libyaml-cpp-dev libboost1.55-dev libboost-program-options1.55-dev
+echo 2 | sudo update-alternatives --config gcc
+mkdir dindexer_build
+cd dindexer_build
+cmake -DCMAKE_BUILD_TYPE=Debug ../dindexer
+make
