@@ -1,4 +1,4 @@
-project(dindexer-pq CXX)
+project(${bare_name}-pq CXX)
 
 add_library(${PROJECT_NAME} STATIC
 	connection.cpp
@@ -7,5 +7,5 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_link_libraries(${PROJECT_NAME}
-	PRIVATE dindexer
+	PRIVATE ${bare_name}-if
 )
