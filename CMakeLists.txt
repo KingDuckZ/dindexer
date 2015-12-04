@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(dindexer VERSION 0.1.1 LANGUAGES CXX C)
+project(dindexer VERSION 0.1.2 LANGUAGES CXX C)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
