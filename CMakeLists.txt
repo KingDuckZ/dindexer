@@ -4,6 +4,7 @@ project("${bare_name}-if" VERSION 0.1.2 LANGUAGES CXX C)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
+set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
 set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11")
@@ -24,6 +25,8 @@ find_package(YamlCpp 0.5.1 REQUIRED)
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${bare_name}-inc INTERFACE)
 
+message(STATUS "Actions search path set to: \"${ACTIONS_PATH}\"")
+
 configure_file(
 	"${PROJECT_SOURCE_DIR}/src/${bare_name}Config.h.in"
 	"${PROJECT_BINARY_DIR}/${bare_name}Config.h"
@@ -42,6 +45,7 @@ target_include_directories(${bare_name}-inc
 
 add_subdirectory(src/update)
 add_subdirectory(src/pq)
+add_subdirectory(src/main)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}

@@ -15,16 +15,12 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id48D6E1D45238460F99C2BCBFDE920791
-#define id48D6E1D45238460F99C2BCBFDE920791
+#ifndef id0FE0395F6FD14626A837BD8628E29FED
+#define id0FE0395F6FD14626A837BD8628E29FED
 
-#define PROGRAM_NAME "@PROJECT_NAME@"
-#define VERSION_MAJOR @PROJECT_VERSION_MAJOR@
-#define VERSION_MINOR @PROJECT_VERSION_MINOR@
-#define VERSION_BETA @PROJECT_VERSION_BETA@
-#define VERSION_PATCH @PROJECT_VERSION_PATCH@
-#define CONFIG_FILE_PATH "@DINDEXER_CONFIG_FILE@"
-#define ACTIONS_SEARCH_PATH "@ACTIONS_PATH@"
-#define ACTION_PREFIX "@bare_name@-"
+#include <stddef.h>
+
+void find_actions ( char*** parOut, size_t* parCount );
+void free_actions ( char** parActions, size_t parCount );
 
 #endif
