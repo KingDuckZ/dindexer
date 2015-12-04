@@ -16,7 +16,7 @@
  */
 
 #include "pq/resultset.hpp"
-#include "pq/resultinfo.hpp"
+#include "resultinfo.hpp"
 #include "pq/databaseexception.hpp"
 #include <libpq-fe.h>
 #include <map>

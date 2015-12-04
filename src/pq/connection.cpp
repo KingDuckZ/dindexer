@@ -15,9 +15,9 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pq/connection.hpp"
+#include "connection.hpp"
 #include "pq/databaseexception.hpp"
-#include "pq/resultinfo.hpp"
+#include "resultinfo.hpp"
 #include <libpq-fe.h>
 #include <algorithm>
 #include <ciso646>

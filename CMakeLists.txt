@@ -20,44 +20,34 @@ find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options)
 find_package(PostgreSQL REQUIRED)
 find_package(YamlCpp 0.5.1 REQUIRED)
 
+add_library(${PROJECT_NAME} INTERFACE)
+
 configure_file(
 	"${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}Config.h.in"
 	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.h"
 )
 
-add_executable(${PROJECT_NAME}
-	src/main.cpp
-	src/filesearcher.cpp
-	src/pathname.cpp
-	src/indexer.cpp
-	src/tiger.c
-	src/tiger.cpp
-	src/pq/connection.cpp
-	src/pq/databaseexception.cpp
-	src/pq/resultset.cpp
-	src/dbbackend.cpp
-	src/settings.cpp
-	src/commandline.cpp
-)
-
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}
-	PRIVATE ${PostgreSQL_INCLUDE_DIRS}
-	PRIVATE ${YAMLCPP_INCLUDE_DIR}
+	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
+	INTERFACE ${YAMLCPP_INCLUDE_DIR}
 )
 
 target_include_directories(${PROJECT_NAME}
-	PRIVATE src
-	PRIVATE include
-	PRIVATE ${PROJECT_BINARY_DIR}
+	INTERFACE ${PROJECT_BINARY_DIR}
+	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
+add_subdirectory(src/update)
+add_subdirectory(src/pq)
+
 target_link_libraries(${PROJECT_NAME}
-	${PostgreSQL_LIBRARIES}
-	${YAMLCPP_LIBRARY}
-	${Boost_LIBRARIES}
+	INTERFACE ${PostgreSQL_LIBRARIES}
+	INTERFACE ${YAMLCPP_LIBRARY}
+	INTERFACE ${Boost_LIBRARIES}
+	INTERFACE dindexer-pq
 )
 
 target_compile_definitions(${PROJECT_NAME}
-	PUBLIC WITH_PROGRESS_FEEDBACK
+	INTERFACE WITH_PROGRESS_FEEDBACK
 )
