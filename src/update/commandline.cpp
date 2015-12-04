@@ -17,18 +17,13 @@
 
 #include "commandline.hpp"
 #include "dindexerConfig.h"
+#include "helpers/lengthof.h"
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <algorithm>
 
 #define STRINGIZE_IMPL(s) #s
 #define STRINGIZE(s) STRINGIZE_IMPL(s)
-
-#if defined(lengthof)
-#	undef lengthof
-#endif
-//http://stackoverflow.com/questions/4415524/common-array-length-macro-for-c#4415646
-#define lengthof(x) ((sizeof(x)/sizeof(0[x])) / ((std::size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 namespace po = boost::program_options;
 
