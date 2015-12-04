@@ -1,4 +1,4 @@
-project(${bare_name}-update CXX C)
+project(${bare_name}-scan CXX C)
 
 add_executable(${PROJECT_NAME}
 	main.cpp

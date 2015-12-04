@@ -43,7 +43,7 @@ target_include_directories(${bare_name}-inc
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
-add_subdirectory(src/update)
+add_subdirectory(src/scan)
 add_subdirectory(src/pq)
 add_subdirectory(src/main)
 
