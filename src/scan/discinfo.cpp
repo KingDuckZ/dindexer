@@ -22,7 +22,9 @@
 #include <fstream>
 #include <boost/tokenizer.hpp>
 #include <ciso646>
-#include <blkid/blkid.h>
+#if defined(WITH_MEDIA_AUTODETECT)
+#	include <blkid/blkid.h>
+#endif
 #include <linux/limits.h>
 #include <sys/stat.h>
 #include <memory>
