@@ -27,13 +27,6 @@ namespace din {
 	namespace {
 		std::string get_joint_atoms ( const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight=0 );
 
-		bool ptr_between (const char* parPtr, const char* parBeg, const char* parEnd) {
-			std::less<const char*> less;
-			std::less_equal<const char*> lesseq;
-
-			return lesseq(parBeg, parPtr) and less(parPtr, parEnd);
-		}
-
 		std::size_t count_grouped (boost::string_ref parIn, char parDelim) {
 			std::size_t retval = 0;
 			char prev = '\0';

@@ -73,7 +73,7 @@ namespace din {
 		{
 			std::copy(parHashDir.byte_data, parHashDir.byte_data + sizeof(parHashDir), buff_ptr);
 			std::fill(buff_ptr + sizeof(parHashDir), buff_ptr + hash_size, 0);
-			TigerHash dummy = {};
+			TigerHash dummy {};
 			tiger_init_hash(parHashDir);
 			tiger_sse2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, parHashDir.data);
 		}
