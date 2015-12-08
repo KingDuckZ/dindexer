@@ -43,7 +43,7 @@ The following libraries must be available on your system:
 - PostgreSQL (libpq)
 - Boost 1.53 or later
 - yaml-cpp 0.5.1 or later
-- libblkid (from util-linux/misc-utils) ***optional, build with -DDINDEXER_WITH_MEDIA_AUTODETECT=Off if you don't have this***
+- libblkid (from util-linux/misc-utils) *optional, build with -DDINDEXER_WITH_MEDIA_AUTODETECT=Off if you don't have this*
 
 ###  Linux  ###
 
