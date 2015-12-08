@@ -21,6 +21,7 @@
 #include <utility>
 
 namespace din {
+#if defined(WITH_MEDIA_AUTODETECT)
 	UnknownMediaTypeException::UnknownMediaTypeException (const std::string& parWhat) :
 		std::runtime_error(parWhat)
 	{
@@ -64,4 +65,5 @@ namespace din {
 			throw CantAutodetectException("Can't autodetect set type, please specify it manually");
 		}
 	}
+#endif
 } //namespace din

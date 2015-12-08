@@ -38,6 +38,7 @@ namespace din {
 	namespace {
 		using MountpointsMap = std::map<std::string, std::string>;
 
+#if defined(WITH_MEDIA_AUTODETECT)
 		//See: http://lkml.iu.edu/hypermail/linux/kernel/0602.1/1295.html
 		enum LinuxDeviceTypes {
 			LinuxDeviceType_Disk = 0x00,
@@ -114,7 +115,7 @@ namespace din {
 
 			DiscType_NoStandardProfile = 0xFFFF, //"No standard Profile"
 		};
-
+#endif
 
 		MountpointsMap list_mountpoints() {
 			std::ifstream rd("/proc/mounts");
@@ -136,6 +137,7 @@ namespace din {
 			return std::move(retmap);
 		}
 
+#if defined(WITH_MEDIA_AUTODETECT)
 		LinuxDeviceTypes get_dev_type (const std::string& parDev) {
 			const char dev_prefix[] = "/dev/";
 			const std::size_t dev_prefix_len = lengthof(dev_prefix) - 1;
@@ -162,6 +164,7 @@ namespace din {
 			}
 			return static_cast<LinuxDeviceTypes>(retval);
 		}
+#endif
 	} //unnamed namespace
 
 	DiscInfo::DiscInfo (std::string&& parPath) :
@@ -188,6 +191,7 @@ namespace din {
 		return not m_device.empty();
 	}
 
+#if defined(WITH_MEDIA_AUTODETECT)
 	DriveTypes DiscInfo::drive_type() const {
 		auto dev_type = get_dev_type(m_device);
 		switch (dev_type) {
@@ -322,4 +326,5 @@ namespace din {
 			return OpticalType_Unknown;
 		};
 	}
+#endif
 } //namespace din

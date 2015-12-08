@@ -73,6 +73,7 @@ int main (int parArgc, char* parArgv[]) {
 		}
 	}
 
+#if defined(WITH_MEDIA_AUTODETECT)
 	char set_type;
 	if (0 == vm.count("type")) {
 		std::cout << "Analyzing disc... ";
@@ -89,6 +90,9 @@ int main (int parArgc, char* parArgv[]) {
 	else {
 		set_type = vm["type"].as<char>();
 	}
+#else
+	const char set_type = vm["type"].as<char>();
+#endif
 
 	std::cout << "constructing...\n";
 

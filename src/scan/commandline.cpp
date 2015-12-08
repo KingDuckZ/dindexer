@@ -60,7 +60,9 @@ namespace din {
 				oss << ", " << g_allowed_types[z];
 			}
 			oss << '.';
+#if defined(WITH_MEDIA_AUTODETECT)
 			oss << " Default is 'autodetect'.";
+#endif
 			type_param_help = oss.str();
 		}
 
@@ -76,7 +78,11 @@ namespace din {
 		po::options_description set_options("Set options");
 		set_options.add_options()
 			("setname,n", po::value<std::string>()->default_value("New set"), "Name to be given to the new set being scanned.")
+#if defined(WITH_MEDIA_AUTODETECT)
 			("type,t", po::value<char>(), type_param_help.c_str())
+#else
+			("type,t", po::value<char>()->default_value('V'), type_param_help.c_str())
+#endif
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()
@@ -121,9 +127,15 @@ namespace din {
 		if (parVarMap.count("search-path") == 0) {
 			throw std::invalid_argument("No search path specified");
 		}
-		if (parVarMap.count("type") and g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
+#if defined(WITH_MEDIA_AUTODETECT)
+		if (parVarMap.count("type")) {
+#endif
+		if (g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
 			throw std::invalid_argument("Invalid value for parameter \"type\"");
 		}
+#if defined(WITH_MEDIA_AUTODETECT)
+		}
+#endif
 		return false;
 	}
 } //namespace din

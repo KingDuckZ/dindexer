@@ -33,6 +33,7 @@ namespace din {
 		MediaType_Other = 'O'
 	};
 
+#if defined(WITH_MEDIA_AUTODETECT)
 	MediaTypes guess_media_type ( std::string&& parPath );
 
 	class UnknownMediaTypeException : std::runtime_error {
@@ -46,6 +47,7 @@ namespace din {
 		CantAutodetectException ( const std::string& parWhat );
 		CantAutodetectException ( const char* parWhat );
 	};
+#endif
 } //namespace din
 
 #endif

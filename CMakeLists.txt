@@ -4,6 +4,7 @@ project("${bare_name}-if" VERSION 0.1.2 LANGUAGES CXX C)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
+option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
 set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
 set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra")

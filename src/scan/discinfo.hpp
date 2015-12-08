@@ -21,6 +21,7 @@
 #include <string>
 
 namespace din {
+#if defined(WITH_MEDIA_AUTODETECT)
 	enum OpticalTypes {
 		OpticalType_DVD,
 		OpticalType_CDRom,
@@ -36,6 +37,7 @@ namespace din {
 		DriveType_Other,
 		DriveType_Unknown
 	};
+#endif
 
 	class DiscInfo {
 	public:
@@ -45,9 +47,11 @@ namespace din {
 		const std::string& mountpoint ( void ) const { return m_mountpoint; }
 		const std::string& device ( void ) const { return m_device; }
 		const std::string& original_path ( void ) const { return m_initial_path; }
-		OpticalTypes optical_type ( void ) const;
 		bool mountpoint_found ( void ) const;
+#if defined(WITH_MEDIA_AUTODETECT)
+		OpticalTypes optical_type ( void ) const;
 		DriveTypes drive_type ( void ) const;
+#endif
 
 	private:
 		const std::string m_initial_path;
