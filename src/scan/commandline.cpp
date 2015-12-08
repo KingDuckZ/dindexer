@@ -30,14 +30,14 @@ namespace po = boost::program_options;
 namespace din {
 	namespace {
 		const char g_allowed_types[] = {
-			static_cast<char>(SetSourceType_CDRom),
-			static_cast<char>(SetSourceType_Directory),
-			static_cast<char>(SetSourceType_DVD),
-			static_cast<char>(SetSourceType_BluRay),
-			static_cast<char>(SetSourceType_FloppyDisk),
-			static_cast<char>(SetSourceType_HardDisk),
-			static_cast<char>(SetSourceType_IomegaZip),
-			static_cast<char>(SetSourceType_Other)
+			static_cast<char>(MediaType_CDRom),
+			static_cast<char>(MediaType_Directory),
+			static_cast<char>(MediaType_DVD),
+			static_cast<char>(MediaType_BluRay),
+			static_cast<char>(MediaType_FloppyDisk),
+			static_cast<char>(MediaType_HardDisk),
+			static_cast<char>(MediaType_IomegaZip),
+			static_cast<char>(MediaType_Other)
 		};
 		const char* const g_version_string =
 			PROGRAM_NAME " v"

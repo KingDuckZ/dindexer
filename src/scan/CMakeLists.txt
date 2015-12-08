@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
 	settings.cpp
 	commandline.cpp
 	discinfo.cpp
+	mediatype.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

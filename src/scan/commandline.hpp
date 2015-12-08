@@ -19,19 +19,9 @@
 #define id1B7A42F6E46547A6AB0F914E2A91399F
 
 #include <boost/program_options/variables_map.hpp>
+#include "mediatype.hpp"
 
 namespace din {
-	enum SetSourceTypes {
-		SetSourceType_CDRom = 'C',
-		SetSourceType_Directory = 'D',
-		SetSourceType_DVD = 'V',
-		SetSourceType_BluRay = 'B',
-		SetSourceType_FloppyDisk = 'F',
-		SetSourceType_HardDisk = 'H',
-		SetSourceType_IomegaZip = 'Z',
-		SetSourceType_Other = 'O'
-	};
-
 	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
 } //namespace din
 
