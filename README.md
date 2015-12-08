@@ -1,4 +1,9 @@
 #	dindexer	#
+##	Flattr	##
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=c%2B%2B&tags=bitbucket&category=software)
+
+Please support the development of this software if you like it!
+
 ##	Debug build status	##
 [![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
 
