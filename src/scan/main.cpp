@@ -31,11 +31,13 @@
 #	include <condition_variable>
 #endif
 #include <wordexp.h>
+#include "discinfo.hpp"
 #include "dindexerConfig.h"
 #include "filesearcher.hpp"
 #include "indexer.hpp"
 #include "settings.hpp"
 #include "commandline.hpp"
+#include "pathname.hpp"
 
 namespace {
 	void run_hash_calculation ( din::Indexer& parIndexer, bool parShowProgress );
@@ -68,10 +70,50 @@ int main (int parArgc, char* parArgv[]) {
 	{
 		const bool loaded = din::load_settings(expand(CONFIG_FILE_PATH), settings);
 		if (not loaded) {
-			std::cerr << "Can't load settings from dindexerrc.yml, quitting\n";
+			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
 			return 1;
 		}
 	}
+
+	char set_type;
+	if (0 == vm.count("type")) {
+		std::cout << "Analyzing disc... ";
+		din::DiscInfo info((std::string(search_path)));
+		const din::DriveTypes drive_type = info.drive_type();
+		if (din::DriveType_HardDisk == drive_type) {
+			if (info.mountpoint() == din::PathName(search_path).path())
+				set_type = din::SetSourceType_HardDisk;
+			else
+				set_type = din::SetSourceType_Directory;
+		}
+		else if (din::DriveType_Optical == drive_type) {
+			switch (info.optical_type()) {
+			case din::OpticalType_DVD:
+				set_type = din::SetSourceType_DVD;
+				break;
+			case din::OpticalType_CDRom:
+				set_type = din::SetSourceType_CDRom;
+				break;
+			case din::OpticalType_BluRay:
+				set_type = din::SetSourceType_BluRay;
+				break;
+			default:
+				std::cerr << "Set autodetect failed because this media type is unknown, please specify the set type manually\n";
+				return 1;
+			}
+		}
+		else {
+			std::cerr << "Can't autodetect set type, please specify it manually\n";
+			return 1;
+		}
+	}
+	else {
+		set_type = vm["type"].as<char>();
+	}
+	std::cout << "Setting type to " << set_type << '\n';
+	return 0;
+
+	std::cout << "constructing...\n";
 
 	din::Indexer indexer(settings);
 	fastf::FileSearcher searcher(search_path);
@@ -92,7 +134,7 @@ int main (int parArgc, char* parArgv[]) {
 		if (verbose) {
 			std::cout << "Writing to database...\n";
 		}
-		if (not indexer.add_to_db(vm["setname"].as<std::string>(), vm["type"].as<char>())) {
+		if (not indexer.add_to_db(vm["setname"].as<std::string>(), set_type)) {
 			std::cerr << "Not written to DB, likely because a set with the same hash already exists\n";
 		}
 	}

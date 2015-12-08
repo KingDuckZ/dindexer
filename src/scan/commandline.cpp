@@ -30,14 +30,14 @@ namespace po = boost::program_options;
 namespace din {
 	namespace {
 		const char g_allowed_types[] = {
-			'C', //CD-Rom
-			'D', //Directory
-			'V', //DVD
-			'B', //BluRay
-			'F', //Floppy Disk
-			'H', //Hard Disk
-			'Z', //Iomega Zip
-			'O'  //Other
+			static_cast<char>(SetSourceType_CDRom),
+			static_cast<char>(SetSourceType_Directory),
+			static_cast<char>(SetSourceType_DVD),
+			static_cast<char>(SetSourceType_BluRay),
+			static_cast<char>(SetSourceType_FloppyDisk),
+			static_cast<char>(SetSourceType_HardDisk),
+			static_cast<char>(SetSourceType_IomegaZip),
+			static_cast<char>(SetSourceType_Other)
 		};
 		const char* const g_version_string =
 			PROGRAM_NAME " v"
@@ -60,6 +60,7 @@ namespace din {
 				oss << ", " << g_allowed_types[z];
 			}
 			oss << '.';
+			oss << " Default is 'autodetect'.";
 			type_param_help = oss.str();
 		}
 
@@ -75,7 +76,7 @@ namespace din {
 		po::options_description set_options("Set options");
 		set_options.add_options()
 			("setname,n", po::value<std::string>()->default_value("New set"), "Name to be given to the new set being scanned.")
-			("type,t", po::value<char>()->default_value('V'), type_param_help.c_str())
+			("type,t", po::value<char>(), type_param_help.c_str())
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()
@@ -120,7 +121,7 @@ namespace din {
 		if (parVarMap.count("search-path") == 0) {
 			throw std::invalid_argument("No search path specified");
 		}
-		if (g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
+		if (parVarMap.count("type") and g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
 			throw std::invalid_argument("Invalid value for parameter \"type\"");
 		}
 		return false;

@@ -115,6 +115,7 @@ static size_t foreach_avail_action(int(*parFunc)(char*, char*), char** parList, 
 			return z;
 		}
 	}
+	return z;
 }
 
 static int printf_stderr (char* parMsg, char* parUnused) {

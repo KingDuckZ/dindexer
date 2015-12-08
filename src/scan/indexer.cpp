@@ -220,7 +220,7 @@ namespace din {
 		m_local_data->db_settings = parDBSettings;
 	}
 
-	Indexer::~Indexer() {
+	Indexer::~Indexer() noexcept {
 	}
 
 	std::size_t Indexer::total_items() const {

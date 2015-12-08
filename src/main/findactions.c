@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <iso646.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "dindexerConfig.h"
 #include "helpers/lengthof.h"
 

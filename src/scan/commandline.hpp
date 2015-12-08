@@ -21,6 +21,17 @@
 #include <boost/program_options/variables_map.hpp>
 
 namespace din {
+	enum SetSourceTypes {
+		SetSourceType_CDRom = 'C',
+		SetSourceType_Directory = 'D',
+		SetSourceType_DVD = 'V',
+		SetSourceType_BluRay = 'B',
+		SetSourceType_FloppyDisk = 'F',
+		SetSourceType_HardDisk = 'H',
+		SetSourceType_IomegaZip = 'Z',
+		SetSourceType_Other = 'O'
+	};
+
 	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
 } //namespace din
 

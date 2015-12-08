@@ -38,6 +38,7 @@ The following libraries must be available on your system:
 - PostgreSQL (libpq)
 - Boost 1.53 or later
 - yaml-cpp 0.5.1 or later
+- libblkid (from util-linux/misc-utils)
 
 ###  Linux  ###
 
@@ -47,7 +48,7 @@ The following libraries must be available on your system:
     make -j2
 
 ###  Other platforms  ###
-I never tested dindexer on anything other than Linux. Note that the code assumes paths to be Unix-like. Other than that, there shouldn't be any major problem to porting the code.
+I never tested dindexer on anything other than Linux. Note that the code assumes paths to be Unix-like. It also makes other assumptions about the current platform being Linux, so porting could be not so straightforward.
 
 ##  Project status  ##
 This project is at an early stage and is still being developed. Currently, only the indexer has been implemented. You can search the database manually if you know how to write the SQL queries you will need.
