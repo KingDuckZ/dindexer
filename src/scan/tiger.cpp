@@ -65,13 +65,14 @@ namespace din {
 		const FileSizeType hash_size = (sizeof(TigerHash) + 63) & -64;
 		const uint32_t buffsize = static_cast<uint32_t>(std::max(hash_size, std::min<FileSizeType>(file_size, g_buff_size)));
 		std::unique_ptr<char[]> buff(new char[63 + buffsize]);
-		char* const buff_ptr = reinterpret_cast<char*>(reinterpret_cast<std::intptr_t>(buff.get() + 63) & (-64));
+		char* const buff_ptr = reinterpret_cast<char*>((reinterpret_cast<std::intptr_t>(buff.get()) + 63) & (-64));
 		assert(buff_ptr >= buff.get() and buff_ptr + buffsize <= buff.get() + 63 + buffsize);
 
 		//Use the initial value of the dir's hash as if it was part of the data to hash and start
 		//by processing that value. Hash is reset to the initial value before the call to tiger.
 		{
 			std::copy(parHashDir.byte_data, parHashDir.byte_data + sizeof(parHashDir), buff_ptr);
+			assert(hash_size >= static_cast<FileSizeType>(sizeof(parHashDir)));
 			std::fill(buff_ptr + sizeof(parHashDir), buff_ptr + hash_size, 0);
 			TigerHash dummy {};
 			tiger_init_hash(parHashDir);
@@ -82,6 +83,7 @@ namespace din {
 		while (remaining > buffsize) {
 			assert(buffsize >= sizeof(uint64_t) * 3);
 			assert(buffsize == (buffsize & -64));
+			assert(buffsize % 64 == 0);
 			remaining -= buffsize;
 			src.read(buff_ptr, buffsize);
 			tiger_sse2_chunk(buff_ptr, buff_ptr, buffsize, parHashFile.data, parHashDir.data);
@@ -91,13 +93,19 @@ namespace din {
 			assert(remaining <= buffsize);
 			src.read(buff_ptr, remaining);
 			const auto aligned_size = remaining & -64;
+			assert(aligned_size <= remaining);
+			assert(aligned_size <= buffsize);
+			const char* read_from_buff = buff_ptr;
 			if (aligned_size) {
 				tiger_sse2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, parHashDir.data);
+				assert((remaining & 63) == remaining - aligned_size);
+				remaining -= aligned_size;
+				read_from_buff += aligned_size;
 			}
 
 			//Remember to pass the augmented data size for the second reallength value: we passed the initial
 			//dir's hash value (64 bytes) as if they were part of the data.
-			tiger_sse2_last_chunk(buff_ptr + aligned_size, buff_ptr + aligned_size, remaining - aligned_size, file_size, file_size + hash_size, parHashFile.data, parHashDir.data, g_tiger_padding);
+			tiger_sse2_last_chunk(read_from_buff, read_from_buff, remaining, file_size, file_size + hash_size, parHashFile.data, parHashDir.data, g_tiger_padding);
 		}
 
 		parSizeOut = static_cast<uint64_t>(file_size);
