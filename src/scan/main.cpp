@@ -78,8 +78,10 @@ int main (int parArgc, char* parArgv[]) {
 	if (0 == vm.count("type")) {
 		std::cout << "Analyzing disc... ";
 		try {
-			set_type = din::guess_media_type(std::string(search_path));
-			std::cout << "Setting type to " << set_type << '\n';
+			const auto guessed_type = din::guess_media_type(std::string(search_path));
+			set_type = guessed_type;
+			std::cout << "Setting type to " << set_type << " ("
+				<< dinlib::media_type_to_str(guessed_type) << ")\n";
 		}
 		catch (const std::runtime_error& e) {
 			std::cout << '\n';

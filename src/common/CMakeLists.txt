@@ -2,6 +2,7 @@ project(${bare_name}-common CXX C)
 
 add_library(${PROJECT_NAME}
 	commandline.cpp
+	mediatypes.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
