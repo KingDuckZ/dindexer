@@ -16,38 +16,26 @@
  */
 
 #include "commandline.hpp"
-#include "dindexerConfig.h"
 #include "helpers/lengthof.h"
+#include "dindexer-common/commandline.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <algorithm>
-
-#define STRINGIZE_IMPL(s) #s
-#define STRINGIZE(s) STRINGIZE_IMPL(s)
 
 namespace po = boost::program_options;
 
 namespace din {
 	namespace {
 		const char g_allowed_types[] = {
-			static_cast<char>(MediaType_CDRom),
-			static_cast<char>(MediaType_Directory),
-			static_cast<char>(MediaType_DVD),
-			static_cast<char>(MediaType_BluRay),
-			static_cast<char>(MediaType_FloppyDisk),
-			static_cast<char>(MediaType_HardDisk),
-			static_cast<char>(MediaType_IomegaZip),
-			static_cast<char>(MediaType_Other)
+			static_cast<char>(dinlib::MediaType_CDRom),
+			static_cast<char>(dinlib::MediaType_Directory),
+			static_cast<char>(dinlib::MediaType_DVD),
+			static_cast<char>(dinlib::MediaType_BluRay),
+			static_cast<char>(dinlib::MediaType_FloppyDisk),
+			static_cast<char>(dinlib::MediaType_HardDisk),
+			static_cast<char>(dinlib::MediaType_IomegaZip),
+			static_cast<char>(dinlib::MediaType_Other)
 		};
-		const char* const g_version_string =
-			PROGRAM_NAME " v"
-			STRINGIZE(VERSION_MAJOR) "."
-			STRINGIZE(VERSION_MINOR) "."
-			STRINGIZE(VERSION_PATCH)
-#if VERSION_BETA
-			"b"
-#endif
-			;
 	} //unnamed namespace
 
 	bool parse_commandline (int parArgc, char* parArgv[], po::variables_map& parVarMap) {
@@ -66,30 +54,25 @@ namespace din {
 			type_param_help = oss.str();
 		}
 
-		po::options_description desc("General");
-		desc.add_options()
-			("help,h", "Produces this help message")
-			("version", "Prints the program's version and quits")
-			//("dump-raw,D", po::value<std::string>(), "Saves the retrieved html to the named file; use - for stdout")
+		po::options_description set_options("Set options");
+		set_options.add_options()
+			("ignore-errors", "Move on even if reading a file fails. Unreadable files are marked as such in the db.")
 #if defined(WITH_PROGRESS_FEEDBACK)
 			("quiet,q", "Hide progress messages and print nothing at all")
 #endif
-		;
-		po::options_description set_options("Set options");
-		set_options.add_options()
 			("setname,n", po::value<std::string>()->default_value("New set"), "Name to be given to the new set being scanned.")
 #if defined(WITH_MEDIA_AUTODETECT)
 			("type,t", po::value<char>(), type_param_help.c_str())
 #else
 			("type,t", po::value<char>()->default_value('V'), type_param_help.c_str())
 #endif
-			("ignore-errors", "Move on even if reading a file fails. Unreadable files are marked as such in the db.")
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()
 			("search-path", po::value<std::string>(), "Search path")
 		;
 		po::options_description all("Available options");
+		const auto desc = dinlib::get_default_commandline();
 		all.add(desc).add(positional_options).add(set_options);
 		po::positional_options_description pd;
 		pd.add("search-path", 1);//.add("xpath", 1);
@@ -102,26 +85,7 @@ namespace din {
 
 		po::notify(parVarMap);
 
-		if (parVarMap.count("help")) {
-#if !defined(NDEBUG)
-			std::cout << "*******************\n";
-			std::cout << "*** DEBUG BUILD ***\n";
-			std::cout << "*******************\n";
-			std::cout << '\n';
-#endif
-			po::options_description visible("Available options");
-			visible.add(desc).add(set_options);
-			std::cout << PROGRAM_NAME << " Copyright (C) 2015  Michele Santullo\n";
-			std::cout << "This program comes with ABSOLUTELY NO WARRANTY.\n"; //for details type `show w'.
-			std::cout << "This is free software, and you are welcome to\n";
-			std::cout << "redistribute it under certain conditions.\n"; //type `show c' for details.
-			std::cout << '\n';
-			std::cout << "Usage: " << PROGRAM_NAME << " [options...] <search-path>\n";
-			std::cout << visible;
-			return true;
-		}
-		else if (parVarMap.count("version")) {
-			std::cout << g_version_string << '\n';
+		if (dinlib::manage_common_commandline(std::cout, ACTION_NAME, "[options...] <search-path>", parVarMap, {std::cref(desc), std::cref(set_options)})) {
 			return true;
 		}
 

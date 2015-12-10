@@ -40,23 +40,23 @@ namespace din {
 	{
 	}
 
-	MediaTypes guess_media_type (std::string&& parPath) {
+	dinlib::MediaTypes guess_media_type (std::string&& parPath) {
 		DiscInfo info(std::move(parPath));
 		const DriveTypes drive_type = info.drive_type();
 		if (DriveType_HardDisk == drive_type) {
 			if (info.mountpoint() == PathName(info.original_path()).path())
-				return MediaType_HardDisk;
+				return dinlib::MediaType_HardDisk;
 			else
-				return MediaType_Directory;
+				return dinlib::MediaType_Directory;
 		}
 		else if (DriveType_Optical == drive_type) {
 			switch (info.optical_type()) {
 			case OpticalType_DVD:
-				return MediaType_DVD;
+				return dinlib::MediaType_DVD;
 			case OpticalType_CDRom:
-				return MediaType_CDRom;
+				return dinlib::MediaType_CDRom;
 			case OpticalType_BluRay:
-				return MediaType_BluRay;
+				return dinlib::MediaType_BluRay;
 			default:
 				throw UnknownMediaTypeException("Set autodetect failed because this media type is unknown, please specify the set type manually");
 			}

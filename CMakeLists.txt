@@ -9,6 +9,7 @@ set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search 
 set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra")
+set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if ("${DINDEXER_CONFIG_FILE}" STREQUAL "")
 	if (DINDEXER_DEBUG_CFG_FILE)
@@ -47,6 +48,7 @@ target_include_directories(${bare_name}-inc
 add_subdirectory(src/scan)
 add_subdirectory(src/pq)
 add_subdirectory(src/main)
+add_subdirectory(src/common)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}

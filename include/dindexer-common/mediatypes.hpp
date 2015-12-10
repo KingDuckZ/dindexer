@@ -15,29 +15,20 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id66D41389BC59433CA58E325395A6197B
-#define id66D41389BC59433CA58E325395A6197B
+#ifndef id700AFD0F33634ACC88079BB8853A9E13
+#define id700AFD0F33634ACC88079BB8853A9E13
 
-#include <string>
-#include <stdexcept>
-#include "dindexer-common/mediatypes.hpp"
-
-namespace din {
-#if defined(WITH_MEDIA_AUTODETECT)
-	dinlib::MediaTypes guess_media_type ( std::string&& parPath );
-
-	class UnknownMediaTypeException : std::runtime_error {
-	public:
-		UnknownMediaTypeException ( const std::string& parWhat );
-		UnknownMediaTypeException ( const char* parWhat );
+namespace dinlib {
+	enum MediaTypes {
+		MediaType_CDRom = 'C',
+		MediaType_Directory = 'D',
+		MediaType_DVD = 'V',
+		MediaType_BluRay = 'B',
+		MediaType_FloppyDisk = 'F',
+		MediaType_HardDisk = 'H',
+		MediaType_IomegaZip = 'Z',
+		MediaType_Other = 'O'
 	};
-
-	class CantAutodetectException : std::runtime_error {
-	public:
-		CantAutodetectException ( const std::string& parWhat );
-		CantAutodetectException ( const char* parWhat );
-	};
-#endif
-} //namespace din
+} //namespace dinlib
 
 #endif
