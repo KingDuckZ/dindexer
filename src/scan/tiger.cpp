@@ -58,6 +58,7 @@ namespace din {
 		tiger_init_hash(parHashFile);
 
 		std::ifstream src(parPath, std::ios::binary);
+		src.exceptions(src.badbit); //Throw on read error
 		src.seekg(0, std::ios_base::end);
 		const auto file_size = src.tellg();
 		src.seekg(0, std::ios_base::beg);
@@ -68,15 +69,19 @@ namespace din {
 		char* const buff_ptr = reinterpret_cast<char*>((reinterpret_cast<std::intptr_t>(buff.get()) + 63) & (-64));
 		assert(buff_ptr >= buff.get() and buff_ptr + buffsize <= buff.get() + 63 + buffsize);
 
+		//Take a copy of parHashDir and work on it - if hashing fails at some
+		//point, we need to leave the dir's hash untouched.
+		auto hash_dir = parHashDir;
+
 		//Use the initial value of the dir's hash as if it was part of the data to hash and start
 		//by processing that value. Hash is reset to the initial value before the call to tiger.
 		{
-			std::copy(parHashDir.byte_data, parHashDir.byte_data + sizeof(parHashDir), buff_ptr);
-			assert(hash_size >= static_cast<FileSizeType>(sizeof(parHashDir)));
-			std::fill(buff_ptr + sizeof(parHashDir), buff_ptr + hash_size, 0);
+			std::copy(hash_dir.byte_data, hash_dir.byte_data + sizeof(hash_dir), buff_ptr);
+			assert(hash_size >= static_cast<FileSizeType>(sizeof(hash_dir)));
+			std::fill(buff_ptr + sizeof(hash_dir), buff_ptr + hash_size, 0);
 			TigerHash dummy {};
-			tiger_init_hash(parHashDir);
-			tiger_sse2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, parHashDir.data);
+			tiger_init_hash(hash_dir);
+			tiger_sse2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, hash_dir.data);
 		}
 
 		auto remaining = file_size;
@@ -86,7 +91,7 @@ namespace din {
 			assert(buffsize % 64 == 0);
 			remaining -= buffsize;
 			src.read(buff_ptr, buffsize);
-			tiger_sse2_chunk(buff_ptr, buff_ptr, buffsize, parHashFile.data, parHashDir.data);
+			tiger_sse2_chunk(buff_ptr, buff_ptr, buffsize, parHashFile.data, hash_dir.data);
 		}
 
 		{
@@ -97,7 +102,7 @@ namespace din {
 			assert(aligned_size <= buffsize);
 			const char* read_from_buff = buff_ptr;
 			if (aligned_size) {
-				tiger_sse2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, parHashDir.data);
+				tiger_sse2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, hash_dir.data);
 				assert((remaining & 63) == remaining - aligned_size);
 				remaining -= aligned_size;
 				read_from_buff += aligned_size;
@@ -105,10 +110,11 @@ namespace din {
 
 			//Remember to pass the augmented data size for the second reallength value: we passed the initial
 			//dir's hash value (64 bytes) as if they were part of the data.
-			tiger_sse2_last_chunk(read_from_buff, read_from_buff, remaining, file_size, file_size + hash_size, parHashFile.data, parHashDir.data, g_tiger_padding);
+			tiger_sse2_last_chunk(read_from_buff, read_from_buff, remaining, file_size, file_size + hash_size, parHashFile.data, hash_dir.data, g_tiger_padding);
 		}
 
 		parSizeOut = static_cast<uint64_t>(file_size);
+		parHashDir = hash_dir;
 	}
 
 	std::string tiger_to_string (const TigerHash& parHash, bool parUpcase) {

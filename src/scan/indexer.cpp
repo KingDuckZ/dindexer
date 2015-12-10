@@ -52,7 +52,8 @@ namespace din {
 			//file_size(0),
 			level(static_cast<uint16_t>(parSt.level)),
 			is_dir(parSt.is_dir),
-			is_symlink(parSt.is_symlink)
+			is_symlink(parSt.is_symlink),
+			unreadable(false)
 		{
 		}
 
@@ -71,12 +72,13 @@ namespace din {
 		uint16_t level;
 		bool is_dir;
 		bool is_symlink;
+		bool unreadable;
 	};
 
 	namespace {
 		typedef std::vector<FileEntry>::iterator FileEntryIt;
 
-		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback) {
+		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_dir);
 			FileEntry& curr_entry = *parEntry;
@@ -105,7 +107,7 @@ namespace din {
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
 					if (it_entry->is_dir) {
-						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback);
+						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors);
 
 						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 						const auto old_size = dir_blob.size();
@@ -148,7 +150,19 @@ namespace din {
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
 					parNextItemCallback(it_entry - parBegin);
-					tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
+					try {
+						tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
+					}
+					catch (const std::ios_base::failure& e) {
+						if (parIgnoreErrors) {
+							it_entry->unreadable = true;
+							it_entry->hash = HashType {};
+						}
+						else {
+							throw e;
+						}
+					}
+
 #if defined(INDEXER_VERBOSE)
 					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
 #endif
@@ -178,6 +192,7 @@ namespace din {
 		std::condition_variable step_notify;
 #endif
 		std::size_t file_count;
+		bool ignore_read_errors;
 	};
 
 	bool FileEntry::operator< (const FileEntry& parOther) const {
@@ -262,7 +277,8 @@ namespace din {
 				++m_local_data->done_count;
 				m_local_data->processing_index = parNext;
 				m_local_data->step_notify.notify_all();
-			}
+			},
+			m_local_data->ignore_read_errors
 		);
 
 		assert(m_local_data->done_count == m_local_data->file_count);
@@ -272,7 +288,8 @@ namespace din {
 			m_local_data->paths.begin(),
 			m_local_data->paths.end(),
 			base_path,
-			[](std::size_t) {}
+			[](std::size_t) {},
+			m_local_data->ignore_read_errors
 		);
 #endif
 
@@ -310,7 +327,9 @@ namespace din {
 				itm.level,
 				itm.file_size,
 				itm.is_dir,
-				itm.is_symlink
+				itm.is_symlink,
+				itm.unreadable,
+				not itm.unreadable
 			});
 		}
 
@@ -381,5 +400,9 @@ namespace din {
 		assert(not m_local_data->paths.empty());
 		std::advance(it, parIndex);
 		return make_relative_path(PathName(m_local_data->paths.front().path), PathName(it->path)).path();
+	}
+
+	void Indexer::ignore_read_errors (bool parIgnore) {
+		m_local_data->ignore_read_errors = parIgnore;
 	}
 } //namespace din

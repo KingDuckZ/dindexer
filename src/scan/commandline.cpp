@@ -83,6 +83,7 @@ namespace din {
 #else
 			("type,t", po::value<char>()->default_value('V'), type_param_help.c_str())
 #endif
+			("ignore-errors", "Move on even if reading a file fails. Unreadable files are marked as such in the db.")
 		;
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()

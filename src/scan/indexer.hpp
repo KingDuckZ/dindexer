@@ -60,6 +60,7 @@ namespace din {
 		void calculate_hash ( void );
 		bool add_to_db ( const std::string& parSetName, char parType, bool parForce=false ) const;
 		bool empty ( void ) const;
+		void ignore_read_errors ( bool parIgnore );
 
 	private:
 		struct LocalData;

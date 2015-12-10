@@ -97,6 +97,7 @@ int main (int parArgc, char* parArgv[]) {
 	std::cout << "constructing...\n";
 
 	din::Indexer indexer(settings);
+	indexer.ignore_read_errors(vm.count("ignore-errors") > 0);
 	fastf::FileSearcher searcher(search_path);
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);

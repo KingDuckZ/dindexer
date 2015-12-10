@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-12-04 12:29:56 GMT
+-- Started on 2015-12-10 12:11:34 GMT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,7 +22,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2038 (class 0 OID 0)
+-- TOC entry 2039 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
@@ -70,11 +70,22 @@ CREATE TABLE files (
     is_hash_valid boolean DEFAULT true NOT NULL,
     access_time timestamp with time zone,
     modify_time timestamp with time zone,
-    CONSTRAINT chk_files_dirsize_zero CHECK (((is_directory = false) OR (size = 0)))
+    unreadable boolean NOT NULL,
+    CONSTRAINT chk_files_dirsize_zero CHECK (((is_directory = false) OR (size = 0))),
+    CONSTRAINT chk_hash_0 CHECK ((((NOT unreadable) AND is_hash_valid) OR ((NOT is_hash_valid) AND (hash ~ '^0+$'::text))))
 );
 
 
 ALTER TABLE files OWNER TO @USERNAME@;
+
+--
+-- TOC entry 2040 (class 0 OID 0)
+-- Dependencies: 175
+-- Name: CONSTRAINT chk_hash_0 ON files; Type: COMMENT; Schema: public; Owner: @USERNAME@
+--
+
+COMMENT ON CONSTRAINT chk_hash_0 ON files IS 'Make sure hash is 0 if unreadable or not valid are set.';
+
 
 --
 -- TOC entry 174 (class 1259 OID 31279)
@@ -92,7 +103,7 @@ CREATE SEQUENCE files_id_seq
 ALTER TABLE files_id_seq OWNER TO @USERNAME@;
 
 --
--- TOC entry 2039 (class 0 OID 0)
+-- TOC entry 2041 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
@@ -118,7 +129,7 @@ CREATE TABLE sets (
 ALTER TABLE sets OWNER TO @USERNAME@;
 
 --
--- TOC entry 2040 (class 0 OID 0)
+-- TOC entry 2042 (class 0 OID 0)
 -- Dependencies: 177
 -- Name: COLUMN sets.type; Type: COMMENT; Schema: public; Owner: @USERNAME@
 --
@@ -148,7 +159,7 @@ CREATE SEQUENCE sets_id_seq
 ALTER TABLE sets_id_seq OWNER TO @USERNAME@;
 
 --
--- TOC entry 2041 (class 0 OID 0)
+-- TOC entry 2043 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @USERNAME@
 --
@@ -165,7 +176,7 @@ ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regcl
 
 
 --
--- TOC entry 1907 (class 2604 OID 31414)
+-- TOC entry 1908 (class 2604 OID 31414)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: @USERNAME@
 --
 
@@ -173,7 +184,7 @@ ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclas
 
 
 --
--- TOC entry 1915 (class 2606 OID 31289)
+-- TOC entry 1916 (class 2606 OID 31289)
 -- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -182,7 +193,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1919 (class 2606 OID 31420)
+-- TOC entry 1920 (class 2606 OID 31420)
 -- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -191,7 +202,7 @@ ALTER TABLE ONLY sets
 
 
 --
--- TOC entry 1917 (class 2606 OID 31294)
+-- TOC entry 1918 (class 2606 OID 31294)
 -- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -200,7 +211,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1912 (class 1259 OID 31426)
+-- TOC entry 1913 (class 1259 OID 31426)
 -- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -208,7 +219,7 @@ CREATE INDEX fki_files_sets ON files USING btree (group_id);
 
 
 --
--- TOC entry 1913 (class 1259 OID 31292)
+-- TOC entry 1914 (class 1259 OID 31292)
 -- Name: idx_paths; Type: INDEX; Schema: public; Owner: @USERNAME@; Tablespace: 
 --
 
@@ -216,7 +227,7 @@ CREATE INDEX idx_paths ON files USING btree (path);
 
 
 --
--- TOC entry 1921 (class 2620 OID 31291)
+-- TOC entry 1922 (class 2620 OID 31291)
 -- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @USERNAME@
 --
 
@@ -224,7 +235,7 @@ CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW E
 
 
 --
--- TOC entry 1920 (class 2606 OID 31421)
+-- TOC entry 1921 (class 2606 OID 31421)
 -- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @USERNAME@
 --
 
@@ -233,7 +244,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 2037 (class 0 OID 0)
+-- TOC entry 2038 (class 0 OID 0)
 -- Dependencies: 8
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -244,7 +255,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2015-12-04 12:29:59 GMT
+-- Completed on 2015-12-10 12:11:36 GMT
 
 --
 -- PostgreSQL database dump complete

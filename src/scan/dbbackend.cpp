@@ -94,6 +94,7 @@ namespace din {
 	}
 
 	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
+		auto bool_to_str = [](bool b) { return (b ? "true" : "false"); };
 		if (parData.empty()) {
 			return;
 		}
@@ -111,7 +112,7 @@ namespace din {
 			std::ostringstream query;
 			query << "INSERT INTO \"files\" " <<
 				"(path, hash, level, group_id, is_directory, is_symlink, size, " <<
-				"access_time, modify_time) VALUES "
+				"access_time, modify_time, is_hash_valid, unreadable) VALUES "
 			;
 
 			const char* comma = "";
@@ -121,10 +122,12 @@ namespace din {
 				query << '(' << conn.escaped_literal(itm.path) << ",'" << itm.hash << "',"
 					<< itm.level << ','
 					<< "currval('\"sets_id_seq\"')" << ','
-					<< (itm.is_directory ? "true" : "false") << ','
+					<< bool_to_str(itm.is_directory) << ','
 					<< (itm.is_symlink ? "true" : "false") << ',' << itm.size
 					<< ',' << '\'' << time_to_str(itm.atime, strtime_buff.get(), strtime_buff_size) << '\''
 					<< ',' << '\'' << time_to_str(itm.mtime, strtime_buff.get(), strtime_buff_size) << '\''
+					<< ',' << bool_to_str(itm.hash_valid)
+					<< ',' << bool_to_str(itm.unreadable)
 				<< ')';
 				comma = ",";
 			}

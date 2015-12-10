@@ -36,6 +36,8 @@ namespace din {
 		uint64_t size;
 		bool is_directory;
 		bool is_symlink;
+		bool unreadable;
+		bool hash_valid;
 	};
 
 	struct SetRecordDataFull {
