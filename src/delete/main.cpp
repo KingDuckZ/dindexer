@@ -16,9 +16,31 @@
  */
 
 #include "commandline.hpp"
+#include "dindexer-common/settings.hpp"
+#include "dindexerConfig.h"
+#include "postgre_delete.hpp"
 #include <iostream>
+#include <ciso646>
+#include <ios>
 #include <vector>
 #include <cstdint>
+
+namespace {
+	bool confirm_delete (const din::IDDescMap& parMap) {
+		for (const auto& itm : parMap) {
+			std::cout << "ID " << itm.first << '\t' << itm.second << '\n';
+		}
+		std::cout << "Confirm deleting these sets? (Y/n)" << std::endl;
+		std::string answer;
+		std::cin >> std::noskipws >> answer >> std::skipws;
+
+		return (answer.empty() or "y" == answer or "Y" == answer);
+	}
+
+	bool always_delete (const din::IDDescMap&) {
+		return true;
+	}
+} //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
@@ -38,12 +60,23 @@ int main (int parArgc, char* parArgv[]) {
 		return 2;
 	}
 
-	auto ids = vm["groupid"].as<std::vector<uint32_t>>();
-	std::cout << "Would delete " << ids.size() << " ids: ";
-	for (auto n : ids) {
-		std::cout << n << ", ";
+	dinlib::Settings settings;
+	{
+		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
+		if (not loaded) {
+			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
+			return 1;
+		}
 	}
-	std::cout << std::endl;
+
+	if (not vm.count("groupid")) {
+		std::cerr << "No IDs specified\n";
+		return 2;
+	}
+
+	const auto ids = vm["groupid"].as<std::vector<uint32_t>>();
+	auto confirm_func = (vm.count("confirm") ? &always_delete : &confirm_delete);
+	din::delete_group_from_db(settings.db, ids, confirm_func);
 	return 0;
 }
 
