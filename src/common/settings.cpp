@@ -21,8 +21,8 @@
 
 namespace YAML {
 	template<>
-	struct convert<din::DinDBSettings> {
-		static Node encode (const din::DinDBSettings& parSettings) {
+	struct convert<dinlib::SettingsDB> {
+		static Node encode (const dinlib::SettingsDB& parSettings) {
 			Node node;
 			node["address"] = parSettings.address;
 			node["username"] = parSettings.username;
@@ -32,7 +32,7 @@ namespace YAML {
 			return node;
 		}
 
-		static bool decode (const Node& parNode, din::DinDBSettings& parSettings) {
+		static bool decode (const Node& parNode, dinlib::SettingsDB& parSettings) {
 			if (not parNode.IsMap() or parNode.size() != 5) {
 				return false;
 			}
@@ -47,13 +47,13 @@ namespace YAML {
 	};
 } //namespace YAML
 
-namespace din {
-	bool load_settings (const std::string& parPath, DinDBSettings& parOut) {
+namespace dinlib {
+	bool load_settings (const std::string& parPath, dinlib::Settings& parOut) {
 		try {
 			auto settings = YAML::LoadFile(parPath);
 
 			if (settings["db_settings"]) {
-				parOut = settings["db_settings"].as<DinDBSettings>();
+				parOut.db = settings["db_settings"].as<dinlib::SettingsDB>();
 				return true;
 			}
 		}
@@ -63,4 +63,4 @@ namespace din {
 
 		return false;
 	}
-} //namespace din
+} //namespace dinlib

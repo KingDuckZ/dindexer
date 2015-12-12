@@ -21,8 +21,8 @@
 #include <string>
 #include <cstdint>
 
-namespace din {
-	struct DinDBSettings {
+namespace dinlib {
+	struct SettingsDB {
 		std::string address;
 		std::string username;
 		std::string password;
@@ -30,10 +30,11 @@ namespace din {
 		uint16_t port;
 	};
 
-	//struct DinSettings {
-	//};
+	struct Settings {
+		SettingsDB db;
+	};
 
-	bool load_settings ( const std::string& parPath, DinDBSettings& parOut );
-} //namespace din
+	bool load_settings ( const std::string& parPath, Settings& parOut );
+} //namespace dinlib
 
 #endif

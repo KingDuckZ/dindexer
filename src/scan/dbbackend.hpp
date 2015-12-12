@@ -24,9 +24,11 @@
 #include <boost/utility/string_ref.hpp>
 #include <ctime>
 
-namespace din {
-	struct DinDBSettings;
+namespace dinlib {
+	struct SettingsDB;;
+} //namespace dinlib
 
+namespace din {
 	struct FileRecordData {
 		std::string path;
 		std::string hash;
@@ -51,8 +53,8 @@ namespace din {
 		const char type;
 	};
 
-	void write_to_db ( const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
-	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const DinDBSettings& parDB, std::string&& parHash );
+	void write_to_db ( const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
+	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, std::string&& parHash );
 } //namespace din
 
 #endif

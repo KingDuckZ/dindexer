@@ -64,9 +64,9 @@ int main (int parArgc, char* parArgv[]) {
 	const bool verbose = false;
 #endif
 
-	din::DinDBSettings settings;
+	dinlib::Settings settings;
 	{
-		const bool loaded = din::load_settings(expand(CONFIG_FILE_PATH), settings);
+		const bool loaded = dinlib::load_settings(expand(CONFIG_FILE_PATH), settings);
 		if (not loaded) {
 			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
 			return 1;

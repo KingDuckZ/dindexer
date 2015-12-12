@@ -35,12 +35,14 @@ namespace fastf {
 	struct FileStats;
 } //namespace fastf
 
-namespace din {
-	struct DinDBSettings;
+namespace dinlib {
+	struct Settings;
+} //namespace dinlib
 
+namespace din {
 	class Indexer {
 	public:
-		explicit Indexer ( const DinDBSettings& parDBSettings );
+		explicit Indexer ( const dinlib::Settings& parSettings );
 		Indexer ( Indexer&& ) = default;
 		Indexer ( const Indexer& ) = delete;
 		~Indexer ( void ) noexcept;

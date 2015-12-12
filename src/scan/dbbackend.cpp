@@ -46,7 +46,7 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const DinDBSettings& parDB, std::string&& parHash) {
+	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, std::string&& parHash) {
 		using boost::lexical_cast;
 
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
@@ -93,7 +93,7 @@ namespace din {
 		return true;
 	}
 
-	void write_to_db (const DinDBSettings& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
+	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
 		auto bool_to_str = [](bool b) { return (b ? "true" : "false"); };
 		if (parData.empty()) {
 			return;

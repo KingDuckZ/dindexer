@@ -184,7 +184,7 @@ namespace din {
 	struct Indexer::LocalData {
 		typedef std::vector<FileEntry> PathList;
 
-		DinDBSettings db_settings;
+		dinlib::SettingsDB db_settings;
 		PathList paths;
 #if defined(WITH_PROGRESS_FEEDBACK)
 		std::atomic<std::size_t> done_count;
@@ -212,7 +212,7 @@ namespace din {
 		;
 	}
 
-	Indexer::Indexer (const DinDBSettings& parDBSettings) :
+	Indexer::Indexer (const dinlib::Settings& parSettings) :
 		m_local_data(new LocalData)
 	{
 #if !defined(NDEBUG)
@@ -232,7 +232,7 @@ namespace din {
 		m_local_data->processing_index = 0;
 #endif
 		m_local_data->file_count = 0;
-		m_local_data->db_settings = parDBSettings;
+		m_local_data->db_settings = parSettings.db;
 	}
 
 	Indexer::~Indexer() noexcept {
