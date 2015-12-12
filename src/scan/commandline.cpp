@@ -54,7 +54,7 @@ namespace din {
 			type_param_help = oss.str();
 		}
 
-		po::options_description set_options("Set options");
+		po::options_description set_options(ACTION_NAME " options");
 		set_options.add_options()
 			("ignore-errors", "Move on even if reading a file fails. Unreadable files are marked as such in the db.")
 #if defined(WITH_PROGRESS_FEEDBACK)
