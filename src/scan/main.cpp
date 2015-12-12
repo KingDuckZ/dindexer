@@ -30,7 +30,6 @@
 #	include <mutex>
 #	include <condition_variable>
 #endif
-#include <wordexp.h>
 #include "dindexerConfig.h"
 #include "filesearcher.hpp"
 #include "indexer.hpp"
@@ -39,7 +38,6 @@
 
 namespace {
 	void run_hash_calculation ( din::Indexer& parIndexer, bool parShowProgress );
-	std::string expand ( const char* parString );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -66,7 +64,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	dinlib::Settings settings;
 	{
-		const bool loaded = dinlib::load_settings(expand(CONFIG_FILE_PATH), settings);
+		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
 		if (not loaded) {
 			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
 			return 1;
@@ -175,15 +173,4 @@ namespace {
 #endif
 	}
 
-	std::string expand (const char* parString) {
-		wordexp_t p;
-		wordexp(parString, &p, 0);
-		char** w = p.we_wordv;
-		std::ostringstream oss;
-		for (std::size_t z = 0; z < p.we_wordc; ++z) {
-			oss << w[z];
-		}
-		wordfree(&p);
-		return oss.str();
-	}
 } //unnamed namespace

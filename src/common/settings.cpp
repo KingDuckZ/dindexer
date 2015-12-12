@@ -18,6 +18,7 @@
 #include "dindexer-common/settings.hpp"
 #include <yaml-cpp/yaml.h>
 #include <ciso646>
+#include <wordexp.h>
 
 namespace YAML {
 	template<>
@@ -48,9 +49,15 @@ namespace YAML {
 } //namespace YAML
 
 namespace dinlib {
-	bool load_settings (const std::string& parPath, dinlib::Settings& parOut) {
+	namespace {
+		std::string expand ( const char* parString );
+	} //unnamed namespace
+
+	bool load_settings (const std::string& parPath, dinlib::Settings& parOut, bool parExpand) {
+		const std::string path = (parExpand ? expand(parPath.c_str()) : parPath);
+
 		try {
-			auto settings = YAML::LoadFile(parPath);
+			auto settings = YAML::LoadFile(path);
 
 			if (settings["db_settings"]) {
 				parOut.db = settings["db_settings"].as<dinlib::SettingsDB>();
@@ -63,4 +70,18 @@ namespace dinlib {
 
 		return false;
 	}
+
+	namespace {
+		std::string expand (const char* parString) {
+			wordexp_t p;
+			wordexp(parString, &p, 0);
+			char** w = p.we_wordv;
+			std::ostringstream oss;
+			for (std::size_t z = 0; z < p.we_wordc; ++z) {
+				oss << w[z];
+			}
+			wordfree(&p);
+			return oss.str();
+		}
+	} //unnamed namespace
 } //namespace dinlib

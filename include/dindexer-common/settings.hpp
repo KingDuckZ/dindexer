@@ -34,7 +34,7 @@ namespace dinlib {
 		SettingsDB db;
 	};
 
-	bool load_settings ( const std::string& parPath, Settings& parOut );
+	bool load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );
 } //namespace dinlib
 
 #endif
