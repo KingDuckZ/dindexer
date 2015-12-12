@@ -37,7 +37,6 @@ configure_file(
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}
 	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
-	INTERFACE ${YAMLCPP_INCLUDE_DIR}
 )
 
 target_include_directories(${bare_name}-inc
@@ -50,10 +49,10 @@ add_subdirectory(src/pq)
 add_subdirectory(src/main)
 add_subdirectory(src/common)
 add_subdirectory(src/delete)
+add_subdirectory(src/query)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}
-	INTERFACE ${YAMLCPP_LIBRARY}
 	INTERFACE ${Boost_LIBRARIES}
 	INTERFACE ${bare_name}-pq
 	INTERFACE ${bare_name}-inc

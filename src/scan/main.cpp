@@ -34,7 +34,7 @@
 #include "dindexerConfig.h"
 #include "filesearcher.hpp"
 #include "indexer.hpp"
-#include "settings.hpp"
+#include "dindexer-common/settings.hpp"
 #include "commandline.hpp"
 
 namespace {

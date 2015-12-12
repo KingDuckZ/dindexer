@@ -16,7 +16,6 @@ add_executable(${PROJECT_NAME}
 	tiger.c
 	tiger.cpp
 	dbbackend.cpp
-	settings.cpp
 	commandline.cpp
 	discinfo.cpp
 	mediatype.cpp

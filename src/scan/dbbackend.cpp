@@ -17,7 +17,7 @@
 
 #include "dbbackend.hpp"
 #include "pq/connection.hpp"
-#include "settings.hpp"
+#include "dindexer-common/settings.hpp"
 #include <string>
 #include <sstream>
 #include <utility>

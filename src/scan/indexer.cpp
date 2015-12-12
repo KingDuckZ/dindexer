@@ -19,7 +19,7 @@
 #include "pathname.hpp"
 #include "tiger.hpp"
 #include "dbbackend.hpp"
-#include "settings.hpp"
+#include "dindexer-common/settings.hpp"
 #include "filestats.hpp"
 #include <algorithm>
 #include <functional>

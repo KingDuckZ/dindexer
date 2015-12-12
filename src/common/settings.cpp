@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "settings.hpp"
+#include "dindexer-common/settings.hpp"
 #include <yaml-cpp/yaml.h>
 #include <ciso646>
 
