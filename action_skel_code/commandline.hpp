@@ -23,6 +23,14 @@
 #include "dindexer-common/mediatypes.hpp"
 
 namespace din {
+	class ValidationError : boost::program_options::validation_error {
+	public:
+		explicit ValidationError ( const boost::program_options::validation_error& parOther );
+		~ValidationError ( void ) noexcept = default;
+
+		const std::string& raw_value ( void ) const;
+	};
+
 	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
 } //namespace din
 
