@@ -68,6 +68,7 @@ namespace dinlib {
 
 	void print_commandline_version (std::ostream& parStream) {
 		parStream << g_version_string << '\n';
+		parStream << "Rev " << VERSION_GIT << '\n';
 	}
 
 	bool manage_common_commandline (std::ostream& parStream, const char* parAction, const char* parUsage, const boost::program_options::variables_map& parVarMap, const boost::program_options::options_description& parOpts) {
