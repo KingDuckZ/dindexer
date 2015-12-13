@@ -8,11 +8,37 @@ Please support the development of this software if you like it!
 [![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
 
 ##   What is dindexer?   ##
+###  Purpose  ###
 dindexer (from "Disc Indexer") is a program to help you keep track of where your files are as you back them up on external media. It's like updatedb/locate, but it's thought for never changing removable media, such as DVDs and BluRays.
 
 Running dindexer on your disks will build a list of all your files and directories. You can associate those lists to a descriptive name and a number, so it's easy to find on what disk a file is on the next time you search for that file.
 
 dindexer will also help you keeping track of duplicate data.
+
+###  What dindexer is not?  ###
+To further clarify what dindexer's intended usage is, let's make a list of what it *won't* do for you:
+
+* it's not a daemon - it's just a regular program that starts when you invoke it, performs its duties and then quits
+* it's not a realtime file indexing utility; I believe there are a few indexing tools out there already, such as Baloo, mlocate and surely others, but dindexer doesn't duplicate any of those, nor wants to replace them
+* it's not a backup tool; dindexer won't backup anything at all, won't make any copies of anything nor anything like that, so it's not like rsync; if you lose your DVD you previously scanned with dindexer, sorry but you've lost all of the data on your DVD
+
+###  Usage example  ###
+You have a pile of DVDs, BluRays or any other external storage media on which you stored a copy of your files. Maybe you wanted to keep YouTube videos you don't want to have on your hard disk anymore, your pictures from your trip to Portugal a few years ago, your gpg private key backup and your Humble Bundle games. Maybe you're just moving away old stuff from your external hard disk onto DVDs, so you can store new data on your hard disk.
+
+It's been a few years since you burned your first DVD, and your collection of backup has only grown more. You got to the point it's hard to tell what you have on your DVDs (especially those you just marked as "Backup March 2012"). Even worse, you don't know if those pictures from Portugal are already on some DVD - you think you backed them up somewhere, but just to be safe you burn them again on the next "Backup December 2015" DVD.
+
+Five months later, you want to show your pictures of your trip to Portugal to your friend, but you finally deleted them from your hard disk. You probably have at least two copies on your DVDs, but where exactly? As you browse through your "pics backup"-labeled DVD and you realize it's a completely different sort of pictures you have on there, you think you should just give up on your Portugal photos for now.
+
+dindexer aims to save you from that scenario. The intended usage flow is:
+
+1. Prepare the list of files you want to burn in an external program like k3b for example, and make your backup
+2. When finished, mount your new backup, for example on /media/cdrom
+3. Scan your backup with dindexer using `dindexer scan --setname "Disc 24 - pictures and stuff" /media/cdrom`
+4. When done, the list of all the files on your disc will be saved in dindexer's database
+5. Make queries to find on which disc you stored your data - this part is still being worked on, but you can imagine something like `dindexer query portugal.jpg` returning "Disc 24 - pictures and stuff"
+6. Go to where you dump - er... store your physical discs (the drawer in your desk, a box, the other room), find the disc you marked as "Disc 24", pop it in your cd-reader and voilà, here's where your portugal.jpg was!
+
+**NOTE:** as dindexer is still being heavily developed, any of those steps can change in the future. I have a few ideas on how to make this program more convenient to use, but this will require some work. Contributions are welcome.
 
 ###  Configuration  ###
 As dindexer needs to write data to a PostgreSQL database, you need to configure access to it. Create a ~/.config/dindexer.yml file with the settings to connect to your database. For example:
