@@ -32,6 +32,7 @@ namespace {
 		}
 		std::cout << "Confirm deleting these sets? (Y/n)" << std::endl;
 		std::string answer;
+		//see also: http://www.lb-stuff.com/user-input
 		std::cin >> std::noskipws >> answer >> std::skipws;
 
 		return (answer.empty() or "y" == answer or "Y" == answer);

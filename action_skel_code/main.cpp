@@ -15,8 +15,9 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include "commandline.hpp"
+#include <iostream>
+#include <ciso646>
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;

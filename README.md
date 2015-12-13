@@ -1,6 +1,6 @@
 #	dindexer	#
 ##	Flattr	##
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=c%2B%2B&tags=bitbucket&category=software)
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software)
 
 Please support the development of this software if you like it!
 
@@ -30,7 +30,7 @@ As dindexer needs to write data to a PostgreSQL database, you need to configure 
 Using dindexer is pretty straightforward: mount your DVD and scan it. For example:
 
     mount /dev/cdrom /media/my_backup
-    dindexer --setname "My generic backup 2015-11-13" /media/my_backup
+    dindexer scan --setname "My generic backup 2015-11-13" /media/my_backup
 
 The program will go through every file in the path you specify. Hashing everything in that path could take a bit of time, so please be patient.
 
