@@ -1,4 +1,4 @@
-project(${bare_name}-delete CXX C)
+project(${bare_name}-delete CXX)
 
 add_executable(${PROJECT_NAME}
 	main.cpp
@@ -19,4 +19,3 @@ string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE ACTION_NAME="${ACTION_NAME}"
 )
-

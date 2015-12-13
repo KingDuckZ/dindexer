@@ -25,16 +25,6 @@
 namespace po = boost::program_options;
 
 namespace din {
-	ValidationError::ValidationError (const po::validation_error& parOther) :
-		po::validation_error(parOther)
-	{
-	}
-
-	const std::string& ValidationError::raw_value() const {
-		auto it_ret = m_substitutions.find("value");
-		return it_ret->second;
-	}
-
 	bool parse_commandline (int parArgc, char* parArgv[], po::variables_map& parVarMap) {
 		po::options_description set_options(ACTION_NAME " options");
 		set_options.add_options()
@@ -56,7 +46,7 @@ namespace din {
 			po::store(po::command_line_parser(parArgc, parArgv).options(all).positional(pd).run(), parVarMap);
 		}
 		catch (const po::validation_error& err) {
-			throw ValidationError(err);
+			throw dinlib::ValidationError(err);
 		}
 
 		po::notify(parVarMap);

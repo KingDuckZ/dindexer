@@ -56,7 +56,7 @@ int main (int parArgc, char* parArgv[]) {
 		std::cerr << err.what() << "\nUse --help for help" << std::endl;
 		return 2;
 	}
-	catch (const din::ValidationError& err) {
+	catch (const dinlib::ValidationError& err) {
 		std::cerr << "Unrecognized id \"" << err.raw_value() << "\", see --help for usage details\n";
 		return 2;
 	}

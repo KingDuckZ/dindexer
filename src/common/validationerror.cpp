@@ -15,15 +15,19 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idB6191389C4AD4EE5862CCF1591BE6CE5
-#define idB6191389C4AD4EE5862CCF1591BE6CE5
-
 #include "dindexer-common/validationerror.hpp"
-#include "dindexer-common/mediatypes.hpp"
-#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/errors.hpp>
 
-namespace din {
-	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
-} //namespace din
+namespace po = boost::program_options;
 
-#endif
+namespace dinlib {
+	ValidationError::ValidationError (const po::validation_error& parOther) :
+		po::validation_error(parOther)
+	{
+	}
+
+	const std::string& ValidationError::raw_value() const {
+		auto it_ret = m_substitutions.find("value");
+		return it_ret->second;
+	}
+} //namespace dinlib

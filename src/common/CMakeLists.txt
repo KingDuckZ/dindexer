@@ -4,6 +4,7 @@ add_library(${PROJECT_NAME}
 	commandline.cpp
 	mediatypes.cpp
 	settings.cpp
+	validationerror.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
