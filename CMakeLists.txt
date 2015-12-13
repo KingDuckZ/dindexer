@@ -52,6 +52,7 @@ add_subdirectory(src/pq)
 add_subdirectory(src/main)
 add_subdirectory(src/common)
 add_subdirectory(src/delete)
+add_subdirectory(src/query)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}
