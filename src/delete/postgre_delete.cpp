@@ -25,10 +25,13 @@
 #include <ciso646>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace din {
 	namespace {
 		IDDescMap fetch_existing_ids (pq::Connection& parConn, const std::vector<uint32_t>& parIDs) {
+			using boost::lexical_cast;
+
 			IDDescMap retmap;
 			if (parIDs.empty()) {
 				return std::move(retmap);
@@ -41,7 +44,7 @@ namespace din {
 
 			auto resultset = parConn.query(oss.str());
 			for (const auto& record : resultset) {
-				retmap[std::stoul(record["id"])] = record["desc"];
+				retmap[lexical_cast<IDDescMap::key_type>(record["id"])] = record["desc"];
 			}
 			return std::move(retmap);
 		}

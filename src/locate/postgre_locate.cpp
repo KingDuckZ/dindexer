@@ -57,8 +57,8 @@ namespace din {
 		for (const auto& record : result) {
 			retval.push_back(LocatedItem{
 				record["path"],
-				std::stoull(record["id"]),
-				lexical_cast<uint32_t>(record["group_id"])
+				lexical_cast<decltype(LocatedItem::id)>(record["id"]),
+				lexical_cast<decltype(LocatedItem::group_id)>(record["group_id"])
 			});
 		}
 
