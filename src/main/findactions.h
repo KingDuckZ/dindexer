@@ -22,5 +22,6 @@
 
 void find_actions ( char*** parOut, size_t* parCount );
 void free_actions ( char** parActions, size_t parCount );
+const char* get_actionname ( const char* parAction );
 
 #endif

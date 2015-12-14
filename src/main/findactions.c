@@ -15,14 +15,15 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "findactions.h"
+#include "dindexerConfig.h"
+#include "helpers/lengthof.h"
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
 #include <iso646.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "dindexerConfig.h"
-#include "helpers/lengthof.h"
 
 typedef struct ActionListStruct {
 	char** list;
@@ -33,6 +34,7 @@ typedef struct ActionListStruct {
 static void increase_actionlist ( const char* parName, ActionList* parList );
 static void push_action ( const char* parName, ActionList* parList );
 static void foreach_dir ( void(*parAction)(const char*, ActionList*), ActionList* parList );
+static int strcmp_wrapper ( const void* parA, const void* parB );
 
 void find_actions (char*** parOut, size_t* parCount) {
 	ActionList list;
@@ -47,6 +49,7 @@ void find_actions (char*** parOut, size_t* parCount) {
 	list.list = *parOut;
 	list.used = 0;
 	foreach_dir(&push_action, &list);
+	qsort((void*)list.list, list.count, sizeof(char*), &strcmp_wrapper);
 
 	*parCount = list.count;
 }
@@ -130,4 +133,24 @@ static void push_action (const char* parName, ActionList* parList) {
 	parList->list[parList->used] = (char*)malloc(1 + name_len);
 	strcpy(parList->list[parList->used], parName);
 	++parList->used;
+}
+
+static int strcmp_wrapper (const void* parA, const void* parB) {
+	const char* const arg1 = *(const char**)parA;
+	const char* const arg2 = *(const char**)parB;
+
+	return strcmp(get_actionname(arg1), get_actionname(arg2));
+}
+
+const char* get_actionname (const char* parAction) {
+	const char* cmd_name_start;
+
+	cmd_name_start = strchr(parAction, '/');
+	if (not cmd_name_start) {
+		cmd_name_start = parAction;
+	}
+	else {
+		++cmd_name_start;
+	}
+	return cmd_name_start + lengthof(ACTION_PREFIX) - 1;
 }

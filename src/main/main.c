@@ -24,9 +24,9 @@
 #include "findactions.h"
 #include "helpers/lengthof.h"
 
-static size_t foreach_avail_action ( int(*parFunc)(char*, char*), char** parList, size_t parCount, char* parPass );
-static int printf_stderr ( char* parMsg, char* parUnused );
-static int same_action ( char* parAction1, char* parAction2 );
+static size_t foreach_avail_action ( int(*parFunc)(const char*, const char*), char** parList, size_t parCount, char* parPass );
+static int printf_stderr ( const char* parMsg, const char* parUnused );
+static int same_action ( const char* parAction1, const char* parAction2 );
 
 int main (int parArgc, char* parArgv[]) {
 	size_t z;
@@ -96,21 +96,15 @@ int main (int parArgc, char* parArgv[]) {
 	return 0;
 }
 
-static size_t foreach_avail_action(int(*parFunc)(char*, char*), char** parList, size_t parCount, char* parPass) {
+static size_t foreach_avail_action(int(*parFunc)(const char*, const char*), char** parList, size_t parCount, char* parPass) {
 	size_t z;
-	char* cmd_name_start;
+	const char* cmd_name_start;
 	int stop;
 
 	for (z = 0; z < parCount; ++z) {
-		cmd_name_start = strchr(parList[z], '/');
-		if (not cmd_name_start) {
-			cmd_name_start = parList[z];
-		}
-		else {
-			++cmd_name_start;
-		}
+		cmd_name_start = get_actionname(parList[z]);
 
-		stop = (*parFunc)(cmd_name_start + lengthof(ACTION_PREFIX) - 1, parPass);
+		stop = (*parFunc)(cmd_name_start, parPass);
 		if (stop) {
 			return z;
 		}
@@ -118,12 +112,12 @@ static size_t foreach_avail_action(int(*parFunc)(char*, char*), char** parList, 
 	return z;
 }
 
-static int printf_stderr (char* parMsg, char* parUnused) {
+static int printf_stderr (const char* parMsg, const char* parUnused) {
 	fprintf(stderr, "\t%s\n", parMsg);
 	return 0;
 }
 
-static int same_action (char* parAction1, char* parAction2) {
+static int same_action (const char* parAction1, const char* parAction2) {
 	if (0 == strcmp(parAction1, parAction2)) {
 		return 1;
 	}
