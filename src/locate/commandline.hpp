@@ -15,22 +15,15 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "commandline.hpp"
-#include <iostream>
-#include <ciso646>
+#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
+#define id1B7A42F6E46547A6AB0F914E2A91399F
 
-int main (int parArgc, char* parArgv[]) {
-	using boost::program_options::variables_map;
+#include "dindexer-common/validationerror.hpp"
+#include "dindexer-common/mediatypes.hpp"
+#include <boost/program_options/variables_map.hpp>
 
-	variables_map vm;
-	try {
-		if (din::parse_commandline(parArgc, parArgv, vm)) {
-			return 0;
-		}
-	}
-	catch (const std::invalid_argument& err) {
-		std::cerr << err.what() << "\nUse --help for help" << std::endl;
-		return 2;
-	}
-	return 0;
-}
+namespace din {
+	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
+} //namespace din
+
+#endif

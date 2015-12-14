@@ -15,22 +15,22 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "commandline.hpp"
-#include <iostream>
-#include <ciso646>
+#ifndef id1AE05A59AE0E4A4490040FD85D9AF665
+#define id1AE05A59AE0E4A4490040FD85D9AF665
 
-int main (int parArgc, char* parArgv[]) {
-	using boost::program_options::variables_map;
+#include "dindexer-common/settings.hpp"
+#include <vector>
+#include <string>
+#include <cstdint>
 
-	variables_map vm;
-	try {
-		if (din::parse_commandline(parArgc, parArgv, vm)) {
-			return 0;
-		}
-	}
-	catch (const std::invalid_argument& err) {
-		std::cerr << err.what() << "\nUse --help for help" << std::endl;
-		return 2;
-	}
-	return 0;
-}
+namespace din {
+	struct LocatedItem {
+		std::string path;
+		uint64_t id;
+		uint32_t group_id;
+	};
+
+	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
+} //namespace din
+
+#endif

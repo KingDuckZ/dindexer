@@ -25,7 +25,6 @@
 #include <ciso646>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
-#include <cstring>
 
 namespace din {
 	namespace {

@@ -16,8 +16,20 @@
  */
 
 #include "commandline.hpp"
+#include "postgre_locate.hpp"
+#include "dindexer-common/settings.hpp"
+#include "dindexerConfig.h"
 #include <iostream>
 #include <ciso646>
+#include <iterator>
+#include <algorithm>
+
+namespace din {
+	std::ostream& operator<< (std::ostream& parStream, const LocatedItem& parItem) {
+		parStream << parItem.group_id << '\t' << parItem.id << '\t' << parItem.path;
+		return parStream;
+	}
+} //namespace din
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
@@ -32,5 +44,22 @@ int main (int parArgc, char* parArgv[]) {
 		std::cerr << err.what() << "\nUse --help for help" << std::endl;
 		return 2;
 	}
+
+	if (not vm.count("substring")) {
+		std::cerr << "Missing search parameter, please use --help for usage instructions.\n";
+		return 2;
+	}
+
+	dinlib::Settings settings;
+	{
+		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
+		if (not loaded) {
+			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
+			return 1;
+		}
+	}
+
+	const auto results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+	std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
 	return 0;
 }
