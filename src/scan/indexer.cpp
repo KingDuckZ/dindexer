@@ -21,6 +21,7 @@
 #include "dbbackend.hpp"
 #include "dindexer-common/settings.hpp"
 #include "filestats.hpp"
+#include "mimetype.hpp"
 #include <algorithm>
 #include <functional>
 #include <vector>
@@ -65,6 +66,7 @@ namespace din {
 		bool operator== ( const FileEntry& ) const = delete;
 
 		std::string path;
+		std::string mime;
 		HashType hash;
 		std::time_t access_time;
 		std::time_t modify_time;
@@ -78,7 +80,7 @@ namespace din {
 	namespace {
 		typedef std::vector<FileEntry>::iterator FileEntryIt;
 
-		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors) {
+		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors, MimeType& parMime) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_dir);
 			FileEntry& curr_entry = *parEntry;
@@ -104,10 +106,11 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
+				curr_entry.mime = parMime.analyze(it_entry->path);
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
 					if (it_entry->is_dir) {
-						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors);
+						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors, parMime);
 
 						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 						const auto old_size = dir_blob.size();
@@ -127,7 +130,9 @@ namespace din {
 				tiger_data(dir_blob, curr_entry.hash);
 				curr_entry.file_size = 0;
 #if defined(INDEXER_VERBOSE)
-				std::cout << "Got intermediate hash for dir " << parCurrDir << ": " << tiger_to_string(curr_entry.hash) << '\n';
+				std::cout << "Got intermediate hash for dir " << parCurrDir <<
+					": " << tiger_to_string(curr_entry.hash) <<
+					' ' << curr_entry.mime << '\n';
 #endif
 			}
 
@@ -152,6 +157,7 @@ namespace din {
 					parNextItemCallback(it_entry - parBegin);
 					try {
 						tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
+						it_entry->mime = parMime.analyze(it_entry->path);
 					}
 					catch (const std::ios_base::failure& e) {
 						if (parIgnoreErrors) {
@@ -164,7 +170,8 @@ namespace din {
 					}
 
 #if defined(INDEXER_VERBOSE)
-					std::cout << ' ' << tiger_to_string(it_entry->hash) << '\n';
+					std::cout << ' ' << tiger_to_string(it_entry->hash) <<
+						' ' << it_entry->mime << '\n';
 #endif
 					++it_entry;
 				}
@@ -251,6 +258,8 @@ namespace din {
 	void Indexer::calculate_hash() {
 		PathName base_path(m_local_data->paths.front().path);
 		std::sort(m_local_data->paths.begin(), m_local_data->paths.end());
+		MimeType mime;
+
 #if defined(INDEXER_VERBOSE)
 		for (auto& itm : m_local_data->paths) {
 			itm.hash.part_a = 1;
@@ -278,7 +287,8 @@ namespace din {
 				m_local_data->processing_index = parNext;
 				m_local_data->step_notify.notify_all();
 			},
-			m_local_data->ignore_read_errors
+			m_local_data->ignore_read_errors,
+			mime
 		);
 
 		assert(m_local_data->done_count == m_local_data->file_count);
@@ -289,7 +299,8 @@ namespace din {
 			m_local_data->paths.end(),
 			base_path,
 			[](std::size_t) {},
-			m_local_data->ignore_read_errors
+			m_local_data->ignore_read_errors,
+			mime
 		);
 #endif
 

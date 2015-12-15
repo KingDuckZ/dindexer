@@ -8,6 +8,8 @@ if (DINDEXER_WITH_MEDIA_AUTODETECT)
 	endif()
 endif()
 
+find_package(Magic REQUIRED)
+
 add_executable(${PROJECT_NAME}
 	main.cpp
 	filesearcher.cpp
@@ -19,15 +21,20 @@ add_executable(${PROJECT_NAME}
 	commandline.cpp
 	discinfo.cpp
 	mediatype.cpp
+	mimetype.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
+target_include_directories(${PROJECT_NAME}
+	PRIVATE ${MAGIC_INCLUDE_DIR}
+)
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
+	PRIVATE ${MAGIC_LIBRARIES}
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
