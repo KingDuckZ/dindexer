@@ -20,8 +20,12 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <boost/utility/string_ref.hpp>
 
 namespace din {
+	using SplitMime = std::pair<boost::string_ref, boost::string_ref>;
+
 	class MimeType {
 	public:
 		MimeType ( void );
@@ -35,6 +39,8 @@ namespace din {
 
 		std::unique_ptr<LocalData> m_local_data;
 	};
+
+	SplitMime split_mime ( const std::string& parFull );
 } //namespace din
 
 #endif
