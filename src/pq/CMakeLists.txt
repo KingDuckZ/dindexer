@@ -6,6 +6,10 @@ add_library(${PROJECT_NAME} STATIC
 	resultset.cpp
 )
 
+target_include_directories(${PROJECT_NAME}
+	PRIVATE ${pqtypes_prefix}/include
+)
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
+	PRIVATE pqtypes
 )
