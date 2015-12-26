@@ -1,0 +1,7 @@
+if (DINDEXER_WITH_MEDIA_AUTODETECT)
+	find_package(blkid)
+	if (NOT BLKID_FOUND)
+		message(STATUS "libblkid not found, media autodetection will be disabled")
+		set(DINDEXER_WITH_MEDIA_AUTODETECT OFF)
+	endif()
+endif()

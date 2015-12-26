@@ -1,13 +1,6 @@
 project(${bare_name}-scan CXX C)
 
-if (DINDEXER_WITH_MEDIA_AUTODETECT)
-	find_package(blkid)
-	if (NOT BLKID_FOUND)
-		message(STATUS "libblkid not found, media autodetection will be disabled")
-		set(DINDEXER_WITH_MEDIA_AUTODETECT OFF)
-	endif()
-endif()
-
+include(WithMediaAutodetect)
 find_package(Magic REQUIRED)
 
 add_executable(${PROJECT_NAME}

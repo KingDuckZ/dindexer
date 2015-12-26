@@ -37,7 +37,7 @@ namespace dinlib {
 #if VERSION_BETA
 			"b"
 #endif
-			;
+		;
 	} //unnamed namespace
 
 	po::options_description get_default_commandline() {

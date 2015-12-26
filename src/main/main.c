@@ -23,10 +23,12 @@
 #include "dindexerConfig.h"
 #include "findactions.h"
 #include "helpers/lengthof.h"
+#include "builtin_feats.h"
 
-static size_t foreach_avail_action ( int(*parFunc)(const char*, const char*), char** parList, size_t parCount, char* parPass );
-static int printf_stderr ( const char* parMsg, const char* parUnused );
-static int same_action ( const char* parAction1, const char* parAction2 );
+static size_t foreach_avail_action ( int(*parFunc)(const char*, const void*), char** parList, size_t parCount, const void* parPass );
+static int printf_stream ( const char* parMsg, const void* parStream );
+static int same_action ( const char* parAction1, const void* parAction2 );
+static void print_usage ( void );
 
 int main (int parArgc, char* parArgv[]) {
 	size_t z;
@@ -36,6 +38,8 @@ int main (int parArgc, char* parArgv[]) {
 	size_t action_path_length;
 	size_t selected_action;
 	char** argv;
+	FILE* streamout;
+	int retval;
 
 	find_actions(&actions, &actions_count);
 	if (0 == actions_count) {
@@ -44,22 +48,33 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	if (parArgc < 2 or strcmp("-h", parArgv[1]) == 0 or strcmp("--help", parArgv[1]) == 0) {
-		fprintf(stderr, "No action specified. Available actions are:\n");
-		foreach_avail_action(&printf_stderr, actions, actions_count, NULL);
-		free_actions(actions, actions_count);
 		if (parArgc < 2) {
-			return 2;
+			streamout = stderr;
+			fprintf(stderr, "No action specified. ");
+			retval = 2;
 		}
 		else {
-			return 0;
+			print_usage();
+			printf("\n");
+			streamout = stdout;
+			retval = 0;
 		}
+		fprintf(streamout, "Available actions are:\n");
+		foreach_avail_action(&printf_stream, actions, actions_count, streamout);
+		free_actions(actions, actions_count);
+		return retval;
+	}
+	else if (strcmp("--builtin", parArgv[1]) == 0) {
+		print_builtin_feats();
+		free_actions(actions, actions_count);
+		return 0;
 	}
 
 	selected_action = foreach_avail_action(&same_action, actions, actions_count, parArgv[1]);
 
 	if (actions_count == selected_action) {
 		fprintf(stderr, "Unrecognized action \"%s\" - available actions are:\n", parArgv[1]);
-		foreach_avail_action(&printf_stderr, actions, actions_count, NULL);
+		foreach_avail_action(&printf_stream, actions, actions_count, stderr);
 		free_actions(actions, actions_count);
 		return 2;
 	}
@@ -96,7 +111,7 @@ int main (int parArgc, char* parArgv[]) {
 	return 0;
 }
 
-static size_t foreach_avail_action(int(*parFunc)(const char*, const char*), char** parList, size_t parCount, char* parPass) {
+static size_t foreach_avail_action(int(*parFunc)(const char*, const void*), char** parList, size_t parCount, const void* parPass) {
 	size_t z;
 	const char* cmd_name_start;
 	int stop;
@@ -112,16 +127,23 @@ static size_t foreach_avail_action(int(*parFunc)(const char*, const char*), char
 	return z;
 }
 
-static int printf_stderr (const char* parMsg, const char* parUnused) {
-	fprintf(stderr, "\t%s\n", parMsg);
+static int printf_stream (const char* parMsg, const void* parStream) {
+	FILE* stream = (FILE*)parStream;
+	fprintf(stream, "\t%s\n", parMsg);
 	return 0;
 }
 
-static int same_action (const char* parAction1, const char* parAction2) {
-	if (0 == strcmp(parAction1, parAction2)) {
+static int same_action (const char* parAction1, const void* parAction2) {
+	const char* const action2 = (const char*)parAction2;
+	if (0 == strcmp(parAction1, action2)) {
 		return 1;
 	}
 	else {
 		return 0;
 	}
+}
+
+static void print_usage() {
+	printf("--help - show this help\n");
+	printf("--builtin - show build info\n");
 }
