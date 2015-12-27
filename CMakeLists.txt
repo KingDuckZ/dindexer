@@ -4,7 +4,7 @@ project("${bare_name}-if" VERSION 0.1.3 LANGUAGES CXX C)
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 include(GetGitRevisionDescription)
-include(ExternalProject)
+include(Buildlibpqtypes)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
@@ -27,6 +27,7 @@ message(STATUS "Config file set to \"${DINDEXER_CONFIG_FILE}\"")
 find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options)
 find_package(PostgreSQL 8.3 REQUIRED)
 find_package(YamlCpp 0.5.1 REQUIRED)
+import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}")
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${bare_name}-inc INTERFACE)
@@ -46,25 +47,6 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 target_include_directories(${bare_name}-inc
 	INTERFACE ${PROJECT_BINARY_DIR}
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
-)
-
-string(REPLACE ";" " -I" pqtypes_inc_dirs "-I${PostgreSQL_INCLUDE_DIRS}")
-set(pqtypes_name "libpqtypes-1.5.1")
-set(pqtypes_prefix ${CMAKE_CURRENT_BINARY_DIR}/lib/${pqtypes_name})
-
-ExternalProject_Add(pqtypes_working
-	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/${pqtypes_name}
-	PREFIX lib/${pqtypes_name}
-	CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lib/${pqtypes_name}/configure --prefix ${pqtypes_prefix} "CPPFLAGS=${pqtypes_inc_dirs}" --quiet
-	BUILD_COMMAND ${MAKE}
-	BUILD_IN_SOURCE 0
-	INSTALL_DIR ${pqtypes_prefix}
-)
-add_library(pqtypes SHARED IMPORTED)
-set_target_properties(pqtypes PROPERTIES
-	IMPORTED_LOCATION ${pqtypes_prefix}/lib/libpqtypes.so
-	IMPORTED_LINK_INTERFACE_LANGUAGES C
-	#INCLUDE_DIRECTORIES ${pqtypes_prefix}/include
 )
 
 add_subdirectory(src/scan)

@@ -7,7 +7,7 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_include_directories(${PROJECT_NAME}
-	PRIVATE ${pqtypes_prefix}/include
+	PRIVATE ${libpqtypes_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
