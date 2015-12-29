@@ -10,8 +10,8 @@ option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build 
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
 set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
 set(PROJECT_VERSION_BETA "1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra -O3 -fomit-frame-pointer")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra -Wno-missing-field-initializers")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra -O3 -fomit-frame-pointer -Wno-missing-field-initializers")
 set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 get_git_head_revision(GIT_REFSPEC PROJECT_VERSION_GIT)
 
