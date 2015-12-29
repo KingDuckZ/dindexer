@@ -30,14 +30,6 @@
 
 namespace din {
 	namespace {
-		std::string make_set_insert_query (pq::Connection& parConn, const SetRecordData& parSetData) {
-			std::ostringstream oss;
-			oss << "INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ("
-				<< parConn.escaped_literal(parSetData.name) << ','
-				<< '\'' << parSetData.type << '\''
-				<< ");";
-			return oss.str();
-		}
 	} //unnamed namespace
 
 	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const TigerHash& parHash) {
@@ -98,7 +90,11 @@ namespace din {
 		conn.connect();
 
 		conn.query_void("BEGIN;");
-		conn.query_void(make_set_insert_query(conn, parSetData));
+		conn.query_void("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2)",
+			parSetData.name,
+			std::string(1, parSetData.type)
+		);
+
 		for (std::size_t z = 0; z < parData.size(); ++z) {
 			const std::string query = "INSERT INTO \"files\" (path, hash, "
 				"level, group_id, is_directory, is_symlink, size, "
