@@ -22,6 +22,7 @@
 #include "dindexer-common/settings.hpp"
 #include "filestats.hpp"
 #include "mimetype.hpp"
+#include "recorddata.hpp"
 #include <algorithm>
 #include <functional>
 #include <vector>
@@ -40,50 +41,18 @@
 #if defined(INDEXER_VERBOSE)
 #	include <iostream>
 #endif
+#include <boost/utility/string_ref.hpp>
 
 namespace din {
-	typedef TigerHash HashType;
-
-	struct FileEntry {
-		FileEntry ( const char* parPath, const fastf::FileStats& parSt ) :
-			path(parPath),
-			hash {},
-			access_time(parSt.atime),
-			modify_time(parSt.mtime),
-			//file_size(0),
-			level(static_cast<uint16_t>(parSt.level)),
-			is_dir(parSt.is_dir),
-			is_symlink(parSt.is_symlink),
-			unreadable(false)
-		{
-		}
-
-		FileEntry ( const FileEntry& ) = delete;
-		FileEntry ( FileEntry&& ) = default;
-		FileEntry& operator= ( const FileEntry& ) = delete;
-		FileEntry& operator= ( FileEntry&& ) = default;
-		bool operator< ( const FileEntry& parOther ) const;
-		bool operator== ( const FileEntry& ) const = delete;
-
-		std::string path;
-		std::string mime;
-		HashType hash;
-		std::time_t access_time;
-		std::time_t modify_time;
-		uint64_t file_size;
-		uint16_t level;
-		bool is_dir;
-		bool is_symlink;
-		bool unreadable;
-	};
+	using HashType = decltype(FileRecordData::hash);
 
 	namespace {
-		typedef std::vector<FileEntry>::iterator FileEntryIt;
+		typedef std::vector<FileRecordData>::iterator FileEntryIt;
 
 		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors, MimeType& parMime) {
 			assert(parEntry != parEnd);
-			assert(parEntry->is_dir);
-			FileEntry& curr_entry = *parEntry;
+			assert(parEntry->is_directory);
+			FileRecordData& curr_entry = *parEntry;
 			auto& curr_entry_it = parEntry;
 
 			//Build a blob with the hashes and filenames of every directory that
@@ -106,10 +75,10 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
-				curr_entry.mime = parMime.analyze(it_entry->path);
+				curr_entry.mime_full = parMime.analyze(it_entry->path);
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
 					PathName curr_subdir(it_entry->path);
-					if (it_entry->is_dir) {
+					if (it_entry->is_directory) {
 						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors, parMime);
 
 						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
@@ -128,11 +97,11 @@ namespace din {
 				}
 
 				tiger_data(dir_blob, curr_entry.hash);
-				curr_entry.file_size = 0;
+				curr_entry.size = 0;
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Got intermediate hash for dir " << parCurrDir <<
 					": " << tiger_to_string(curr_entry.hash) <<
-					' ' << curr_entry.mime << '\n';
+					' ' << curr_entry.mime_type << '\n';
 #endif
 			}
 
@@ -141,7 +110,7 @@ namespace din {
 				auto it_entry = curr_entry_it;
 				while (
 					it_entry != parEnd
-					and (it_entry->is_dir
+					and (it_entry->is_directory
 						or it_entry->level != curr_entry_it->level + 1
 						or PathName(it_entry->path).pop_right() != parCurrDir
 					)
@@ -149,15 +118,19 @@ namespace din {
 					++it_entry;
 				}
 
-				while (it_entry != parEnd and not it_entry->is_dir and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
-					assert(not it_entry->is_dir);
+				while (it_entry != parEnd and not it_entry->is_directory and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
+					assert(not it_entry->is_directory);
 #if defined(INDEXER_VERBOSE)
 					std::cout << "Hashing file " << it_entry->path << "...";
 #endif
 					parNextItemCallback(it_entry - parBegin);
 					try {
-						tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->file_size);
-						it_entry->mime = parMime.analyze(it_entry->path);
+						tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->size);
+						it_entry->hash_valid = true;
+						it_entry->mime_full = parMime.analyze(it_entry->path);
+						auto mime_pair = split_mime(it_entry->mime_full);
+						it_entry->mime_type = mime_pair.first;
+						it_entry->mime_charset = mime_pair.second;
 					}
 					catch (const std::ios_base::failure& e) {
 						if (parIgnoreErrors) {
@@ -170,8 +143,8 @@ namespace din {
 					}
 
 #if defined(INDEXER_VERBOSE)
-					std::cout << ' ' << tiger_to_string(it_entry->hash) <<
-						' ' << it_entry->mime << '\n';
+					std::cout << ' ' << tiger_to_string(it_entry->hash) << ' ' <<
+						"Mime type: \"" << it_entry->mime_type << "\"\n";
 #endif
 					++it_entry;
 				}
@@ -180,16 +153,28 @@ namespace din {
 #if defined(INDEXER_VERBOSE)
 			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
+			curr_entry_it->hash_valid = true;
 		}
 
 		template <bool FileTrue=true>
 		struct IsFile {
-			bool operator() ( const FileEntry& parEntry ) const { return parEntry.is_dir xor FileTrue; }
+			bool operator() ( const FileRecordData& parEntry ) const { return parEntry.is_directory xor FileTrue; }
 		};
+
+		FileRecordData make_file_record_data (const char* parPath, const fastf::FileStats& parSt) {
+			return FileRecordData(
+				parPath,
+				parSt.atime,
+				parSt.mtime,
+				parSt.level,
+				parSt.is_dir,
+				parSt.is_symlink
+			);
+		}
 	} //unnamed namespace
 
 	struct Indexer::LocalData {
-		typedef std::vector<FileEntry> PathList;
+		typedef std::vector<FileRecordData> PathList;
 
 		dinlib::SettingsDB db_settings;
 		PathList paths;
@@ -202,12 +187,13 @@ namespace din {
 		bool ignore_read_errors;
 	};
 
-	bool FileEntry::operator< (const FileEntry& parOther) const {
-		const FileEntry& o = parOther;
+	bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
+		const FileRecordData& l = parLeft;
+		const FileRecordData& r = parRight;
 		return
-			(level < o.level)
-			or (level == o.level and is_dir and not o.is_dir)
-			or (level == o.level and is_dir == o.is_dir and path < o.path)
+			(l.level < r.level)
+			or (l.level == r.level and l.is_directory and not r.is_directory)
+			or (l.level == r.level and l.is_directory == r.is_directory and l.path < r.path)
 
 			//sort by directory - parent first, children later
 			//(level == o.level and is_dir and not o.is_dir)
@@ -257,7 +243,7 @@ namespace din {
 
 	void Indexer::calculate_hash() {
 		PathName base_path(m_local_data->paths.front().path);
-		std::sort(m_local_data->paths.begin(), m_local_data->paths.end());
+		std::sort(m_local_data->paths.begin(), m_local_data->paths.end(), &file_record_data_lt);
 		MimeType mime;
 
 #if defined(INDEXER_VERBOSE)
@@ -266,7 +252,7 @@ namespace din {
 			itm.hash.part_b = 1;
 			itm.hash.part_c = 1;
 
-			if (itm.is_dir)
+			if (itm.is_directory)
 				std::cout << "(D) ";
 			else
 				std::cout << "(F) ";
@@ -317,41 +303,25 @@ namespace din {
 #endif
 
 		if (not parForce) {
-			std::string first_hash(tiger_to_string(m_local_data->paths.front().hash, true));
+			const auto& first_hash = m_local_data->paths.front().hash;
 			FileRecordData itm;
 			SetRecordDataFull set;
-			const bool already_in_db = read_from_db(itm, set, m_local_data->db_settings, std::move(first_hash));
+			const bool already_in_db = read_from_db(itm, set, m_local_data->db_settings, first_hash);
 			if (already_in_db) {
 				return false;
 			}
 		}
 
 		PathName base_path(m_local_data->paths.front().path);
-		std::vector<FileRecordData> data;
-		data.reserve(m_local_data->paths.size());
-		for (const auto& itm : m_local_data->paths) {
-			data.push_back(FileRecordData {
-				make_relative_path(base_path, PathName(itm.path)).path(),
-				tiger_to_string(itm.hash),
-				itm.access_time,
-				itm.modify_time,
-				itm.level,
-				itm.file_size,
-				itm.is_dir,
-				itm.is_symlink,
-				itm.unreadable,
-				not itm.unreadable
-			});
-		}
 
 		SetRecordData set_data {parSetName, parType};
-		write_to_db(m_local_data->db_settings, data, set_data);
+		write_to_db(m_local_data->db_settings, m_local_data->paths, set_data);
 		return true;
 	}
 
 	bool Indexer::add_path (const char* parPath, const fastf::FileStats& parStats) {
 		m_local_data->paths.push_back(
-			FileEntry(parPath, parStats));
+			make_file_record_data(parPath, parStats));
 		if (not parStats.is_dir) {
 			++m_local_data->file_count;
 		}
@@ -364,14 +334,14 @@ namespace din {
 
 		std::cout << "---------------- FILE LIST ----------------\n";
 		for (const auto& cur_itm : m_local_data->paths) {
-			if (not cur_itm.is_dir) {
+			if (not cur_itm.is_directory) {
 				PathName cur_path(cur_itm.path);
 				std::cout << make_relative_path(base_path, cur_path).path() << '\n';
 			}
 		}
 		std::cout << "---------------- DIRECTORY LIST ----------------\n";
 		for (const auto& cur_itm : m_local_data->paths) {
-			if (cur_itm.is_dir) {
+			if (cur_itm.is_directory) {
 				PathName cur_path(cur_itm.path);
 				std::cout << make_relative_path(base_path, cur_path).path() << '\n';
 			}

@@ -21,40 +21,19 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <boost/utility/string_ref.hpp>
-#include <ctime>
 
 namespace dinlib {
 	struct SettingsDB;;
 } //namespace dinlib
 
 namespace din {
-	struct FileRecordData {
-		std::string path;
-		std::string hash;
-		std::time_t atime;
-		std::time_t mtime;
-		uint16_t level;
-		uint64_t size;
-		bool is_directory;
-		bool is_symlink;
-		bool unreadable;
-		bool hash_valid;
-	};
-
-	struct SetRecordDataFull {
-		std::string name;
-		uint32_t disk_number;
-		char type;
-	};
-
-	struct SetRecordData {
-		const boost::string_ref name;
-		const char type;
-	};
+	struct FileRecordData;
+	struct SetRecordData;
+	struct SetRecordDataFull;
+	struct TigerHash;
 
 	void write_to_db ( const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
-	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, std::string&& parHash );
+	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const TigerHash& parHash );
 } //namespace din
 
 #endif

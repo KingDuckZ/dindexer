@@ -18,6 +18,7 @@
 #include "dbbackend.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-common/settings.hpp"
+#include "recorddata.hpp"
 #include <string>
 #include <sstream>
 #include <utility>
@@ -25,11 +26,10 @@
 #include <exception>
 #include <memory>
 #include <boost/utility/string_ref.hpp>
+#include <chrono>
 
 namespace din {
 	namespace {
-		const std::size_t g_batch_size = 100;
-
 		std::string make_set_insert_query (pq::Connection& parConn, const SetRecordData& parSetData) {
 			std::ostringstream oss;
 			oss << "INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ("
@@ -38,15 +38,9 @@ namespace din {
 				<< ");";
 			return oss.str();
 		}
-
-		boost::string_ref time_to_str (const std::time_t parTime, char* parBuff, std::size_t parLength) {
-			const auto gtm = std::gmtime(&parTime);
-			const auto len = std::strftime(parBuff, parLength, "%F %T%z", gtm);
-			return boost::string_ref(parBuff, len);
-		}
 	} //unnamed namespace
 
-	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, std::string&& parHash) {
+	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const TigerHash& parHash) {
 		using boost::lexical_cast;
 
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
@@ -55,8 +49,8 @@ namespace din {
 		uint32_t group_id;
 		{
 			std::ostringstream oss;
-			oss << "SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash=" <<
-				conn.escaped_literal(parHash) <<
+			oss << "SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash='" <<
+				tiger_to_string(parHash, true) << "'" <<
 				" LIMIT 1;";
 
 			auto resultset = conn.query(oss.str());
@@ -66,7 +60,7 @@ namespace din {
 
 			auto row = resultset[0];
 			parItem.path = row["path"];
-			parItem.hash = std::move(parHash);
+			parItem.hash = parHash;
 			parItem.level = lexical_cast<uint16_t>(row["level"]);
 			parItem.size = lexical_cast<uint64_t>(row["size"]);
 			parItem.is_directory = (row["is_directory"] == "t" ? true : false);
@@ -94,47 +88,36 @@ namespace din {
 	}
 
 	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
-		auto bool_to_str = [](bool b) { return (b ? "true" : "false"); };
+		using std::chrono::system_clock;
+
 		if (parData.empty()) {
 			return;
 		}
-
-		const std::size_t strtime_buff_size = 512;
-		std::unique_ptr<char[]> strtime_buff(new char[strtime_buff_size]);
 
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
 		conn.query_void("BEGIN;");
 		conn.query_void(make_set_insert_query(conn, parSetData));
-		//TODO: use COPY instead of INSERT INTO
-		for (std::size_t z = 0; z < parData.size(); z += g_batch_size) {
-			std::ostringstream query;
-			query << "INSERT INTO \"files\" " <<
-				"(path, hash, level, group_id, is_directory, is_symlink, size, " <<
+		for (std::size_t z = 0; z < parData.size(); ++z) {
+			const std::string query = "INSERT INTO \"files\" (path, hash, "
+				"level, group_id, is_directory, is_symlink, size, "
 				"access_time, modify_time, is_hash_valid, unreadable) VALUES "
-			;
+				"($1, $2, $3, currval('\"sets_id_seq\"'), $4, $5, $6, $7, $8, $9, $10);";
 
-			const char* comma = "";
-			for (auto i = z; i < std::min(z + g_batch_size, parData.size()); ++i) {
-				const auto& itm = parData[i];
-				query << comma;
-				query << '(' << conn.escaped_literal(itm.path) << ",'" << itm.hash << "',"
-					<< itm.level << ','
-					<< "currval('\"sets_id_seq\"')" << ','
-					<< bool_to_str(itm.is_directory) << ','
-					<< (itm.is_symlink ? "true" : "false") << ',' << itm.size
-					<< ',' << '\'' << time_to_str(itm.atime, strtime_buff.get(), strtime_buff_size) << '\''
-					<< ',' << '\'' << time_to_str(itm.mtime, strtime_buff.get(), strtime_buff_size) << '\''
-					<< ',' << bool_to_str(itm.hash_valid)
-					<< ',' << bool_to_str(itm.unreadable)
-				<< ')';
-				comma = ",";
-			}
-			query << ';';
-			//query << "\nCOMMIT;";
-
-			conn.query_void(query.str());
+			const auto& itm = parData[z];
+			conn.query_void(query,
+				itm.path,
+				tiger_to_string(itm.hash),
+				itm.level,
+				itm.is_directory,
+				itm.is_symlink,
+				itm.size,
+				system_clock::from_time_t(itm.atime),
+				system_clock::from_time_t(itm.mtime),
+				itm.hash_valid,
+				itm.unreadable
+			);
 		}
 		conn.query_void("COMMIT;");
 	}

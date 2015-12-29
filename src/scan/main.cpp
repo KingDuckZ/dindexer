@@ -133,6 +133,10 @@ namespace {
 		parShowProgress = false;
 #endif
 		if (not parShowProgress) {
+//Hashing file /mnt/cdrom/Sacred 2/Fallen Angel/UK/Sacred.2.Fallen.Angel-ArenaBG/DISC2/S2DISC2.md1... 512c201321ed01cc2a82c9f80bfeaaa673bc8eb3cea4e5c1
+//terminate called after throwing an instance of 'std::ios_base::failure'
+//what():  basic_filebuf::xsgetn error reading the file
+//Hashing file /mnt/cdrom/Sacred 2/Fallen Angel/UK/Sacred.2.Fallen.Angel-ArenaBG/DISC2/S2DISC2.mdf...Annullato
 			parIndexer.calculate_hash();
 		}
 #if defined(WITH_PROGRESS_FEEDBACK)

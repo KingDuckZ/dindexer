@@ -24,8 +24,82 @@
 #include <memory>
 #include <boost/lexical_cast.hpp>
 #include <sstream>
+#include <cstring>
+#include "libpqtypes.h"
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+
+using sc = std::chrono::system_clock;
 
 namespace pq {
+	namespace implem {
+		template <> const char* type_to_pqtypes_name<std::string>() { return "%text"; }
+		template <> const char* type_to_pqtypes_name<boost::string_ref>() { return "%text"; }
+		template <> const char* type_to_pqtypes_name<bool>() { return "%bool"; }
+		template <> const char* type_to_pqtypes_name<float>() { return "%float4"; }
+		template <> const char* type_to_pqtypes_name<double>() { return "%float8"; }
+		template <> const char* type_to_pqtypes_name<int16_t>() { return "%int2"; }
+		template <> const char* type_to_pqtypes_name<int32_t>() { return "%int4"; }
+		template <> const char* type_to_pqtypes_name<int64_t>() { return "%int8"; }
+		template <> const char* type_to_pqtypes_name<uint16_t>() { return "%int2"; }
+		template <> const char* type_to_pqtypes_name<uint32_t>() { return "%int4"; }
+		template <> const char* type_to_pqtypes_name<uint64_t>() { return "%int8"; }
+		template <> const char* type_to_pqtypes_name<sc::time_point>() { return "%timestamptz"; }
+
+		template const char* type_to_pqtypes_name<std::string> ( void );
+		template const char* type_to_pqtypes_name<boost::string_ref> ( void );
+		template const char* type_to_pqtypes_name<bool> ( void );
+		template const char* type_to_pqtypes_name<float> ( void );
+		template const char* type_to_pqtypes_name<double> ( void );
+		template const char* type_to_pqtypes_name<int16_t> ( void );
+		template const char* type_to_pqtypes_name<int32_t> ( void );
+		template const char* type_to_pqtypes_name<int64_t> ( void );
+		template const char* type_to_pqtypes_name<uint16_t> ( void );
+		template const char* type_to_pqtypes_name<uint32_t> ( void );
+		template const char* type_to_pqtypes_name<uint64_t> ( void );
+
+		auto get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::conv (const std::chrono::system_clock::time_point& parParam) -> type {
+			static_assert(sizeof(storage) == sizeof(PGtimestamp), "Wrong size for timestamp, please update DATA_SIZE");
+			static_assert(alignof(storage) == alignof(PGtimestamp), "Wrong alignment for timestamp, please update type");
+
+			using std::chrono::system_clock;
+
+			PGtimestamp ts;
+
+			std::memset(&ts, 0, sizeof(PGtimestamp));
+
+			auto t = system_clock::to_time_t(parParam);
+			ts.epoch = t;
+			auto tm = std::localtime(&t);
+			ts.time.hour = tm->tm_hour;
+			ts.time.min = tm->tm_min;
+			ts.time.sec = tm->tm_sec;
+			ts.time.usec = 0;
+			ts.time.withtz = 1;
+			ts.date.isbc = 0;
+			ts.date.year = tm->tm_year + 1900;
+			ts.date.mon = tm->tm_mon;
+			ts.date.mday = tm->tm_mday;
+			char* tzn;
+			PQlocalTZInfo(&t, &ts.time.gmtoff, &ts.time.isdst, &tzn);
+			std::strcpy(ts.time.tzabbr, tzn);
+
+			std::copy(reinterpret_cast<const char*>(&ts), reinterpret_cast<const char*>(&ts) + sizeof(ts), reinterpret_cast<char*>(&m_storage));
+			return &m_storage;
+		}
+
+		get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::~get_pqlib_c_type_struct ( void ) noexcept {
+			return;
+		}
+	} //namespace implem
+
+	namespace {
+		int call_PQputf (PGparam* parParam, const std::string* parTypes, va_list parArgp) {
+			return PQputvf(parParam, nullptr, 0, parTypes->c_str(), parArgp);
+		}
+	} //unnamed namespace
+
 	struct Connection::LocalData {
 		PGconn* connection;
 	};
@@ -81,10 +155,13 @@ namespace pq {
 			throw DatabaseException(oss.str(), std::move(err), __FILE__, __LINE__);
 		}
 		query_void("SET NAMES 'utf8'");
+
+		PQinitTypes(m_localData->connection); //Init libpqtypes
 	}
 
 	void Connection::disconnect() {
 		if (is_connected()) {
+			PQclearTypes(m_localData->connection); //clear libpqtypes
 			PQfinish(m_localData->connection);
 			m_localData->connection = nullptr;
 		}
@@ -133,5 +210,42 @@ namespace pq {
 
 		PQArrayType clean_str(PQescapeLiteral(m_localData->connection, parString.data(), parString.size()), &PQfreemem);
 		return std::string(clean_str.get());
+	}
+
+	void Connection::query_void_params (const std::string& parQuery, PGParams& parParams) {
+		auto deleter = [](PGresult* r) { PQclear(r); };
+		using ResultPtr = std::unique_ptr<PGresult, decltype(deleter)>;
+
+		int result_format = 1;
+		assert(parParams.get());
+		auto res = ResultPtr(
+			PQparamExec(
+				m_localData->connection,
+				parParams.get(),
+				parQuery.c_str(),
+				result_format
+			),
+			deleter
+		);
+		if (not res) {
+			std::ostringstream oss;
+			oss << "Error allocating result object while running \"" << parQuery << "\": " << PQgeterror();
+			throw DatabaseException("Error running query", oss.str(), __FILE__, __LINE__);
+		}
+		const int ress = PQresultStatus(res.get());
+		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
+			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
+		}
+	}
+
+	auto Connection::make_params (const std::string* parTypes, ...) -> PGParams {
+		PGParams retval(PQparamCreate(m_localData->connection), &PQparamClear);
+		va_list argp;
+
+		va_start(argp, parTypes);
+		call_PQputf(retval.get(), parTypes, argp);
+		va_end(argp);
+
+		return std::move(retval);
 	}
 } //namespace pq
