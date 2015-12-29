@@ -66,4 +66,5 @@ target_link_libraries(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME}
 	INTERFACE WITH_PROGRESS_FEEDBACK
+	INTERFACE BOOST_SPIRIT_USE_PHOENIX_V3=1
 )
