@@ -10,11 +10,11 @@
 #include <boost/spirit/include/qi_char_.hpp>
 #include <boost/spirit/include/qi_plus.hpp>
 #include <boost/spirit/include/qi_raw.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/phoenix/object/construct.hpp>
 #include <boost/phoenix/stl/container.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
+#include <boost/phoenix/operator.hpp>
 
 namespace din {
 	using MagicCookie = std::unique_ptr<magic_set, void(*)(magic_t)>;
