@@ -89,8 +89,8 @@ namespace din {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
-		conn.query_void("BEGIN;");
-		conn.query_void("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2)",
+		conn.query("BEGIN;");
+		conn.query("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2)",
 			parSetData.name,
 			std::string(1, parSetData.type)
 		);
@@ -102,7 +102,7 @@ namespace din {
 				"($1, $2, $3, currval('\"sets_id_seq\"'), $4, $5, $6, $7, $8, $9, $10);";
 
 			const auto& itm = parData[z];
-			conn.query_void(query,
+			conn.query(query,
 				itm.path,
 				tiger_to_string(itm.hash),
 				itm.level,
@@ -115,6 +115,6 @@ namespace din {
 				itm.unreadable
 			);
 		}
-		conn.query_void("COMMIT;");
+		conn.query("COMMIT;");
 	}
 } //namespace din

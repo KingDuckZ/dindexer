@@ -70,6 +70,6 @@ namespace din {
 		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<uint32_t>(oss, " OR \"id\"="));
 		oss << ";\nCOMMIT;";
 
-		conn.query_void(oss.str());
+		conn.query(oss.str());
 	}
 } //namespace din

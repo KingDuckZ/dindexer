@@ -39,20 +39,19 @@ namespace pq {
 		bool is_connected ( void ) const noexcept;
 		void connect ( void );
 		void disconnect ( void );
-		void query_void ( const std::string& parQuery );
 		ResultSet query ( const std::string& parQuery );
 
 		std::string escaped_literal ( const std::string& parString );
 		std::string escaped_literal ( boost::string_ref parString );
 
 		template <typename... Args>
-		void query_void ( const std::string& parQuery, Args&&... parArgs );
+		ResultSet query ( const std::string& parQuery, Args&&... parArgs );
 
 	private:
 		struct LocalData;
 		using PGParams = std::unique_ptr<::PGparam, void(*)(::PGparam*)>;
 
-		void query_void_params ( const std::string& parQuery, PGParams& parParams );
+		ResultSet query_params ( const std::string& parQuery, PGParams& parParams );
 		PGParams make_params ( const std::string* parTypes, ... );
 
 		const std::string m_username;
@@ -108,7 +107,7 @@ namespace pq {
 	} //namespace implem
 
 	template <typename... Args>
-	void Connection::query_void (const std::string& parQuery, Args&&... parArgs) {
+	ResultSet Connection::query (const std::string& parQuery, Args&&... parArgs) {
 		using std::remove_cv;
 		using std::remove_reference;
 
@@ -126,7 +125,7 @@ namespace pq {
 		};
 		PGParams pgparams = make_pgparams();
 
-		this->query_void_params(parQuery, pgparams);
+		return this->query_params(parQuery, pgparams);
 	}
 } //namespace pq
 

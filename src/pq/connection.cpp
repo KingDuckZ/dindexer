@@ -154,7 +154,7 @@ namespace pq {
 			oss << "Unable to connect to database " << m_address << ':' << m_port << " as user \"" << m_username << '"';
 			throw DatabaseException(oss.str(), std::move(err), __FILE__, __LINE__);
 		}
-		query_void("SET NAMES 'utf8'");
+		this->query("SET NAMES 'utf8'");
 
 		PQinitTypes(m_localData->connection); //Init libpqtypes
 	}
@@ -184,16 +184,6 @@ namespace pq {
 		return ResultSet(std::move(info));
 	}
 
-	void Connection::query_void (const std::string& parQuery) {
-		ResultInfo info(PQexec(m_localData->connection, parQuery.c_str()));
-		if (not info.result)
-			throw DatabaseException("Error running query", "Error allocating result object", __FILE__, __LINE__);
-		const int ress = PQresultStatus(info.result.get());
-		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
-			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
-		}
-	}
-
 	std::string Connection::escaped_literal (const std::string& parString) {
 		return this->escaped_literal(boost::string_ref(parString));
 	}
@@ -205,7 +195,7 @@ namespace pq {
 		return std::string(clean_str.get());
 	}
 
-	void Connection::query_void_params (const std::string& parQuery, PGParams& parParams) {
+	ResultSet Connection::query_params (const std::string& parQuery, PGParams& parParams) {
 		int result_format = 1;
 		assert(parParams.get());
 		ResultInfo info(
@@ -225,6 +215,8 @@ namespace pq {
 		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
 			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
 		}
+
+		return ResultSet(std::move(info));
 	}
 
 	auto Connection::make_params (const std::string* parTypes, ...) -> PGParams {
