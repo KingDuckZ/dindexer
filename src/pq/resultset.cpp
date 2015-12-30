@@ -44,17 +44,19 @@ namespace pq {
 	};
 
 	struct ResultSet::LocalData {
-		explicit LocalData ( PGresult* parResult ) :
-			result(parResult)
+		typedef ResultInfo::PGResultPtr PGResultPtr;
+
+		explicit LocalData ( PGResultPtr&& parResult ) :
+			info(std::move(parResult), &columns)
 		{
 		}
 
-		PGresult* result;
+		ResultInfo info;
 		std::map<std::string, int> columns;
 	};
 
-	Row::Row (const ResultInfo& parResult, std::size_t parRow) :
-		m_localData(new LocalData(parResult.result, parRow, parResult.column_mappings, (parResult.column_mappings ? parResult.column_mappings->size() : 0)))
+	Row::Row (const ResultInfo* parResult, std::size_t parRow) :
+		m_localData(new LocalData(parResult->result.get(), parRow, parResult->column_mappings, (parResult->column_mappings ? parResult->column_mappings->size() : 0)))
 	{
 		assert(not m_localData->result or static_cast<std::size_t>(std::max(0, PQnfields(m_localData->result))) == m_localData->col_count);
 	}
@@ -63,11 +65,6 @@ namespace pq {
 		m_localData(std::move(parOther.m_localData))
 	{
 	}
-
-	//Row::Row (const Row& parOther) :
-	//	m_localData(new LocalData(parOther.m_localData->result, parOther.m_localData->row_index, parOther.m_localData->columns, parOther.m_localData->col_count))
-	//{
-	//}
 
 	Row::~Row() noexcept {
 	}
@@ -115,10 +112,10 @@ namespace pq {
 	}
 
 
-	ResultSet::ResultSet (ResultInfo& parResult) :
-		m_localData(new LocalData(parResult.result))
+	ResultSet::ResultSet (ResultInfo&& parResult) :
+		m_localData(new LocalData(std::move(parResult.result)))
 	{
-		const auto result = m_localData->result;
+		const auto result = m_localData->info.result.get();
 		const int column_count = PQnfields(result);
 		std::string col_name;
 		for (int z = 0; z < column_count; ++z) {
@@ -132,26 +129,18 @@ namespace pq {
 	}
 
 	ResultSet::~ResultSet() noexcept {
-		if (m_localData->result) {
-			PQclear(m_localData->result);
-			m_localData->result = nullptr;
-		}
 	}
 
 	Row ResultSet::operator[] (std::size_t parIndex) const {
-		ResultInfo info;
-		info.result = m_localData->result;
-		info.column_mappings = &m_localData->columns;
-
 		if (parIndex >= size())
 			throw DatabaseException("Out of range", "Column index " + boost::lexical_cast<std::string>(parIndex) + " is out of range (column count is " + boost::lexical_cast<std::string>(size()) + ')', __FILE__, __LINE__);
 
-		return Row(info, parIndex);
+		return Row(&m_localData->info, parIndex);
 	}
 
 	std::size_t ResultSet::size() const {
-		assert(m_localData->result);
-		const auto retval = PQntuples(m_localData->result);
+		assert(m_localData->info.result);
+		const auto retval = PQntuples(m_localData->info.result.get());
 		assert(retval >= 0);
 		return static_cast<std::size_t>(std::max(0, retval));
 	}

@@ -33,7 +33,7 @@ namespace pq {
 	public:
 		typedef boost::transform_iterator<boost::function<std::string(std::size_t)>, boost::counting_iterator<std::size_t>> const_iterator;
 
-		Row ( const ResultInfo& parResult, std::size_t parRow );
+		Row ( const ResultInfo* parResult, std::size_t parRow );
 		Row ( const Row& ) = delete;
 		Row ( Row&& parOther );
 		~Row ( void ) noexcept;
@@ -60,7 +60,7 @@ namespace pq {
 	public:
 		typedef boost::transform_iterator<boost::function<Row(std::size_t)>, boost::counting_iterator<std::size_t>> const_iterator;
 
-		explicit ResultSet ( ResultInfo& parResult );
+		explicit ResultSet ( ResultInfo&& parResult );
 		ResultSet ( const ResultSet& ) = delete;
 		ResultSet ( ResultSet&& parOther );
 		~ResultSet ( void ) noexcept;

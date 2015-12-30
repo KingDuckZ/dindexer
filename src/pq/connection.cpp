@@ -173,29 +173,22 @@ namespace pq {
 	}
 
 	ResultSet Connection::query (const std::string& parQuery) {
-		//TODO: sanitize input string
-		auto res = PQexec(m_localData->connection, parQuery.c_str());
-		if (not res)
+		ResultInfo info(PQexec(m_localData->connection, parQuery.c_str()));
+		if (not info.result)
 			throw DatabaseException("Error running query", "Error allocating result object", __FILE__, __LINE__);
-		const int ress = PQresultStatus(res);
+		const int ress = PQresultStatus(info.result.get());
 		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
-			PQclear(res);
 			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
 		}
 
-		ResultInfo info;
-		info.result = res;
-		info.column_mappings = nullptr;
-		return ResultSet(info);
+		return ResultSet(std::move(info));
 	}
 
 	void Connection::query_void (const std::string& parQuery) {
-		//TODO: sanitize input string
-		auto deleter = [](PGresult* r) { PQclear(r); };
-		std::unique_ptr<PGresult, decltype(deleter)> res(PQexec(m_localData->connection, parQuery.c_str()), deleter);
-		if (not res)
+		ResultInfo info(PQexec(m_localData->connection, parQuery.c_str()));
+		if (not info.result)
 			throw DatabaseException("Error running query", "Error allocating result object", __FILE__, __LINE__);
-		const int ress = PQresultStatus(res.get());
+		const int ress = PQresultStatus(info.result.get());
 		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
 			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
 		}
@@ -213,26 +206,22 @@ namespace pq {
 	}
 
 	void Connection::query_void_params (const std::string& parQuery, PGParams& parParams) {
-		auto deleter = [](PGresult* r) { PQclear(r); };
-		using ResultPtr = std::unique_ptr<PGresult, decltype(deleter)>;
-
 		int result_format = 1;
 		assert(parParams.get());
-		auto res = ResultPtr(
+		ResultInfo info(
 			PQparamExec(
 				m_localData->connection,
 				parParams.get(),
 				parQuery.c_str(),
 				result_format
-			),
-			deleter
+			)
 		);
-		if (not res) {
+		if (not info.result) {
 			std::ostringstream oss;
 			oss << "Error allocating result object while running \"" << parQuery << "\": " << PQgeterror();
 			throw DatabaseException("Error running query", oss.str(), __FILE__, __LINE__);
 		}
-		const int ress = PQresultStatus(res.get());
+		const int ress = PQresultStatus(info.result.get());
 		if (ress != PGRES_TUPLES_OK && ress != PGRES_COMMAND_OK) {
 			throw DatabaseException("Error running query", error_message(), __FILE__, __LINE__);
 		}

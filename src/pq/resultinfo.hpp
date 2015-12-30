@@ -21,10 +21,34 @@
 #include <libpq-fe.h>
 #include <map>
 #include <string>
+#include <memory>
 
 namespace pq {
 	struct ResultInfo {
-		PGresult* result;
+		typedef std::unique_ptr<PGresult, void(*)(PGresult*)> PGResultPtr;
+
+		ResultInfo ( void ) :
+			result(nullptr, &PQclear),
+			column_mappings(nullptr)
+		{
+		}
+		ResultInfo ( const ResultInfo& ) = delete;
+		ResultInfo ( ResultInfo&& ) = default;
+		explicit ResultInfo ( PGresult* parRes ) :
+			result(parRes, &PQclear),
+			column_mappings(nullptr)
+		{
+		}
+		ResultInfo ( PGResultPtr&& parRes, const std::map<std::string, int>* parColMappings ) :
+			result(std::move(parRes)),
+			column_mappings(parColMappings)
+		{
+		}
+		~ResultInfo ( void ) noexcept = default;
+		ResultInfo& operator= ( const ResultInfo& ) = delete;
+		ResultInfo& operator= ( ResultInfo&& ) = default;
+
+		PGResultPtr result;
 		const std::map<std::string, int>* column_mappings;
 	};
 } //namespace pq
