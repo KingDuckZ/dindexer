@@ -81,6 +81,7 @@ namespace din {
 
 	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
 		using std::chrono::system_clock;
+		using boost::lexical_cast;
 
 		if (parData.empty()) {
 			return;
@@ -90,22 +91,30 @@ namespace din {
 		conn.connect();
 
 		conn.query("BEGIN;");
-		conn.query("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2)",
-			parSetData.name,
-			std::string(1, parSetData.type)
-		);
+		uint32_t new_group_id;
+		{
+			auto id_res = conn.query("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2) RETURNING \"id\";",
+				parSetData.name,
+				std::string(1, parSetData.type)
+			);
+			assert(id_res.size() == 1);
+			assert(id_res[0].size() == 1);
+			//TODO: make it possible to get the id directly as a string
+			new_group_id = lexical_cast<uint32_t>(id_res[0][0]);
+		}
 
 		for (std::size_t z = 0; z < parData.size(); ++z) {
 			const std::string query = "INSERT INTO \"files\" (path, hash, "
 				"level, group_id, is_directory, is_symlink, size, "
 				"access_time, modify_time, is_hash_valid, unreadable) VALUES "
-				"($1, $2, $3, currval('\"sets_id_seq\"'), $4, $5, $6, $7, $8, $9, $10);";
+				"($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);";
 
 			const auto& itm = parData[z];
 			conn.query(query,
 				itm.path,
 				tiger_to_string(itm.hash),
 				itm.level,
+				new_group_id,
 				itm.is_directory,
 				itm.is_symlink,
 				itm.size,

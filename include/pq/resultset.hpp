@@ -44,6 +44,8 @@ namespace pq {
 		std::string operator[] ( std::size_t parIndex ) const;
 		Row& operator= ( const Row& ) = delete;
 		Row& operator= ( Row&& ) = delete;
+		bool is_null ( std::size_t parIndex ) const;
+		bool is_null ( const std::string& parIndex ) const;
 
 		const_iterator begin ( void ) const;
 		const_iterator end ( void ) const;
@@ -52,6 +54,8 @@ namespace pq {
 
 	private:
 		struct LocalData;
+
+		std::string get_as_str_assume_valid ( int parIndex ) const;
 
 		std::unique_ptr<LocalData> m_localData;
 	};

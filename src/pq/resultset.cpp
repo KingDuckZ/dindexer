@@ -25,8 +25,46 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <boost/bind.hpp>
+#include "libpqtypes.h"
 
 namespace pq {
+	namespace {
+		int cast_col_index_or_throw (std::size_t parIndex, std::size_t parCount, const char* parFile, int parLine) {
+			if (parIndex >= parCount) {
+				std::ostringstream oss;
+				oss << "Requested column at index " << parIndex << " is out of range (column count is " << parCount << ')';
+				throw DatabaseException("Error retrieving column", oss.str(), parFile, parLine);
+			}
+			return static_cast<int>(parIndex);
+		}
+
+		int conv_col_index_or_throw (const std::string& parIndex, const std::map<std::string, int>& parCols, const char* parFile, int parLine) {
+			const auto num_index_it = parCols.find(parIndex);
+			if (parCols.end() == num_index_it) {
+				throw DatabaseException("Error retrieving column", "Requested column \"" + parIndex + "\" doesn't exist", parFile, parLine);
+			}
+
+			return num_index_it->second;
+		}
+
+		std::string binary_to_string (const char* parValue, Oid parType, int parLength) {
+			using boost::lexical_cast;
+
+			assert(parValue);
+			assert(parLength > 0);
+
+			//TODO: use libpqtypes
+			switch (parType) {
+			case 21:
+				return lexical_cast<std::string>(*reinterpret_cast<const uint16_t*>(parValue));
+			default:
+				//not implemented
+				assert(false);
+				return std::string();
+			}
+		}
+	} //unnamed namespace
+
 	struct Row::LocalData {
 		LocalData ( const PGresult* parResult, std::size_t parRow, const std::map<std::string, int>* parCols, std::size_t parColCount ) :
 			result(parResult),
@@ -70,13 +108,7 @@ namespace pq {
 	}
 
 	std::string Row::operator[] (const std::string& parIndex) const {
-		assert(m_localData->columns);
-		const auto num_index_it = m_localData->columns->find(parIndex);
-		if (num_index_it == m_localData->columns->end())
-			throw DatabaseException("Error retrieving column", "Requested column \"" + parIndex + "\" doesn't exist", __FILE__, __LINE__);
-
-		const int num_index = num_index_it->second;
-		return PQgetvalue(m_localData->result, static_cast<int>(m_localData->row_index), num_index);
+		return get_as_str_assume_valid(conv_col_index_or_throw(parIndex, *m_localData->columns, __FILE__, __LINE__));
 	}
 
 	std::size_t Row::size() const {
@@ -88,13 +120,47 @@ namespace pq {
 	}
 
 	std::string Row::operator[] (std::size_t parIndex) const {
-		if (parIndex >= m_localData->col_count) {
-			std::ostringstream oss;
-			oss << "Requested column at index " << parIndex << " is out of range (column count is " << m_localData->col_count << ')';
-			throw DatabaseException("Error retrieving column", oss.str(), __FILE__, __LINE__);
-		}
+		return get_as_str_assume_valid(cast_col_index_or_throw(parIndex, m_localData->col_count, __FILE__, __LINE__));
+	}
 
-		return PQgetvalue(m_localData->result, static_cast<int>(m_localData->row_index), static_cast<int>(parIndex));
+	std::string Row::get_as_str_assume_valid (int parIndex) const {
+		const int num_index = parIndex;
+		const auto row_index = static_cast<int>(m_localData->row_index);
+		const auto format = PQfformat(m_localData->result, num_index);
+		const int data_len = PQgetlength(m_localData->result, row_index, num_index);
+		switch (format) {
+		case 0:
+			//textual data
+			return std::string(PQgetvalue(m_localData->result, row_index, num_index), data_len);
+		case 1:
+			//binary data
+			if (is_null(num_index)) {
+				return std::string();
+			}
+			else {
+				return binary_to_string(
+					PQgetvalue(m_localData->result, row_index, num_index),
+					PQftype(m_localData->result, num_index),
+					data_len
+				);
+			}
+		default:
+			//unknown
+			assert(false);
+			return std::string();
+		}
+	}
+
+	bool Row::is_null (std::size_t parIndex) const {
+		const auto num_index = cast_col_index_or_throw(parIndex, m_localData->col_count, __FILE__, __LINE__);
+		const auto row_index = static_cast<int>(m_localData->row_index);
+		return (1 == PQgetisnull(m_localData->result, row_index, num_index) ? true : false);
+	}
+
+	bool Row::is_null (const std::string& parIndex) const {
+		const auto num_index = conv_col_index_or_throw(parIndex, *m_localData->columns, __FILE__, __LINE__);
+		const auto row_index = static_cast<int>(m_localData->row_index);
+		return (1 == PQgetisnull(m_localData->result, row_index, num_index) ? true : false);
 	}
 
 	Row::const_iterator Row::begin() const {

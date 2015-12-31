@@ -196,7 +196,8 @@ namespace pq {
 	}
 
 	ResultSet Connection::query_params (const std::string& parQuery, PGParams& parParams) {
-		int result_format = 1;
+		//TODO: make result_format parametric
+		int result_format = 0;
 		assert(parParams.get());
 		ResultInfo info(
 			PQparamExec(
