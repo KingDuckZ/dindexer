@@ -19,12 +19,11 @@
 #define id68BF7AAC5BD54AF2BBD6EC1318B6687E
 
 #include "pq/resultset.hpp"
+#include "pq/implem/pq_type_helpers.hpp"
 #include <string>
 #include <cstdint>
 #include <memory>
 #include <boost/utility/string_ref.hpp>
-#include <chrono>
-#include <type_traits>
 
 struct pg_param;
 typedef pg_param PGparam;
@@ -61,50 +60,6 @@ namespace pq {
 		const uint16_t m_port;
 		std::unique_ptr<LocalData> m_localData;
 	};
-
-	namespace implem {
-		template <typename T>
-		const char* type_to_pqtypes_name ( void );
-
-		template <typename T>
-		struct get_pqlib_c_type_struct {
-			using type = T;
-			static type conv ( T parParam ) { return parParam; }
-		};
-		template <>
-		struct get_pqlib_c_type_struct<std::string> {
-			using type = const char*;
-			static type conv ( const std::string& parParam ) { return parParam.c_str(); }
-		};
-		template <>
-		struct get_pqlib_c_type_struct<boost::string_ref> {
-			using type = const char*;
-			static type conv ( const boost::string_ref& parParam ) { return parParam.data(); }
-		};
-		template <>
-		struct get_pqlib_c_type_struct<bool> {
-			using type = int;
-			static type conv ( bool parParam ) { return (parParam ? 1 : 0); }
-		};
-		template <>
-		struct get_pqlib_c_type_struct<std::chrono::system_clock::time_point> {
-			struct StorageStruct { uint64_t epoch; int a[14]; char tzabbr[16]; };
-			static constexpr std::size_t DATA_SIZE = sizeof(StorageStruct);
-			using storage = std::aligned_storage<DATA_SIZE, alignof(uint64_t)>::type;
-			storage m_storage;
-
-		public:
-			using type = const storage*;
-
-			type conv ( const std::chrono::system_clock::time_point& parParam );
-			~get_pqlib_c_type_struct ( void ) noexcept;
-		};
-
-		template <typename T>
-		inline typename get_pqlib_c_type_struct<T>::type get_pqlib_c_type (const T& parParam) {
-			return get_pqlib_c_type_struct<T>::conv(parParam);
-		}
-	} //namespace implem
 
 	template <typename... Args>
 	ResultSet Connection::query (const std::string& parQuery, Args&&... parArgs) {

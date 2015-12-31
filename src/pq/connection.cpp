@@ -30,35 +30,8 @@
 #include <ctime>
 #include <cassert>
 
-using sc = std::chrono::system_clock;
-
 namespace pq {
 	namespace implem {
-		template <> const char* type_to_pqtypes_name<std::string>() { return "%text"; }
-		template <> const char* type_to_pqtypes_name<boost::string_ref>() { return "%text"; }
-		template <> const char* type_to_pqtypes_name<bool>() { return "%bool"; }
-		template <> const char* type_to_pqtypes_name<float>() { return "%float4"; }
-		template <> const char* type_to_pqtypes_name<double>() { return "%float8"; }
-		template <> const char* type_to_pqtypes_name<int16_t>() { return "%int2"; }
-		template <> const char* type_to_pqtypes_name<int32_t>() { return "%int4"; }
-		template <> const char* type_to_pqtypes_name<int64_t>() { return "%int8"; }
-		template <> const char* type_to_pqtypes_name<uint16_t>() { return "%int2"; }
-		template <> const char* type_to_pqtypes_name<uint32_t>() { return "%int4"; }
-		template <> const char* type_to_pqtypes_name<uint64_t>() { return "%int8"; }
-		template <> const char* type_to_pqtypes_name<sc::time_point>() { return "%timestamptz"; }
-
-		template const char* type_to_pqtypes_name<std::string> ( void );
-		template const char* type_to_pqtypes_name<boost::string_ref> ( void );
-		template const char* type_to_pqtypes_name<bool> ( void );
-		template const char* type_to_pqtypes_name<float> ( void );
-		template const char* type_to_pqtypes_name<double> ( void );
-		template const char* type_to_pqtypes_name<int16_t> ( void );
-		template const char* type_to_pqtypes_name<int32_t> ( void );
-		template const char* type_to_pqtypes_name<int64_t> ( void );
-		template const char* type_to_pqtypes_name<uint16_t> ( void );
-		template const char* type_to_pqtypes_name<uint32_t> ( void );
-		template const char* type_to_pqtypes_name<uint64_t> ( void );
-
 		auto get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::conv (const std::chrono::system_clock::time_point& parParam) -> type {
 			static_assert(sizeof(storage) == sizeof(PGtimestamp), "Wrong size for timestamp, please update DATA_SIZE");
 			static_assert(alignof(storage) == alignof(PGtimestamp), "Wrong alignment for timestamp, please update type");
