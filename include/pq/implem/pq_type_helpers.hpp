@@ -18,6 +18,7 @@
 #ifndef idEC73C3E4D64D44ABA0DB7D41FA8A7EB7
 #define idEC73C3E4D64D44ABA0DB7D41FA8A7EB7
 
+#include "pq/implem/string_bt.hpp"
 #include <chrono>
 #include <type_traits>
 #include <boost/utility/string_ref.hpp>
@@ -25,7 +26,7 @@
 namespace pq {
 	namespace implem {
 		template <typename T>
-		const char* type_to_pqtypes_name ( void );
+		struct type_to_pqtypes_name;
 
 		template <typename T>
 		struct get_pqlib_c_type_struct {
@@ -66,18 +67,121 @@ namespace pq {
 			return get_pqlib_c_type_struct<T>::conv(parParam);
 		}
 
-		template <> inline const char* type_to_pqtypes_name<std::string>() { return "%text"; }
-		template <> inline const char* type_to_pqtypes_name<boost::string_ref>() { return "%text"; }
-		template <> inline const char* type_to_pqtypes_name<bool>() { return "%bool"; }
-		template <> inline const char* type_to_pqtypes_name<float>() { return "%float4"; }
-		template <> inline const char* type_to_pqtypes_name<double>() { return "%float8"; }
-		template <> inline const char* type_to_pqtypes_name<int16_t>() { return "%int2"; }
-		template <> inline const char* type_to_pqtypes_name<int32_t>() { return "%int4"; }
-		template <> inline const char* type_to_pqtypes_name<int64_t>() { return "%int8"; }
-		template <> inline const char* type_to_pqtypes_name<uint16_t>() { return "%int2"; }
-		template <> inline const char* type_to_pqtypes_name<uint32_t>() { return "%int4"; }
-		template <> inline const char* type_to_pqtypes_name<uint64_t>() { return "%int8"; }
-		template <> inline const char* type_to_pqtypes_name<std::chrono::system_clock::time_point>() { return "%timestamptz"; }
+		template <>
+		struct type_to_pqtypes_name<std::string> {
+			constexpr static const char* name = "text";
+		};
+		template <>
+		struct type_to_pqtypes_name<boost::string_ref> {
+			constexpr static const char* name = "text";
+		};
+		template <>
+		struct type_to_pqtypes_name<bool> {
+			constexpr static const char* name = "bool";
+		};
+		template <>
+		struct type_to_pqtypes_name<float> {
+			constexpr static const char* name = "float4";
+		};
+		template <>
+		struct type_to_pqtypes_name<double> {
+			constexpr static const char* name = "float8";
+		};
+		template <>
+		struct type_to_pqtypes_name<int16_t> {
+			constexpr static const char* name = "int2";
+		};
+		template <>
+		struct type_to_pqtypes_name<int32_t> {
+			constexpr static const char* name = "int4";
+		};
+		template <>
+		struct type_to_pqtypes_name<int64_t> {
+			constexpr static const char* name = "int8";
+		};
+		template <>
+		struct type_to_pqtypes_name<uint16_t> {
+			constexpr static const char* name = "int2";
+		};
+		template <>
+		struct type_to_pqtypes_name<uint32_t> {
+			constexpr static const char* name = "int4";
+		};
+		template <>
+		struct type_to_pqtypes_name<uint64_t> {
+			constexpr static const char* name = "int8";
+		};
+		template <>
+		struct type_to_pqtypes_name<std::chrono::system_clock::time_point> {
+			constexpr static const char* name = "timestamptz";
+		};
+
+		constexpr inline std::size_t strlen (const char* parStr) {
+			return (*parStr ? 1 + strlen(parStr + 1) : 0);
+		}
+
+		template <typename T>
+		struct type_to_pqtypes_name_impl : public type_to_pqtypes_name<T> {
+			constexpr static const std::size_t size = strlen(type_to_pqtypes_name<T>::name) + 1;
+		};
+
+		template <typename T>
+		constexpr bt::string<type_to_pqtypes_name_impl<T>::size + 1> make_pqtypes_name ( const char parPrefix='%' );
+
+		template <typename T>
+		inline constexpr
+		bt::string<type_to_pqtypes_name_impl<T>::size + 1> make_pqtypes_name (const char parPrefix) {
+			return bt::make_string<2>({parPrefix, '\0'}) + bt::string<type_to_pqtypes_name_impl<T>::size>(type_to_pqtypes_name_impl<T>::name);
+		}
+
+		template <std::size_t... Sizes>
+		struct total_string_len;
+		template <>
+		struct total_string_len<> {
+			constexpr static const std::size_t result = 1;
+		};
+		template <std::size_t S1, std::size_t... Sizes>
+		struct total_string_len<S1, Sizes...> {
+			constexpr static const std::size_t result = S1 - 1 + total_string_len<Sizes...>::result;
+		};
+
+		inline constexpr
+		bt::string<1> spaced_concat_strings() {
+			return bt::string<1>("");
+		}
+		template <std::size_t S1>
+		inline constexpr
+		bt::string<S1 + 1> spaced_concat_strings (bt::string<S1> parA1) {
+			return bt::make_string(" ") + parA1;
+		}
+		template <std::size_t S1, std::size_t S2, std::size_t... Sizes>
+		constexpr inline
+		bt::string<total_string_len<S1, S2, Sizes...>::result + 2 + sizeof...(Sizes)> spaced_concat_strings (bt::string<S1> parA1, bt::string<S2> parA2, bt::string<Sizes>... parArgs) {
+			return (
+				bt::make_string(" ") + parA1 +
+				bt::make_string(" ") + parA2 +
+				spaced_concat_strings(parArgs...)
+			);
+		}
+
+		inline constexpr
+		bt::string<1> concat_strings() {
+			return bt::string<1>("");
+		}
+		template <std::size_t S1>
+		inline constexpr
+		bt::string<S1> concat_strings (bt::string<S1> parA1) {
+			return parA1;
+		}
+		template <std::size_t S1, std::size_t S2, std::size_t... Sizes>
+		constexpr inline
+		bt::string<total_string_len<S1, S2, Sizes...>::result + 1 + sizeof...(Sizes)> concat_strings (bt::string<S1> parA1, bt::string<S2> parA2, bt::string<Sizes>... parArgs) {
+			return (
+				parA1 +
+				bt::make_string(" ") + parA2 +
+				spaced_concat_strings(parArgs...)
+			);
+		}
 	} //namespace implem
 } //namespace pq
 
