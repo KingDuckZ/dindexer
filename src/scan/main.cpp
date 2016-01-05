@@ -19,10 +19,10 @@
 #	undef WITH_PROGRESS_FEEDBACK
 #endif
 
-#include "recorddata.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include "dindexerConfig.h"
-#include "filesearcher.hpp"
-#include "indexer.hpp"
+#include "dindexer-machinery/filesearcher.hpp"
+#include "dindexer-machinery/indexer.hpp"
 #include "dindexer-common/settings.hpp"
 #include "commandline.hpp"
 #include "dbbackend.hpp"

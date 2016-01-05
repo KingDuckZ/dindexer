@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tiger.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include <fstream>
 #include <cstdint>
 #include <memory>

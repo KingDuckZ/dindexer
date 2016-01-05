@@ -19,7 +19,7 @@
 #define id1B7A42F6E46547A6AB0F914E2A91399F
 
 #include <boost/program_options/variables_map.hpp>
-#include "mediatype.hpp"
+#include "dindexer-machinery/mediatype.hpp"
 
 namespace din {
 	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );

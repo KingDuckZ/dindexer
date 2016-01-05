@@ -52,6 +52,7 @@ target_include_directories(${bare_name}-inc
 #Libraries
 add_subdirectory(src/pq)
 add_subdirectory(src/common)
+add_subdirectory(src/machinery)
 
 #Actions
 add_subdirectory(src/main)

@@ -1,33 +1,21 @@
-project(${bare_name}-scan CXX C)
+project(${bare_name}-scan CXX)
 
 include(WithMediaAutodetect)
-find_package(Magic REQUIRED)
 
 add_executable(${PROJECT_NAME}
 	main.cpp
-	filesearcher.cpp
-	pathname.cpp
-	indexer.cpp
-	tiger.c
-	tiger.cpp
 	dbbackend.cpp
 	commandline.cpp
-	discinfo.cpp
-	mediatype.cpp
-	mimetype.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
-target_include_directories(${PROJECT_NAME}
-	PRIVATE ${MAGIC_INCLUDE_DIR}
-)
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
-	PRIVATE ${MAGIC_LIBRARIES}
+	PRIVATE ${bare_name}-machinery
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
@@ -36,12 +24,6 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 if (DINDEXER_WITH_MEDIA_AUTODETECT)
-	target_include_directories(${PROJECT_NAME} SYSTEM
-		PRIVATE ${BLKID_INCLUDE_DIRS}
-	)
-	target_link_libraries(${PROJECT_NAME}
-		PRIVATE ${BLKID_LIBRARIES}
-	)
 	target_compile_definitions(${PROJECT_NAME}
 		PRIVATE WITH_MEDIA_AUTODETECT
 	)

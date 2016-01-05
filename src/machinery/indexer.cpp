@@ -15,13 +15,13 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "indexer.hpp"
+#include "dindexer-machinery/indexer.hpp"
 #include "pathname.hpp"
-#include "tiger.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include "dindexer-common/settings.hpp"
-#include "filestats.hpp"
+#include "dindexer-machinery/filestats.hpp"
 #include "mimetype.hpp"
-#include "recorddata.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include <algorithm>
 #include <functional>
 #include <stdexcept>

@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mediatype.hpp"
+#include "dindexer-machinery/mediatype.hpp"
 #include "pathname.hpp"
 #include "discinfo.hpp"
 #include <utility>
