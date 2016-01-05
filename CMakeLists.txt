@@ -49,10 +49,13 @@ target_include_directories(${bare_name}-inc
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
-add_subdirectory(src/scan)
+#Libraries
 add_subdirectory(src/pq)
-add_subdirectory(src/main)
 add_subdirectory(src/common)
+
+#Actions
+add_subdirectory(src/main)
+add_subdirectory(src/scan)
 add_subdirectory(src/delete)
 add_subdirectory(src/query)
 add_subdirectory(src/locate)

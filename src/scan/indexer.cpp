@@ -18,14 +18,12 @@
 #include "indexer.hpp"
 #include "pathname.hpp"
 #include "tiger.hpp"
-#include "dbbackend.hpp"
 #include "dindexer-common/settings.hpp"
 #include "filestats.hpp"
 #include "mimetype.hpp"
 #include "recorddata.hpp"
 #include <algorithm>
 #include <functional>
-#include <vector>
 #include <stdexcept>
 #if defined(WITH_PROGRESS_FEEDBACK)
 #	include <atomic>
@@ -171,12 +169,29 @@ namespace din {
 				parSt.is_symlink
 			);
 		}
+
+		bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
+			const FileRecordData& l = parLeft;
+			const FileRecordData& r = parRight;
+			return
+				(l.level < r.level)
+				or (l.level == r.level and l.is_directory and not r.is_directory)
+				or (l.level == r.level and l.is_directory == r.is_directory and l.path < r.path)
+
+				//sort by directory - parent first, children later
+				//(level == o.level and is_dir and not o.is_dir)
+				//or (level == o.level and is_dir == o.is_dir and path < o.path)
+				//or (level > o.level + 1)
+				//or (level + 1 == o.level and is_dir and not o.is_dir and path < o.path)
+				//or (level + 1 == o.level and is_dir and not o.is_dir and path == PathName(o.path).dirname())
+				//or (level == o.level + 1 and not (o.is_dir and not is_dir and o.path == PathName(path).dirname()))
+			;
+		}
 	} //unnamed namespace
 
 	struct Indexer::LocalData {
 		typedef std::vector<FileRecordData> PathList;
 
-		dinlib::SettingsDB db_settings;
 		PathList paths;
 #if defined(WITH_PROGRESS_FEEDBACK)
 		std::atomic<std::size_t> done_count;
@@ -187,25 +202,7 @@ namespace din {
 		bool ignore_read_errors;
 	};
 
-	bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
-		const FileRecordData& l = parLeft;
-		const FileRecordData& r = parRight;
-		return
-			(l.level < r.level)
-			or (l.level == r.level and l.is_directory and not r.is_directory)
-			or (l.level == r.level and l.is_directory == r.is_directory and l.path < r.path)
-
-			//sort by directory - parent first, children later
-			//(level == o.level and is_dir and not o.is_dir)
-			//or (level == o.level and is_dir == o.is_dir and path < o.path)
-			//or (level > o.level + 1)
-			//or (level + 1 == o.level and is_dir and not o.is_dir and path < o.path)
-			//or (level + 1 == o.level and is_dir and not o.is_dir and path == PathName(o.path).dirname())
-			//or (level == o.level + 1 and not (o.is_dir and not is_dir and o.path == PathName(path).dirname()))
-		;
-	}
-
-	Indexer::Indexer (const dinlib::Settings& parSettings) :
+	Indexer::Indexer() :
 		m_local_data(new LocalData)
 	{
 #if !defined(NDEBUG)
@@ -225,7 +222,6 @@ namespace din {
 		m_local_data->processing_index = 0;
 #endif
 		m_local_data->file_count = 0;
-		m_local_data->db_settings = parSettings.db;
 	}
 
 	Indexer::~Indexer() noexcept {
@@ -297,28 +293,6 @@ namespace din {
 #endif
 	}
 
-	bool Indexer::add_to_db (const std::string& parSetName, char parType, bool parForce) const {
-#if defined(WITH_PROGRESS_FEEDBACK)
-		assert(m_local_data->done_count == m_local_data->file_count);
-#endif
-
-		if (not parForce) {
-			const auto& first_hash = m_local_data->paths.front().hash;
-			FileRecordData itm;
-			SetRecordDataFull set;
-			const bool already_in_db = read_from_db(itm, set, m_local_data->db_settings, first_hash);
-			if (already_in_db) {
-				return false;
-			}
-		}
-
-		PathName base_path(m_local_data->paths.front().path);
-
-		SetRecordData set_data {parSetName, parType};
-		write_to_db(m_local_data->db_settings, m_local_data->paths, set_data);
-		return true;
-	}
-
 	bool Indexer::add_path (const char* parPath, const fastf::FileStats& parStats) {
 		m_local_data->paths.push_back(
 			make_file_record_data(parPath, parStats));
@@ -385,5 +359,12 @@ namespace din {
 
 	void Indexer::ignore_read_errors (bool parIgnore) {
 		m_local_data->ignore_read_errors = parIgnore;
+	}
+
+	const std::vector<FileRecordData>& Indexer::record_data() const {
+#if defined(WITH_PROGRESS_FEEDBACK)
+		assert(m_local_data->done_count == m_local_data->file_count);
+#endif
+		return m_local_data->paths;
 	}
 } //namespace din

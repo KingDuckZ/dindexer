@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #if !defined(NDEBUG)
 #	define INDEXER_VERBOSE
@@ -40,9 +41,11 @@ namespace dinlib {
 } //namespace dinlib
 
 namespace din {
+	struct FileRecordData;
+
 	class Indexer {
 	public:
-		explicit Indexer ( const dinlib::Settings& parSettings );
+		Indexer ( void );
 		Indexer ( Indexer&& ) = default;
 		Indexer ( const Indexer& ) = delete;
 		~Indexer ( void ) noexcept;
@@ -60,9 +63,9 @@ namespace din {
 		std::condition_variable& step_notify ( void );
 #endif
 		void calculate_hash ( void );
-		bool add_to_db ( const std::string& parSetName, char parType, bool parForce=false ) const;
 		bool empty ( void ) const;
 		void ignore_read_errors ( bool parIgnore );
+		const std::vector<FileRecordData>& record_data ( void ) const;
 
 	private:
 		struct LocalData;
