@@ -40,12 +40,10 @@ namespace din {
 
 		uint32_t group_id;
 		{
-			std::ostringstream oss;
-			oss << "SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash='" <<
-				tiger_to_string(parHash, true) << "'" <<
-				" LIMIT 1;";
-
-			auto resultset = conn.query(oss.str());
+			auto resultset = conn.query(
+				"SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash=$1 LIMIT 1;",
+				tiger_to_string(parHash, true)
+			);
 			if (resultset.empty()) {
 				return false;
 			}
@@ -61,10 +59,10 @@ namespace din {
 		}
 
 		{
-			std::ostringstream oss;
-			oss << "SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=" << group_id << ';';
-
-			auto resultset = conn.query(oss.str());
+			auto resultset = conn.query(
+				"SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=$1;",
+				group_id
+			);
 			if (resultset.empty()) {
 				std::ostringstream err_msg;
 				err_msg << "Missing set: found a record with group_id=" << group_id;
