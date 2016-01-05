@@ -85,6 +85,30 @@ I never tested dindexer on anything other than Linux. Note that the code assumes
 This project is at an early stage and is still being developed. Currently, only the indexer has been implemented. You can search the database manually if you know how to write the SQL queries you will need.
 
 ##   Useful technical details   ##
+###  Program overview  ###
+For the sake of clarity, from here on I will refer to the main program (more on it later) simply as "dindexer" and collectively call all the other executables "actions". I will refer to static and shared objects as "libraries".
+"dindexer" is also the name of this project as a whole; that meaning will be kept and it will hopefully be clear from the context.
+
+dindexer is made of several actions and libraries. All of them are located in src/, but shared headers are found in include/. The main program, dindexer (the one users are supposed to run), is in src/main/ and it produces the dindexer executable. If you're working on this project, for your convenience you can symlink the dindexer executable into the root of your build directory. dindexer simply takes one action parameter and tries to match it to available actions. If successful it will run the relevant action passing all remaining command line parameters on.
+
+Other than dindexer, in src/ you can find the following actions:
+
+* **delete**
+* **locate**
+* **query**
+* **scan**
+
+and the following libraries:
+
+* **common** a collection of common code useful for the CL fronted
+* **machinery** the bulk of dindexer, such as the indexing functionality
+* **pq** a c++ wrapper for libpq (PostgreSql)
+
+Additionally inside include/helpers/ you will find header-only implementations of very generic helper tools.
+
+Currently, actions are just the command line frontend to access the functionalities in the libraries. This way writing a new CLI or GUI should be relatively easy.
+This structure might change in the future.
+
 ###  Queries  ###
 
 #### Find duplicates ####
