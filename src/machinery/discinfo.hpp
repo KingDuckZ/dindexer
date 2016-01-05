@@ -20,7 +20,7 @@
 
 #include <string>
 
-namespace din {
+namespace mchlib {
 #if defined(WITH_MEDIA_AUTODETECT)
 	enum OpticalTypes {
 		OpticalType_DVD,
@@ -58,6 +58,6 @@ namespace din {
 		std::string m_mountpoint;
 		std::string m_device;
 	};
-} //namespace din
+} //namespace mchlib
 
 #endif

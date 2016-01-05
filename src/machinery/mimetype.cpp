@@ -16,7 +16,7 @@
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/operator.hpp>
 
-namespace din {
+namespace mchlib {
 	using MagicCookie = std::unique_ptr<magic_set, void(*)(magic_t)>;
 
 	struct MimeType::LocalData {
@@ -109,4 +109,4 @@ namespace din {
 			return retval;
 		}
 	}
-} //namespace din
+} //namespace mchlib

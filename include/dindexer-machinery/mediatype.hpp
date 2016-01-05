@@ -22,7 +22,7 @@
 #include <stdexcept>
 #include "dindexer-common/mediatypes.hpp"
 
-namespace din {
+namespace mchlib {
 #if defined(WITH_MEDIA_AUTODETECT)
 	dinlib::MediaTypes guess_media_type ( std::string&& parPath );
 
@@ -38,6 +38,6 @@ namespace din {
 		CantAutodetectException ( const char* parWhat );
 	};
 #endif
-} //namespace din
+} //namespace mchlib
 
 #endif

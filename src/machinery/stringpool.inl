@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace din {
+namespace mchlib {
 	namespace implem {
 		template <typename StrRef>
 		std::pair<StrRef, bool> clone_ifp (const StrRef& parClone, StrRef parSource) {
@@ -137,4 +137,4 @@ namespace din {
 		}
 		return;
 	}
-} //namespace din
+} //namespace mchlib

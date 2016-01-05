@@ -34,7 +34,7 @@ extern "C" void tiger ( const char* parStr, uint64_t parLength, uint64_t parHash
 #	error "Not implemented without SSE2"
 #endif
 
-namespace din {
+namespace mchlib {
 	namespace {
 		const uint32_t g_buff_size = 1024 * 8;
 		const char g_tiger_padding = 0x80; //0x01 for V1
@@ -139,4 +139,4 @@ namespace din {
 	void tiger_data (const std::vector<char>& parData, TigerHash& parHash) {
 		tiger (parData.data(), parData.size(), parHash.data, g_tiger_padding);
 	}
-} //namespace din
+} //namespace mchlib

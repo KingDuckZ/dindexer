@@ -36,7 +36,7 @@
 #endif
 #include <cstdint>
 
-namespace din {
+namespace mchlib {
 	namespace {
 		using MountpointsMap = std::map<std::string, std::string>;
 
@@ -329,4 +329,4 @@ namespace din {
 		};
 	}
 #endif
-} //namespace din
+} //namespace mchlib

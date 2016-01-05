@@ -26,14 +26,16 @@ namespace dinlib {
 	struct SettingsDB;;
 } //namespace dinlib
 
-namespace din {
+namespace mchlib {
 	struct FileRecordData;
 	struct SetRecordData;
 	struct SetRecordDataFull;
 	struct TigerHash;
+} //namespace mchlib
 
-	void write_to_db ( const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData );
-	bool read_from_db ( FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const TigerHash& parHash );
+namespace din {
+	void write_to_db ( const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData );
+	bool read_from_db ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parHash );
 } //namespace din
 
 #endif

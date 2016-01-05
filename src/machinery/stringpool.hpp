@@ -28,7 +28,7 @@
 #include <functional>
 #include <boost/iterator/transform_iterator.hpp>
 
-namespace din {
+namespace mchlib {
 	template <typename C, typename Str=std::basic_string<C>, typename StrRef=boost::basic_string_ref<C>>
 	class StringPool {
 		typedef std::pair<StrRef, const Str*> StringListPair;
@@ -63,7 +63,7 @@ namespace din {
 		PoolType m_pool;
 		StringListType m_strings;
 	};
-} //namespace din
+} //namespace mchlib
 
 #include "stringpool.inl"
 

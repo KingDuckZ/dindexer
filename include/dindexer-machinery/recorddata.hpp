@@ -26,7 +26,7 @@
 #include <boost/flyweight.hpp>
 #include <boost/flyweight/no_locking.hpp>
 
-namespace din {
+namespace mchlib {
 	struct FileRecordData {
 		struct MimeStringTagStruct { };
 		typedef boost::flyweights::tag<MimeStringTagStruct> MimeStringTag;
@@ -81,6 +81,6 @@ namespace din {
 		const boost::string_ref name;
 		const char type;
 	};
-} //namespace din
+} //namespace mchlib
 
 #endif

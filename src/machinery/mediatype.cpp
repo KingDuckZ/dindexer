@@ -20,7 +20,7 @@
 #include "discinfo.hpp"
 #include <utility>
 
-namespace din {
+namespace mchlib {
 #if defined(WITH_MEDIA_AUTODETECT)
 	UnknownMediaTypeException::UnknownMediaTypeException (const std::string& parWhat) :
 		std::runtime_error(parWhat)
@@ -66,4 +66,4 @@ namespace din {
 		}
 	}
 #endif
-} //namespace din
+} //namespace mchlib

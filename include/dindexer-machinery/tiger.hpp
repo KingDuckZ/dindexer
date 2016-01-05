@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace din {
+namespace mchlib {
 	struct TigerHash {
 		TigerHash ( void ) = default;
 
@@ -44,6 +44,6 @@ namespace din {
 	std::string tiger_to_string ( const TigerHash& parHash, bool parUpcase=false );
 	void tiger_data ( const std::string& parData, TigerHash& parHash );
 	void tiger_data ( const std::vector<char>& parData, TigerHash& parHash );
-} //namespace din
+} //namespace mchlib
 
 #endif

@@ -41,7 +41,7 @@
 #endif
 #include <boost/utility/string_ref.hpp>
 
-namespace din {
+namespace mchlib {
 	using HashType = decltype(FileRecordData::hash);
 
 	namespace {
@@ -367,4 +367,4 @@ namespace din {
 #endif
 		return m_local_data->paths;
 	}
-} //namespace din
+} //namespace mchlib

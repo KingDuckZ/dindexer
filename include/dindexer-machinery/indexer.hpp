@@ -40,7 +40,7 @@ namespace dinlib {
 	struct Settings;
 } //namespace dinlib
 
-namespace din {
+namespace mchlib {
 	struct FileRecordData;
 
 	class Indexer {
@@ -72,6 +72,6 @@ namespace din {
 
 		std::unique_ptr<LocalData> m_local_data;
 	};
-} //namespace din
+} //namespace mchlib
 
 #endif

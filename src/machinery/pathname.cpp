@@ -21,7 +21,7 @@
 #include <ciso646>
 #include <iostream>
 
-namespace din {
+namespace mchlib {
 	const std::string PathName::m_empty_str("");
 
 	namespace {
@@ -210,4 +210,4 @@ namespace din {
 		}
 		return true;
 	}
-} //namespace din
+} //namespace mchlib

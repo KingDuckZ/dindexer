@@ -25,7 +25,7 @@
 #include <map>
 #include <iostream>
 
-namespace din {
+namespace mchlib {
 	class PathName {
 	public:
 		PathName ( PathName&& ) = default;
@@ -57,6 +57,6 @@ namespace din {
 
 	PathName make_relative_path ( const PathName& parBasePath, const PathName& parOtherPath );
 	std::ostream& operator<< ( std::ostream& parStream, const PathName& parPath );
-} //namespace din
+} //namespace mchlib
 
 #endif

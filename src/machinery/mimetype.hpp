@@ -23,7 +23,7 @@
 #include <utility>
 #include <boost/utility/string_ref.hpp>
 
-namespace din {
+namespace mchlib {
 	using SplitMime = std::pair<boost::string_ref, boost::string_ref>;
 
 	class MimeType {
@@ -41,6 +41,6 @@ namespace din {
 	};
 
 	SplitMime split_mime ( const std::string& parFull );
-} //namespace din
+} //namespace mchlib
 
 #endif

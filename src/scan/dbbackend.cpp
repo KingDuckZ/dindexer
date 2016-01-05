@@ -32,7 +32,7 @@ namespace din {
 	namespace {
 	} //unnamed namespace
 
-	bool read_from_db (FileRecordData& parItem, SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const TigerHash& parHash) {
+	bool read_from_db (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parHash) {
 		using boost::lexical_cast;
 
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
@@ -79,7 +79,7 @@ namespace din {
 		return true;
 	}
 
-	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<FileRecordData>& parData, const SetRecordData& parSetData) {
+	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData) {
 		using std::chrono::system_clock;
 		using boost::lexical_cast;
 

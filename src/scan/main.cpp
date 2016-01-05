@@ -39,8 +39,8 @@
 #endif
 
 namespace {
-	void run_hash_calculation ( din::Indexer& parIndexer, bool parShowProgress );
-	bool add_to_db ( const std::vector<din::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
+	void run_hash_calculation ( mchlib::Indexer& parIndexer, bool parShowProgress );
+	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -79,7 +79,7 @@ int main (int parArgc, char* parArgv[]) {
 	if (0 == vm.count("type")) {
 		std::cout << "Analyzing disc... ";
 		try {
-			const auto guessed_type = din::guess_media_type(std::string(search_path));
+			const auto guessed_type = mchlib::guess_media_type(std::string(search_path));
 			set_type = guessed_type;
 			std::cout << "Setting type to " << set_type << " ("
 				<< dinlib::media_type_to_str(guessed_type) << ")\n";
@@ -99,12 +99,12 @@ int main (int parArgc, char* parArgv[]) {
 
 	std::cout << "constructing...\n";
 
-	din::Indexer indexer;
+	mchlib::Indexer indexer;
 	indexer.ignore_read_errors(vm.count("ignore-errors") > 0);
 	fastf::FileSearcher searcher(search_path);
 	fastf::FileSearcher::ConstCharVecType ext, ignore;
 	searcher.SetFollowSymlinks(true);
-	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&din::Indexer::add_path, &indexer, _1, _2)));
+	searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&mchlib::Indexer::add_path, &indexer, _1, _2)));
 	searcher.Search(ext, ignore);
 	if (verbose) {
 		std::cout << "Fetching items list...\n";
@@ -127,7 +127,7 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
-	void run_hash_calculation (din::Indexer& parIndexer, bool parShowProgress) {
+	void run_hash_calculation (mchlib::Indexer& parIndexer, bool parShowProgress) {
 		if (parIndexer.empty()) {
 			return;
 		}
@@ -149,7 +149,7 @@ namespace {
 			std::cout << "Processing";
 			std::cout.flush();
 			const auto total_items = parIndexer.total_items();
-			std::thread hash_thread(&din::Indexer::calculate_hash, &parIndexer);
+			std::thread hash_thread(&mchlib::Indexer::calculate_hash, &parIndexer);
 			std::mutex progress_print;
 			std::size_t clear_size = 0;
 			const auto digit_count = static_cast<std::size_t>(std::log10(static_cast<double>(total_items))) + 1;
@@ -180,23 +180,23 @@ namespace {
 #endif
 	}
 
-	bool add_to_db (const std::vector<din::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce) {
-		using din::FileRecordData;
-		using din::SetRecordDataFull;
-		using din::SetRecordData;
+	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce) {
+		using mchlib::FileRecordData;
+		using mchlib::SetRecordDataFull;
+		using mchlib::SetRecordData;
 
 		if (not parForce) {
 			const auto& first_hash = parData.front().hash;
 			FileRecordData itm;
 			SetRecordDataFull set;
-			const bool already_in_db = read_from_db(itm, set, parDBSettings, first_hash);
+			const bool already_in_db = din::read_from_db(itm, set, parDBSettings, first_hash);
 			if (already_in_db) {
 				return false;
 			}
 		}
 
 		SetRecordData set_data {parSetName, parType};
-		write_to_db(parDBSettings, parData, set_data);
+		din::write_to_db(parDBSettings, parData, set_data);
 		return true;
 	}
 } //unnamed namespace
