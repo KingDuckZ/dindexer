@@ -47,4 +47,5 @@ void print_builtin_feats() {
 #else
 	printf("NDEBUG = no (Debug build)\n");
 #endif
+	printf("DB_OWNER_NAME = \"%s\"\n", DB_OWNER_NAME);
 }

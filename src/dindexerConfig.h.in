@@ -27,5 +27,6 @@
 #define CONFIG_FILE_PATH "@DINDEXER_CONFIG_FILE@"
 #define ACTIONS_SEARCH_PATH "@ACTIONS_PATH@"
 #define ACTION_PREFIX "@bare_name@-"
+#define DB_OWNER_NAME "@DB_OWNER_NAME@"
 
 #endif

@@ -9,6 +9,7 @@ include(Buildlibpqtypes)
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
 set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
+set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra -Wno-missing-field-initializers")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra -O3 -fomit-frame-pointer -Wno-missing-field-initializers")
@@ -37,6 +38,10 @@ message(STATUS "Actions search path set to: \"${ACTIONS_PATH}\"")
 configure_file(
 	"${PROJECT_SOURCE_DIR}/src/${bare_name}Config.h.in"
 	"${PROJECT_BINARY_DIR}/${bare_name}Config.h"
+)
+configure_file(
+	"${PROJECT_SOURCE_DIR}/dindexer.sql.in"
+	"${PROJECT_BINARY_DIR}/dindexer.sql"
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
