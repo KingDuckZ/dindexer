@@ -78,18 +78,38 @@ namespace pq {
 	};
 
 	Connection::Connection (std::string&& parUsername, std::string&& parPasswd, std::string&& parDatabase, std::string&& parAddress, uint16_t parPort) :
+		m_localData(new LocalData),
 		m_username(std::move(parUsername)),
 		m_passwd(std::move(parPasswd)),
 		m_database(std::move(parDatabase)),
 		m_address(std::move(parAddress)),
-		m_port(parPort),
-		m_localData(new LocalData)
+		m_port(parPort)
 	{
 		m_localData->connection = nullptr;
 	}
 
+	Connection::Connection (Connection&& parOther) :
+		m_localData(std::move(parOther.m_localData)),
+		m_username(std::move(parOther.m_username)),
+		m_passwd(std::move(parOther.m_passwd)),
+		m_database(std::move(parOther.m_database)),
+		m_address(std::move(parOther.m_address)),
+		m_port(parOther.m_port)
+	{
+	}
+
 	Connection::~Connection() noexcept {
 		disconnect();
+	}
+
+	Connection& Connection::operator= (Connection&& parOther) {
+		m_localData = std::move(parOther.m_localData);
+		m_username = std::move(parOther.m_username);
+		m_passwd = std::move(parOther.m_passwd);
+		m_database = std::move(parOther.m_database);
+		m_address = std::move(parOther.m_address);
+		m_port = parOther.m_port;
+		return *this;
 	}
 
 	bool Connection::is_connected() const noexcept {

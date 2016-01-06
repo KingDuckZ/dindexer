@@ -32,6 +32,8 @@ namespace pq {
 	class Connection {
 	public:
 		Connection ( std::string&& parUsername, std::string&& parPasswd, std::string&& parDatabase, std::string&& parAddress, uint16_t parPort );
+		Connection ( Connection&& );
+		Connection ( const Connection& ) = delete;
 		~Connection ( void ) noexcept;
 
 		std::string error_message ( void ) const;
@@ -46,6 +48,9 @@ namespace pq {
 		template <typename... Args>
 		ResultSet query ( const std::string& parQuery, Args&&... parArgs );
 
+		Connection& operator= ( Connection&& );
+		Connection& operator= ( const Connection& ) = delete;
+
 	private:
 		struct LocalData;
 		using PGParams = std::unique_ptr<::PGparam, void(*)(::PGparam*)>;
@@ -53,12 +58,12 @@ namespace pq {
 		ResultSet query_params ( const std::string& parQuery, PGParams& parParams );
 		PGParams make_params ( const std::string* parTypes, ... );
 
-		const std::string m_username;
-		const std::string m_passwd;
-		const std::string m_database;
-		const std::string m_address;
-		const uint16_t m_port;
 		std::unique_ptr<LocalData> m_localData;
+		std::string m_username;
+		std::string m_passwd;
+		std::string m_database;
+		std::string m_address;
+		uint16_t m_port;
 	};
 
 	template <typename... Args>
