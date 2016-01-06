@@ -134,6 +134,11 @@ namespace mchlib {
 						if (parIgnoreErrors) {
 							it_entry->unreadable = true;
 							it_entry->hash = HashType {};
+							if (it_entry->mime_full.get().empty()) {
+								it_entry->mime_full = "unknown";
+								it_entry->mime_type = boost::string_ref(it_entry->mime_full.get());
+								it_entry->mime_charset = boost::string_ref(it_entry->mime_full.get());
+							}
 						}
 						else {
 							throw e;
@@ -152,6 +157,12 @@ namespace mchlib {
 			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(curr_entry_it->hash) << '\n';
 #endif
 			curr_entry_it->hash_valid = true;
+			{
+				curr_entry_it->mime_full = parMime.analyze(curr_entry_it->path);
+				auto mime_pair = split_mime(curr_entry_it->mime_full);
+				curr_entry_it->mime_type = mime_pair.first;
+				curr_entry_it->mime_charset = mime_pair.second;
+			}
 		}
 
 		template <bool FileTrue=true>

@@ -104,8 +104,9 @@ namespace din {
 		for (std::size_t z = 0; z < parData.size(); ++z) {
 			const std::string query = "INSERT INTO \"files\" (path, hash, "
 				"level, group_id, is_directory, is_symlink, size, "
-				"access_time, modify_time, is_hash_valid, unreadable) VALUES "
-				"($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);";
+				"access_time, modify_time, is_hash_valid, unreadable, "
+				"mimetype, charset) VALUES "
+				"($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);";
 
 			const auto& itm = parData[z];
 			conn.query(query,
@@ -119,7 +120,9 @@ namespace din {
 				system_clock::from_time_t(itm.atime),
 				system_clock::from_time_t(itm.mtime),
 				itm.hash_valid,
-				itm.unreadable
+				itm.unreadable,
+				std::string(itm.mime_type.data(), itm.mime_type.size()),
+				std::string(itm.mime_charset.data(), itm.mime_charset.size())
 			);
 		}
 		conn.query("COMMIT;");
