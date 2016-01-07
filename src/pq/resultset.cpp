@@ -50,6 +50,7 @@ namespace pq {
 		std::string binary_to_string (const char* parValue, Oid parType, int parLength) {
 			using boost::lexical_cast;
 
+			static_cast<void>(parLength);
 			assert(parValue);
 			assert(parLength > 0);
 
