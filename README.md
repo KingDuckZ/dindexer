@@ -38,7 +38,7 @@ dindexer aims to save you from that scenario. The intended usage flow is:
 5. Make queries to find on which disc you stored your data - this part is still being worked on, but you can imagine something like `dindexer query portugal.jpg` returning "Disc 24 - pictures and stuff"
 6. Go to where you dump - er... store your physical discs (the drawer in your desk, a box, the other room), find the disc you marked as "Disc 24", pop it in your cd-reader and voilà, here's where your portugal.jpg was!
 
-**NOTE:** as dindexer is still being heavily developed, any of those steps can change in the future. I have a few ideas on how to make this program more convenient to use, but this will require some work. Contributions are welcome.
+**WARNING:** as dindexer is still being heavily developed, any of those steps can change in the future. I have a few ideas on how to make this program more convenient to use, but this will require some work. Contributions are welcome.
 
 ###  Configuration  ###
 As dindexer needs to write data to a PostgreSQL database, you need to configure access to it. Create a ~/.config/dindexer.yml file with the settings to connect to your database. For example:
@@ -70,6 +70,8 @@ The following libraries must be available on your system:
 - Boost 1.53 or later
 - yaml-cpp 0.5.1 or later
 - libblkid (from util-linux/misc-utils) *optional, build with -DDINDEXER_WITH_MEDIA_AUTODETECT=Off if you don't have this*
+
+*Note:* Although the CMakeLists.txt will say minimum required version for PostgreSQL is 8.3, this program has only ever been tested with 9.4. 8.3 is simply the threshold under which I'm sure the code will not work. If you want to try dindexer with a PostgreSQL version less than 9.4 you are welcome to do so, but please note I won't be able to make sure everything will work. Patches that address eventual issues are welcome.
 
 ###  Linux  ###
 
