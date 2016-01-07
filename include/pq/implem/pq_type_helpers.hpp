@@ -62,6 +62,10 @@ namespace pq {
 		template <>
 		struct get_pqlib_c_type_struct<std::chrono::system_clock::time_point> {
 			//Hack to make some sort of "static pimpl"
+			//I don't want to include libpqtypes here since this is a public
+			//header, so the following should mimic the real struct in that they
+			//should have the same size and alignment. This is asserted in the
+			//cpp.
 			struct StorageStruct { uint64_t epoch; int a[14]; char tzabbr[16]; };
 			static constexpr std::size_t DATA_SIZE = sizeof(StorageStruct);
 			using storage = std::aligned_storage<DATA_SIZE, alignof(uint64_t)>::type;

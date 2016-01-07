@@ -27,6 +27,40 @@
 
 namespace pq {
 	namespace implem {
+		auto get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::conv (const std::chrono::system_clock::time_point& parParam) -> type {
+			static_assert(sizeof(storage) == sizeof(PGtimestamp), "Wrong size for timestamp, please update DATA_SIZE");
+			static_assert(alignof(storage) == alignof(PGtimestamp), "Wrong alignment for timestamp, please update type");
+
+			using std::chrono::system_clock;
+
+			PGtimestamp ts;
+
+			std::memset(&ts, 0, sizeof(PGtimestamp));
+
+			auto t = system_clock::to_time_t(parParam);
+			ts.epoch = t;
+			auto tm = std::localtime(&t);
+			ts.time.hour = tm->tm_hour;
+			ts.time.min = tm->tm_min;
+			ts.time.sec = tm->tm_sec;
+			ts.time.usec = 0;
+			ts.time.withtz = 1;
+			ts.date.isbc = 0;
+			ts.date.year = tm->tm_year + 1900;
+			ts.date.mon = tm->tm_mon;
+			ts.date.mday = tm->tm_mday;
+			char* tzn;
+			PQlocalTZInfo(&t, &ts.time.gmtoff, &ts.time.isdst, &tzn);
+			std::strcpy(ts.time.tzabbr, tzn);
+
+			std::copy(reinterpret_cast<const char*>(&ts), reinterpret_cast<const char*>(&ts) + sizeof(ts), reinterpret_cast<char*>(&m_storage));
+			return &m_storage;
+		}
+
+		get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::~get_pqlib_c_type_struct ( void ) noexcept {
+			return;
+		}
+
 		get_pqlib_c_type_struct_arr::get_pqlib_c_type_struct_arr (const Connection& parConn) :
 			m_par(parConn.make_empty_params())
 		{
