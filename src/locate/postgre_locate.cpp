@@ -26,6 +26,33 @@
 namespace din {
 	namespace {
 		const int g_max_results = 200;
+
+		pq::Connection make_pq_conn ( const dinlib::SettingsDB& parDB, bool parOpen=true );
+
+		pq::Connection make_pq_conn (const dinlib::SettingsDB& parDB, bool parOpen) {
+			auto conn = pq::Connection(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+			if (parOpen) {
+				conn.connect();
+			}
+			return std::move(conn);
+		}
+
+		std::vector<LocatedSet> sets_result_to_vec (pq::ResultSet&& parResult) {
+			using boost::lexical_cast;
+
+			std::vector<LocatedSet> retval;
+			retval.reserve(parResult.size());
+			for (const auto& record : parResult) {
+				retval.push_back(LocatedSet{
+					record["desc"],
+					lexical_cast<decltype(LocatedSet::id)>(record["id"]),
+					lexical_cast<decltype(LocatedSet::files_count)>(record["file_count"]),
+					lexical_cast<decltype(LocatedSet::dir_count)>(record["dir_count"])
+				});
+			}
+
+			return std::move(retval);
+		}
 	} //unnamed namespace
 
 	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
@@ -33,8 +60,7 @@ namespace din {
 		using boost::string_ref;
 		namespace ba = boost::algorithm;
 
-		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
-		conn.connect();
+		auto conn = make_pq_conn(parDB);
 
 		const auto clean_string_with_quotes = conn.escaped_literal(parSearch);
 		const auto clean_string = string_ref(clean_string_with_quotes).substr(1, clean_string_with_quotes.size() - 2);
@@ -63,5 +89,35 @@ namespace din {
 		}
 
 		return std::move(retval);
+	}
+
+	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
+		auto conn = make_pq_conn(parDB);
+
+		const std::string query = std::string("SELECT \"id\", \"desc\", "
+			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND NOT \"is_directory\") as \"file_count\", "
+			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND \"is_directory\") as \"dir_count\" "
+			"FROM \"sets\" WHERE str_match_partial(\"desc\", $1, $2) LIMIT "
+		) + std::to_string(g_max_results) + ";";
+
+		auto result = conn.query(query, parSearch, parCaseInsensitive);
+		return sets_result_to_vec(std::move(result));
+	}
+
+	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive) {
+		if (parSets.empty()) {
+			return locate_sets_in_db(parDB, parSearch, parCaseInsensitive);
+		}
+
+		auto conn = make_pq_conn(parDB);
+
+		const std::string query = std::string("SELECT \"id\", \"desc\", "
+			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND NOT \"is_directory\") as \"file_count\", "
+			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND \"is_directory\") as \"dir_count\" "
+			"FROM \"sets\" WHERE \"id\" = ANY($1) AND str_match_partial(\"desc\", $3, $2) LIMIT "
+		) + std::to_string(g_max_results) + ";";
+
+		auto result = conn.query(query, parSearch, parCaseInsensitive, parSets);
+		return sets_result_to_vec(std::move(result));
 	}
 } //namespace din

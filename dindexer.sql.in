@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2016-01-06 01:55:35 GMT
+-- Started on 2016-01-07 15:10:56 GMT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,7 +22,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2040 (class 0 OID 0)
+-- TOC entry 2041 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
@@ -31,6 +31,23 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 192 (class 1255 OID 31654)
+-- Name: str_match_partial(text, text, boolean); Type: FUNCTION; Schema: public; Owner: @DB_OWNER_NAME@
+--
+
+CREATE FUNCTION str_match_partial(text, text, boolean) RETURNS boolean
+    LANGUAGE sql IMMUTABLE
+    AS $_$SELECT CASE WHEN $3 THEN
+LOWER($1) LIKE LOWER('%'||regexp_replace($2, '(\%_)', '\\1')||'%')
+ELSE
+$1 LIKE '%'||regexp_replace($2, '(\%_)', '\\1')||'%'
+END;
+$_$;
+
+
+ALTER FUNCTION public.str_match_partial(text, text, boolean) OWNER TO @DB_OWNER_NAME@;
 
 --
 -- TOC entry 191 (class 1255 OID 31290)
@@ -81,7 +98,7 @@ CREATE TABLE files (
 ALTER TABLE files OWNER TO @DB_OWNER_NAME@;
 
 --
--- TOC entry 2041 (class 0 OID 0)
+-- TOC entry 2042 (class 0 OID 0)
 -- Dependencies: 175
 -- Name: CONSTRAINT chk_hash_0 ON files; Type: COMMENT; Schema: public; Owner: @DB_OWNER_NAME@
 --
@@ -105,7 +122,7 @@ CREATE SEQUENCE files_id_seq
 ALTER TABLE files_id_seq OWNER TO @DB_OWNER_NAME@;
 
 --
--- TOC entry 2042 (class 0 OID 0)
+-- TOC entry 2043 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DB_OWNER_NAME@
 --
@@ -131,7 +148,7 @@ CREATE TABLE sets (
 ALTER TABLE sets OWNER TO @DB_OWNER_NAME@;
 
 --
--- TOC entry 2043 (class 0 OID 0)
+-- TOC entry 2044 (class 0 OID 0)
 -- Dependencies: 177
 -- Name: COLUMN sets.type; Type: COMMENT; Schema: public; Owner: @DB_OWNER_NAME@
 --
@@ -161,7 +178,7 @@ CREATE SEQUENCE sets_id_seq
 ALTER TABLE sets_id_seq OWNER TO @DB_OWNER_NAME@;
 
 --
--- TOC entry 2044 (class 0 OID 0)
+-- TOC entry 2045 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DB_OWNER_NAME@
 --
@@ -170,7 +187,7 @@ ALTER SEQUENCE sets_id_seq OWNED BY sets.id;
 
 
 --
--- TOC entry 1904 (class 2604 OID 31284)
+-- TOC entry 1905 (class 2604 OID 31284)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: @DB_OWNER_NAME@
 --
 
@@ -178,7 +195,7 @@ ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regcl
 
 
 --
--- TOC entry 1908 (class 2604 OID 31414)
+-- TOC entry 1909 (class 2604 OID 31414)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: @DB_OWNER_NAME@
 --
 
@@ -186,7 +203,7 @@ ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclas
 
 
 --
--- TOC entry 1917 (class 2606 OID 31289)
+-- TOC entry 1918 (class 2606 OID 31289)
 -- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -195,7 +212,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1921 (class 2606 OID 31420)
+-- TOC entry 1922 (class 2606 OID 31420)
 -- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -204,7 +221,7 @@ ALTER TABLE ONLY sets
 
 
 --
--- TOC entry 1919 (class 2606 OID 31294)
+-- TOC entry 1920 (class 2606 OID 31294)
 -- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -213,7 +230,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 1913 (class 1259 OID 31426)
+-- TOC entry 1914 (class 1259 OID 31426)
 -- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -221,7 +238,7 @@ CREATE INDEX fki_files_sets ON files USING btree (group_id);
 
 
 --
--- TOC entry 1914 (class 1259 OID 31651)
+-- TOC entry 1915 (class 1259 OID 31651)
 -- Name: idx_mimetype; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -229,7 +246,7 @@ CREATE INDEX idx_mimetype ON files USING btree (mimetype, charset);
 
 
 --
--- TOC entry 1915 (class 1259 OID 31292)
+-- TOC entry 1916 (class 1259 OID 31292)
 -- Name: idx_paths; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@; Tablespace: 
 --
 
@@ -237,7 +254,7 @@ CREATE INDEX idx_paths ON files USING btree (path);
 
 
 --
--- TOC entry 1923 (class 2620 OID 31291)
+-- TOC entry 1924 (class 2620 OID 31291)
 -- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @DB_OWNER_NAME@
 --
 
@@ -245,7 +262,7 @@ CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW E
 
 
 --
--- TOC entry 1922 (class 2606 OID 31421)
+-- TOC entry 1923 (class 2606 OID 31421)
 -- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@
 --
 
@@ -254,7 +271,7 @@ ALTER TABLE ONLY files
 
 
 --
--- TOC entry 2039 (class 0 OID 0)
+-- TOC entry 2040 (class 0 OID 0)
 -- Dependencies: 8
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -265,7 +282,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2016-01-06 01:55:37 GMT
+-- Completed on 2016-01-07 15:11:05 GMT
 
 --
 -- PostgreSQL database dump complete

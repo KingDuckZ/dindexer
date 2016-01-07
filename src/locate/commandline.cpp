@@ -27,6 +27,7 @@ namespace din {
 		po::options_description set_options(ACTION_NAME " options");
 		set_options.add_options()
 			("case-insensitive,i", "Disable case sensitivity during search")
+			("set,s", "Look for matching sets instead of files")
 			//("option,o", po::value<std::string>()->default_value("default_value"), "Help message")
 			//("option2", po::value<int>(), "Help message")
 		;

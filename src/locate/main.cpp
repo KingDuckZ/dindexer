@@ -29,6 +29,15 @@ namespace din {
 		parStream << parItem.group_id << '\t' << parItem.id << '\t' << parItem.path;
 		return parStream;
 	}
+
+	std::ostream& operator<< (std::ostream& parStream, const LocatedSet& parItem) {
+		const decltype(parItem.dir_count) one = 1;
+		const auto dircount = std::max(parItem.dir_count, one) - one;
+
+		parStream << parItem.id << "\t\"" << parItem.desc << "\"\t" <<
+			'\t' << parItem.files_count << '\t' << dircount;
+		return parStream;
+	}
 } //namespace din
 
 int main (int parArgc, char* parArgv[]) {
@@ -59,7 +68,13 @@ int main (int parArgc, char* parArgv[]) {
 		}
 	}
 
-	const auto results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
-	std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
+	if (vm.count("set")) {
+		const auto results = din::locate_sets_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedSet>(std::cout, "\n"));
+	}
+	else {
+		const auto results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
+	}
 	return 0;
 }
