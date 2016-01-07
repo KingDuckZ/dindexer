@@ -94,64 +94,63 @@ namespace pq {
 
 		template <typename T>
 		struct type_to_pqtypes_name_impl : public type_to_pqtypes_name<T> {
-			constexpr static const std::size_t size = strlen(type_to_pqtypes_name<T>::name) + 1;
+			constexpr static const std::size_t size = strlen(type_to_pqtypes_name<T>::name()) + 1;
 		};
 
 		template <>
 		struct type_to_pqtypes_name<std::string> {
-			constexpr static const char* name = "text";
+			constexpr static const char* name ( void ) { return "text"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<boost::string_ref> {
-			constexpr static const char* name = "text";
+			constexpr static const char* name ( void ) { return "text"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<bool> {
-			constexpr static const char* name = "bool";
+			constexpr static const char* name ( void ) { return "bool"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<float> {
-			constexpr static const char* name = "float4";
+			constexpr static const char* name ( void ) { return "float4"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<double> {
-			constexpr static const char* name = "float8";
+			constexpr static const char* name ( void ) { return "float8"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<int16_t> {
-			constexpr static const char* name = "int2";
+			constexpr static const char* name ( void ) { return "int2"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<int32_t> {
-			constexpr static const char* name = "int4";
+			constexpr static const char* name ( void ) { return "int4"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<int64_t> {
-			constexpr static const char* name = "int8";
+			constexpr static const char* name ( void ) { return "int8"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<uint16_t> {
-			constexpr static const char* name = "int2";
+			constexpr static const char* name ( void ) { return "int2"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<uint32_t> {
-			constexpr static const char* name = "int4";
+			constexpr static const char* name ( void ) { return "int4"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<uint64_t> {
-			constexpr static const char* name = "int8";
+			constexpr static const char* name ( void ) { return "int8"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<std::chrono::system_clock::time_point> {
-			constexpr static const char* name = "timestamptz";
+			constexpr static const char* name ( void ) { return "timestamptz"; }
 		};
 		template <typename VT, typename VU>
 		struct type_to_pqtypes_name<std::vector<VT, VU>> {
 		private:
-			constexpr static const std::size_t sub_size = strlen(type_to_pqtypes_name<VT>::name) + 1;
-			constexpr static const bt::string<sub_size> sub_name_str = type_to_pqtypes_name<VT>::name;
+			constexpr static const std::size_t sub_size = strlen(type_to_pqtypes_name<VT>::name()) + 1;
 		public:
-			constexpr static bt::string<3 + sub_size - 1> name = sub_name_str + bt::make_string("[]");
+			constexpr static bt::string<3 + sub_size - 1> name ( void ) { return bt::string<sub_size>(type_to_pqtypes_name<VT>::name()) + bt::make_string("[]"); }
 		};
 
 		template <typename T>
@@ -198,7 +197,7 @@ namespace pq {
 		template <typename T>
 		inline constexpr
 		bt::string<type_to_pqtypes_name_impl<T>::size + 1> make_pqtypes_name (const char parPrefix) {
-			return bt::make_string<2>({parPrefix, '\0'}) + bt::string<type_to_pqtypes_name_impl<T>::size>(type_to_pqtypes_name_impl<T>::name);
+			return bt::make_string<2>({parPrefix, '\0'}) + bt::string<type_to_pqtypes_name_impl<T>::size>(type_to_pqtypes_name_impl<T>::name());
 		}
 
 		template <std::size_t... Sizes>
