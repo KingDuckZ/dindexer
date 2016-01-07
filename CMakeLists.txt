@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(bare_name "dindexer")
-project("${bare_name}-if" VERSION 0.1.3 LANGUAGES CXX C)
+project("${bare_name}-if" VERSION 0.1.4 LANGUAGES CXX C)
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 include(GetGitRevisionDescription)
