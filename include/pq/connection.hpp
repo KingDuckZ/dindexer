@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ typedef pg_param PGparam;
 
 namespace pq {
 	class Connection {
+		friend struct implem::get_pqlib_c_type_struct_arr;
 	public:
 		Connection ( std::string&& parUsername, std::string&& parPasswd, std::string&& parDatabase, std::string&& parAddress, uint16_t parPort );
 		Connection ( Connection&& );
@@ -57,6 +58,7 @@ namespace pq {
 
 		ResultSet query_params ( const std::string& parQuery, PGParams& parParams );
 		PGParams make_params ( const std::string* parTypes, ... );
+		PGParams make_empty_params ( void ) const;
 
 		std::unique_ptr<LocalData> m_localData;
 		std::string m_username;
@@ -78,7 +80,7 @@ namespace pq {
 			auto types_bt = concat_strings(make_pqtypes_name<typename remove_cv<typename remove_reference<Args>::type>::type>()...);
 			static_assert(types_bt.size() > 0, "Invalid empty types string (function called with no arguments?)");
 			const std::string types(types_bt.data(), types_bt.size());
-			return this->make_params(&types, implem::get_pqlib_c_type_struct<typename remove_cv<typename remove_reference<Args>::type>::type>().conv(parArgs)...);
+			return this->make_params(&types, implem::get_pqlib_c_type_struct<typename remove_cv<typename remove_reference<Args>::type>::type>(*this).conv(parArgs)...);
 		};
 		PGParams pgparams = make_pgparams();
 

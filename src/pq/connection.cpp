@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -99,7 +99,9 @@ namespace pq {
 	}
 
 	Connection::~Connection() noexcept {
-		disconnect();
+		if (m_localData) {
+			disconnect();
+		}
 	}
 
 	Connection& Connection::operator= (Connection&& parOther) {
@@ -214,7 +216,7 @@ namespace pq {
 	}
 
 	auto Connection::make_params (const std::string* parTypes, ...) -> PGParams {
-		PGParams retval(PQparamCreate(m_localData->connection), &PQparamClear);
+		PGParams retval = make_empty_params();
 		va_list argp;
 
 		va_start(argp, parTypes);
@@ -222,5 +224,12 @@ namespace pq {
 		va_end(argp);
 
 		return std::move(retval);
+	}
+
+	auto Connection::make_empty_params() const -> PGParams {
+		assert(is_connected());
+		auto ret = PGParams(PQparamCreate(m_localData->connection), &PQparamClear);
+		assert(ret.get());
+		return std::move(ret);
 	}
 } //namespace pq
