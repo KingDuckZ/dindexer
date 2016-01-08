@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -20,12 +20,40 @@
 #include <functional>
 #include <ciso646>
 #include <iostream>
+#include <cassert>
 
 namespace mchlib {
 	const std::string PathName::m_empty_str("");
 
 	namespace {
 		std::string get_joint_atoms ( const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight=0 );
+		std::size_t calc_join_size ( const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight=0 );
+		std::size_t get_adjusted_atom_count ( const StringPool<char>& parPool, std::size_t parSkipRight );
+
+		std::size_t get_adjusted_atom_count (const StringPool<char>& parPool, std::size_t parSkipRight) {
+			const auto orig_atom_count = parPool.size();
+			const auto atom_count = (parSkipRight >= orig_atom_count ? 0 : orig_atom_count - parSkipRight);
+			return atom_count;
+		}
+
+		std::size_t calc_join_size (const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight) {
+			const auto atom_count = get_adjusted_atom_count(parPool, parSkipRight);
+			if (not atom_count) {
+				if (parPool.empty() and parAbs) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+
+			std::size_t reserve = (parAbs ? 1 : 0);
+			for (std::size_t z = 0; z < atom_count; ++z) {
+				reserve += parPool[z].size();
+			}
+			reserve += atom_count - 1;
+			return reserve;
+		}
 
 		std::size_t count_grouped (boost::string_ref parIn, char parDelim) {
 			std::size_t retval = 0;
@@ -55,32 +83,30 @@ namespace mchlib {
 		}
 
 		std::string get_joint_atoms (const StringPool<char>& parPool, bool parAbs, std::size_t parSkipRight) {
-			const auto orig_atom_count = parPool.size();
-			const auto atom_count = (parSkipRight >= orig_atom_count ? 0 : orig_atom_count - parSkipRight);
-			if (not atom_count) {
-				if (parPool.empty() and parAbs) {
+			const auto reserve = calc_join_size(parPool, parAbs, parSkipRight);
+			switch (reserve) {
+			case 0:
+				//reserve 0 means the resulting string is empty
+				return std::string("");
+			case 1:
+				//when reserve is 1 and we're talking about an absolute path,
+				//the resulting string can only be "/"
+				if (parAbs) {
 					return std::string("/");
 				}
-				else {
-					return std::string("");
-				}
-			}
-
-			std::size_t reserve = (parAbs ? 1 : 0);
-			for (std::size_t z = 0; z < atom_count; ++z) {
-				reserve += parPool[z].size();
-			}
-			reserve += atom_count - 1;
+			};
 
 			std::string out;
 			out.reserve(reserve);
 			const char* slash = (parAbs ? "/" : "");
+			const auto atom_count = get_adjusted_atom_count(parPool, parSkipRight);
 			for (std::size_t z = 0; z < atom_count; ++z) {
 				out += slash;
 				const auto& curr_itm = parPool[z];
 				out.insert(out.end(), curr_itm.begin(), curr_itm.end());
 				slash = "/";
 			}
+			assert(reserve == out.size());
 			return std::move(out);
 		}
 	} //unnamed namespace
@@ -209,5 +235,9 @@ namespace mchlib {
 			}
 		}
 		return true;
+	}
+
+	std::size_t PathName::str_path_size() const {
+		return calc_join_size(m_pool, is_absolute());
 	}
 } //namespace mchlib

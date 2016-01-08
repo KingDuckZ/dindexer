@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -35,6 +35,7 @@ namespace mchlib {
 
 		bool is_absolute ( void ) const { return m_absolute; }
 		std::string path ( void ) const;
+		std::size_t str_path_size ( void ) const;
 		const std::string& original_path ( void ) const { return (m_original_path ? *m_original_path : m_empty_str); }
 		std::size_t atom_count ( void ) const;
 		const boost::string_ref operator[] ( std::size_t parIndex ) const;
