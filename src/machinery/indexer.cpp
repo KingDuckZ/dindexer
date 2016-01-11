@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -62,7 +62,7 @@ namespace mchlib {
 				while (
 					it_entry != parEnd and (
 						it_entry->level == curr_entry.level
-						or parCurrDir != PathName(it_entry->path).pop_right()
+						or parCurrDir != PathName(it_entry->abs_path).pop_right()
 					//and (not it_entry->is_dir or (it_entry->level <= curr_entry.level
 					//and parCurrDir != PathName(it_entry->path).pop_right()))
 				)) {
@@ -73,9 +73,9 @@ namespace mchlib {
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
-				curr_entry.mime_full = parMime.analyze(it_entry->path);
-				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->path).pop_right()) {
-					PathName curr_subdir(it_entry->path);
+				curr_entry.mime_full = parMime.analyze(it_entry->abs_path);
+				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->abs_path).pop_right()) {
+					PathName curr_subdir(it_entry->abs_path);
 					if (it_entry->is_directory) {
 						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors, parMime);
 
@@ -110,22 +110,22 @@ namespace mchlib {
 					it_entry != parEnd
 					and (it_entry->is_directory
 						or it_entry->level != curr_entry_it->level + 1
-						or PathName(it_entry->path).pop_right() != parCurrDir
+						or PathName(it_entry->abs_path).pop_right() != parCurrDir
 					)
 				) {
 					++it_entry;
 				}
 
-				while (it_entry != parEnd and not it_entry->is_directory and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->path).pop_right() == parCurrDir) {
+				while (it_entry != parEnd and not it_entry->is_directory and it_entry->level == curr_entry_it->level + 1 and PathName(it_entry->abs_path).pop_right() == parCurrDir) {
 					assert(not it_entry->is_directory);
 #if defined(INDEXER_VERBOSE)
-					std::cout << "Hashing file " << it_entry->path << "...";
+					std::cout << "Hashing file " << it_entry->abs_path << "...";
 #endif
 					parNextItemCallback(it_entry - parBegin);
 					try {
-						tiger_file(it_entry->path, it_entry->hash, curr_entry_it->hash, it_entry->size);
+						tiger_file(it_entry->abs_path, it_entry->hash, curr_entry_it->hash, it_entry->size);
 						it_entry->hash_valid = true;
-						it_entry->mime_full = parMime.analyze(it_entry->path);
+						it_entry->mime_full = parMime.analyze(it_entry->abs_path);
 						auto mime_pair = split_mime(it_entry->mime_full);
 						it_entry->mime_type = mime_pair.first;
 						it_entry->mime_charset = mime_pair.second;
@@ -158,7 +158,7 @@ namespace mchlib {
 #endif
 			curr_entry_it->hash_valid = true;
 			{
-				curr_entry_it->mime_full = parMime.analyze(curr_entry_it->path);
+				curr_entry_it->mime_full = parMime.analyze(curr_entry_it->abs_path);
 				auto mime_pair = split_mime(curr_entry_it->mime_full);
 				curr_entry_it->mime_type = mime_pair.first;
 				curr_entry_it->mime_charset = mime_pair.second;
@@ -187,7 +187,7 @@ namespace mchlib {
 			return
 				(l.level < r.level)
 				or (l.level == r.level and l.is_directory and not r.is_directory)
-				or (l.level == r.level and l.is_directory == r.is_directory and l.path < r.path)
+				or (l.level == r.level and l.is_directory == r.is_directory and l.abs_path < r.abs_path)
 
 				//sort by directory - parent first, children later
 				//(level == o.level and is_dir and not o.is_dir)
@@ -197,6 +197,15 @@ namespace mchlib {
 				//or (level + 1 == o.level and is_dir and not o.is_dir and path == PathName(o.path).dirname())
 				//or (level == o.level + 1 and not (o.is_dir and not is_dir and o.path == PathName(path).dirname()))
 			;
+		}
+
+		void populate_rel_paths (const PathName& parBase, std::vector<FileRecordData>& parItems) {
+			const std::size_t offset = parBase.str_path_size();
+			for (FileRecordData& itm : parItems) {
+				assert(itm.abs_path.size() >= offset);
+				itm.path = boost::string_ref(itm.abs_path).substr(offset);
+				assert(itm.path.data());
+			}
 		}
 	} //unnamed namespace
 
@@ -249,7 +258,7 @@ namespace mchlib {
 #endif
 
 	void Indexer::calculate_hash() {
-		PathName base_path(m_local_data->paths.front().path);
+		PathName base_path(m_local_data->paths.front().abs_path);
 		std::sort(m_local_data->paths.begin(), m_local_data->paths.end(), &file_record_data_lt);
 		MimeType mime;
 
@@ -263,7 +272,7 @@ namespace mchlib {
 				std::cout << "(D) ";
 			else
 				std::cout << "(F) ";
-			std::cout << itm.path << " (" << itm.level << ")\n";
+			std::cout << itm.abs_path << " (" << itm.level << ")\n";
 		}
 		std::cout << "-----------------------------------------------------\n";
 #endif
@@ -297,6 +306,8 @@ namespace mchlib {
 		);
 #endif
 
+		populate_rel_paths(base_path, m_local_data->paths);
+
 #if defined(INDEXER_VERBOSE)
 		for (const auto& itm : m_local_data->paths) {
 			assert(not (1 == itm.hash.part_a and 1 == itm.hash.part_b and 1 == itm.hash.part_c));
@@ -315,19 +326,19 @@ namespace mchlib {
 
 #if defined(INDEXER_VERBOSE)
 	void Indexer::dump() const {
-		PathName base_path(m_local_data->paths.front().path);
+		PathName base_path(m_local_data->paths.front().abs_path);
 
 		std::cout << "---------------- FILE LIST ----------------\n";
 		for (const auto& cur_itm : m_local_data->paths) {
 			if (not cur_itm.is_directory) {
-				PathName cur_path(cur_itm.path);
+				PathName cur_path(cur_itm.abs_path);
 				std::cout << make_relative_path(base_path, cur_path).path() << '\n';
 			}
 		}
 		std::cout << "---------------- DIRECTORY LIST ----------------\n";
 		for (const auto& cur_itm : m_local_data->paths) {
 			if (cur_itm.is_directory) {
-				PathName cur_path(cur_itm.path);
+				PathName cur_path(cur_itm.abs_path);
 				std::cout << make_relative_path(base_path, cur_path).path() << '\n';
 			}
 		}
@@ -349,8 +360,8 @@ namespace mchlib {
 		if (m_local_data->paths.empty() or 0 == m_local_data->processing_index)
 			return std::string();
 
-		PathName base_path(m_local_data->paths.front().path);
-		PathName ret_path(m_local_data->paths[m_local_data->processing_index].path);
+		PathName base_path(m_local_data->paths.front().abs_path);
+		PathName ret_path(m_local_data->paths[m_local_data->processing_index].abs_path);
 		return make_relative_path(base_path, ret_path).path();
 	}
 #endif
@@ -365,7 +376,7 @@ namespace mchlib {
 		auto it = boost::make_filter_iterator<IsFile<>>(m_local_data->paths.begin(), m_local_data->paths.end());
 		assert(not m_local_data->paths.empty());
 		std::advance(it, parIndex);
-		return make_relative_path(PathName(m_local_data->paths.front().path), PathName(it->path)).path();
+		return make_relative_path(PathName(m_local_data->paths.front().abs_path), PathName(it->abs_path)).path();
 	}
 
 	void Indexer::ignore_read_errors (bool parIgnore) {

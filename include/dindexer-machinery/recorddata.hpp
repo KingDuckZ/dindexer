@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -35,10 +35,11 @@ namespace mchlib {
 		FileRecordData ( void ) = default;
 		FileRecordData ( const char* parPath, std::time_t parATime, std::time_t parMTime, uint64_t parLevel, bool parIsDir, bool parIsSymLink ) :
 			hash {},
-			path(parPath),
+			abs_path(parPath),
 			mime_full(),
 			atime(parATime),
 			mtime(parMTime),
+			path(abs_path),
 			mime_type(),
 			mime_charset(),
 			size(0),
@@ -57,10 +58,11 @@ namespace mchlib {
 		bool operator== ( const FileRecordData& ) const = delete;
 
 		TigerHash hash;
-		std::string path;
+		std::string abs_path;
 		mime_string mime_full;
 		std::time_t atime;
 		std::time_t mtime;
+		boost::string_ref path;
 		boost::string_ref mime_type;
 		boost::string_ref mime_charset;
 		uint64_t size;

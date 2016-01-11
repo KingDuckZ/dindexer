@@ -49,13 +49,18 @@ namespace din {
 			}
 
 			auto row = resultset[0];
-			parItem.path = row["path"];
+			parItem.abs_path = row["path"];
 			parItem.hash = parHash;
 			parItem.level = lexical_cast<uint16_t>(row["level"]);
 			parItem.size = lexical_cast<uint64_t>(row["size"]);
 			parItem.is_directory = (row["is_directory"] == "t" ? true : false);
 			parItem.is_symlink = (row["is_symlink"] == "t" ? true : false);
 			group_id = lexical_cast<uint32_t>(row["group_id"]);
+
+			if (parItem.abs_path.size() != 1 or parItem.abs_path != "/") {
+				parItem.abs_path = std::string("/") + parItem.abs_path;
+			}
+			parItem.path = boost::string_ref(parItem.abs_path).substr(1);
 		}
 
 		{
@@ -101,6 +106,12 @@ namespace din {
 			new_group_id = lexical_cast<uint32_t>(id_res[0][0]);
 		}
 
+		//TODO: remove this empty_path part. This is a temporary fix needed to
+		//work around a bug in libpqtypes for which empty paths are inserted
+		//as null values in the db.
+		const char* empty_path = "/";
+		const auto empty_path_string = boost::string_ref(empty_path);
+
 		for (std::size_t z = 0; z < parData.size(); ++z) {
 			const std::string query = "INSERT INTO \"files\" (path, hash, "
 				"level, group_id, is_directory, is_symlink, size, "
@@ -109,8 +120,9 @@ namespace din {
 				"($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);";
 
 			const auto& itm = parData[z];
+			assert(itm.path.data());
 			conn.query(query,
-				itm.path,
+				(itm.path.empty() ? empty_path_string : itm.path),
 				tiger_to_string(itm.hash),
 				itm.level,
 				new_group_id,
