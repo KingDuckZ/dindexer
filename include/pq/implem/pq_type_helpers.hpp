@@ -107,7 +107,7 @@ namespace pq {
 		};
 		template <>
 		struct type_to_pqtypes_name<boost::string_ref> {
-			constexpr static const char* name ( void ) { return "text*"; }
+			constexpr static const char* name ( void ) { return "text"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<bool> {

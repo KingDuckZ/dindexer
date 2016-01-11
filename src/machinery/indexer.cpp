@@ -200,10 +200,10 @@ namespace mchlib {
 		}
 
 		void populate_rel_paths (const PathName& parBase, std::vector<FileRecordData>& parItems) {
-			const std::size_t offset = parBase.str_path_size();
+			const std::size_t offset = parBase.str_path_size() + 1;
 			for (FileRecordData& itm : parItems) {
-				assert(itm.abs_path.size() >= offset);
-				itm.path = boost::string_ref(itm.abs_path).substr(offset);
+				const auto curr_offset = std::min(offset, itm.abs_path.size());
+				itm.path = boost::string_ref(itm.abs_path).substr(curr_offset);
 				assert(itm.path.data());
 			}
 		}

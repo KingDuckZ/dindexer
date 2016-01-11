@@ -109,7 +109,7 @@ namespace din {
 		//TODO: remove this empty_path part. This is a temporary fix needed to
 		//work around a bug in libpqtypes for which empty paths are inserted
 		//as null values in the db.
-		const char* empty_path = "/";
+		const char* const empty_path = "/";
 		const auto empty_path_string = boost::string_ref(empty_path);
 
 		for (std::size_t z = 0; z < parData.size(); ++z) {
