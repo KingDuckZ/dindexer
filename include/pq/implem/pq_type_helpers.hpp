@@ -24,6 +24,7 @@
 #include <boost/utility/string_ref.hpp>
 #include <vector>
 #include <memory>
+#include <cassert>
 
 struct pg_param;
 typedef pg_param PGparam;
@@ -49,9 +50,12 @@ namespace pq {
 		};
 		template <>
 		struct get_pqlib_c_type_struct<boost::string_ref> {
+		private:
+			std::string m_str;
+		public:
 			using type = const char*;
 			explicit get_pqlib_c_type_struct ( const Connection& ) { }
-			static type conv ( const boost::string_ref& parParam ) { return parParam.data(); }
+			type conv ( boost::string_ref parParam ) { m_str = std::string(parParam.data(), parParam.size()); return m_str.c_str(); }
 		};
 		template <>
 		struct get_pqlib_c_type_struct<bool> {
@@ -99,11 +103,11 @@ namespace pq {
 
 		template <>
 		struct type_to_pqtypes_name<std::string> {
-			constexpr static const char* name ( void ) { return "text"; }
+			constexpr static const char* name ( void ) { return "text*"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<boost::string_ref> {
-			constexpr static const char* name ( void ) { return "text"; }
+			constexpr static const char* name ( void ) { return "text*"; }
 		};
 		template <>
 		struct type_to_pqtypes_name<bool> {

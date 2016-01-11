@@ -133,8 +133,8 @@ namespace din {
 				system_clock::from_time_t(itm.mtime),
 				itm.hash_valid,
 				itm.unreadable,
-				std::string(itm.mime_type.data(), itm.mime_type.size()),
-				std::string(itm.mime_charset.data(), itm.mime_charset.size())
+				itm.mime_type,
+				itm.mime_charset
 			);
 		}
 		conn.query("COMMIT;");
