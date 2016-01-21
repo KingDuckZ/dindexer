@@ -73,7 +73,7 @@ namespace mchlib {
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
-				curr_entry.mime_full = parMime.analyze(it_entry->abs_path);
+				curr_entry.mime_full = parMime.analyze(curr_entry.abs_path);
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->abs_path).pop_right()) {
 					PathName curr_subdir(it_entry->abs_path);
 					if (it_entry->is_directory) {

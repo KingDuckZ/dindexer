@@ -56,6 +56,8 @@ namespace mchlib {
 	}
 
 	const char* MimeType::analyze (const std::string& parPath) {
+		assert(not parPath.empty());
+		assert(parPath.c_str());
 		if (initialized()) {
 			const auto cookie = m_local_data->magic_cookie.get();
 			const auto retval = magic_file(cookie, parPath.c_str());
