@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -23,6 +23,8 @@
 #include "dindexerConfig.h"
 #include "dindexer-machinery/filesearcher.hpp"
 #include "dindexer-machinery/indexer.hpp"
+#include "dindexer-machinery/machinery_info.hpp"
+#include "dindexer-common/common_info.hpp"
 #include "dindexer-common/settings.hpp"
 #include "commandline.hpp"
 #include "dbbackend.hpp"
@@ -196,7 +198,10 @@ namespace {
 		}
 
 		SetRecordData set_data {parSetName, parType};
-		din::write_to_db(parDBSettings, parData, set_data);
+		const auto app_signature = dinlib::dindexer_signature();
+		const auto lib_signature = mchlib::lib_signature();
+		const std::string signature = std::string(app_signature.data(), app_signature.size()) + "/" + std::string(lib_signature.data(), lib_signature.size());
+		din::write_to_db(parDBSettings, parData, set_data, signature);
 		return true;
 	}
 } //unnamed namespace

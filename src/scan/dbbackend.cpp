@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
@@ -82,7 +82,7 @@ namespace din {
 		return true;
 	}
 
-	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData) {
+	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
 		using std::chrono::system_clock;
 		using boost::lexical_cast;
 
@@ -96,9 +96,12 @@ namespace din {
 		conn.query("BEGIN;");
 		uint32_t new_group_id;
 		{
-			auto id_res = conn.query("INSERT INTO \"sets\" (\"desc\",\"type\") VALUES ($1, $2) RETURNING \"id\";",
+			auto id_res = conn.query("INSERT INTO \"sets\" "
+				"(\"desc\",\"type\", \"app_name\") "
+				"VALUES ($1, $2) RETURNING \"id\";",
 				parSetData.name,
-				std::string(1, parSetData.type)
+				std::string(1, parSetData.type),
+				parSignature
 			);
 			assert(id_res.size() == 1);
 			assert(id_res[0].size() == 1);

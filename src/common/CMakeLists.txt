@@ -5,6 +5,7 @@ add_library(${PROJECT_NAME}
 	mediatypes.cpp
 	settings.cpp
 	validationerror.cpp
+	common_info.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

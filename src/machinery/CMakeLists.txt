@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} SHARED
 	filesearcher.cpp
 	discinfo.cpp
 	mediatype.cpp
+	machinery_info.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

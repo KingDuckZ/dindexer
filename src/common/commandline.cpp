@@ -18,12 +18,10 @@
 #include "dindexer-common/commandline.hpp"
 #include "dindexerConfig.h"
 #include "helpers/lengthof.h"
+#include "helpers/stringize.h"
 #include <boost/program_options.hpp>
 #include <ostream>
 #include <utility>
-
-#define STRINGIZE_IMPL(s) #s
-#define STRINGIZE(s) STRINGIZE_IMPL(s)
 
 namespace po = boost::program_options;
 

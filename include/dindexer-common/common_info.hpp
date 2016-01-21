@@ -15,27 +15,13 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id842AF56BD80A4CF59957451DF9082AA2
-#define id842AF56BD80A4CF59957451DF9082AA2
+#ifndef idD68F614BAF5D480A90EE41731BDEE822
+#define idD68F614BAF5D480A90EE41731BDEE822
 
-#include <string>
-#include <vector>
-#include <cstdint>
+#include <boost/utility/string_ref.hpp>
 
 namespace dinlib {
-	struct SettingsDB;;
+	boost::string_ref dindexer_signature ( void );
 } //namespace dinlib
-
-namespace mchlib {
-	struct FileRecordData;
-	struct SetRecordData;
-	struct SetRecordDataFull;
-	struct TigerHash;
-} //namespace mchlib
-
-namespace din {
-	void write_to_db ( const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature );
-	bool read_from_db ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parHash );
-} //namespace din
 
 #endif
