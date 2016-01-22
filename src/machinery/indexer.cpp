@@ -47,11 +47,26 @@ namespace mchlib {
 	namespace {
 		typedef std::vector<FileRecordData>::iterator FileEntryIt;
 
+		void append_to_vec (std::vector<char>& parDest, const HashType& parHash, const std::string& parString) {
+			const auto old_size = parDest.size();
+			parDest.resize(old_size + sizeof(HashType) + parString.size());
+			std::copy(parHash.byte_data, parHash.byte_data + sizeof(HashType), parDest.begin() + old_size);
+			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size + sizeof(HashType));
+		}
+
+		void append_to_vec (std::vector<char>& parDest, const std::string& parString) {
+			const auto old_size = parDest.size();
+			parDest.resize(old_size + parString.size());
+			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
+		}
+
 		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors, MimeType& parMime) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_directory);
 			FileRecordData& curr_entry = *parEntry;
 			auto& curr_entry_it = parEntry;
+
+			curr_entry.mime_full = parMime.analyze(curr_entry.abs_path);
 
 			//Build a blob with the hashes and filenames of every directory that
 			//is a direct child of current entry
@@ -73,23 +88,17 @@ namespace mchlib {
 #if defined(INDEXER_VERBOSE)
 				std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
-				curr_entry.mime_full = parMime.analyze(curr_entry.abs_path);
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->abs_path).pop_right()) {
 					PathName curr_subdir(it_entry->abs_path);
+					const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
+					std::cout << "Adding " << relpath << " to blob\n";
+
 					if (it_entry->is_directory) {
 						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors, parMime);
-
-						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
-						const auto old_size = dir_blob.size();
-						dir_blob.resize(old_size + sizeof(HashType) + relpath.size());
-						std::copy(it_entry->hash.byte_data, it_entry->hash.byte_data + sizeof(HashType), dir_blob.begin() + old_size);
-						std::copy(relpath.begin(), relpath.end(), dir_blob.begin() + old_size + sizeof(HashType));
+						append_to_vec(dir_blob, it_entry->hash, relpath);
 					}
 					else {
-						std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
-						const auto old_size = dir_blob.size();
-						dir_blob.resize(old_size + relpath.size());
-						std::copy(relpath.begin(), relpath.end(), dir_blob.begin() + old_size);
+						append_to_vec(dir_blob, relpath);
 					}
 					++it_entry;
 				}

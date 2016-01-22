@@ -1,4 +1,4 @@
-/* Copyright 2015, Michele Santullo
+/* Copyright 2016, Michele Santullo
  * This file is part of "dindexer".
  *
  * "dindexer" is free software: you can redistribute it and/or modify
