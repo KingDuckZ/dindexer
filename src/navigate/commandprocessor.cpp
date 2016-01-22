@@ -41,6 +41,27 @@ BOOST_FUSION_ADAPT_STRUCT(
 );
 
 namespace din {
+	using StringList = std::vector<std::string>;
+
+	namespace {
+		bool wrap_void_noparam (const std::function<void()>& parCallback, const StringList&) {
+			parCallback();
+			return false;
+		}
+
+		bool wrap_void_oneparam (const std::function<void(const std::string&)>& parCallback, const StringList& parArgs) {
+			assert(1 == parArgs.size());
+			parCallback(parArgs.front());
+			return false;
+		}
+
+		bool wrap_bool_noparam (const std::function<bool()>& parCallback, const StringList& parArgs) {
+			static_cast<void>(parArgs);
+			assert(parArgs.empty());
+			return parCallback();
+		}
+	} //unnamed namespace
+
 	struct CustomCommand {
 		std::string name;
 		CommandProcessor::CmdCallback callback;
@@ -140,5 +161,25 @@ namespace din {
 
 		//Add the new command
 		m_local_data->commands.push_back(CustomCommand {std::move(parName), std::move(parCallback), parExpParams});
+	}
+
+	void CommandProcessor::add_command (std::string&& parName, std::function<void()> parCallback, uint32_t parExpParams) {
+		add_command(std::move(parName), std::bind(&wrap_void_noparam, std::move(parCallback), std::placeholders::_1), parExpParams);
+	}
+
+	void CommandProcessor::add_command (std::string&& parName, std::function<void(const std::string&)> parCallback, uint32_t parExpParams) {
+		add_command(std::move(parName), std::bind(&wrap_void_oneparam, std::move(parCallback), std::placeholders::_1), parExpParams);
+	}
+
+	void CommandProcessor::add_command (std::string&& parName, std::function<bool()> parCallback, uint32_t parExpParams) {
+		add_command(std::move(parName), std::bind(&wrap_bool_noparam, std::move(parCallback), std::placeholders::_1), parExpParams);
+	}
+
+	void CommandProcessor::add_command (std::string&& parName, void(*parCallback)(), uint32_t parExpParams) {
+		add_command(std::move(parName), std::function<void()>(parCallback), parExpParams);
+	}
+
+	void CommandProcessor::add_command (std::string&& parName, bool(*parCallback)(), uint32_t parExpParams) {
+		add_command(std::move(parName), std::function<bool()>(parCallback), parExpParams);
 	}
 } //namespace din

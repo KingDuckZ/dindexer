@@ -34,6 +34,11 @@ namespace din {
 		~CommandProcessor ( void ) noexcept;
 
 		void add_command ( std::string&& parName, CmdCallback parCallback, uint32_t parExpParams );
+		void add_command ( std::string&& parName, std::function<void()> parCallback, uint32_t parExpParams );
+		void add_command ( std::string&& parName, std::function<void(const std::string&)> parCallback, uint32_t parExpParams );
+		void add_command ( std::string&& parName, std::function<bool()> parCallback, uint32_t parExpParams );
+		void add_command ( std::string&& parName, void(*parCallback)(), uint32_t parExpParams );
+		void add_command ( std::string&& parName, bool(*parCallback)(), uint32_t parExpParams );
 		bool exec_command ( const std::string& parCommand );
 
 	private:

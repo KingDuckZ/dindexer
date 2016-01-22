@@ -26,8 +26,8 @@
 namespace {
 	void do_navigation ( void );
 
-	bool on_exit ( const std::vector<std::string>& );
-	bool on_cd ( const std::vector<std::string>& parArgs );
+	bool on_exit ( void );
+	void on_cd ( const std::string& parDir );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -49,13 +49,11 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
-	bool on_exit (const std::vector<std::string>&) {
+	bool on_exit() {
 		return true;
 	}
-	bool on_cd (const std::vector<std::string>& parArgs) {
-		assert(parArgs.size() == 1);
-		std::cout << "Would cd into " << parArgs.front() << '\n';
-		return false;
+	void on_cd (const std::string& parDir) {
+		std::cout << "Would cd into " << parDir << '\n';
 	}
 
 	void do_navigation() {
