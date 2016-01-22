@@ -91,7 +91,6 @@ namespace mchlib {
 				while (parEnd != it_entry and it_entry->level == curr_entry_it->level + 1 and parCurrDir == PathName(it_entry->abs_path).pop_right()) {
 					PathName curr_subdir(it_entry->abs_path);
 					const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
-					std::cout << "Adding " << relpath << " to blob\n";
 
 					if (it_entry->is_directory) {
 						hash_dir(it_entry, parBegin, parEnd, curr_subdir, parNextItemCallback, parIgnoreErrors, parMime);
