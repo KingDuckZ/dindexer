@@ -97,8 +97,8 @@ namespace din {
 		uint32_t new_group_id;
 		{
 			auto id_res = conn.query("INSERT INTO \"sets\" "
-				"(\"desc\",\"type\", \"app_name\") "
-				"VALUES ($1, $2) RETURNING \"id\";",
+				"(\"desc\",\"type\",\"app_name\") "
+				"VALUES ($1, $2, $3) RETURNING \"id\";",
 				parSetData.name,
 				std::string(1, parSetData.type),
 				parSignature
