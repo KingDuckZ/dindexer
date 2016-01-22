@@ -65,6 +65,7 @@ add_subdirectory(src/scan)
 add_subdirectory(src/delete)
 add_subdirectory(src/query)
 add_subdirectory(src/locate)
+add_subdirectory(src/navigate)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}
@@ -76,4 +77,7 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
 	INTERFACE WITH_PROGRESS_FEEDBACK
 	INTERFACE BOOST_SPIRIT_USE_PHOENIX_V3=1
+	#workaround for a bug in gcc 5.3 that is causing exceptions to slip
+	#through try/catch blocks.
+	INTERFACE _GLIBCXX_USE_CXX11_ABI=0
 )
