@@ -17,6 +17,7 @@
 
 #include "commandline.hpp"
 #include "commandprocessor.hpp"
+#include "dirmanager.hpp"
 #include <iostream>
 #include <ciso646>
 #include <string>
@@ -27,7 +28,7 @@ namespace {
 	void do_navigation ( void );
 
 	bool on_exit ( void );
-	void on_cd ( const std::string& parDir );
+	void on_pwd ( const din::DirManager& parDirMan );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -52,8 +53,8 @@ namespace {
 	bool on_exit() {
 		return true;
 	}
-	void on_cd (const std::string& parDir) {
-		std::cout << "Would cd into " << parDir << '\n';
+	void on_pwd (const din::DirManager& parDirMan) {
+		std::cout << parDirMan.to_string() << '\n';
 	}
 
 	void do_navigation() {
@@ -62,10 +63,14 @@ namespace {
 		bool running = true;
 		std::string curr_line;
 		din::CommandProcessor proc;
+		din::DirManager dir_man;
 		proc.add_command("exit", &on_exit, 0);
-		proc.add_command("cd", &on_cd, 1);
+		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::DirManager::push_piece, &dir_man, std::placeholders::_1)), 1);
+		proc.add_command("pwd", std::function<void()>(std::bind(&on_pwd, std::ref(dir_man))), 0);
 		do {
-			std::getline(inp, curr_line);
+			do {
+				std::getline(inp, curr_line);
+			} while (curr_line.empty());
 			running = proc.exec_command(curr_line);
 		} while (running);
 	}

@@ -74,7 +74,7 @@ namespace din {
 
 	template <typename Iterator>
 	struct CommandGrammar : boost::spirit::qi::grammar<Iterator, ParsedCommand(), boost::spirit::unicode::space_type> {
-		explicit CommandGrammar ( void );
+		CommandGrammar ( void );
 
 		boost::spirit::qi::rule<Iterator, ParsedCommand(), boost::spirit::unicode::space_type> start;
 		boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::unicode::space_type> quoted_string;
@@ -96,9 +96,10 @@ namespace din {
 		using boost::spirit::qi::lexeme;
 		using boost::spirit::unicode::char_;
 		using boost::spirit::unicode::space;
+		using boost::spirit::qi::string;
 
 		quoted_string %= lexeme['"' >> *(char_ - '"') >> '"'];
-		argument %= lexeme[+(char_ - space)];
+		argument %= lexeme[+(string("\\ ") | (char_ - space))];
 		string_arg %= quoted_string | argument;
 		start = argument >> *string_arg;
 	}
