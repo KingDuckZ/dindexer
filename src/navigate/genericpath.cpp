@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dirmanager.hpp"
+#include "genericpath.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/range/algorithm/copy.hpp>
@@ -62,7 +62,7 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	void DirManager::push_piece (const std::string& parPiece) {
+	void GenericPath::push_piece (const std::string& parPiece) {
 		using boost::spirit::qi::parse;
 
 		PathGrammar<std::string::const_iterator> gramm;
@@ -97,7 +97,7 @@ namespace din {
 		assert(parse_result);
 	}
 
-	std::string DirManager::to_string() const {
+	std::string GenericPath::to_string() const {
 		std::ostringstream oss;
 		oss << '/';
 		boost::copy(m_stack, infix_ostream_iterator<std::string>(oss, "/"));

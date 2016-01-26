@@ -4,7 +4,7 @@ add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
 	commandprocessor.cpp
-	dirmanager.cpp
+	genericpath.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

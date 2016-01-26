@@ -22,9 +22,9 @@
 #include <string>
 
 namespace din {
-	class DirManager {
+	class GenericPath {
 	public:
-		DirManager ( void ) = default;
+		GenericPath ( void ) = default;
 
 		void push_piece ( const std::string& parPiece );
 		std::string to_string ( void ) const;

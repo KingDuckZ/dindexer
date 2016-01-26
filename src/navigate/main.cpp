@@ -17,7 +17,7 @@
 
 #include "commandline.hpp"
 #include "commandprocessor.hpp"
-#include "dirmanager.hpp"
+#include "genericpath.hpp"
 #include <iostream>
 #include <ciso646>
 #include <string>
@@ -28,7 +28,8 @@ namespace {
 	void do_navigation ( void );
 
 	bool on_exit ( void );
-	void on_pwd ( const din::DirManager& parDirMan );
+	void on_pwd ( const din::GenericPath& parDirMan );
+	void on_ls ( const din::GenericPath& parDirMan );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -53,25 +54,34 @@ namespace {
 	bool on_exit() {
 		return true;
 	}
-	void on_pwd (const din::DirManager& parDirMan) {
+
+	void on_pwd (const din::GenericPath& parDirMan) {
 		std::cout << parDirMan.to_string() << '\n';
 	}
 
-	void do_navigation() {
+	void on_ls (const din::GenericPath& parDirMan) {
+
+	}
+
+	void do_navigation (din::DBSource& parDB) {
 		auto& inp = std::cin;
 
 		bool running = true;
 		std::string curr_line;
 		din::CommandProcessor proc;
-		din::DirManager dir_man;
+		din::GenericPath dir_man;
 		proc.add_command("exit", &on_exit, 0);
-		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::DirManager::push_piece, &dir_man, std::placeholders::_1)), 1);
+		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::GenericPath::push_piece, &dir_man, std::placeholders::_1)), 1);
+		proc.add_command("disconnect", std::function<void()>(std::bind(&din::DBSource::disconnect, &parDB)), 0);
 		proc.add_command("pwd", std::function<void()>(std::bind(&on_pwd, std::ref(dir_man))), 0);
+		proc.add_command("ls", std::function<void()>(std::bind(&on_ls, std::ref(dir_man))), 0);
 		do {
 			do {
 				std::getline(inp, curr_line);
 			} while (curr_line.empty());
 			running = proc.exec_command(curr_line);
 		} while (running);
+
+		parDB.disconnect();
 	}
 } //unnamed namespace
