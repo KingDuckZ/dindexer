@@ -5,6 +5,7 @@ add_executable(${PROJECT_NAME}
 	commandline.cpp
 	commandprocessor.cpp
 	genericpath.cpp
+	dbsource.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
