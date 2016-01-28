@@ -20,9 +20,7 @@ namespace din {
 	///-------------------------------------------------------------------------
 	template <typename T, size_t S, typename A>
 	MaxSizedArray<T, S, A>::MaxSizedArray() {
-		this->AllocMemory();
-		//Careful here, I'm not sure this is valid c++
-		m_localMem = reinterpret_cast<T*>(this->GetMemPtrAtIndex(0));
+		m_localMem = this->AllocMemory();
 		m_used = 0;
 	}
 
@@ -33,8 +31,7 @@ namespace din {
 		parent_type(),
 		m_used(0)
 	{
-		this->AllocMemory();
-		m_localMem = reinterpret_cast<T*>(this->GetMemPtrAtIndex(0));
+		m_localMem = this->AllocMemory();
 		const size_type count = parOther.size();
 		for (size_type z = 0; z < count; ++z) {
 			this->push_back(parOther[z]);
@@ -48,8 +45,7 @@ namespace din {
 		parent_type(),
 		m_used(0)
 	{
-		this->AllocMemory();
-		m_localMem = reinterpret_cast<T*>(this->GetMemPtrAtIndex(0));
+		m_localMem = this->AllocMemory();
 		const size_type count = parOther.size();
 		for (size_type z = 0; z < count; ++z) {
 			this->push_back(std::move(parOther[z]));
@@ -83,8 +79,7 @@ namespace din {
 	template <typename T, size_t S, typename A>
 	void MaxSizedArray<T, S, A>::push_back (value_type&& parNewItem) {
 		assert(size() < capacity());
-		char* buffer = this->GetMemPtrAtIndex(m_used);
-		new(buffer) T(std::move(parNewItem));
+		this->GetNewT(m_used, std::move(parNewItem));
 		++m_used;
 	}
 
@@ -93,8 +88,7 @@ namespace din {
 	template <typename T, size_t S, typename A>
 	void MaxSizedArray<T, S, A>::push_back (const value_type& parNewItem) {
 		assert(size() < capacity());
-		char* buffer = this->GetMemPtrAtIndex(m_used);
-		new(buffer) T(parNewItem);
+		this->GetNewT(m_used, parNewItem);
 		++m_used;
 	}
 

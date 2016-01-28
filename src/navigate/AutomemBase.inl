@@ -16,144 +16,103 @@
  */
 
 namespace din {
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-AutomemBase_heap<T, S, A>::AutomemBase_heap() {
-#if !defined(NDEBUG)
-	m_localMem = NULL;
-#endif
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-AutomemBase_heap<T, S, A>::AutomemBase_heap (const AutomemBase_heap& parOther) {
-#if !defined(NDEBUG)
-	m_localMem = NULL;
-#endif
-	AllocMemory();
-	std::copy(parOther.GetMemPtr(), parOther.GetMemPtr() + S, this->GetMemPtr());
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-AutomemBase_heap<T, S, A>::AutomemBase_heap (AutomemBase_heap&& parOther) {
-	std::swap(parOther.m_localMem, this->m_localMem);
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-void AutomemBase_heap<T, S, A>::AllocMemory() {
-#if !defined(NDEBUG)
-	Assert(NULL == m_localMem);
-#endif
-	m_localMem = A().allocate(S);
-	for (size_t z = 0; z < S; ++z) {
-		new(m_localMem + z) T;
-	}
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-void AutomemBase_heap<T, S, A>::FreeMemory() noexcept {
-#if !defined(NDEBUG)
-	Assert(NULL != m_localMem);
-#endif
-	for (size_t z = 0; z < S; ++z) {
-		m_localMem->~T();
-	}
-	A().deallocate(m_localMem, S);
-#if !defined(NDEBUG)
-	m_localMem = NULL;
-#endif
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S>
-AutomemBase_stack<T, S>::AutomemBase_stack() {
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S>
-AutomemBase_stack<T, S>::AutomemBase_stack (const AutomemBase_stack& parOther) {
-	std::copy(parOther.GetMemPtr(), parOther.GetMemPtr() + S, this->GetMemPtr());
-}
-
-///-----------------------------------------------------------------------------
-///-----------------------------------------------------------------------------
-template <typename T, size_t S>
-AutomemBase_stack<T, S>::AutomemBase_stack (AutomemBase_stack&& parOther) {
-	for (size_t z = 0; z < S; ++z) {
-		std::swap(m_localMem[z], parOther.m_localMem[z]);
-	}
-}
-
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-AutomemRawBase_heap<T, S, A>::AutomemRawBase_heap() {
-#if !defined(NDEBUG)
-	m_localMem = NULL;
-#endif
-}
-
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-void AutomemRawBase_heap<T, S, A>::AllocMemory() {
-#if !defined(NDEBUG)
-	Assert(NULL == m_localMem);
-#endif
-	m_localMem = A().allocate(S);
+	namespace {
 #if defined(ASSERTIONSENABLED)
-	assert(reinterpret_cast<PTR_INT_TYPE>(m_localMem) % alignof(T) == 0); //Make sure alignment is correct
+		const char g_guard = 0xAB;
 #endif
-}
+	} //unnamed namespace
 
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-void AutomemRawBase_heap<T, S, A>::FreeMemory() noexcept {
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	AutomemRawBase_heap<T, S, A>::AutomemRawBase_heap() {
 #if !defined(NDEBUG)
-	Assert(NULL != m_localMem);
+		m_localMem = nullptr;
 #endif
-	A().deallocate(m_localMem, S);
+	}
+
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	AutomemRawBase_heap<T, S, A>::AutomemRawBase_heap (AutomemRawBase_heap&& parOther) {
 #if !defined(NDEBUG)
-	m_localMem = NULL;
+		m_localMem = nullptr;
 #endif
-}
+		this->swap(parOther);
+	}
 
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S, typename A>
-char* AutomemRawBase_heap<T, S, A>::GetMemPtrAtIndex (size_t parIndex) {
-	T* const retVal = GetMemPtr() + parIndex;
-	return reinterpret_cast<char*>(retVal);
-}
-
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S>
-void AutomemRawBase_stack<T, S>::AllocMemory() {
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	T* AutomemRawBase_heap<T, S, A>::AllocMemory() {
+#if !defined(NDEBUG)
+		Assert(nullptr == m_localMem);
+#endif
+		m_localMem = A().allocate(S);
 #if defined(ASSERTIONSENABLED)
-	assert(reinterpret_cast<PTR_INT_TYPE>(m_localMem) % alignof(T) == 0); //Make sure alignment is correct
+		assert(reinterpret_cast<PTR_INT_TYPE>(m_localMem) % alignof(T) == 0); //Make sure alignment is correct
+		std::fill(
+			reinterpret_cast<char*>(&m_localMem[0]),
+			reinterpret_cast<char*>(&m_localMem[0]) + sizeof(m_localMem),
+			g_guard
+		);
 #endif
-}
+		return m_localMem;
+	}
 
-///-------------------------------------------------------------------------
-///-------------------------------------------------------------------------
-template <typename T, size_t S>
-char* AutomemRawBase_stack<T, S>::GetMemPtrAtIndex (size_t parIndex) {
-	T* const retVal = GetMemPtr() + parIndex;
-#if defined(ASSERTIONSENABLED)
-	assert(reinterpret_cast<PTR_INT_TYPE>(retVal) % alignof(T) == 0);
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	void AutomemRawBase_heap<T, S, A>::FreeMemory() noexcept {
+#if !defined(NDEBUG)
+		Assert(nullptr != m_localMem);
 #endif
-	return reinterpret_cast<char*>(retVal);
-}
+		A().deallocate(m_localMem, S);
+#if !defined(NDEBUG)
+		m_localMem = nullptr;
+#endif
+	}
+
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	template <typename... Args>
+	T* AutomemRawBase_heap<T, S, A>::GetNewT (size_t parIndex, Args&&... parArgs) {
+		assert(parIndex < S);
+		T* const location = m_localMem + parIndex;
+#if defined(ASSERTIONSENABLED)
+		assert(reinterpret_cast<PTR_INT_TYPE>(location) % alignof(T) == 0);
+		assert(g_guard == *reinterpret_cast<const char*>(location));
+#endif
+		return new(location) T(std::forward<Args...>(parArgs)...);
+	}
+
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S>
+	T* AutomemRawBase_stack<T, S>::AllocMemory() {
+#if defined(ASSERTIONSENABLED)
+		assert(reinterpret_cast<PTR_INT_TYPE>(m_localMem) % alignof(T) == 0); //Make sure alignment is correct
+		std::fill(
+			reinterpret_cast<char*>(&m_localMem[0]),
+			reinterpret_cast<char*>(&m_localMem[0]) + sizeof(m_localMem),
+			g_guard
+		);
+#endif
+		return reinterpret_cast<T*>(&m_localMem[0]);
+	}
+
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S>
+	template <typename... Args>
+	T* AutomemRawBase_stack<T, S>::GetNewT (size_t parIndex, Args&&... parArgs) {
+		assert(parIndex < S);
+		auto* const location = &m_localMem[parIndex];
+#if defined(ASSERTIONSENABLED)
+		assert(reinterpret_cast<PTR_INT_TYPE>(location) % alignof(T) == 0);
+		assert(g_guard == *reinterpret_cast<const char*>(location));
+#endif
+		return new(location) T(std::forward<Args...>(parArgs)...);
+	}
 } //namespace din

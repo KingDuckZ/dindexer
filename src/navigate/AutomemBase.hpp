@@ -34,54 +34,6 @@ namespace din {
 	const size_t MAX_STACK_ALLOC_SIZE = 128;
 
 	///-------------------------------------------------------------------------
-	///Heap-based allocation, constructs everything
-	///-------------------------------------------------------------------------
-	template <typename T, size_t S, typename A=std::allocator<T> >
-	class AutomemBase_heap {
-	protected:
-		AutomemBase_heap ( void );
-		AutomemBase_heap ( const AutomemBase_heap& parOther );
-		AutomemBase_heap ( AutomemBase_heap&& parOther );
-		~AutomemBase_heap ( void ) = default;
-
-		T* GetMemPtr ( void ) { return m_localMem; }
-		const T* GetMemPtr ( void ) const { return m_localMem; }
-		void AllocMemory ( void );
-		void FreeMemory ( void ) noexcept;
-		void swap ( AutomemBase_heap& parOther ) noexcept { std::swap(m_localMem, parOther.m_localMem); }
-	private:
-#if defined(ASSERTIONSENABLED)
-		typedef uintptr_t PTR_INT_TYPE;
-		static_assert(sizeof(PTR_INT_TYPE) == sizeof(T*), "Wrong uintptr_t size");
-#endif
-		void operator= (const AutomemBase_heap&);
-		T* m_localMem;
-	};
-
-	///-------------------------------------------------------------------------
-	///Stack-based allocation, constructs everything
-	///-------------------------------------------------------------------------
-	template <typename T, size_t S>
-	class AutomemBase_stack {
-	protected:
-		AutomemBase_stack ( void );
-		AutomemBase_stack ( const AutomemBase_stack& parOther );
-		AutomemBase_stack ( AutomemBase_stack&& parOther );
-		~AutomemBase_stack ( void ) = default;
-
-		T* GetMemPtr ( void ) { return m_localMem; }
-		const T* GetMemPtr ( void ) const { return m_localMem; }
-		void AllocMemory ( void ) { return; }
-		void FreeMemory ( void ) noexcept { return; }
-	private:
-#if defined(ASSERTIONSENABLED)
-		typedef uintptr_t PTR_INT_TYPE;
-		static_assert(sizeof(PTR_INT_TYPE) == sizeof(T*), "Wrong uintptr_t size");
-#endif
-		T m_localMem[S];
-	};
-
-	///-------------------------------------------------------------------------
 	///Heap-based allocation, only gets raw memory
 	///-------------------------------------------------------------------------
 	template <typename T, size_t S, typename A=std::allocator<T> >
@@ -89,11 +41,11 @@ namespace din {
 	protected:
 		AutomemRawBase_heap ( void );
 		AutomemRawBase_heap ( const AutomemRawBase_heap& ) = delete; //Copy ctor can't be implemented at this level
+		AutomemRawBase_heap ( AutomemRawBase_heap&& parOther );
 
-		T* GetMemPtr ( void ) { return m_localMem; }
-		const T* GetMemPtr ( void ) const { return m_localMem; }
-		char* GetMemPtrAtIndex ( size_t parIndex );
-		void AllocMemory ( void );
+		template <typename... Args>
+		T* GetNewT ( size_t parIndex, Args&&... parArgs );
+		T* AllocMemory ( void );
 		void FreeMemory ( void ) noexcept;
 		void swap ( AutomemRawBase_heap& parOther ) noexcept { std::swap(m_localMem, parOther.m_localMem); }
 	private:
@@ -117,10 +69,9 @@ namespace din {
 		AutomemRawBase_stack ( AutomemRawBase_stack&& ) = delete;
 		~AutomemRawBase_stack ( void ) = default;
 
-		T* GetMemPtr ( void ) { return reinterpret_cast<T*>(&m_localMem[0]); }
-		const T* GetMemPtr ( void ) const { return reinterpret_cast<const T*>(&m_localMem[0]); }
-		char* GetMemPtrAtIndex ( size_t parIndex );
-		void AllocMemory ( void );
+		template <typename... Args>
+		T* GetNewT ( size_t parIndex, Args&&... parArgs );
+		T* AllocMemory ( void );
 		void FreeMemory ( void ) noexcept { return; }
 	private:
 #if defined(ASSERTIONSENABLED)
