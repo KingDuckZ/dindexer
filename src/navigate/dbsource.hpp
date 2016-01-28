@@ -20,6 +20,7 @@
 
 #include "dindexer-machinery/recorddata.hpp"
 #include "flatinsertin2dlist.hpp"
+#include "MaxSizedArray.hpp"
 #include <memory>
 #include <cstdint>
 #include <vector>
@@ -56,7 +57,7 @@ namespace din {
 		std::vector<uint32_t> sets ( void );
 
 		template <SetDetails... D>
-		std::vector<std::vector<std::string>> set_details ( const std::vector<uint32_t>& parIDs );
+		auto set_details ( const std::vector<uint32_t>& parIDs ) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>>;
 		//TODO: replace return value with vector of maxsizedarray
 		//auto set_details ( const std::vector<uint32_t>& parIDs ) -> std::array<std::string, sizeof...(D)>;
 
@@ -70,12 +71,12 @@ namespace din {
 	};
 
 	template <SetDetails... D>
-	std::vector<std::vector<std::string>> DBSource::set_details (const std::vector<uint32_t>& parIDs) {
+	auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
 	//auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::array<std::string, sizeof...(D)> {
-		typedef std::vector<std::vector<std::string>> ReturnType;
+		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
 		typedef std::map<SetDetails, std::string> DetailsMap;
 		typedef const std::string&(DetailsMap::*AtFunc)(const SetDetails&) const;
-		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(const std::string&);
+		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
 		const std::array<SetDetails, sizeof...(D)> details { D... };
 		const DetailsMap details_dic {

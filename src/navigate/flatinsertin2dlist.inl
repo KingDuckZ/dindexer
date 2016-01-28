@@ -47,7 +47,7 @@ namespace din {
 		auto& list = *m_list;
 		const auto inner_size = (list.empty() ? m_inner_count : list[list.size() - 1].size());
 		if (inner_size == m_inner_count) {
-			if (not m_outer_count or m_outer_count < list.size()) {
+			if (not m_outer_count or list.size() < m_outer_count) {
 				list.push_back(inner_list_type());
 				list[list.size() - 1].reserve(m_inner_count);
 			}
