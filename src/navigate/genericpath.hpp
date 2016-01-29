@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace din {
 	class GenericPath {
@@ -28,6 +29,8 @@ namespace din {
 
 		void push_piece ( const std::string& parPiece );
 		std::string to_string ( void ) const;
+		uint16_t level ( void ) const;
+		const std::string& operator[] ( std::size_t parIndex ) const;
 
 	private:
 		using StackType = std::vector<std::string>;

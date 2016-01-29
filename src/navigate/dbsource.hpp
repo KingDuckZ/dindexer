@@ -48,6 +48,23 @@ namespace din {
 		SetDetail_ID = 0x10
 	};
 
+	enum FileDetails {
+		FileDetail_ID = 0x0001,
+		FileDetail_Path = 0x0002,
+		FileDetail_Level = 0x0004,
+		FileDetail_GroupID = 0x0008,
+		FileDetail_IsDir = 0x0010,
+		FileDetail_IsSymLink = 0x0020,
+		FileDetail_Size = 0x0040,
+		FileDetail_Hash = 0x0080,
+		FileDetail_IsHashValid = 0x0100,
+		FileDetail_ATime = 0x0200,
+		FileDetail_MTime = 0x0400,
+		FileDetail_Unreadable = 0x800,
+		FileDetail_MimeType = 0x1000,
+		FileDetail_Charset = 0x2000
+	};
+
 	class DBSource {
 	public:
 		explicit DBSource ( const dinlib::SettingsDB& parDBSettings );
@@ -58,47 +75,72 @@ namespace din {
 
 		template <SetDetails... D>
 		auto set_details ( const std::vector<uint32_t>& parIDs ) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>>;
-		//TODO: replace return value with vector of maxsizedarray
-		//auto set_details ( const std::vector<uint32_t>& parIDs ) -> std::array<std::string, sizeof...(D)>;
+
+		template <FileDetails... D>
+		auto file_details ( uint32_t parSetID, uint16_t parLevel, boost::string_ref parDir ) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>>;
 
 	private:
 		struct LocalData;
+		typedef std::map<SetDetails, std::string> SetDetailsMap;
+		typedef std::map<FileDetails, std::string> FileDetailsMap;
+		typedef std::vector<std::string> ColumnList;
+		typedef std::function<void(std::string&&)> QueryCallback;
 
 		pq::Connection& get_conn ( void );
-		void query_push_results ( const std::vector<std::string>& parCols, boost::string_ref parTable, const std::vector<uint32_t>& parIDs, std::function<void(std::string&&)> parCallback );
+		void query_no_conditions ( const ColumnList& parCols, boost::string_ref parTable, const std::vector<uint32_t>& parIDs, QueryCallback parCallback );
+		void query_files_in_dir ( const ColumnList& parCols, boost::string_ref parDir, uint16_t parLevel, uint32_t parGroupID, QueryCallback parCallback );
+
+		static const SetDetailsMap m_set_details_map;
+		static const FileDetailsMap m_file_details_map;
 
 		std::unique_ptr<LocalData> m_local_data;
 	};
 
+	namespace implem {
+		template <class M, M... Details>
+		inline
+		std::vector<std::string> make_columns_vec (const std::map<M, std::string>& parDic) {
+			std::vector<std::string> columns;
+			columns.reserve(sizeof...(Details));
+
+			const std::array<M, sizeof...(Details)> details { Details... };
+			//std::generate(details.begin(), details.end(), columns.begin(), std::bind(at_func, &details_dic, std::placeholders::_1));
+			for (auto detail : details) {
+				columns.push_back(parDic.at(detail));
+			}
+			return std::move(columns);
+		}
+	} //namespace implem
+
 	template <SetDetails... D>
 	auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
-	//auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::array<std::string, sizeof...(D)> {
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
-		typedef std::map<SetDetails, std::string> DetailsMap;
-		typedef const std::string&(DetailsMap::*AtFunc)(const SetDetails&) const;
+		typedef const std::string&(SetDetailsMap::*AtFunc)(const SetDetails&) const;
 		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
-		const std::array<SetDetails, sizeof...(D)> details { D... };
-		const DetailsMap details_dic {
-			{SetDetail_Desc, "desc"},
-			{SetDetail_Type, "type"},
-			{SetDetail_CreeationDate, "creation"},
-			{SetDetail_AppName, "app_name"},
-			{SetDetail_ID, "id"}
-		};
-
-		std::vector<std::string> columns;
-		columns.reserve(sizeof...(D));
-		AtFunc at_func = &DetailsMap::at;
-		//std::generate(details.begin(), details.end(), columns.begin(), std::bind(at_func, &details_dic, std::placeholders::_1));
-		for (auto detail : details) {
-			columns.push_back(details_dic.at(detail));
-		}
+		const auto columns = implem::make_columns_vec<SetDetails, D...>(m_set_details_map);
+		AtFunc at_func = &SetDetailsMap::at;
 
 		ReturnType list;
 		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
 		FlatPushBackFunc pback_func = &FlatInsertIn2DList<ReturnType>::push_back;
-		this->query_push_results(columns, "sets", parIDs, std::bind(pback_func, &flat_list, std::placeholders::_1));
+		this->query_no_conditions(columns, "sets", parIDs, std::bind(pback_func, &flat_list, std::placeholders::_1));
+		return std::move(list);
+	}
+
+	template <FileDetails... D>
+	auto DBSource::file_details (uint32_t parSetID, uint16_t parLevel, boost::string_ref parDir) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
+		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
+		typedef const std::string&(SetDetailsMap::*AtFunc)(const SetDetails&) const;
+		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
+
+		const auto columns = implem::make_columns_vec<FileDetails, D...>(m_file_details_map);
+		AtFunc at_func = &SetDetailsMap::at;
+
+		ReturnType list;
+		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
+		FlatPushBackFunc pback_func = &FlatInsertIn2DList<ReturnType>::push_back;
+		this->query_files_in_dir(columns, parDir, parLevel, parSetID, std::bind(pback_func, &flat_list, std::placeholders::_1));
 		return std::move(list);
 	}
 } //namespace din

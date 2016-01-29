@@ -29,6 +29,8 @@
 namespace din {
 	const size_t MAXSZARR_MAX_STACK_ALLOC_SIZE = MAX_STACK_ALLOC_SIZE;
 
+	//TODO: add a template parameter to force stack allocation regardless of
+	//sizeof(T) * S
 	template <typename T, size_t S, typename A=std::allocator<T> >
 	class MaxSizedArray :
 		private std::conditional<

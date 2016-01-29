@@ -26,6 +26,41 @@
 #include <boost/range/algorithm/copy.hpp>
 
 namespace din {
+	namespace {
+		const uint32_t g_files_query_limit = 500;
+
+		std::ostream& operator<< (std::ostream& parOut, const std::vector<std::string>& parCols) {
+			parOut << '"';
+			boost::copy(parCols, infix_ostream_iterator<std::string>(parOut, "\", \""));
+			parOut << '"';
+			return parOut;
+		}
+	} //unnamed namespace
+
+	const DBSource::SetDetailsMap DBSource::m_set_details_map {
+		{SetDetail_Desc, "desc"},
+		{SetDetail_Type, "type"},
+		{SetDetail_CreeationDate, "creation"},
+		{SetDetail_AppName, "app_name"},
+		{SetDetail_ID, "id"}
+	};
+	const DBSource::FileDetailsMap DBSource::m_file_details_map {
+		{FileDetail_ID, "id"},
+		{FileDetail_Path, "path"},
+		{FileDetail_Level, "level"},
+		{FileDetail_GroupID, "group_id"},
+		{FileDetail_IsDir, "is_directory"},
+		{FileDetail_IsSymLink, "is_symlink"},
+		{FileDetail_Size, "size"},
+		{FileDetail_Hash, "hash"},
+		{FileDetail_IsHashValid, "is_hash_valid"},
+		{FileDetail_ATime, "access_time"},
+		{FileDetail_MTime, "modify_time"},
+		{FileDetail_Unreadable, "unreadable"},
+		{FileDetail_MimeType, "mimetype"},
+		{FileDetail_Charset, "charset"}
+	};
+
 	struct DBSource::LocalData {
 		explicit LocalData ( const dinlib::SettingsDB& parDBSettings ) :
 			conn(
@@ -78,15 +113,40 @@ namespace din {
 		return std::move(retval);
 	}
 
-	void DBSource::query_push_results (const std::vector<std::string>& parCols, boost::string_ref parTable, const std::vector<uint32_t>& parIDs, std::function<void(std::string&&)> parCallback) {
+	void DBSource::query_no_conditions (const ColumnList& parCols, boost::string_ref parTable, const std::vector<uint32_t>& parIDs, std::function<void(std::string&&)> parCallback) {
 		std::ostringstream oss;
-		oss << "SELECT \"";
-		boost::copy(parCols, infix_ostream_iterator<std::string>(oss, "\", \""));
-		oss << '"';
-		oss << " FROM \"" << parTable << "\" WHERE \"id\" = ANY($1) ORDER BY \"desc\" ASC LIMIT 500;";
+		oss << "SELECT " << parCols << ' ' <<
+			"FROM \"" << parTable << "\" " <<
+			"WHERE \"id\"=ANY($1) " <<
+			"ORDER BY \"desc\" ASC " <<
+			"LIMIT " << g_files_query_limit << ';';
 
 		auto& conn = get_conn();
 		auto result = conn.query(oss.str(), parIDs);
+		for (auto row : result) {
+			for (auto val : row) {
+				parCallback(std::move(val));
+			}
+		}
+	}
+
+	void DBSource::query_files_in_dir (const ColumnList& parCols, boost::string_ref parDir, uint16_t parLevel, uint32_t parGroupID, QueryCallback parCallback) {
+		std::ostringstream oss;
+		oss << "SELECT " << parCols << ' ' <<
+			"FROM \"files\" WHERE " <<
+			"\"level\"=$1 " <<
+			"AND \"group_id\"=$2 " <<
+			"AND str_begins_with(\"path\", COALESCE($3, '')) " <<
+			"ORDER BY \"path\" ASC " <<
+			"LIMIT " << g_files_query_limit << ';';
+
+		auto& conn = get_conn();
+		auto result = conn.query(
+			oss.str(),
+			parLevel,
+			parGroupID,
+			parDir
+		);
 		for (auto row : result) {
 			for (auto val : row) {
 				parCallback(std::move(val));

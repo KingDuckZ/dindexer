@@ -22,6 +22,7 @@
 #include <sstream>
 #include <boost/phoenix/bind/bind_function.hpp>
 #include <boost/phoenix/operator.hpp>
+#include <cassert>
 
 namespace qi = boost::spirit::qi;
 
@@ -102,5 +103,14 @@ namespace din {
 		oss << '/';
 		boost::copy(m_stack, infix_ostream_iterator<std::string>(oss, "/"));
 		return oss.str();
+	}
+
+	uint16_t GenericPath::level() const {
+		return static_cast<uint16_t>(m_stack.size());
+	}
+
+	const std::string& GenericPath::operator[] (std::size_t parIndex) const {
+		assert(parIndex < level());
+		return m_stack[parIndex];
 	}
 } //namespace din

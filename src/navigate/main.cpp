@@ -28,10 +28,12 @@
 #include <vector>
 #include <cassert>
 #include <boost/range/algorithm/copy.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace {
 	void do_navigation ( din::DBSource& parDB );
 
+	template <typename V> void print_db_result ( const V& parResult );
 	bool on_exit ( void );
 	void on_pwd ( const din::GenericPath& parDirMan );
 	void on_ls ( const din::GenericPath& parDirMan, din::DBSource& parDB );
@@ -67,6 +69,14 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
+	template <typename V>
+	void print_db_result (const V& parResult) {
+		for (const auto& row : parResult) {
+			boost::copy(row, infix_ostream_iterator<std::string>(std::cout, "\t"));
+			std::cout << "\n";
+		}
+	}
+
 	bool on_exit() {
 		return true;
 	}
@@ -78,11 +88,18 @@ namespace {
 	void on_ls (const din::GenericPath& parDirMan, din::DBSource& parDB) {
 		using namespace din;
 
-		auto sets_ids = parDB.sets();
-		auto sets_info = parDB.set_details<SetDetail_ID, SetDetail_Desc, SetDetail_CreeationDate>(sets_ids);
-		for (const auto& row : sets_info) {
-			boost::copy(row, infix_ostream_iterator<std::string>(std::cout, "\t"));
-			std::cout << "\n";
+		const auto curr_path = parDirMan.to_string();
+		if ("/" == curr_path) {
+			auto sets_ids = parDB.sets();
+			auto sets_info = parDB.set_details<SetDetail_ID, SetDetail_Desc, SetDetail_CreeationDate>(sets_ids);
+			print_db_result(sets_info);
+		}
+		else {
+			const auto start_from = curr_path.find('/', 1);
+			auto path_prefix = boost::string_ref(curr_path).substr(start_from == curr_path.npos ? curr_path.size() : start_from + 1);
+			const auto set_id = boost::lexical_cast<uint32_t>(parDirMan[0]);
+			auto files_info = parDB.file_details<FileDetail_Path>(set_id, parDirMan.level(), path_prefix);
+			print_db_result(files_info);
 		}
 	}
 
