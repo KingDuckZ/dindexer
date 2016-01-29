@@ -137,7 +137,7 @@ namespace din {
 			"\"level\"=$1 " <<
 			"AND \"group_id\"=$2 " <<
 			"AND str_begins_with(\"path\", COALESCE($3, '')) " <<
-			"ORDER BY \"path\" ASC " <<
+			"ORDER BY \"is_directory\" DESC, \"path\" ASC " <<
 			"LIMIT " << g_files_query_limit << ';';
 
 		auto& conn = get_conn();
