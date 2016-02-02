@@ -168,7 +168,7 @@ namespace pq {
 			//Hack to make some sort of "static pimpl"
 			struct StorageStruct { int a; int b[2 * 6]; void* c[2]; };
 			static constexpr std::size_t DATA_SIZE = sizeof(StorageStruct);
-			using storage = std::aligned_storage<DATA_SIZE, alignof(uint64_t)>::type;
+			using storage = std::aligned_storage<DATA_SIZE, alignof(int)>::type;
 			void push_param ( const char* parFormat, ... );
 			storage m_storage;
 			PGParams m_par;

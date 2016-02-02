@@ -27,6 +27,21 @@
 
 namespace pq {
 	namespace implem {
+		template <
+			typename Expected,
+			typename Struct,
+			std::size_t ES=sizeof(Expected),
+			std::size_t EA=alignof(Expected),
+			std::size_t SS=sizeof(Struct),
+			std::size_t SA=alignof(Struct)
+		>
+		void static_assert_size() {
+			//static_assert(sizeof(PGparam*) == sizeof(void*), "Unexpected pointer size");
+			//static_assert(sizeof(PGresult*) == sizeof(void*), "Unexpected pointer size");
+			static_assert(ES == SS, "Wrong size for static memory");
+			static_assert(EA == SA, "Wrong alignment for static memory");
+		}
+
 		auto get_pqlib_c_type_struct<std::chrono::system_clock::time_point>::conv (const std::chrono::system_clock::time_point& parParam) -> type {
 			static_assert(sizeof(storage) == sizeof(PGtimestamp), "Wrong size for timestamp, please update DATA_SIZE");
 			static_assert(alignof(storage) == alignof(PGtimestamp), "Wrong alignment for timestamp, please update type");
@@ -64,8 +79,7 @@ namespace pq {
 		get_pqlib_c_type_struct_arr::get_pqlib_c_type_struct_arr (const Connection& parConn) :
 			m_par(parConn.make_empty_params())
 		{
-			static_assert(sizeof(storage) == sizeof(PGarray), "Wrong size for PGarray's static memory");
-			static_assert(alignof(storage) == alignof(PGarray), "Wrong alignment for PGarray's static memory");
+			static_assert_size<PGarray, storage>();
 
 			PGarray arr;
 			std::fill(reinterpret_cast<char*>(&arr), reinterpret_cast<char*>(&arr) + sizeof(PGarray), '\0');

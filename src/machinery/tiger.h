@@ -97,7 +97,7 @@ typedef t_word t_block[8];
 /** Standard tiger calculation, put your string in str and the string length on length and get the result on res **/
 void tiger(const char *str, t_word length, t_res res, char pad);
 /** Similar to tiger but interleaving accesses to both equally sized strings to reduce overhead and pipeline stalls you get the result of str1 on res1 and the one of str2 on res2 **/
-void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2);
+void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2, char pad);
 #ifdef __SSE2__
 /** This is equivalent to tiger_2 but uses SSE2 for the key schduling making it faster **/
 void tiger_sse2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2, char pad);

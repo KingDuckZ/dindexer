@@ -25,13 +25,18 @@
 #include <sstream>
 #include <iomanip>
 
-#if defined(__SSE2__)
-extern "C" void tiger_sse2_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRes1[3], uint64_t parRes2[3] );
-extern "C" void tiger_sse2_last_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRealLength1, uint64_t parRealLength2, uint64_t parRes1[3], uint64_t parRes2[3], char parPadding );
 extern "C" void tiger ( const char* parStr, uint64_t parLength, uint64_t parHash[3], char parPadding );
 
+#if defined(__SSE2__)
+#	define USE_TIGER_SSE2
+#endif
+
+#if defined(USE_TIGER_SSE2)
+extern "C" void tiger_sse2_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRes1[3], uint64_t parRes2[3] );
+extern "C" void tiger_sse2_last_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRealLength1, uint64_t parRealLength2, uint64_t parRes1[3], uint64_t parRes2[3], char parPadding );
 #else
-#	error "Not implemented without SSE2"
+extern "C" void tiger_2_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRes1[3], uint64_t parRes2[3] );
+extern "C" void tiger_2_last_chunk ( const char* parStr1, const char* parStr2, uint64_t parLength, uint64_t parRealLength1, uint64_t parRealLength2, uint64_t parRes1[3], uint64_t parRes2[3], char parPadding );
 #endif
 
 namespace mchlib {
@@ -81,7 +86,11 @@ namespace mchlib {
 			std::fill(buff_ptr + sizeof(hash_dir), buff_ptr + hash_size, 0);
 			TigerHash dummy {};
 			tiger_init_hash(hash_dir);
+#if defined(USE_TIGER_SSE2)
 			tiger_sse2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, hash_dir.data);
+#else
+			tiger_2_chunk(buff_ptr, buff_ptr, hash_size, dummy.data, hash_dir.data);
+#endif
 		}
 
 		auto remaining = file_size;
@@ -91,7 +100,11 @@ namespace mchlib {
 			assert(buffsize % 64 == 0);
 			remaining -= buffsize;
 			src.read(buff_ptr, buffsize);
+#if defined(USE_TIGER_SSE2)
 			tiger_sse2_chunk(buff_ptr, buff_ptr, buffsize, parHashFile.data, hash_dir.data);
+#else
+			tiger_2_chunk(buff_ptr, buff_ptr, buffsize, parHashFile.data, hash_dir.data);
+#endif
 		}
 
 		{
@@ -102,7 +115,11 @@ namespace mchlib {
 			assert(aligned_size <= buffsize);
 			const char* read_from_buff = buff_ptr;
 			if (aligned_size) {
+#if defined(USE_TIGER_SSE2)
 				tiger_sse2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, hash_dir.data);
+#else
+				tiger_2_chunk(buff_ptr, buff_ptr, aligned_size, parHashFile.data, hash_dir.data);
+#endif
 				assert((remaining & 63) == remaining - aligned_size);
 				remaining -= aligned_size;
 				read_from_buff += aligned_size;
@@ -110,7 +127,11 @@ namespace mchlib {
 
 			//Remember to pass the augmented data size for the second reallength value: we passed the initial
 			//dir's hash value (64 bytes) as if they were part of the data.
+#if defined(USE_TIGER_SSE2)
 			tiger_sse2_last_chunk(read_from_buff, read_from_buff, remaining, file_size, file_size + hash_size, parHashFile.data, hash_dir.data, g_tiger_padding);
+#else
+			tiger_2_last_chunk(read_from_buff, read_from_buff, remaining, file_size, file_size + hash_size, parHashFile.data, hash_dir.data, g_tiger_padding);
+#endif
 		}
 
 		parSizeOut = static_cast<uint64_t>(file_size);
@@ -140,3 +161,7 @@ namespace mchlib {
 		tiger (parData.data(), parData.size(), parHash.data, g_tiger_padding);
 	}
 } //namespace mchlib
+
+#if defined(USE_TIGER_SSE2)
+#	undef USE_TIGER_SSE2
+#endif

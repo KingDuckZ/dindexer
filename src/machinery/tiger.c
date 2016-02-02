@@ -664,7 +664,7 @@ void tiger_chunk(const char *str, t_word length, t_res res)
 void tiger_last_chunk(const char *str, t_word length, t_word reallength, t_res res, char pad)
 {
     t_block tmp;
-	t_word i;
+    t_word i;
 
     i=length & 63;
     //Padding on last block
@@ -707,20 +707,12 @@ void tiger(const char *str, t_word length, t_res res, char pad)
   tiger_last_chunk(str + proc_length, length - proc_length, length, res, pad);
 }
 
-void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2)
+
+void tiger_2_chunk(const char *str1, const char *str2, t_word length, t_res res1, t_res res2)
 {
     t_block tmp1;
     t_block tmp2;
     const char * end = str1 + (length&(-64));
-    t_word i;
-    endianvars_2;
-
-    res1[0]=0x0123456789ABCDEFULL;
-    res2[0]=0x0123456789ABCDEFULL;
-    res1[1]=0xFEDCBA9876543210ULL;
-    res2[1]=0xFEDCBA9876543210ULL;
-    res1[2]=0xF096A5B4C3B2E187ULL;
-    res2[2]=0xF096A5B4C3B2E187ULL;
 
     while(str1<end)
     {
@@ -746,6 +738,14 @@ void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_re
         #endif
         #endif
     }
+}
+void tiger_2_last_chunk (const char *str1, const char *str2, t_word length, t_word reallength1, t_word reallength2, t_res res1, t_res res2, char pad)
+{
+    t_word i;
+    t_block tmp1;
+    t_block tmp2;
+    endianvars_2;
+
     i=length & 63;
     //Padding on last block
     //add 0x01 afterwards.
@@ -754,8 +754,8 @@ void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_re
     //Finally add message size at the end of the block.
     memcpy(tmp1,str1,(size_t)i);
     memcpy(tmp2,str2,(size_t)i);
-    uc(tmp1)[i]=0x01;
-    uc(tmp2)[i++]=0x01;
+    uc(tmp1)[i]=pad;
+    uc(tmp2)[i++]=pad;
     memset(uc(tmp1)+i,0,(size_t)((8-i)&7));
     memset(uc(tmp2)+i,0,(size_t)((8-i)&7));
     i+=(8-i)&7;
@@ -784,6 +784,20 @@ void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_re
     tiger_block_2(tmp1, tmp2, res1, res2);
     //Finally we reorder the result so it is shown in little endian
     fixresendian_2;
+}
+
+void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2, char pad)
+{
+    const t_word aligned_length = (length&(-64));
+    res1[0]=0x0123456789ABCDEFULL;
+    res2[0]=0x0123456789ABCDEFULL;
+    res1[1]=0xFEDCBA9876543210ULL;
+    res2[1]=0xFEDCBA9876543210ULL;
+    res1[2]=0xF096A5B4C3B2E187ULL;
+    res2[2]=0xF096A5B4C3B2E187ULL;
+
+    tiger_2_chunk(str1, str2, aligned_length, res1, res2);
+    tiger_2_last_chunk(str1 + aligned_length, str2 + aligned_length, length - aligned_length, length, length, res1, res2, pad);
 }
 
 #ifdef __SSE2__
@@ -835,7 +849,7 @@ void tiger_sse2_last_chunk (const char *str1, const char *str2, t_word length, t
 
 void tiger_sse2(const char *str1, const char *str2, t_word length, t_res res1, t_res res2, char pad)
 {
-	const t_word aligned_length = (length&(-64));
+    const t_word aligned_length = (length&(-64));
     res1[0]=0x0123456789ABCDEFULL;
     res2[0]=0x0123456789ABCDEFULL;
     res1[1]=0xFEDCBA9876543210ULL;
@@ -843,8 +857,8 @@ void tiger_sse2(const char *str1, const char *str2, t_word length, t_res res1, t
     res1[2]=0xF096A5B4C3B2E187ULL;
     res2[2]=0xF096A5B4C3B2E187ULL;
 
-	tiger_sse2_chunk(str1, str2, aligned_length, res1, res2);
-	tiger_sse2_last_chunk(str1 + aligned_length, str2 + aligned_length, length - aligned_length, length, length, res1, res2, pad);
+    tiger_sse2_chunk(str1, str2, aligned_length, res1, res2);
+    tiger_sse2_last_chunk(str1 + aligned_length, str2 + aligned_length, length - aligned_length, length, length, res1, res2, pad);
 }
 #endif
 

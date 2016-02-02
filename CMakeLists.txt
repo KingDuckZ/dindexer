@@ -79,5 +79,8 @@ target_compile_definitions(${PROJECT_NAME}
 	INTERFACE BOOST_SPIRIT_USE_PHOENIX_V3=1
 	#workaround for a bug in gcc 5.3 that is causing exceptions to slip
 	#through try/catch blocks.
+	#WARNING: this will likely cause linking erros with boost and
+	#yaml-cpp unless they are also built with this option or with an
+	#older version of gcc.
 	INTERFACE _GLIBCXX_USE_CXX11_ABI=0
 )
