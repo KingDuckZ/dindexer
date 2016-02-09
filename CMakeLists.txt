@@ -66,6 +66,8 @@ add_subdirectory(src/delete)
 add_subdirectory(src/query)
 add_subdirectory(src/locate)
 add_subdirectory(src/navigate)
+add_subdirectory(test/gtest)
+add_subdirectory(test/unit)
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}

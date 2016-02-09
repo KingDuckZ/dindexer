@@ -18,6 +18,7 @@
 #define BOOST_SPIRIT_UNICODE
 
 #include "commandprocessor.hpp"
+//TODO: trim #includes
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/phoenix/phoenix.hpp>
