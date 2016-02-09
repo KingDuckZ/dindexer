@@ -23,6 +23,7 @@
 //TEST_F for class
 TEST(machinery, diriterator) {
 	using mchlib::SetListing;
+	using mchlib::SetListingView;
 	using mchlib::FileRecordData;
 
 	FileRecordData test_data_arr[] = {
@@ -911,9 +912,15 @@ TEST(machinery, diriterator) {
 	SetListing lst(std::move(test_data));
 
 	auto i = lst.begin();
-	std::cout << i->abs_path << '\n';
+	EXPECT_EQ("", i->abs_path);
+
 	++i;
-	std::cout << i->abs_path << '\n';
-	++i;
-	std::cout << i->abs_path << '\n';
+	EXPECT_EQ("BestAndBest", i->abs_path);
+
+	auto view = SetListingView(i);
+	auto i2 = view.cbegin();
+	EXPECT_EQ("BestAndBest/CD1", i2->abs_path);
+
+	++i2;
+	EXPECT_EQ("BestAndBest/CD2", i2->abs_path);
 }

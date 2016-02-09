@@ -144,6 +144,10 @@ namespace mchlib {
 	}
 
 	auto SetListing::begin() const -> const_iterator {
+		return cbegin();
+	}
+
+	auto SetListing::cbegin() const -> const_iterator {
 		std::unique_ptr<PathName> base_path;
 		if (m_list.begin() != m_list.end()) {
 			base_path.reset(new PathName(m_list.front().abs_path));
@@ -151,15 +155,23 @@ namespace mchlib {
 		return const_iterator(m_list.begin(), m_list.end(), std::move(base_path));
 	}
 
-	//auto SetListing::cbegin() const -> const_iterator {
-	//}
-
 	//auto SetListing::end() const -> const_iterator {
 	//}
 
 	//auto SetListing::cend() const -> const_iterator {
 	//}
 
-	//ListType descend_copy (const const_iterator& parItem) const {
-	//}
+	SetListingView::SetListingView (const const_iterator& parIter) :
+		m_begin(parIter.m_current),
+		m_end(parIter.m_end)
+	{
+	}
+
+	auto SetListingView::cbegin() const -> const_iterator {
+		std::unique_ptr<PathName> base_path;
+		if (m_begin != m_end) {
+			base_path.reset(new PathName(m_begin->abs_path));
+		}
+		return const_iterator(m_begin, m_end, std::move(base_path));
+	}
 } //namespace mchlib

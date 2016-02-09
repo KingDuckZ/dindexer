@@ -25,9 +25,11 @@
 
 namespace mchlib {
 	class PathName;
+	class SetListingView;
 
 	namespace implem {
 		class DirIterator : public boost::iterator_facade<DirIterator, FileRecordData, boost::random_access_traversal_tag> {
+			friend class mchlib::SetListingView;
 			friend class boost::iterator_core_access;
 			typedef boost::iterator_facade<DirIterator, FileRecordData, boost::random_access_traversal_tag> base_class;
 			typedef base_class::difference_type difference_type;
@@ -66,28 +68,9 @@ namespace mchlib {
 		};
 	};
 
-	//class SetListingView {
-	//public:
-	//	typedef DirIterator const_iterator;
-
-	//	SetListingView ( SetListing::const_iterator parBeg, SetListing::const_iterator parVeryEnd );
-	//	~SetListingView ( void ) noexcept = default;
-
-	//	const_iterator begin ( void ) const;
-	//	const_iterator cbegin ( void ) const;
-	//	const_iterator end ( void ) const;
-	//	const_iterator cend ( void ) const;
-
-	//	SetListingView
-
-	//private:
-	//	const SetListing::const_iterator m_begin;
-	//	const SetListing::const_iterator m_end;
-	//};
-
 	class SetListing {
-		typedef std::vector<FileRecordData> ListType;
 	public:
+		typedef std::vector<FileRecordData> ListType;
 		typedef implem::DirIterator const_iterator;
 
 		explicit SetListing ( ListType&& parList, bool parSort=true );
@@ -98,10 +81,28 @@ namespace mchlib {
 		const_iterator end ( void ) const;
 		const_iterator cend ( void ) const;
 
-		ListType descend_copy ( const const_iterator& parItem ) const;
+		//ListType descend_copy ( const const_iterator& parItem ) const;
 
 	private:
 		ListType m_list;
+	};
+
+	class SetListingView {
+	public:
+		typedef SetListing::const_iterator const_iterator;
+		typedef SetListing::ListType::const_iterator list_iterator;
+
+		explicit SetListingView ( const const_iterator& parIter );
+		~SetListingView ( void ) noexcept = default;
+
+		const_iterator begin ( void ) const;
+		const_iterator cbegin ( void ) const;
+		const_iterator end ( void ) const;
+		const_iterator cend ( void ) const;
+
+	private:
+		list_iterator m_begin;
+		list_iterator m_end;
 	};
 } //namespace mchlib
 
