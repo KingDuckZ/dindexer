@@ -100,10 +100,13 @@ namespace din {
 		template <class M, M... Details>
 		inline
 		std::vector<std::string> make_columns_vec (const std::map<M, std::string>& parDic) {
+			//typedef const std::string&(SetDetailsMap::*AtFunc)(const SetDetails&) const;
+
 			std::vector<std::string> columns;
 			columns.reserve(sizeof...(Details));
 
 			const std::array<M, sizeof...(Details)> details { Details... };
+			//AtFunc at_func = &SetDetailsMap::at;
 			//std::generate(details.begin(), details.end(), columns.begin(), std::bind(at_func, &details_dic, std::placeholders::_1));
 			for (auto detail : details) {
 				columns.push_back(parDic.at(detail));
@@ -115,11 +118,9 @@ namespace din {
 	template <SetDetails... D>
 	auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
-		typedef const std::string&(SetDetailsMap::*AtFunc)(const SetDetails&) const;
 		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
 		const auto columns = implem::make_columns_vec<SetDetails, D...>(m_set_details_map);
-		AtFunc at_func = &SetDetailsMap::at;
 
 		ReturnType list;
 		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
@@ -131,11 +132,9 @@ namespace din {
 	template <FileDetails... D>
 	auto DBSource::file_details (uint32_t parSetID, uint16_t parLevel, boost::string_ref parDir) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
-		typedef const std::string&(SetDetailsMap::*AtFunc)(const SetDetails&) const;
 		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
 		const auto columns = implem::make_columns_vec<FileDetails, D...>(m_file_details_map);
-		AtFunc at_func = &SetDetailsMap::at;
 
 		ReturnType list;
 		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
