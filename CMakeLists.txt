@@ -5,9 +5,13 @@ list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 include(GetGitRevisionDescription)
 include(Buildlibpqtypes)
+include(gccversion)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
+	option(DINDEXER_CXX11_ABI "Controls if _GLIBCXX_USE_CXX11_ABI gets set to 0 or not" ON)
+endif()
 set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
 set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
@@ -54,14 +58,18 @@ target_include_directories(${bare_name}-inc
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
-add_definitions(
-	#workaround for a bug in gcc 5.3 that is causing exceptions to slip
-	#through try/catch blocks.
-	#WARNING: this will likely cause linking erros with boost and
-	#yaml-cpp unless they are also built with this option or with an
-	#older version of gcc.
-	-D_GLIBCXX_USE_CXX11_ABI=0
-)
+
+if (NOT DINDEXER_CXX11_ABI AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
+	message(STATUS "CXX11 ABI disabled (_GLIBCXX_USE_CXX11_ABI=0)")
+	add_definitions(
+		#workaround for a bug in gcc 5.3 that is causing exceptions to slip
+		#through try/catch blocks.
+		#WARNING: this will likely cause linking erros with boost and
+		#yaml-cpp unless they are also built with this option or with an
+		#older version of gcc.
+		-D_GLIBCXX_USE_CXX11_ABI=0
+	)
+endif()
 
 #Libraries
 add_subdirectory(src/pq)
