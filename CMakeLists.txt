@@ -54,6 +54,15 @@ target_include_directories(${bare_name}-inc
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
+add_definitions(
+	#workaround for a bug in gcc 5.3 that is causing exceptions to slip
+	#through try/catch blocks.
+	#WARNING: this will likely cause linking erros with boost and
+	#yaml-cpp unless they are also built with this option or with an
+	#older version of gcc.
+	-D_GLIBCXX_USE_CXX11_ABI=0
+)
+
 #Libraries
 add_subdirectory(src/pq)
 add_subdirectory(src/common)
@@ -79,10 +88,4 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
 	INTERFACE WITH_PROGRESS_FEEDBACK
 	INTERFACE BOOST_SPIRIT_USE_PHOENIX_V3=1
-	#workaround for a bug in gcc 5.3 that is causing exceptions to slip
-	#through try/catch blocks.
-	#WARNING: this will likely cause linking erros with boost and
-	#yaml-cpp unless they are also built with this option or with an
-	#older version of gcc.
-	INTERFACE _GLIBCXX_USE_CXX11_ABI=0
 )
