@@ -912,15 +912,17 @@ TEST(machinery, diriterator) {
 	SetListing lst(std::move(test_data));
 
 	auto i = lst.begin();
-	EXPECT_EQ("", i->abs_path);
-
-	++i;
 	EXPECT_EQ("BestAndBest", i->abs_path);
 
-	auto view = SetListingView(i);
-	auto i2 = view.cbegin();
-	EXPECT_EQ("BestAndBest/CD1", i2->abs_path);
+	{
+		auto view = SetListingView(i);
+		auto i2 = view.cbegin();
+		EXPECT_EQ("BestAndBest/CD1", i2->abs_path);
 
-	++i2;
-	EXPECT_EQ("BestAndBest/CD2", i2->abs_path);
+		++i2;
+		EXPECT_EQ("BestAndBest/CD2", i2->abs_path);
+	}
+
+	++i;
+	EXPECT_EQ("City Hunter", i->abs_path);
 }

@@ -45,62 +45,42 @@ namespace mchlib {
 
 	namespace implem {
 		DirIterator::DirIterator (DirIterator&& parOther) :
-			m_first(std::move(parOther.m_first)),
 			m_current(std::move(parOther.m_current)),
 			m_end(std::move(parOther.m_end)),
-			m_base_path(std::move(parOther.m_base_path)),
-			m_second_offs(parOther.m_second_offs)
+			m_base_path(std::move(parOther.m_base_path))
 		{
 		}
 
 		DirIterator::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath) :
-			m_first(parBegin),
 			m_current(parBegin),
 			m_end(parEnd),
-			m_base_path(std::move(parBasePath)),
-			m_second_offs(0)
+			m_base_path(std::move(parBasePath))
 		{
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level);
 
 			//Look for the point where the children of this entry starts
-			auto search_second = parBegin;
 			while (
-				search_second != m_end and (
-					search_second->level == m_base_path->atom_count() or
-					*m_base_path != PathName(search_second->abs_path).pop_right()
+				m_current != m_end and (
+					m_current->level == m_base_path->atom_count() or
+					*m_base_path != PathName(m_current->abs_path).pop_right()
 			)) {
-				assert(search_second->level == m_base_path->atom_count());
-				++search_second;
+				//assert(m_current->level == m_base_path->atom_count());
+				++m_current;
 			}
-			m_second_offs = std::distance(parBegin, search_second);
 		}
 
 		DirIterator::~DirIterator() noexcept {
 		}
 
 		void DirIterator::increment() {
-			if (m_current == m_first and m_second_offs > 1) {
-				m_current = m_first + m_second_offs;
-			}
-			else {
-				++m_current;
-			}
+			++m_current;
 		}
 
 		void DirIterator::decrement() {
-			if (m_current == m_first + m_second_offs) {
-				m_current = m_first;
-			}
-			else {
-				--m_current;
-			}
+			--m_current;
 		}
 
 		void DirIterator::advance (std::size_t parAdvance) {
-			if (m_current == m_first and parAdvance > 0) {
-				--parAdvance;
-				m_current = m_first + m_second_offs;
-			}
 			m_current += parAdvance;
 		}
 

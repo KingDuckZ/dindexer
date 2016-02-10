@@ -50,21 +50,9 @@ namespace mchlib {
 			reference dereference ( void ) const;
 			bool is_end ( void ) const;
 
-			//There are three iterators and an offset because the first item
-			//could very well be detached from the rest of its siblings. For
-			//example "a", "b", "a/c", "a/d": when iterating on that sequence the
-			//expected outcome is "a", "a/c", "a/d". So in order to be able to
-			//iterate back and forward we need a "first" iterator so we can
-			//always get back to it whene we are decrementing an iterator to
-			//"a/c" for example. current is just the current iterator, and the
-			//offset is needed so we can tell if at any moment we are at
-			//first+offset and skip back to first instead of decrementing
-			//current. end is just there so we know when to stop advancing.
-			VecIterator m_first;
 			VecIterator m_current;
 			VecIterator m_end;
 			std::unique_ptr<PathName> m_base_path;
-			std::vector<FileRecordData>::difference_type m_second_offs;
 		};
 	};
 
