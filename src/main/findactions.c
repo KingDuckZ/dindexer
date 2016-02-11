@@ -42,6 +42,7 @@ void find_actions (char*** parOut, size_t* parCount) {
 	list.count = 0;
 	foreach_dir(&increase_actionlist, &list);
 	if (0 == list.count) {
+		*parOut = NULL;
 		return;
 	}
 
@@ -60,7 +61,9 @@ void free_actions (char** parActions, size_t parCount) {
 	for (z = 0; z < parCount; ++z) {
 		free(parActions[z]);
 	}
-	free(parActions);
+	if (parActions) {
+		free(parActions);
+	}
 }
 
 static void foreach_dir (void(*parAction)(const char*, ActionList*), ActionList* parList) {

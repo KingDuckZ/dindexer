@@ -40,9 +40,11 @@ int main (int parArgc, char* parArgv[]) {
 	char** argv;
 	FILE* streamout;
 	int retval;
+	int showbuiltin;
 
+	showbuiltin = (parArgc >= 2 ? not strcmp("--builtin", parArgv[1]) : 0);
 	find_actions(&actions, &actions_count);
-	if (0 == actions_count) {
+	if (0 == actions_count and not showbuiltin) {
 		fprintf(stderr, "No actions found in \"%s\"\n", ACTIONS_SEARCH_PATH);
 		return 1;
 	}
@@ -64,7 +66,7 @@ int main (int parArgc, char* parArgv[]) {
 		free_actions(actions, actions_count);
 		return retval;
 	}
-	else if (strcmp("--builtin", parArgv[1]) == 0) {
+	else if (showbuiltin) {
 		print_builtin_feats();
 		free_actions(actions, actions_count);
 		return 0;
