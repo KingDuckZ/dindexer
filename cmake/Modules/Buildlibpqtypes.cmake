@@ -22,6 +22,12 @@ function (import_libpqtypes_project PostgreSQL_INCLUDE_DIRS)
 	set_target_properties(pqtypes PROPERTIES
 		IMPORTED_LOCATION ${libpqtypes_prefix}/lib/libpqtypes.so
 	)
+	install(
+		DIRECTORY ${libpqtypes_prefix}/lib/
+		DESTINATION "lib"
+		COMPONENT runtime
+		FILES_MATCHING PATTERN "libpqtypes.so*"
+	)
 
 	if(EXISTS "${libpqtypes_base_path}/configure.ac")
 		file(STRINGS "${libpqtypes_base_path}/configure.ac" libpqtypes_version_str REGEX "^AC_INIT[\t ]*\\([\t ]*libpqtypes[\t ]*,[\t ]*[0-9].*$")

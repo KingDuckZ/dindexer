@@ -12,7 +12,8 @@ option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the 
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
 	option(DINDEXER_CXX11_ABI "Controls if _GLIBCXX_USE_CXX11_ABI gets set to 0 or not" ON)
 endif()
-set(ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
+set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
+string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
 set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra -Wno-missing-field-initializers")
@@ -37,7 +38,7 @@ import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}")
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${bare_name}-inc INTERFACE)
 
-message(STATUS "Actions search path set to: \"${ACTIONS_PATH}\"")
+message(STATUS "Actions search path set to: \"${DINDEXER_ACTIONS_PATH}\"")
 
 configure_file(
 	"${PROJECT_SOURCE_DIR}/src/${bare_name}Config.h.in"

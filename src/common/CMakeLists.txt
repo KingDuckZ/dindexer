@@ -19,3 +19,9 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${YAMLCPP_LIBRARY}
 )
+
+#install(TARGETS ${PROJECT_NAME}
+#	LIBRARY DESTINATION lib
+#	RUNTIME DESTINATION bin
+#	ARCHIVE DESTINATION lib/static
+#)
