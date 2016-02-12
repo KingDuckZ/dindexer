@@ -22,6 +22,7 @@
 #include <cassert>
 #include <algorithm>
 
+
 namespace mchlib {
 	namespace {
 		bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
@@ -44,14 +45,18 @@ namespace mchlib {
 	} //unnamed namespace
 
 	namespace implem {
-		DirIterator::DirIterator (DirIterator&& parOther) :
+		template class DirIterator<true>;
+
+		template <bool Const>
+		DirIterator<Const>::DirIterator (DirIterator<Const>&& parOther) :
 			m_current(std::move(parOther.m_current)),
 			m_end(std::move(parOther.m_end)),
 			m_base_path(std::move(parOther.m_base_path))
 		{
 		}
 
-		DirIterator::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath) :
+		template <bool Const>
+		DirIterator<Const>::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath) :
 			m_current(parBegin),
 			m_end(parEnd),
 			m_base_path(std::move(parBasePath))
@@ -70,10 +75,12 @@ namespace mchlib {
 			}
 		}
 
-		DirIterator::~DirIterator() noexcept {
+		template <bool Const>
+		DirIterator<Const>::~DirIterator() noexcept {
 		}
 
-		void DirIterator::increment() {
+		template <bool Const>
+		void DirIterator<Const>::increment() {
 			assert(PathName(m_current->abs_path).pop_right() == *m_base_path);
 			do {
 				++m_current;
@@ -84,12 +91,14 @@ namespace mchlib {
 			);
 		}
 
-		auto DirIterator::distance_to (const DirIterator& parOther) const -> difference_type {
+		template <bool Const>
+		auto DirIterator<Const>::distance_to (const DirIterator<Const>& parOther) const -> difference_type {
 			assert(false); //TODO: write implementation
 			return std::distance(m_current, parOther.m_current);
 		}
 
-		bool DirIterator::equal (const DirIterator& parOther) const {
+		template <bool Const>
+		bool DirIterator<Const>::equal (const DirIterator<Const>& parOther) const {
 			return
 				(m_end == parOther.m_end) and
 				(
@@ -99,11 +108,13 @@ namespace mchlib {
 			;
 		}
 
-		auto DirIterator::dereference() const -> reference {
+		template <bool Const>
+		auto DirIterator<Const>::dereference() const -> reference {
 			return const_cast<reference>(*m_current);
 		}
 
-		bool DirIterator::is_end() const {
+		template <bool Const>
+		bool DirIterator<Const>::is_end() const {
 			const bool is_this_end =
 				not m_base_path or
 				(m_current == m_end) or

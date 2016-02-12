@@ -15,36 +15,42 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef id040FEEC20F7B4F65A3EF67BA6460E737
+#define id040FEEC20F7B4F65A3EF67BA6460E737
+
 #include "dindexer-machinery/recorddata.hpp"
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
-
-#ifndef id040FEEC20F7B4F65A3EF67BA6460E737
-#define id040FEEC20F7B4F65A3EF67BA6460E737
+#include <type_traits>
 
 namespace mchlib {
 	class PathName;
 	class SetListingView;
 
 	namespace implem {
-		class DirIterator : public boost::iterator_facade<DirIterator, FileRecordData, boost::forward_traversal_tag> {
+		template <bool Const>
+		class DirIterator : public boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> {
 			friend class mchlib::SetListingView;
 			friend class boost::iterator_core_access;
-			typedef boost::iterator_facade<DirIterator, FileRecordData, boost::random_access_traversal_tag> base_class;
-			typedef base_class::difference_type difference_type;
-			typedef base_class::reference reference;
+			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::random_access_traversal_tag> base_class;
+			typedef typename base_class::difference_type difference_type;
+			typedef typename base_class::reference reference;
 		public:
-			typedef std::vector<mchlib::FileRecordData>::const_iterator VecIterator;
+			typedef typename std::conditional<
+				Const,
+				std::vector<mchlib::FileRecordData>::const_iterator,
+				std::vector<mchlib::FileRecordData>::iterator
+			>::type VecIterator;
 
-			DirIterator ( DirIterator&& parOther );
+			DirIterator ( DirIterator<Const>&& parOther );
 			DirIterator ( VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath );
 			~DirIterator ( void ) noexcept;
 
 		private:
 			void increment ( void );
-			difference_type distance_to ( const DirIterator& parOther ) const;
-			bool equal ( const DirIterator& parOther ) const;
+			difference_type distance_to ( const DirIterator<Const>& parOther ) const;
+			bool equal ( const DirIterator<Const>& parOther ) const;
 			reference dereference ( void ) const;
 			bool is_end ( void ) const;
 
@@ -56,7 +62,7 @@ namespace mchlib {
 
 	class SetListingView {
 	public:
-		typedef implem::DirIterator const_iterator;
+		typedef implem::DirIterator<true> const_iterator;
 		typedef std::vector<FileRecordData>::const_iterator list_iterator;
 
 		explicit SetListingView ( const const_iterator& parIter );
