@@ -28,7 +28,7 @@ namespace mchlib {
 	class SetListingView;
 
 	namespace implem {
-		class DirIterator : public boost::iterator_facade<DirIterator, FileRecordData, boost::random_access_traversal_tag> {
+		class DirIterator : public boost::iterator_facade<DirIterator, FileRecordData, boost::forward_traversal_tag> {
 			friend class mchlib::SetListingView;
 			friend class boost::iterator_core_access;
 			typedef boost::iterator_facade<DirIterator, FileRecordData, boost::random_access_traversal_tag> base_class;
@@ -43,8 +43,6 @@ namespace mchlib {
 
 		private:
 			void increment ( void );
-			void decrement ( void );
-			void advance ( std::size_t parAdvance );
 			difference_type distance_to ( const DirIterator& parOther ) const;
 			bool equal ( const DirIterator& parOther ) const;
 			reference dereference ( void ) const;

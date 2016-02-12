@@ -84,16 +84,6 @@ namespace mchlib {
 			);
 		}
 
-		void DirIterator::decrement() {
-			assert(false); //TODO: write implementation
-			--m_current;
-		}
-
-		void DirIterator::advance (std::size_t parAdvance) {
-			assert(false); //TODO: remove
-			m_current += parAdvance;
-		}
-
 		auto DirIterator::distance_to (const DirIterator& parOther) const -> difference_type {
 			assert(false); //TODO: write implementation
 			return std::distance(m_current, parOther.m_current);
