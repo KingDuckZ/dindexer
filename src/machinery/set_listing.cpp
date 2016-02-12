@@ -56,6 +56,7 @@ namespace mchlib {
 			m_end(parEnd),
 			m_base_path(std::move(parBasePath))
 		{
+			assert(m_base_path or m_current == m_end);
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level);
 
 			//Look for the point where the children of this entry starts
@@ -64,7 +65,7 @@ namespace mchlib {
 					m_current->level == m_base_path->atom_count() or
 					*m_base_path != PathName(m_current->abs_path).pop_right()
 			)) {
-				//assert(m_current->level == m_base_path->atom_count());
+				assert(m_base_path);
 				++m_current;
 			}
 		}
@@ -73,18 +74,28 @@ namespace mchlib {
 		}
 
 		void DirIterator::increment() {
-			++m_current;
+			assert(PathName(m_current->abs_path).pop_right() == *m_base_path);
+			do {
+				++m_current;
+			} while(
+				m_current != m_end and
+				m_current->level == m_base_path->atom_count() + 1 and
+				*m_base_path != PathName(m_current->abs_path).pop_right()
+			);
 		}
 
 		void DirIterator::decrement() {
+			assert(false); //TODO: write implementation
 			--m_current;
 		}
 
 		void DirIterator::advance (std::size_t parAdvance) {
+			assert(false); //TODO: remove
 			m_current += parAdvance;
 		}
 
 		auto DirIterator::distance_to (const DirIterator& parOther) const -> difference_type {
+			assert(false); //TODO: write implementation
 			return std::distance(m_current, parOther.m_current);
 		}
 
@@ -104,10 +115,11 @@ namespace mchlib {
 
 		bool DirIterator::is_end() const {
 			const bool is_this_end =
+				not m_base_path or
 				(m_current == m_end) or
-				(m_base_path->atom_count() != m_base_path->atom_count() + 1) or
+				(m_current->level != m_base_path->atom_count() + 1) /*or
 				(*m_base_path != PathName(m_current->abs_path).pop_right())
-			;
+			*/;
 			return is_this_end;
 		}
 	} //namespace implem
@@ -135,16 +147,28 @@ namespace mchlib {
 		return const_iterator(m_list.begin(), m_list.end(), std::move(base_path));
 	}
 
-	//auto SetListing::end() const -> const_iterator {
-	//}
+	auto SetListing::end() const -> const_iterator {
+		return cend();
+	}
 
-	//auto SetListing::cend() const -> const_iterator {
-	//}
+	auto SetListing::cend() const -> const_iterator {
+		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>());
+	}
 
 	SetListingView::SetListingView (const const_iterator& parIter) :
 		m_begin(parIter.m_current),
 		m_end(parIter.m_end)
 	{
+	}
+
+	SetListingView::SetListingView (const SetListing& parListing) :
+		m_begin(parListing.m_list.begin()),
+		m_end(parListing.m_list.end())
+	{
+	}
+
+	auto SetListingView::begin() const -> const_iterator {
+		return cbegin();
 	}
 
 	auto SetListingView::cbegin() const -> const_iterator {
@@ -153,5 +177,13 @@ namespace mchlib {
 			base_path.reset(new PathName(m_begin->abs_path));
 		}
 		return const_iterator(m_begin, m_end, std::move(base_path));
+	}
+
+	auto SetListingView::end() const -> const_iterator {
+		return cend();
+	}
+
+	auto SetListingView::cend() const -> const_iterator {
+		return const_iterator(m_end, m_end, std::unique_ptr<PathName>());
 	}
 } //namespace mchlib

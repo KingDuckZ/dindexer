@@ -57,6 +57,7 @@ namespace mchlib {
 	};
 
 	class SetListing {
+		friend class SetListingView;
 	public:
 		typedef std::vector<FileRecordData> ListType;
 		typedef implem::DirIterator const_iterator;
@@ -81,6 +82,7 @@ namespace mchlib {
 		typedef SetListing::ListType::const_iterator list_iterator;
 
 		explicit SetListingView ( const const_iterator& parIter );
+		explicit SetListingView ( const SetListing& parListing );
 		~SetListingView ( void ) noexcept = default;
 
 		const_iterator begin ( void ) const;
