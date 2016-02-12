@@ -1,4 +1,4 @@
-Configuration for drone.io
+# Configuration for drone.io
 
 git submodule update --init
 cd ..
@@ -18,3 +18,4 @@ mkdir dindexer_build
 cd dindexer_build
 cmake -DCMAKE_BUILD_TYPE=Release ../dindexer
 make
+make package
