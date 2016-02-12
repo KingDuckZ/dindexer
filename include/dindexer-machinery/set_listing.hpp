@@ -54,33 +54,14 @@ namespace mchlib {
 		};
 	};
 
-	class SetListing {
-		friend class SetListingView;
-	public:
-		typedef std::vector<FileRecordData> ListType;
-		typedef implem::DirIterator const_iterator;
-
-		explicit SetListing ( ListType&& parList, bool parSort=true );
-		~SetListing ( void ) noexcept;
-
-		const_iterator begin ( void ) const;
-		const_iterator cbegin ( void ) const;
-		const_iterator end ( void ) const;
-		const_iterator cend ( void ) const;
-
-		//ListType descend_copy ( const const_iterator& parItem ) const;
-
-	private:
-		ListType m_list;
-	};
-
 	class SetListingView {
 	public:
-		typedef SetListing::const_iterator const_iterator;
-		typedef SetListing::ListType::const_iterator list_iterator;
+		typedef implem::DirIterator const_iterator;
+		typedef std::vector<FileRecordData>::const_iterator list_iterator;
 
 		explicit SetListingView ( const const_iterator& parIter );
-		explicit SetListingView ( const SetListing& parListing );
+		SetListingView ( list_iterator parBeg, list_iterator parEnd );
+		SetListingView ( SetListingView&& ) = default;
 		~SetListingView ( void ) noexcept = default;
 
 		const_iterator begin ( void ) const;
@@ -91,6 +72,26 @@ namespace mchlib {
 	private:
 		list_iterator m_begin;
 		list_iterator m_end;
+	};
+
+	class SetListing {
+	public:
+		typedef std::vector<FileRecordData> ListType;
+		typedef SetListingView::const_iterator const_iterator;
+
+		explicit SetListing ( ListType&& parList, bool parSort=true );
+		~SetListing ( void ) noexcept;
+
+		const_iterator begin ( void ) const;
+		const_iterator cbegin ( void ) const;
+		const_iterator end ( void ) const;
+		const_iterator cend ( void ) const;
+
+		//ListType descend_copy ( const const_iterator& parItem ) const;
+		SetListingView make_view ( void ) const;
+
+	private:
+		ListType m_list;
 	};
 } //namespace mchlib
 

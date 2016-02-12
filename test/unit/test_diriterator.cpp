@@ -175,7 +175,7 @@ TEST(machinery, diriterator) {
 
 	std::vector<std::string> flattened;
 	flattened.reserve(lengthof(expected_list));
-	flatten_filelist(SetListingView(lst), flattened);
+	flatten_filelist(lst.make_view(), flattened);
 	EXPECT_EQ(lengthof(expected_list), flattened.size());
 	const auto count = std::min(lengthof(expected_list), flattened.size());
 	for (std::size_t z = 0; z < count; ++z) {

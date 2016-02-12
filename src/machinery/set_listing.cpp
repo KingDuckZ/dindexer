@@ -145,15 +145,19 @@ namespace mchlib {
 		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>());
 	}
 
+	SetListingView SetListing::make_view() const {
+		return SetListingView(m_list.begin(), m_list.end());
+	}
+
 	SetListingView::SetListingView (const const_iterator& parIter) :
 		m_begin(parIter.m_current),
 		m_end(parIter.m_end)
 	{
 	}
 
-	SetListingView::SetListingView (const SetListing& parListing) :
-		m_begin(parListing.m_list.begin()),
-		m_end(parListing.m_list.end())
+	SetListingView::SetListingView (list_iterator parBeg, list_iterator parEnd) :
+		m_begin(parBeg),
+		m_end(parEnd)
 	{
 	}
 
