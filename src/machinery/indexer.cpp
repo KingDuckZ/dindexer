@@ -15,6 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//WARNING: buggy code - intermediate hash for directories that contain files
+//is likely wrong!
 //#define USE_LEGACY_HASH_DIR
 
 #include "dindexer-machinery/indexer.hpp"
@@ -55,6 +57,7 @@ namespace mchlib {
 		void append_to_vec (std::vector<char>& parDest, const HashType& parHash, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + sizeof(HashType) + parString.size());
+			std::cout << "Appending " << tiger_to_string(parHash) << " and " << parString << "\n";
 			std::copy(parHash.byte_data, parHash.byte_data + sizeof(HashType), parDest.begin() + old_size);
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size + sizeof(HashType));
 		}
@@ -62,6 +65,7 @@ namespace mchlib {
 		void append_to_vec (std::vector<char>& parDest, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + parString.size());
+			std::cout << "Appending " << parString << "\n";
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
 		}
 
@@ -78,15 +82,14 @@ namespace mchlib {
 			std::cout << "Making initial hash for " << parCurrDir << "...\n";
 #endif
 			for (auto it = parList.begin(); it != parList.end(); ++it) {
-				if (not it->is_directory) {
-					break;
-				}
+				assert(parCurrDir == PathName(it->abs_path).pop_right());
 
 				PathName curr_subdir(it->abs_path);
 				const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 				if (it->is_directory) {
 					auto cd_list = SetListingView<false>(it);
-					hash_dir(*it, cd_list, get_pathname(it), parMime, parIgnoreErrors);
+					assert(cd_list.begin()->abs_path != it->abs_path);
+					hash_dir(*it, cd_list, curr_subdir, parMime, parIgnoreErrors);
 					append_to_vec(dir_blob, it->hash, relpath);
 				}
 				else {
@@ -136,6 +139,17 @@ namespace mchlib {
 				std::cout << ' ' << tiger_to_string(it->hash) << ' ' <<
 					"Mime type: \"" << it->mime_type << "\"\n";
 #endif
+			}
+
+#if defined(INDEXER_VERBOSE)
+			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(parEntry.hash) << '\n';
+#endif
+			parEntry.hash_valid = true;
+			{
+				parEntry.mime_full = parMime.analyze(parEntry.abs_path);
+				auto mime_pair = split_mime(parEntry.mime_full);
+				parEntry.mime_type = mime_pair.first;
+				parEntry.mime_charset = mime_pair.second;
 			}
 		}
 #endif
@@ -394,7 +408,8 @@ namespace mchlib {
 #endif
 		);
 
-		assert(m_local_data->done_count == m_local_data->file_count);
+		//TODO: re-enable after hash_dir sends progress notifications again
+		//assert(m_local_data->done_count == m_local_data->file_count);
 #else
 		hash_dir(
 #if defined(USE_LEGACY_HASH_DIR)
@@ -494,7 +509,8 @@ namespace mchlib {
 
 	const std::vector<FileRecordData>& Indexer::record_data() const {
 #if defined(WITH_PROGRESS_FEEDBACK)
-		assert(m_local_data->done_count == m_local_data->file_count);
+		//TODO: re-enable after hash_dir sends progress notifications again
+		//assert(m_local_data->done_count == m_local_data->file_count);
 #endif
 		return m_local_data->paths;
 	}

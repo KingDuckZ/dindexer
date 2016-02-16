@@ -32,7 +32,6 @@ namespace mchlib {
 
 	class PathName;
 	template <bool Const> class SetListingView;
-	template <bool Const> const PathName& get_pathname ( const implem::DirIterator<Const>& parIter );
 
 	template <bool Const>
 	implem::DirIterator<Const> first_file ( const SetListingView<Const>& parList );
@@ -45,7 +44,6 @@ namespace mchlib {
 			friend class mchlib::SetListingView<Const>;
 			friend class boost::iterator_core_access;
 			template <bool> friend class DirIterator;
-			template <bool B> friend const PathName& mchlib::get_pathname ( const DirIterator<B>& parIter );
 			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::random_access_traversal_tag> base_class;
 			typedef typename base_class::difference_type difference_type;
 			typedef typename base_class::reference reference;
@@ -128,11 +126,6 @@ namespace mchlib {
 	private:
 		ListType m_list;
 	};
-
-	template <bool Const>
-	inline const PathName& get_pathname (const implem::DirIterator<Const>& parIter) {
-		return *parIter.m_base_path;
-	}
 
 	template <bool Const>
 	inline implem::DirIterator<Const> first_file (const SetListingView<Const>& parList) {
