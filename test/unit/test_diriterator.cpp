@@ -25,14 +25,14 @@
 //TEST_F for class
 
 namespace {
-	void flatten_filelist (const mchlib::SetListingView& parContent, std::vector<std::string>& parOut) {
+	void flatten_filelist (const mchlib::SetListingView<true>& parContent, std::vector<std::string>& parOut) {
 		const auto end = parContent.end();
 
 		for (auto itcurr = parContent.cbegin(); itcurr != end; ++itcurr) {
 			parOut.push_back(itcurr->abs_path);
 
 			if (itcurr->is_directory) {
-				flatten_filelist(mchlib::SetListingView(itcurr), parOut);
+				flatten_filelist(mchlib::SetListingView<true>(itcurr), parOut);
 			}
 		}
 	}
@@ -153,7 +153,7 @@ TEST(machinery, diriterator) {
 	EXPECT_EQ("BestAndBest", i->abs_path);
 
 	{
-		auto view = SetListingView(i);
+		auto view = SetListingView<true>(i);
 		auto i2 = view.cbegin();
 		EXPECT_EQ("BestAndBest/CD1", i2->abs_path);
 
@@ -175,7 +175,7 @@ TEST(machinery, diriterator) {
 
 	std::vector<std::string> flattened;
 	flattened.reserve(lengthof(expected_list));
-	flatten_filelist(lst.make_view(), flattened);
+	flatten_filelist(lst.make_cview(), flattened);
 	EXPECT_EQ(lengthof(expected_list), flattened.size());
 	const auto count = std::min(lengthof(expected_list), flattened.size());
 	for (std::size_t z = 0; z < count; ++z) {

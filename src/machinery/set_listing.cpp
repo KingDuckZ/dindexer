@@ -45,12 +45,6 @@ namespace mchlib {
 	} //unnamed namespace
 
 	namespace implem {
-		template class DirIterator<true>;
-		template class DirIterator<false>;
-		template bool DirIterator<true>::equal ( const DirIterator<false>& ) const;
-		template bool DirIterator<true>::equal ( const DirIterator<true>& ) const;
-		template DirIterator<true>::DirIterator ( DirIterator<false>&&, enabler );
-
 		template <bool Const>
 		DirIterator<Const>::DirIterator (DirIterator<Const>&& parOther) :
 			m_current(std::move(parOther.m_current)),
@@ -137,6 +131,14 @@ namespace mchlib {
 			*/;
 			return is_this_end;
 		}
+
+		template class DirIterator<true>;
+		template class DirIterator<false>;
+		template bool DirIterator<true>::equal ( const DirIterator<false>& ) const;
+		template bool DirIterator<true>::equal ( const DirIterator<true>& ) const;
+		template bool DirIterator<false>::equal ( const DirIterator<false>& ) const;
+		template bool DirIterator<false>::equal ( const DirIterator<true>& ) const;
+		template DirIterator<true>::DirIterator ( DirIterator<false>&&, enabler );
 	} //namespace implem
 
 	SetListing::SetListing (ListType&& parList, bool parSort) :
@@ -170,27 +172,39 @@ namespace mchlib {
 		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>());
 	}
 
-	SetListingView SetListing::make_view() const {
-		return SetListingView(m_list.begin(), m_list.end());
+	SetListingView<false> SetListing::make_view() {
+		return SetListingView<false>(m_list.begin(), m_list.end());
 	}
 
-	SetListingView::SetListingView (const const_iterator& parIter) :
+	SetListingView<true> SetListing::make_view() const {
+		return SetListingView<true>(m_list.begin(), m_list.end());
+	}
+
+	SetListingView<true> SetListing::make_cview() const {
+		return SetListingView<true>(m_list.begin(), m_list.end());
+	}
+
+	template <bool Const>
+	SetListingView<Const>::SetListingView (const implem::DirIterator<Const>& parIter) :
 		m_begin(parIter.m_current),
 		m_end(parIter.m_end)
 	{
 	}
 
-	SetListingView::SetListingView (list_iterator parBeg, list_iterator parEnd) :
-		m_begin(parBeg),
-		m_end(parEnd)
+	template <bool Const>
+	SetListingView<Const>::SetListingView (list_iterator parBeg, list_iterator parEnd) :
+		m_begin(std::move(parBeg)),
+		m_end(std::move(parEnd))
 	{
 	}
 
-	auto SetListingView::begin() const -> const_iterator {
+	template <bool Const>
+	auto SetListingView<Const>::begin() const -> const_iterator {
 		return cbegin();
 	}
 
-	auto SetListingView::cbegin() const -> const_iterator {
+	template <bool Const>
+	auto SetListingView<Const>::cbegin() const -> const_iterator {
 		std::unique_ptr<PathName> base_path;
 		if (m_begin != m_end) {
 			base_path.reset(new PathName(m_begin->abs_path));
@@ -198,11 +212,34 @@ namespace mchlib {
 		return const_iterator(m_begin, m_end, std::move(base_path));
 	}
 
-	auto SetListingView::end() const -> const_iterator {
+	template <bool Const>
+	auto SetListingView<Const>::end() const -> const_iterator {
 		return cend();
 	}
 
-	auto SetListingView::cend() const -> const_iterator {
+	template <bool Const>
+	auto SetListingView<Const>::cend() const -> const_iterator {
 		return const_iterator(m_end, m_end, std::unique_ptr<PathName>());
 	}
+
+	template <bool Const>
+	template <bool B, typename R>
+	R SetListingView<Const>::begin() {
+		std::unique_ptr<PathName> base_path;
+		if (m_begin != m_end) {
+			base_path.reset(new PathName(m_begin->abs_path));
+		}
+		return iterator(m_begin, m_end, std::move(base_path));
+	}
+
+	template <bool Const>
+	template <bool B, typename R>
+	R SetListingView<Const>::end() {
+		return iterator(m_end, m_end, std::unique_ptr<PathName>());
+	}
+
+	template class SetListingView<true>;
+	template class SetListingView<false>;
+	template SetListingView<false>::iterator SetListingView<false>::begin ( void );
+	template SetListingView<false>::iterator SetListingView<false>::end ( void );
 } //namespace mchlib
