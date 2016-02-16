@@ -49,7 +49,8 @@ namespace mchlib {
 		DirIterator<Const>::DirIterator (DirIterator<Const>&& parOther) :
 			m_current(std::move(parOther.m_current)),
 			m_end(std::move(parOther.m_end)),
-			m_base_path(std::move(parOther.m_base_path))
+			m_base_path(std::move(parOther.m_base_path)),
+			m_level_offset(parOther.m_level_offset)
 		{
 		}
 
@@ -58,23 +59,26 @@ namespace mchlib {
 		DirIterator<Const>::DirIterator (DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type) :
 			m_current(parOther.m_current),
 			m_end(parOther.m_end),
-			m_base_path(std::move(parOther.m_base_path))
+			m_base_path(std::move(parOther.m_base_path)),
+			m_level_offset(parOther.m_level_offset)
 		{
 		}
 
 		template <bool Const>
-		DirIterator<Const>::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath) :
+		DirIterator<Const>::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath, std::size_t parLevelOffset) :
 			m_current(parBegin),
 			m_end(parEnd),
-			m_base_path(std::move(parBasePath))
+			m_base_path(std::move(parBasePath)),
+			m_level_offset(parLevelOffset)
 		{
 			assert(m_base_path or m_current == m_end);
-			assert(m_current == m_end or m_base_path->atom_count() == m_current->level);
+			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->abs_path).atom_count());
+			assert(m_current == m_end or m_base_path->atom_count() == m_current->level + m_level_offset);
 
 			//Look for the point where the children of this entry starts
 			while (
 				m_current != m_end and (
-					m_current->level == m_base_path->atom_count() or
+					m_current->level + m_level_offset == m_base_path->atom_count() or
 					*m_base_path != PathName(m_current->abs_path).pop_right()
 			)) {
 				assert(m_base_path);
@@ -93,7 +97,7 @@ namespace mchlib {
 				++m_current;
 			} while(
 				m_current != m_end and
-				m_current->level == m_base_path->atom_count() + 1 and
+				m_current->level + m_level_offset == m_base_path->atom_count() + 1 and
 				*m_base_path != PathName(m_current->abs_path).pop_right()
 			);
 		}
@@ -126,7 +130,7 @@ namespace mchlib {
 			const bool is_this_end =
 				not m_base_path or
 				(m_current == m_end) or
-				(m_current->level != m_base_path->atom_count() + 1) /*or
+				(m_current->level + m_level_offset != m_base_path->atom_count() + 1) /*or
 				(*m_base_path != PathName(m_current->abs_path).pop_right())
 			*/;
 			return is_this_end;
@@ -161,7 +165,7 @@ namespace mchlib {
 		if (m_list.begin() != m_list.end()) {
 			base_path.reset(new PathName(m_list.front().abs_path));
 		}
-		return const_iterator(m_list.begin(), m_list.end(), std::move(base_path));
+		return const_iterator(m_list.begin(), m_list.end(), std::move(base_path), base_path->atom_count());
 	}
 
 	auto SetListing::end() const -> const_iterator {
@@ -169,32 +173,37 @@ namespace mchlib {
 	}
 
 	auto SetListing::cend() const -> const_iterator {
-		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>());
+		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>(), 0);
 	}
 
 	SetListingView<false> SetListing::make_view() {
-		return SetListingView<false>(m_list.begin(), m_list.end());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		return SetListingView<false>(m_list.begin(), m_list.end(), offs);
 	}
 
 	SetListingView<true> SetListing::make_view() const {
-		return SetListingView<true>(m_list.begin(), m_list.end());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		return SetListingView<true>(m_list.begin(), m_list.end(), offs);
 	}
 
 	SetListingView<true> SetListing::make_cview() const {
-		return SetListingView<true>(m_list.begin(), m_list.end());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		return SetListingView<true>(m_list.begin(), m_list.end(), offs);
 	}
 
 	template <bool Const>
 	SetListingView<Const>::SetListingView (const implem::DirIterator<Const>& parIter) :
 		m_begin(parIter.m_current),
-		m_end(parIter.m_end)
+		m_end(parIter.m_end),
+		m_level_offset(parIter.m_level_offset)
 	{
 	}
 
 	template <bool Const>
-	SetListingView<Const>::SetListingView (list_iterator parBeg, list_iterator parEnd) :
+	SetListingView<Const>::SetListingView (list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset) :
 		m_begin(std::move(parBeg)),
-		m_end(std::move(parEnd))
+		m_end(std::move(parEnd)),
+		m_level_offset(parLevelOffset)
 	{
 	}
 
@@ -209,7 +218,7 @@ namespace mchlib {
 		if (m_begin != m_end) {
 			base_path.reset(new PathName(m_begin->abs_path));
 		}
-		return const_iterator(m_begin, m_end, std::move(base_path));
+		return const_iterator(m_begin, m_end, std::move(base_path), m_level_offset);
 	}
 
 	template <bool Const>
@@ -219,7 +228,7 @@ namespace mchlib {
 
 	template <bool Const>
 	auto SetListingView<Const>::cend() const -> const_iterator {
-		return const_iterator(m_end, m_end, std::unique_ptr<PathName>());
+		return const_iterator(m_end, m_end, std::unique_ptr<PathName>(), m_level_offset);
 	}
 
 	template <bool Const>
@@ -229,13 +238,13 @@ namespace mchlib {
 		if (m_begin != m_end) {
 			base_path.reset(new PathName(m_begin->abs_path));
 		}
-		return iterator(m_begin, m_end, std::move(base_path));
+		return iterator(m_begin, m_end, std::move(base_path), m_level_offset);
 	}
 
 	template <bool Const>
 	template <bool B, typename R>
 	R SetListingView<Const>::end() {
-		return iterator(m_end, m_end, std::unique_ptr<PathName>());
+		return iterator(m_end, m_end, std::unique_ptr<PathName>(), m_level_offset);
 	}
 
 	template class SetListingView<true>;

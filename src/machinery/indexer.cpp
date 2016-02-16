@@ -368,7 +368,7 @@ namespace mchlib {
 #endif
 
 #if !defined(USE_LEGACY_HASH_DIR)
-		SetListingView<false> recordlist(m_local_data->paths.begin(), m_local_data->paths.end());
+		SetListingView<false> recordlist(m_local_data->paths.begin(), m_local_data->paths.end(), base_path.atom_count());
 #endif
 #if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;

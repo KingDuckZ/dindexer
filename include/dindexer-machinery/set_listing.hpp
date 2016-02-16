@@ -60,7 +60,7 @@ namespace mchlib {
 			DirIterator ( DirIterator<Const>&& parOther );
 			template <bool OtherConst>
 			DirIterator ( DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type = enabler() );
-			DirIterator ( VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath );
+			DirIterator ( VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath, std::size_t parLevelOffset );
 			~DirIterator ( void ) noexcept;
 
 		private:
@@ -75,6 +75,7 @@ namespace mchlib {
 			VecIterator m_current;
 			VecIterator m_end;
 			std::unique_ptr<PathName> m_base_path;
+			std::size_t m_level_offset;
 		};
 	};
 
@@ -87,7 +88,7 @@ namespace mchlib {
 		typedef typename implem::DirIterator<Const>::VecIterator list_iterator;
 
 		explicit SetListingView ( const implem::DirIterator<Const>& parIter );
-		SetListingView ( list_iterator parBeg, list_iterator parEnd );
+		SetListingView ( list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset );
 		SetListingView ( SetListingView&& ) = default;
 		~SetListingView ( void ) noexcept = default;
 
@@ -103,6 +104,7 @@ namespace mchlib {
 	private:
 		list_iterator m_begin;
 		list_iterator m_end;
+		std::size_t m_level_offset;
 	};
 
 	class SetListing {
