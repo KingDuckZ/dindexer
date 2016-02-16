@@ -46,11 +46,24 @@ namespace mchlib {
 
 	namespace implem {
 		template class DirIterator<true>;
+		template class DirIterator<false>;
+		template bool DirIterator<true>::equal ( const DirIterator<false>& ) const;
+		template bool DirIterator<true>::equal ( const DirIterator<true>& ) const;
+		template DirIterator<true>::DirIterator ( DirIterator<false>&&, enabler );
 
 		template <bool Const>
 		DirIterator<Const>::DirIterator (DirIterator<Const>&& parOther) :
 			m_current(std::move(parOther.m_current)),
 			m_end(std::move(parOther.m_end)),
+			m_base_path(std::move(parOther.m_base_path))
+		{
+		}
+
+		template <bool Const>
+		template <bool OtherConst>
+		DirIterator<Const>::DirIterator (DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type) :
+			m_current(parOther.m_current),
+			m_end(parOther.m_end),
 			m_base_path(std::move(parOther.m_base_path))
 		{
 		}
@@ -98,7 +111,8 @@ namespace mchlib {
 		}
 
 		template <bool Const>
-		bool DirIterator<Const>::equal (const DirIterator<Const>& parOther) const {
+		template <bool OtherConst>
+		bool DirIterator<Const>::equal (const DirIterator<OtherConst>& parOther) const {
 			return
 				(m_end == parOther.m_end) and
 				(

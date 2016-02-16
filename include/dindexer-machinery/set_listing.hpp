@@ -33,9 +33,11 @@ namespace mchlib {
 		class DirIterator : public boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> {
 			friend class mchlib::SetListingView;
 			friend class boost::iterator_core_access;
+			template <bool> friend class DirIterator;
 			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::random_access_traversal_tag> base_class;
 			typedef typename base_class::difference_type difference_type;
 			typedef typename base_class::reference reference;
+			struct enabler {};
 		public:
 			typedef typename std::conditional<
 				Const,
@@ -44,13 +46,17 @@ namespace mchlib {
 			>::type VecIterator;
 
 			DirIterator ( DirIterator<Const>&& parOther );
+			template <bool OtherConst>
+			DirIterator ( DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type = enabler() );
 			DirIterator ( VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath );
 			~DirIterator ( void ) noexcept;
 
 		private:
 			void increment ( void );
 			difference_type distance_to ( const DirIterator<Const>& parOther ) const;
-			bool equal ( const DirIterator<Const>& parOther ) const;
+			template <bool OtherConst>
+			bool equal ( const DirIterator<OtherConst>& parOther ) const;
+
 			reference dereference ( void ) const;
 			bool is_end ( void ) const;
 
