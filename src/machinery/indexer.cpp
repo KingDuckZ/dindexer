@@ -15,6 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#define USE_LEGACY_HASH_DIR
+
 #include "dindexer-machinery/indexer.hpp"
 #include "pathname.hpp"
 #include "dindexer-machinery/tiger.hpp"
@@ -22,6 +24,9 @@
 #include "dindexer-machinery/filestats.hpp"
 #include "mimetype.hpp"
 #include "dindexer-machinery/recorddata.hpp"
+#if !defined(USE_LEGACY_HASH_DIR)
+#	include "dindexer-machinery/set_listing.hpp"
+#endif
 #include <algorithm>
 #include <functional>
 #include <stdexcept>
@@ -60,6 +65,82 @@ namespace mchlib {
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
 		}
 
+#if !defined(USE_LEGACY_HASH_DIR)
+		void hash_dir (FileRecordData& parEntry, SetListingView<false>& parList, const PathName& parCurrDir, MimeType& parMime, bool parIgnoreErrors) {
+			assert(parEntry.is_directory);
+
+			parEntry.mime_full = parMime.analyze(parEntry.abs_path);
+
+			//Build a blob with the hashes and filenames of every directory that
+			//is a direct child of current entry
+			std::vector<char> dir_blob;
+#if defined(INDEXER_VERBOSE)
+			std::cout << "Making initial hash for " << parCurrDir << "...\n";
+#endif
+			for (auto it = parList.begin(); it != parList.end(); ++it) {
+				if (not it->is_directory) {
+					break;
+				}
+
+				PathName curr_subdir(it->abs_path);
+				const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
+				if (it->is_directory) {
+					auto cd_list = SetListingView<false>(it);
+					hash_dir(*it, cd_list, get_pathname(it), parMime, parIgnoreErrors);
+					append_to_vec(dir_blob, it->hash, relpath);
+				}
+				else {
+					append_to_vec(dir_blob, relpath);
+				}
+			}
+			tiger_data(dir_blob, parEntry.hash);
+			parEntry.size = 0;
+
+#if defined(INDEXER_VERBOSE)
+			std::cout << "Got intermediate hash for dir " << parCurrDir <<
+				": " << tiger_to_string(parEntry.hash) <<
+				' ' << parEntry.mime_type << '\n';
+#endif
+
+			//Now with the initial hash ready, let's start hashing files, if any
+			for (auto it = first_file(parList); it != parList.end(); ++it) {
+				assert(not it->is_directory);
+#if defined(INDEXER_VERBOSE)
+				std::cout << "Hashing file " << it->abs_path << "...";
+#endif
+				//TODO: notify callback
+				try {
+					tiger_file(it->abs_path, it->hash, parEntry.hash, it->size);
+					it->hash_valid = true;
+					it->mime_full = parMime.analyze(it->abs_path);
+					auto mime_pair = split_mime(it->mime_full);
+					it->mime_type = mime_pair.first;
+					it->mime_charset = mime_pair.second;
+				}
+				catch (const std::ios_base::failure& e) {
+					if (parIgnoreErrors) {
+						it->unreadable = true;
+						it->hash = HashType {};
+						if (it->mime_full.get().empty()) {
+							it->mime_full = "unknown";
+							it->mime_type = boost::string_ref(it->mime_full.get());
+							it->mime_charset = boost::string_ref(it->mime_full.get());
+						}
+					}
+					else {
+						throw e;
+					}
+				}
+
+#if defined(INDEXER_VERBOSE)
+				std::cout << ' ' << tiger_to_string(it->hash) << ' ' <<
+					"Mime type: \"" << it->mime_type << "\"\n";
+#endif
+			}
+		}
+#endif
+
+#if defined(USE_LEGACY_HASH_DIR)
 		void hash_dir (FileEntryIt parEntry, FileEntryIt parBegin, FileEntryIt parEnd, const PathName& parCurrDir, std::function<void(std::size_t)> parNextItemCallback, bool parIgnoreErrors, MimeType& parMime) {
 			assert(parEntry != parEnd);
 			assert(parEntry->is_directory);
@@ -172,6 +253,7 @@ namespace mchlib {
 				curr_entry_it->mime_charset = mime_pair.second;
 			}
 		}
+#endif
 
 		template <bool FileTrue=true>
 		struct IsFile {
@@ -285,9 +367,13 @@ namespace mchlib {
 		std::cout << "-----------------------------------------------------\n";
 #endif
 
+#if !defined(USE_LEGACY_HASH_DIR)
+		SetListingView<false> recordlist(m_local_data->paths.begin(), m_local_data->paths.end());
+#endif
 #if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;
 		hash_dir(
+#if defined(USE_LEGACY_HASH_DIR)
 			m_local_data->paths.begin(),
 			m_local_data->paths.begin(),
 			m_local_data->paths.end(),
@@ -299,11 +385,19 @@ namespace mchlib {
 			},
 			m_local_data->ignore_read_errors,
 			mime
+#else
+			m_local_data->paths.front(),
+			recordlist,
+			base_path,
+			mime,
+			m_local_data->ignore_read_errors
+#endif
 		);
 
 		assert(m_local_data->done_count == m_local_data->file_count);
 #else
 		hash_dir(
+#if defined(USE_LEGACY_HASH_DIR)
 			m_local_data->paths.begin(),
 			m_local_data->paths.begin(),
 			m_local_data->paths.end(),
@@ -311,6 +405,13 @@ namespace mchlib {
 			[](std::size_t) {},
 			m_local_data->ignore_read_errors,
 			mime
+#else
+			m_local_data->paths.front(),
+			recordlist,
+			base_path,
+			mime,
+			m_local_data->ignore_read_errors
+#endif
 		);
 #endif
 

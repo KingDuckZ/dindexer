@@ -34,6 +34,11 @@ namespace mchlib {
 	template <bool Const> class SetListingView;
 	template <bool Const> const PathName& get_pathname ( const implem::DirIterator<Const>& parIter );
 
+	template <bool Const>
+	implem::DirIterator<Const> first_file ( const SetListingView<Const>& parList );
+	template <bool Const>
+	implem::DirIterator<Const> first_file ( SetListingView<Const>& parList );
+
 	namespace implem {
 		template <bool Const>
 		class DirIterator : public boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> {
@@ -125,6 +130,26 @@ namespace mchlib {
 	template <bool Const>
 	inline const PathName& get_pathname (const implem::DirIterator<Const>& parIter) {
 		return *parIter.m_base_path;
+	}
+
+	template <bool Const>
+	inline implem::DirIterator<Const> first_file (const SetListingView<Const>& parList) {
+		auto end = parList.end();
+		for (auto it = parList.begin(); it != end; ++it) {
+			if (not it->is_directory)
+				return std::move(it);
+		}
+		return parList.end();
+	}
+
+	template <bool Const>
+	inline implem::DirIterator<Const> first_file (SetListingView<Const>& parList) {
+		auto end = parList.end();
+		for (auto it = parList.begin(); it != end; ++it) {
+			if (not it->is_directory)
+				return std::move(it);
+		}
+		return parList.end();
 	}
 } //namespace mchlib
 
