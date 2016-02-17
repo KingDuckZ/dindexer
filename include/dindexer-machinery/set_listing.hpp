@@ -105,6 +105,9 @@ namespace mchlib {
 		std::size_t m_level_offset;
 	};
 
+	using MutableSetListingView = SetListingView<false>;
+	using ConstSetListingView = SetListingView<true>;
+
 	class SetListing {
 	public:
 		typedef std::vector<FileRecordData> ListType;

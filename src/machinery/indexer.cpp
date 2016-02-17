@@ -70,7 +70,7 @@ namespace mchlib {
 		}
 
 #if !defined(USE_LEGACY_HASH_DIR)
-		void hash_dir (FileRecordData& parEntry, SetListingView<false>& parList, const PathName& parCurrDir, MimeType& parMime, bool parIgnoreErrors) {
+		void hash_dir (FileRecordData& parEntry, MutableSetListingView& parList, const PathName& parCurrDir, MimeType& parMime, bool parIgnoreErrors) {
 			assert(parEntry.is_directory);
 
 			parEntry.mime_full = parMime.analyze(parEntry.abs_path);
@@ -87,7 +87,7 @@ namespace mchlib {
 				PathName curr_subdir(it->abs_path);
 				const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 				if (it->is_directory) {
-					auto cd_list = SetListingView<false>(it);
+					auto cd_list = MutableSetListingView(it);
 					assert(cd_list.begin()->abs_path != it->abs_path);
 					hash_dir(*it, cd_list, curr_subdir, parMime, parIgnoreErrors);
 					append_to_vec(dir_blob, it->hash, relpath);
@@ -382,7 +382,7 @@ namespace mchlib {
 #endif
 
 #if !defined(USE_LEGACY_HASH_DIR)
-		SetListingView<false> recordlist(m_local_data->paths.begin(), m_local_data->paths.end(), base_path.atom_count());
+		MutableSetListingView recordlist(m_local_data->paths.begin(), m_local_data->paths.end(), base_path.atom_count());
 #endif
 #if defined(WITH_PROGRESS_FEEDBACK)
 		m_local_data->done_count = 0;
