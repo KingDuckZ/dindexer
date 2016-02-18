@@ -3,6 +3,10 @@
 
 #include <utility>
 
+#if !defined(NDEBUG) && !defined(KAK_DEBUG)
+#	define KAK_DEBUG
+#endif
+
 namespace Kakoune
 {
 
@@ -121,5 +125,9 @@ struct RefCountable
 };
 
 }
+
+#if defined(KAK_DEBUG)
+#	undef KAK_DEBUG
+#endif
 
 #endif // ref_ptr_hh_INCLUDED

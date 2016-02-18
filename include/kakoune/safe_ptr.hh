@@ -3,9 +3,7 @@
 
 // #define SAFE_PTR_TRACK_CALLSTACKS
 
-#include "assert.hh"
 #include "ref_ptr.hh"
-#include "backtrace.hh"
 
 #include <type_traits>
 #include <utility>
@@ -13,6 +11,14 @@
 #ifdef SAFE_PTR_TRACK_CALLSTACKS
 #include "vector.hh"
 #include <algorithm>
+#endif
+
+#include <cassert>
+
+#define kak_assert assert
+
+#if !defined(NDEBUG) && !defined(KAK_DEBUG)
+#	define KAK_DEBUG
 #endif
 
 namespace Kakoune
@@ -33,7 +39,7 @@ public:
         #endif
     }
 
-    friend void inc_ref_count(const SafeCountable* sc, void* ptr)
+    friend void inc_ref_count(const SafeCountable* sc, void* /*ptr*/)
     {
         ++sc->m_count;
         #ifdef SAFE_PTR_TRACK_CALLSTACKS
@@ -41,7 +47,7 @@ public:
         #endif
     }
 
-    friend void dec_ref_count(const SafeCountable* sc, void* ptr)
+    friend void dec_ref_count(const SafeCountable* sc, void* /*ptr*/)
     {
         --sc->m_count;
         kak_assert(sc->m_count >= 0);
@@ -53,7 +59,7 @@ public:
         #endif
     }
 
-    friend void ref_ptr_moved(const SafeCountable* sc, void* from, void* to)
+    friend void ref_ptr_moved(const SafeCountable* /*sc*/, void* /*from*/, void* /*to*/)
     {
         #ifdef SAFE_PTR_TRACK_CALLSTACKS
         auto it = std::find_if(sc->m_callstacks.begin(), sc->m_callstacks.end(),
@@ -77,10 +83,10 @@ private:
     mutable int m_count;
 #else
     [[gnu::always_inline]]
-    friend void inc_ref_count(const SafeCountable* sc, void* ptr) {}
+    friend void inc_ref_count(const SafeCountable* /*sc*/, void* /*ptr*/) {}
 
     [[gnu::always_inline]]
-    friend void dec_ref_count(const SafeCountable* sc, void* ptr) {}
+    friend void dec_ref_count(const SafeCountable* /*sc*/, void* /*ptr*/) {}
 #endif
 };
 
@@ -91,5 +97,10 @@ template<typename T>
 using SafePtr = RefPtr<T, PropagateConst<T, SafeCountable>>;
 
 }
+
+#if defined(KAK_DEBUG)
+#	undef KAK_DEBUG
+#endif
+#undef kak_assert
 
 #endif // safe_ptr_hh_INCLUDED
