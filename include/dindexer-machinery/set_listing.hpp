@@ -19,6 +19,7 @@
 #define id040FEEC20F7B4F65A3EF67BA6460E737
 
 #include "dindexer-machinery/recorddata.hpp"
+#include "kakoune/safe_ptr.hh"
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
@@ -58,7 +59,7 @@ namespace mchlib {
 			DirIterator ( DirIterator<Const>&& parOther );
 			template <bool OtherConst>
 			DirIterator ( DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type = enabler() );
-			DirIterator ( VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath, std::size_t parLevelOffset );
+			DirIterator ( VecIterator parBegin, VecIterator parEnd, const PathName* parBasePath, std::size_t parLevelOffset );
 			~DirIterator ( void ) noexcept;
 
 		private:
@@ -72,7 +73,7 @@ namespace mchlib {
 
 			VecIterator m_current;
 			VecIterator m_end;
-			std::unique_ptr<PathName> m_base_path;
+			Kakoune::SafePtr<const PathName> m_base_path;
 			std::size_t m_level_offset;
 		};
 	};
@@ -87,6 +88,9 @@ namespace mchlib {
 
 		explicit SetListingView ( const implem::DirIterator<Const>& parIter );
 		SetListingView ( list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset );
+		SetListingView ( list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset, const std::shared_ptr<PathName>& parBasePath );
+		template <bool B=not Const, typename Other=typename std::enable_if<B, SetListingView<not B>>::type>
+		SetListingView ( const Other& parOther );
 		SetListingView ( SetListingView&& ) = default;
 		~SetListingView ( void ) noexcept = default;
 
@@ -102,6 +106,7 @@ namespace mchlib {
 	private:
 		list_iterator m_begin;
 		list_iterator m_end;
+		std::shared_ptr<PathName> m_base_path;
 		std::size_t m_level_offset;
 	};
 
@@ -128,6 +133,7 @@ namespace mchlib {
 
 	private:
 		ListType m_list;
+		std::shared_ptr<PathName> m_base_path;
 	};
 
 	template <bool Const>

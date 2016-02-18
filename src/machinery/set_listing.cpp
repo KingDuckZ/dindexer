@@ -22,7 +22,6 @@
 #include <cassert>
 #include <algorithm>
 
-
 namespace mchlib {
 	namespace {
 		bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
@@ -65,12 +64,13 @@ namespace mchlib {
 		}
 
 		template <bool Const>
-		DirIterator<Const>::DirIterator (VecIterator parBegin, VecIterator parEnd, std::unique_ptr<PathName>&& parBasePath, std::size_t parLevelOffset) :
+		DirIterator<Const>::DirIterator (VecIterator parBegin, VecIterator parEnd, const PathName* parBasePath, std::size_t parLevelOffset) :
 			m_current(parBegin),
 			m_end(parEnd),
-			m_base_path(std::move(parBasePath)),
+			m_base_path(parBasePath),
 			m_level_offset(parLevelOffset)
 		{
+			assert(parBasePath);
 			assert(m_base_path or m_current == m_end);
 			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->abs_path).atom_count());
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level + m_level_offset);
@@ -146,10 +146,14 @@ namespace mchlib {
 	} //namespace implem
 
 	SetListing::SetListing (ListType&& parList, bool parSort) :
-		m_list(std::move(parList))
+		m_list(std::move(parList)),
+		m_base_path()
 	{
 		if (parSort) {
 			std::sort(m_list.begin(), m_list.end(), &file_record_data_lt);
+		}
+		if (not m_list.empty()) {
+			m_base_path.reset(new PathName(m_list.front().abs_path));
 		}
 	}
 
@@ -161,11 +165,8 @@ namespace mchlib {
 	}
 
 	auto SetListing::cbegin() const -> const_iterator {
-		std::unique_ptr<PathName> base_path;
-		if (m_list.begin() != m_list.end()) {
-			base_path.reset(new PathName(m_list.front().abs_path));
-		}
-		return const_iterator(m_list.begin(), m_list.end(), std::move(base_path), base_path->atom_count());
+		const auto atom_count = (m_base_path ? m_base_path->atom_count() : 0);
+		return const_iterator(m_list.begin(), m_list.end(), m_base_path.get(), atom_count);
 	}
 
 	auto SetListing::end() const -> const_iterator {
@@ -173,37 +174,64 @@ namespace mchlib {
 	}
 
 	auto SetListing::cend() const -> const_iterator {
-		return const_iterator(m_list.end(), m_list.end(), std::unique_ptr<PathName>(), 0);
+		return const_iterator(m_list.end(), m_list.end(), m_base_path.get(), 0);
 	}
 
 	SetListingView<false> SetListing::make_view() {
 		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
-		return SetListingView<false>(m_list.begin(), m_list.end(), offs);
+		return SetListingView<false>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
 	SetListingView<true> SetListing::make_view() const {
 		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
-		return SetListingView<true>(m_list.begin(), m_list.end(), offs);
+		return SetListingView<true>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
 	SetListingView<true> SetListing::make_cview() const {
 		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
-		return SetListingView<true>(m_list.begin(), m_list.end(), offs);
+		return SetListingView<true>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
 	template <bool Const>
 	SetListingView<Const>::SetListingView (const implem::DirIterator<Const>& parIter) :
 		m_begin(parIter.m_current),
 		m_end(parIter.m_end),
+		m_base_path(),
 		m_level_offset(parIter.m_level_offset)
 	{
+		if (m_begin != m_end) {
+			m_base_path.reset(new PathName(m_begin->abs_path));
+		}
 	}
 
 	template <bool Const>
 	SetListingView<Const>::SetListingView (list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset) :
 		m_begin(std::move(parBeg)),
 		m_end(std::move(parEnd)),
+		m_base_path(),
 		m_level_offset(parLevelOffset)
+	{
+		if (m_begin != m_end) {
+			m_base_path.reset(new PathName(m_begin->abs_path));
+		}
+	}
+
+	template <bool Const>
+	SetListingView<Const>::SetListingView (list_iterator parBeg, list_iterator parEnd, std::size_t parLevelOffset, const std::shared_ptr<PathName>& parBasePath) :
+		m_begin(std::move(parBeg)),
+		m_end(std::move(parEnd)),
+		m_base_path(parBasePath),
+		m_level_offset(parLevelOffset)
+	{
+	}
+
+	template <bool Const>
+	template <bool B, typename Other>
+	SetListingView<Const>::SetListingView (const Other& parOther) :
+		m_begin(parOther.m_begin),
+		m_end(parOther.m_end),
+		m_base_path(parOther.m_base_path),
+		m_level_offset(parOther.m_level_offset)
 	{
 	}
 
@@ -214,11 +242,7 @@ namespace mchlib {
 
 	template <bool Const>
 	auto SetListingView<Const>::cbegin() const -> const_iterator {
-		std::unique_ptr<PathName> base_path;
-		if (m_begin != m_end) {
-			base_path.reset(new PathName(m_begin->abs_path));
-		}
-		return const_iterator(m_begin, m_end, std::move(base_path), m_level_offset);
+		return const_iterator(m_begin, m_end, m_base_path.get(), m_level_offset);
 	}
 
 	template <bool Const>
@@ -228,23 +252,19 @@ namespace mchlib {
 
 	template <bool Const>
 	auto SetListingView<Const>::cend() const -> const_iterator {
-		return const_iterator(m_end, m_end, std::unique_ptr<PathName>(), m_level_offset);
+		return const_iterator(m_end, m_end, m_base_path.get(), m_level_offset);
 	}
 
 	template <bool Const>
 	template <bool B, typename R>
 	R SetListingView<Const>::begin() {
-		std::unique_ptr<PathName> base_path;
-		if (m_begin != m_end) {
-			base_path.reset(new PathName(m_begin->abs_path));
-		}
-		return iterator(m_begin, m_end, std::move(base_path), m_level_offset);
+		return iterator(m_begin, m_end, m_base_path.get(), m_level_offset);
 	}
 
 	template <bool Const>
 	template <bool B, typename R>
 	R SetListingView<Const>::end() {
-		return iterator(m_end, m_end, std::unique_ptr<PathName>(), m_level_offset);
+		return iterator(m_end, m_end, m_base_path.get(), m_level_offset);
 	}
 
 	template class SetListingView<true>;

@@ -19,6 +19,7 @@
 #define id279E04E31E2C4D98B8C902781A3CE018
 
 #include "stringpool.hpp"
+#include "kakoune/safe_ptr.hh"
 #include <vector>
 #include <string>
 #include <boost/utility/string_ref.hpp>
@@ -26,7 +27,7 @@
 #include <iostream>
 
 namespace mchlib {
-	class PathName {
+	class PathName : public Kakoune::SafeCountable {
 	public:
 		PathName ( PathName&& ) = default;
 		PathName ( const PathName& ) = default;
