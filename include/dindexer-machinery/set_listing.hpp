@@ -45,9 +45,7 @@ namespace mchlib {
 			friend class mchlib::SetListingView<Const>;
 			friend class boost::iterator_core_access;
 			template <bool> friend class DirIterator;
-			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::random_access_traversal_tag> base_class;
-			typedef typename base_class::difference_type difference_type;
-			typedef typename base_class::reference reference;
+			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> base_class;
 			struct enabler {};
 		public:
 			typedef typename std::conditional<
@@ -55,8 +53,14 @@ namespace mchlib {
 				std::vector<mchlib::FileRecordData>::const_iterator,
 				std::vector<mchlib::FileRecordData>::iterator
 			>::type VecIterator;
+			typedef typename base_class::difference_type difference_type;
+			typedef typename base_class::value_type value_type;
+			typedef typename base_class::pointer pointer;
+			typedef typename base_class::reference reference;
+			typedef typename base_class::iterator_category iterator_category;
 
-			DirIterator ( DirIterator<Const>&& parOther );
+			DirIterator ( DirIterator&& parOther );
+			DirIterator ( const DirIterator& parOther );
 			template <bool OtherConst>
 			DirIterator ( DirIterator<OtherConst>&& parOther, typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, enabler>::type = enabler() );
 			DirIterator ( VecIterator parBegin, VecIterator parEnd, const PathName* parBasePath, std::size_t parLevelOffset );
@@ -130,6 +134,11 @@ namespace mchlib {
 		SetListingView<false> make_view ( void );
 		SetListingView<true> make_view ( void ) const;
 		SetListingView<true> make_cview ( void ) const;
+
+		bool empty ( void ) const;
+		std::size_t size ( void ) const;
+		std::size_t files_count ( void ) const;
+		std::size_t dir_count ( void ) const;
 
 	private:
 		ListType m_list;

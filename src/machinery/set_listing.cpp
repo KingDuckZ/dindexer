@@ -45,10 +45,19 @@ namespace mchlib {
 
 	namespace implem {
 		template <bool Const>
-		DirIterator<Const>::DirIterator (DirIterator<Const>&& parOther) :
+		DirIterator<Const>::DirIterator (DirIterator&& parOther) :
 			m_current(std::move(parOther.m_current)),
 			m_end(std::move(parOther.m_end)),
 			m_base_path(std::move(parOther.m_base_path)),
+			m_level_offset(parOther.m_level_offset)
+		{
+		}
+
+		template <bool Const>
+		DirIterator<Const>::DirIterator (const DirIterator& parOther) :
+			m_current(parOther.m_current),
+			m_end(parOther.m_end),
+			m_base_path(parOther.m_base_path),
 			m_level_offset(parOther.m_level_offset)
 		{
 		}
@@ -175,6 +184,34 @@ namespace mchlib {
 
 	auto SetListing::cend() const -> const_iterator {
 		return const_iterator(m_list.end(), m_list.end(), m_base_path.get(), 0);
+	}
+
+	bool SetListing::empty() const {
+		return m_list.empty();
+	}
+
+	std::size_t SetListing::size() const {
+		return m_list.size();
+	}
+
+	std::size_t SetListing::files_count() const {
+		return std::count_if(
+			m_list.begin(),
+			m_list.end(),
+			[] (const FileRecordData& parItm) {
+				return not parItm.is_directory;
+			}
+		);
+	}
+
+	std::size_t SetListing::dir_count() const {
+		return std::count_if(
+			m_list.begin(),
+			m_list.end(),
+			[] (const FileRecordData& parItm) {
+				return parItm.is_directory;
+			}
+		);
 	}
 
 	SetListingView<false> SetListing::make_view() {

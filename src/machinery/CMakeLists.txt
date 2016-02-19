@@ -13,6 +13,7 @@ add_library(${PROJECT_NAME} SHARED
 	discinfo.cpp
 	mediatype.cpp
 	machinery_info.cpp
+	guess_content_type.cpp
 	set_listing.cpp
 )
 
