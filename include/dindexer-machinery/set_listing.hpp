@@ -66,6 +66,13 @@ namespace mchlib {
 			DirIterator ( VecIterator parBegin, VecIterator parEnd, const PathName* parBasePath, std::size_t parLevelOffset );
 			~DirIterator ( void ) noexcept;
 
+			DirIterator& operator= ( DirIterator&& parOther );
+			DirIterator& operator= ( const DirIterator& parOther );
+			template <bool OtherConst>
+			DirIterator& operator= ( typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, DirIterator<OtherConst>>::type&& parOther );
+			template <bool OtherConst>
+			DirIterator& operator= ( const typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, DirIterator<OtherConst>>::type& parOther );
+
 		private:
 			void increment ( void );
 			difference_type distance_to ( const DirIterator<Const>& parOther ) const;

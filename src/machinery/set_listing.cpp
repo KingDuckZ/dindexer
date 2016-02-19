@@ -100,6 +100,44 @@ namespace mchlib {
 		}
 
 		template <bool Const>
+		DirIterator<Const>& DirIterator<Const>::operator= (DirIterator&& parOther) {
+			m_current = std::move(parOther.m_current);
+			m_end = std::move(parOther.m_end);
+			m_base_path = std::move(parOther.m_base_path);
+			m_level_offset = parOther.m_level_offset;
+			return *this;
+		}
+
+		template <bool Const>
+		DirIterator<Const>& DirIterator<Const>::operator= (const DirIterator& parOther) {
+			m_current = parOther.m_current;
+			m_end = parOther.m_end;
+			m_base_path = parOther.m_base_path;
+			m_level_offset = parOther.m_level_offset;
+			return *this;
+		}
+
+		template <bool Const>
+		template <bool OtherConst>
+		DirIterator<Const>& DirIterator<Const>::operator= (typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, DirIterator<OtherConst>>::type&& parOther) {
+			m_current = parOther.m_current;
+			m_end = parOther.m_end;
+			m_base_path = std::move(parOther.m_base_path);
+			m_level_offset = parOther.m_level_offset;
+			return *this;
+		}
+
+		template <bool Const>
+		template <bool OtherConst>
+		DirIterator<Const>& DirIterator<Const>::operator= (const typename std::enable_if<std::is_convertible<typename DirIterator<OtherConst>::VecIterator, VecIterator>::value, DirIterator<OtherConst>>::type& parOther) {
+			m_current = parOther.m_current;
+			m_end = parOther.m_end;
+			m_base_path = parOther.m_base_path;
+			m_level_offset = parOther.m_level_offset;
+			return *this;
+		}
+
+		template <bool Const>
 		void DirIterator<Const>::increment() {
 			assert(PathName(m_current->abs_path).pop_right() == *m_base_path);
 			do {
