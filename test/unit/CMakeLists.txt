@@ -2,6 +2,7 @@ project(${bare_name}-test CXX)
 
 add_executable(${PROJECT_NAME}
 	test_diriterator.cpp
+	test_guess_content_type.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

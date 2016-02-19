@@ -61,16 +61,25 @@ namespace mchlib {
 
 	template <bool Const>
 	inline
-	std::size_t count_listing_items (const SetListingView<Const>& /*parList*/) {
-		assert(false);
-		return 0;
-		//return std::count_if(
-		//	parList.cbegin(),
-		//	parList.cend(),
-		//	[] (const FileRecordData&) {
-		//		return true;
-		//	}
-		//);
+	std::size_t count_listing_items (const SetListingView<Const>& parList) {
+		return std::count_if(
+			parList.cbegin(),
+			parList.cend(),
+			[] (const FileRecordData&) {
+				return true;
+			}
+		);
+	}
+
+	template <bool Const>
+	inline
+	std::size_t count_listing_items_recursive (const SetListingView<Const>& parList) {
+		std::size_t retval = 0;
+		for (auto it = parList.begin(), itEND = parList.end(); it != itEND; ++it, ++retval) {
+			if (it->is_directory)
+				retval += count_listing_items_recursive(SetListingView<Const>(it));
+		}
+		return retval;
 	}
 } //namespace mchlib
 

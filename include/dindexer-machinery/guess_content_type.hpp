@@ -28,12 +28,13 @@ namespace mchlib {
 		ContentType_Backup,
 		ContentType_VideoDVD,
 		ContentType_VideoBD,
+		ContentType_VideoCD,
 		ContentType_Unknown
 	};
 
 	template <bool> class SetListingView;
 
-	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const SetListingView<true>& parContent );
+	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const SetListingView<true>& parContent, std::size_t parEntriesCount=0 );
 } //namespace mchlib
 
 #endif
