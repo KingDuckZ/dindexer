@@ -21,7 +21,10 @@
 #include "dindexer-machinery/guess_content_type.hpp"
 #include "dindexer-machinery/set_listing.hpp"
 #include "dindexer-machinery/set_listing_helpers.hpp"
+#include "globbing.hpp"
 #include <boost/iterator/filter_iterator.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+#include <boost/range/empty.hpp>
 #include <cstdint>
 #include <algorithm>
 #include <functional>
@@ -31,15 +34,13 @@
 
 namespace mchlib {
 	namespace {
-		using FoundItemPair = std::pair<bool, ConstSetListingView::const_iterator>;
-
 		template <typename O, uint16_t L>
 		struct IsLevelLikeO {
 			bool operator() ( const FileRecordData& parEntry );
 		};
 
 		struct EntryChecking {
-			typedef bool(*CheckerFunction)(dinlib::MediaTypes, const ConstSetListingView&);
+			typedef bool(*CheckerFunction)(dinlib::MediaTypes, const ConstSetListingView&, const std::vector<const FileRecordData*>&);
 
 			std::size_t max_total_entries;
 			CheckerFunction checker_func;
@@ -64,96 +65,57 @@ namespace mchlib {
 			return std::move(retval);
 		}
 
-		bool is_path_eq (const char* parPath, const FileRecordData& parEntry) {
-			return (parEntry.path == parPath);
-		}
+		std::vector<int> check_missing_content (const std::vector<const FileRecordData*>& parContent, const std::vector<const char*>& parCheck) {
+			using boost::make_indirect_iterator;
+			using FileRecordIterator =
+				boost::indirect_iterator<std::vector<const FileRecordData*>::const_iterator>;
 
-		//std::vector<int> check_missing_content (const ConstSetListingView& parContent, const std::vector<const char*>& parCheck) {
-		//	std::vector<int> retval;
-		//	for (int z = 0; z < static_cast<int>(parCheck.size()), ++z) {
-		//		auto glob_range = glob(parContent, parCheck[z]);
-		//		if (boost::empty(glob_range)) {
-		//			retval.push_back(z);
-		//		}
-		//	}
-		//	return std::move(retval);
-		//}
-
-		FoundItemPair find_item (const ConstSetListingView& parContent, const char* parPath) {
-			auto it = std::find_if(
-				parContent.begin(),
-				parContent.end(),
-				[parPath](const FileRecordData& parEntry) {
-					return (parEntry.path == parPath);
-				}
+			std::vector<int> retval;
+			auto glob = Glob<FileRecordIterator>(
+				make_indirect_iterator(parContent.begin()),
+				make_indirect_iterator(parContent.end())
 			);
 
-			return std::make_pair(parContent.end() != it, it);
+			for (int z = 0; z < static_cast<int>(parCheck.size()); ++z) {
+				glob.set_pattern(parCheck[z]);
+				if (boost::empty(glob)) {
+					retval.push_back(z);
+				}
+			}
+			return std::move(retval);
 		}
 
-		bool identify_video_dvd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent) {
-			if (parMediaType != dinlib::MediaType_DVD) {
+		bool identify_video_dvd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent ) {
+			if (parMediaType != dinlib::MediaType_DVD and parMediaType != dinlib::MediaType_Directory)
 				return false;
-			}
 
 			const auto items_count = count_listing_items(parContent);
 			if (items_count < 2) {
 				return false;
 			}
 
-			auto it_video_ts = std::find_if(parContent.begin(), parContent.end(), std::bind(&is_path_eq, "VIDEO_TS", std::placeholders::_1));
-			if (parContent.end() == it_video_ts) {
-				return false;
-			}
-
-			auto it_audio_ts = std::find_if(parContent.begin(), parContent.end(), std::bind(&is_path_eq, "AUDIO_TS", std::placeholders::_1));
-			if (parContent.end() == it_audio_ts) {
-				return false;
-			}
-
-			return true;
+			const std::vector<const char*> should_have {
+				"VIDEO_TS/*.VOB",
+				"AUDIO_TS"
+			};
+			return check_missing_content(parFlatContent, should_have).empty();
 		}
 
-		bool identify_video_cd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent) {
-			if (parMediaType != dinlib::MediaType_CDRom)
+		bool identify_video_cd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent) {
+			if (parMediaType != dinlib::MediaType_CDRom and parMediaType != dinlib::MediaType_Directory)
 				return false;
 
 			const auto items_count = count_listing_items(parContent);
 			if (items_count < 4)
 				return false;
 
-			//const std::vector<const char*> should_have {
-			//	"SVCD/*.VCD",
-			//	"MPEGAV/AVSEQ??.DAT",
-			//	"SEGMENT/ITEM???.DAT",
-			//	"CDI"
-			//};
-
-			auto found = find_item(parContent, "SVCD");
-			if (not found.first or not found.second->is_directory)
-				return false;
-			found = find_item(parContent, "MPEGAV");
-			if (not found.first or not found.second->is_directory)
-				return false;
-			found = find_item(parContent, "SEGMENT");
-			if (not found.first or not found.second->is_directory)
-				return false;
-			found = find_item(parContent, "CDI");
-			if (not found.first or not found.second->is_directory)
-				return false;
-
-			//FileRecordData("SVCD",0,0,1,true,false),
-			//FileRecordData("SVCD/INFO.VCD",0,0,2,false,false),
-			//FileRecordData("SVCD/ENTRIES.VCD",0,0,2,false,false),
-			//FileRecordData("SVCD/SEARCH.DAT",0,0,2,false,false),
-			//FileRecordData("SVCD/PSD.VCD",0,0,2,false,false),
-			//FileRecordData("MPEGAV",0,0,1,true,false),
-			//FileRecordData("MPEGAV/AVSEQ01.DAT",0,0,2,false,false),
-			//FileRecordData("SEGMENT",0,0,1,true,false),
-			//FileRecordData("SEGMENT/ITEM001.DAT",0,0,2,false,false),
-			//FileRecordData("CDI",0,0,1,true,false),
-			//FileRecordData("KARAOKE",0,0,1,true,false)
-			return true;
+			const std::vector<const char*> should_have {
+				"SVCD/*.VCD",
+				"MPEGAV/AVSEQ??.DAT",
+				"SEGMENT/ITEM???.DAT",
+				"CDI"
+			};
+			return check_missing_content(parFlatContent, should_have).empty();
 		}
 	} //unnamed namespace
 
@@ -164,10 +126,11 @@ namespace mchlib {
 		};
 
 		const auto total_entries = (parEntriesCount ? parEntriesCount : count_listing_items_recursive(parContent));
+		auto flattened = flattened_listing(parContent);
 
 		for (const auto& chk : checker_chain) {
 			if (chk.max_total_entries and chk.max_total_entries >= total_entries) {
-				if (chk.checker_func(parMediaType, parContent)) {
+				if (chk.checker_func(parMediaType, parContent, flattened)) {
 					return chk.content_type;
 				}
 			}

@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME} SHARED
 	machinery_info.cpp
 	guess_content_type.cpp
 	set_listing.cpp
+	globbing.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

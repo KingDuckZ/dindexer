@@ -48,7 +48,9 @@ TEST(machinery, guess_content_type) {
 			FileRecordData("",0,0,0,true,false),
 			FileRecordData("VIDEO_TS",0,0,1,true,false),
 			FileRecordData("AUDIO_TS",0,0,1,true,false),
-			FileRecordData("VIDEO_TS/VTS_01_0.BUP",0,0,2,false,false)
+			FileRecordData("VIDEO_TS/VTS_01_0.BUP",0,0,2,false,false),
+			FileRecordData("VIDEO_TS/VTS_01_0.VOB",0,0,2,false,false),
+			FileRecordData("VIDEO_TS/VIDEO_TS.VOB",0,0,2,false,false)
 		};
 		detect_type(test_data, mchlib::ContentType_VideoDVD, dinlib::MediaType_DVD);
 	}
