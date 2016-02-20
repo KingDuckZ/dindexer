@@ -21,6 +21,7 @@
 #include "set_listing.hpp"
 #include <cstddef>
 #include <algorithm>
+#include <type_traits>
 
 namespace mchlib {
 	template <bool Const>
@@ -34,6 +35,25 @@ namespace mchlib {
 
 	template <bool Const>
 	std::size_t count_listing_items_recursive ( const SetListingView<Const>& parList );
+
+	template <bool Const>
+	std::vector<typename std::conditional<Const, const FileRecordData*, FileRecordData*>::type>
+	flattened_listing ( const mchlib::SetListingView<Const>& parContent );
+
+	namespace implem {
+		template <bool Const>
+		void flattened_listing (const mchlib::SetListingView<Const>& parContent, std::vector<typename std::conditional<Const, const FileRecordData*, FileRecordData*>::type>& parOut) {
+			const auto end = parContent.end();
+
+			for (auto itcurr = parContent.cbegin(); itcurr != end; ++itcurr) {
+				parOut.push_back(&*itcurr);
+
+				if (itcurr->is_directory) {
+					flattened_listing(mchlib::SetListingView<Const>(itcurr), parOut);
+				}
+			}
+		}
+	} //namespace implem
 
 	template <bool Const>
 	inline
@@ -80,6 +100,16 @@ namespace mchlib {
 				retval += count_listing_items_recursive(SetListingView<Const>(it));
 		}
 		return retval;
+	}
+
+	template <bool Const>
+	inline
+	std::vector<typename std::conditional<Const, const FileRecordData*, FileRecordData*>::type>
+	flattened_listing (const mchlib::SetListingView<Const>& parContent) {
+		std::vector<typename std::conditional<Const, const FileRecordData*, FileRecordData*>::type> retval;
+
+		implem::flattened_listing(parContent, retval);
+		return std::move(retval);
 	}
 } //namespace mchlib
 

@@ -16,6 +16,7 @@
  */
 
 #include "dindexer-machinery/set_listing.hpp"
+#include "dindexer-machinery/set_listing_helpers.hpp"
 #include "helpers/lengthof.h"
 #include <gtest/gtest.h>
 #include <vector>
@@ -25,17 +26,6 @@
 //TEST_F for class
 
 namespace {
-	void flatten_filelist (const mchlib::SetListingView<true>& parContent, std::vector<std::string>& parOut) {
-		const auto end = parContent.end();
-
-		for (auto itcurr = parContent.cbegin(); itcurr != end; ++itcurr) {
-			parOut.push_back(itcurr->abs_path);
-
-			if (itcurr->is_directory) {
-				flatten_filelist(mchlib::SetListingView<true>(itcurr), parOut);
-			}
-		}
-	}
 } //unnamed namespace
 
 TEST(machinery, diriterator) {
@@ -174,8 +164,12 @@ TEST(machinery, diriterator) {
 	EXPECT_EQ("Cowboy Bebop - Tank - The Best", i->abs_path);
 
 	std::vector<std::string> flattened;
+	auto flattened_ptrs = mchlib::flattened_listing(lst.make_cview());
 	flattened.reserve(lengthof(expected_list));
-	flatten_filelist(lst.make_cview(), flattened);
+	for (const auto itm : flattened_ptrs) {
+		flattened.push_back(itm->abs_path);
+	}
+
 	EXPECT_EQ(lengthof(expected_list), flattened.size());
 	const auto count = std::min(lengthof(expected_list), flattened.size());
 	for (std::size_t z = 0; z < count; ++z) {
