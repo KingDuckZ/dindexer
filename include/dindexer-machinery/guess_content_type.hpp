@@ -20,21 +20,27 @@
 
 #include "dindexer-common/mediatypes.hpp"
 #include "dindexer-machinery/recorddata.hpp"
+#include "dindexer-common/compatibility.h"
 #include <vector>
 
 namespace mchlib {
 	enum ContentTypes {
-		ContentType_Generic,
-		ContentType_Backup,
-		ContentType_VideoDVD,
-		ContentType_VideoBD,
-		ContentType_VideoCD,
-		ContentType_Unknown
+		ContentType_Empty = 'E',
+		ContentType_Generic = 'G',
+		ContentType_Backup = 'A',
+		ContentType_VideoDVD = 'D',
+		ContentType_VideoBD = 'B',
+		ContentType_VideoCD = 'C',
+		ContentType_Unknown = 'U'
 	};
 
 	template <bool> class SetListingView;
 
 	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const SetListingView<true>& parContent, std::size_t parEntriesCount=0 );
+	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const std::vector<FileRecordData>& parContent );
+
+	char content_type_to_char ( ContentTypes parCType ) a_pure;
+	ContentTypes char_to_content_type ( char parCType ) a_pure;
 } //namespace mchlib
 
 #endif

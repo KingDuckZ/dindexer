@@ -39,4 +39,8 @@ namespace dinlib {
 		}
 		return it_ret->second;
 	}
+
+	MediaTypes char_to_media_type (char parMType) {
+		return static_cast<MediaTypes>(parMType);
+	}
 } //namespace dinlib

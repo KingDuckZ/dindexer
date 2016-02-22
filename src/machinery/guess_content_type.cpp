@@ -22,6 +22,7 @@
 #include "dindexer-machinery/set_listing.hpp"
 #include "dindexer-machinery/set_listing_helpers.hpp"
 #include "globbing.hpp"
+#include "pathname.hpp"
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/empty.hpp>
@@ -31,6 +32,7 @@
 #include <ciso646>
 #include <regex>
 #include <utility>
+#include <memory>
 
 namespace mchlib {
 	namespace {
@@ -120,6 +122,9 @@ namespace mchlib {
 	} //unnamed namespace
 
 	ContentTypes guess_content_type (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, std::size_t parEntriesCount) {
+		if (boost::empty(parContent))
+			return ContentType_Empty;
+
 		std::vector<EntryChecking> checker_chain {
 			{ 100, &identify_video_dvd, ContentType_VideoDVD },
 			{ 200, &identify_video_cd, ContentType_VideoCD }
@@ -136,6 +141,24 @@ namespace mchlib {
 			}
 		}
 		return ContentType_Generic;
+	}
+
+	ContentTypes guess_content_type (dinlib::MediaTypes parMediaType, const std::vector<FileRecordData>& parContent) {
+		if (parContent.empty())
+			return ContentType_Empty;
+
+		//TODO: assert that the first item in the list is the shortest string
+		std::shared_ptr<PathName> pathname(new PathName(parContent.front().abs_path));
+		ConstSetListingView view(parContent.begin(), parContent.end(), pathname->atom_count(), pathname);
+		return guess_content_type(parMediaType, view, parContent.size());
+	}
+
+	char content_type_to_char (mchlib::ContentTypes parCType) {
+		return static_cast<char>(parCType);
+	}
+
+	ContentTypes char_to_content_type (char parCType) {
+		return static_cast<ContentTypes>(parCType);
 	}
 } //namespace mchlib
 

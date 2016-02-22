@@ -73,15 +73,15 @@ namespace mchlib {
 		bool hash_valid;
 	};
 
-	struct SetRecordDataFull {
-		std::string name;
-		uint32_t disk_number;
+	struct SetRecordData {
+		boost::string_ref name;
 		char type;
+		char content_type;
 	};
 
-	struct SetRecordData {
-		const boost::string_ref name;
-		const char type;
+	struct SetRecordDataFull : public SetRecordData {
+		std::string name;
+		uint32_t disk_number;
 	};
 } //namespace mchlib
 

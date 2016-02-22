@@ -26,6 +26,7 @@
 #include "dindexer-machinery/machinery_info.hpp"
 #include "dindexer-common/common_info.hpp"
 #include "dindexer-common/settings.hpp"
+#include "dindexer-machinery/guess_content_type.hpp"
 #include "commandline.hpp"
 #include "dbbackend.hpp"
 #include <iostream>
@@ -42,7 +43,7 @@
 
 namespace {
 	void run_hash_calculation ( mchlib::Indexer& parIndexer, bool parShowProgress );
-	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
+	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, char parContent, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -117,11 +118,15 @@ int main (int parArgc, char* parArgv[]) {
 		return 1;
 	}
 	else {
+		const auto set_type_casted = dinlib::char_to_media_type(set_type);
+		const mchlib::ContentTypes content = mchlib::guess_content_type(set_type_casted, indexer.record_data());
+		const char content_type = mchlib::content_type_to_char(content);
+
 		run_hash_calculation(indexer, verbose);
 		if (verbose) {
 			std::cout << "Writing to database...\n";
 		}
-		if (not add_to_db(indexer.record_data(), vm["setname"].as<std::string>(), set_type, settings.db)) {
+		if (not add_to_db(indexer.record_data(), vm["setname"].as<std::string>(), set_type, content_type, settings.db)) {
 			std::cerr << "Not written to DB, likely because a set with the same hash already exists\n";
 		}
 	}
@@ -182,7 +187,7 @@ namespace {
 #endif
 	}
 
-	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, const dinlib::SettingsDB& parDBSettings, bool parForce) {
+	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, char parContentType, const dinlib::SettingsDB& parDBSettings, bool parForce) {
 		using mchlib::FileRecordData;
 		using mchlib::SetRecordDataFull;
 		using mchlib::SetRecordData;
@@ -197,7 +202,7 @@ namespace {
 			}
 		}
 
-		SetRecordData set_data {parSetName, parType};
+		SetRecordData set_data {parSetName, parType, parContentType };
 		const auto app_signature = dinlib::dindexer_signature();
 		const auto lib_signature = mchlib::lib_signature();
 		const std::string signature = std::string(app_signature.data(), app_signature.size()) + "/" + std::string(lib_signature.data(), lib_signature.size());
