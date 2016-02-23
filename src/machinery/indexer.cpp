@@ -58,7 +58,6 @@ namespace mchlib {
 		void append_to_vec (std::vector<char>& parDest, const HashType& parHash, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + sizeof(HashType) + parString.size());
-			std::cout << "Appending " << tiger_to_string(parHash) << " and " << parString << "\n";
 			std::copy(parHash.byte_data, parHash.byte_data + sizeof(HashType), parDest.begin() + old_size);
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size + sizeof(HashType));
 		}
@@ -66,7 +65,6 @@ namespace mchlib {
 		void append_to_vec (std::vector<char>& parDest, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + parString.size());
-			std::cout << "Appending " << parString << "\n";
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
 		}
 
