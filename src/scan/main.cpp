@@ -170,8 +170,9 @@ namespace {
 			std::size_t clear_size = 0;
 			const auto digit_count = static_cast<std::size_t>(std::log10(static_cast<double>(total_items))) + 1;
 			do {
-				std::unique_lock<std::mutex> lk(progress_print);
-				parIndexer.step_notify().wait(lk);
+				//TODO: fix this steaming pile of crap
+				//std::unique_lock<std::mutex> lk(progress_print);
+				//parIndexer.step_notify().wait(lk);
 				std::cout << '\r';
 				std::fill_n(cout_iterator(std::cout), clear_size, ' ');
 				std::cout << '\r';
@@ -186,7 +187,7 @@ namespace {
 					std::cout << msg;
 					std::cout.flush();
 				}
-			} while (parIndexer.processed_items() != total_items);
+			} while (false); //parIndexer.processed_items() != total_items);
 
 			hash_thread.join();
 			if (parIndexer.processed_items() > 0) {
