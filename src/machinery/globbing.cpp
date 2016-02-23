@@ -19,10 +19,12 @@
 #include "dindexer-machinery/recorddata.hpp"
 #include <fnmatch.h>
 #include <ciso646>
+#include <cassert>
 
 namespace mchlib {
 	namespace implem {
 		bool glob_matches (const FileRecordData& parData, const char* parGlob) {
+			assert(parData.path.data());
 			//assert that the substring in path terminates at the same place
 			//where the one in abs_path terminates (ie: it's null-terminated).
 			assert(parData.path == std::string(parData.path.data()));

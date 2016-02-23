@@ -131,7 +131,9 @@ namespace mchlib {
 		};
 
 		const auto total_entries = (parEntriesCount ? parEntriesCount : count_listing_items_recursive(parContent));
+		assert(total_entries == count_listing_items_recursive(parContent));
 		auto flattened = flattened_listing(parContent);
+		assert(flattened.size() == total_entries);
 
 		for (const auto& chk : checker_chain) {
 			if (chk.max_total_entries and chk.max_total_entries >= total_entries) {
@@ -147,10 +149,16 @@ namespace mchlib {
 		if (parContent.empty())
 			return ContentType_Empty;
 
+		//Assert that array being passed in is sorted in the same way SetListing
+		//would sort it. If it's not the case things will break because
+		//SetListingView won't do any sorting.
+		assert(std::equal(parContent.begin(), parContent.end(), SetListing(std::vector<FileRecordData>(parContent)).sorted_list().begin()));
+
 		//TODO: assert that the first item in the list is the shortest string
 		std::shared_ptr<PathName> pathname(new PathName(parContent.front().abs_path));
 		ConstSetListingView view(parContent.begin(), parContent.end(), pathname->atom_count(), pathname);
-		return guess_content_type(parMediaType, view, parContent.size());
+		assert(parContent.size() >= 1);
+		return guess_content_type(parMediaType, view, parContent.size() - 1);
 	}
 
 	char content_type_to_char (mchlib::ContentTypes parCType) {

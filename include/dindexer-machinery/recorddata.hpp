@@ -51,11 +51,17 @@ namespace mchlib {
 		{
 		}
 
+#if defined(NDEBUG)
 		FileRecordData ( const FileRecordData& ) = delete;
+#else
+		FileRecordData ( const FileRecordData& ) = default;
+#endif
 		FileRecordData ( FileRecordData&& ) = default;
 		FileRecordData& operator= ( const FileRecordData& ) = delete;
 		FileRecordData& operator= ( FileRecordData&& ) = default;
-		bool operator== ( const FileRecordData& ) const = delete;
+#if !defined(NDEBUG)
+		bool operator== ( const FileRecordData& parOther ) const;
+#endif
 
 		TigerHash hash;
 		std::string abs_path;
@@ -83,6 +89,12 @@ namespace mchlib {
 		std::string name;
 		uint32_t disk_number;
 	};
+
+#if !defined(NDEBUG)
+	inline bool FileRecordData::operator== (const FileRecordData& parOther) const {
+		return (this->abs_path == parOther.abs_path);
+	}
+#endif
 } //namespace mchlib
 
 #endif

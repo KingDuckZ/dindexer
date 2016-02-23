@@ -21,12 +21,30 @@
 #include <ciso646>
 #include <cassert>
 #include <algorithm>
+#include <boost/utility/string_ref.hpp>
 
 namespace mchlib {
 	namespace {
-		bool file_record_data_lt (const FileRecordData& parLeft, const FileRecordData& parRight) {
+		//A struct that wraps the minimum necessary in order for LT comparison
+		//to be made.
+		struct FileRecordDataForSearch {
+			FileRecordDataForSearch ( const char* parPath, uint16_t parLevel, bool parIsDir) :
+				abs_path(parPath),
+				level(parLevel),
+				is_directory(parIsDir)
+			{
+				assert(parPath);
+			}
+
+			boost::string_ref abs_path;
+			uint16_t level;
+			bool is_directory;
+		};
+
+		template <typename OtherRecord>
+		bool file_record_data_lt (const FileRecordData& parLeft, const OtherRecord& parRight) {
 			const FileRecordData& l = parLeft;
-			const FileRecordData& r = parRight;
+			const OtherRecord& r = parRight;
 			return
 				(l.level < r.level)
 				or (l.level == r.level and l.is_directory and not r.is_directory)
@@ -84,7 +102,7 @@ namespace mchlib {
 			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->abs_path).atom_count());
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level + m_level_offset);
 
-			//Look for the point where the children of this entry starts
+			//Look for the point where the children of this entry start
 			while (
 				m_current != m_end and (
 					m_current->level + m_level_offset == m_base_path->atom_count() or
@@ -197,7 +215,11 @@ namespace mchlib {
 		m_base_path()
 	{
 		if (parSort) {
-			std::sort(m_list.begin(), m_list.end(), &file_record_data_lt);
+			sort_list(m_list);
+		}
+		else {
+			//Assert that received list is already sorted
+			assert(std::equal(m_list.begin(), m_list.end(), SetListing(ListType(m_list), true).sorted_list().begin()));
 		}
 		if (not m_list.empty()) {
 			m_base_path.reset(new PathName(m_list.front().abs_path));
@@ -250,6 +272,20 @@ namespace mchlib {
 				return parItm.is_directory;
 			}
 		);
+	}
+
+	const SetListing::ListType& SetListing::sorted_list() const {
+		return m_list;
+	}
+
+	void SetListing::sort_list (ListType& parList) {
+		std::sort(parList.begin(), parList.end(), &file_record_data_lt<FileRecordData>);
+	}
+
+	SetListing::ListType::iterator SetListing::lower_bound (ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir) {
+		using boost::string_ref;
+		FileRecordDataForSearch find_record(parPath, parLevel, parIsDir);
+		return std::lower_bound(parList.begin(), parList.end(), find_record, &file_record_data_lt<FileRecordDataForSearch>);
 	}
 
 	SetListingView<false> SetListing::make_view() {

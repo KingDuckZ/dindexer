@@ -47,6 +47,7 @@
 #	include <iostream>
 #endif
 #include <boost/utility/string_ref.hpp>
+#include <boost/range/empty.hpp>
 
 namespace mchlib {
 	using HashType = decltype(FileRecordData::hash);
@@ -88,7 +89,8 @@ namespace mchlib {
 				const std::string relpath = make_relative_path(parCurrDir, curr_subdir).path();
 				if (it->is_directory) {
 					auto cd_list = MutableSetListingView(it);
-					assert(cd_list.begin()->abs_path != it->abs_path);
+					assert(boost::empty(cd_list) or cd_list.begin()->abs_path != it->abs_path);
+
 					hash_dir(*it, cd_list, curr_subdir, parMime, parIgnoreErrors);
 					append_to_vec(dir_blob, it->hash, relpath);
 				}
@@ -440,8 +442,17 @@ namespace mchlib {
 	}
 
 	bool Indexer::add_path (const char* parPath, const fastf::FileStats& parStats) {
-		m_local_data->paths.push_back(
-			make_file_record_data(parPath, parStats));
+		auto it_before = SetListing::lower_bound(
+			m_local_data->paths,
+			parPath,
+			parStats.level,
+			parStats.is_dir
+		);
+
+		m_local_data->paths.insert(
+			it_before,
+			make_file_record_data(parPath, parStats)
+		);
 		if (not parStats.is_dir) {
 			++m_local_data->file_count;
 		}

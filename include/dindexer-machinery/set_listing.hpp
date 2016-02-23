@@ -25,6 +25,7 @@
 #include <memory>
 #include <type_traits>
 #include <ciso646>
+#include <cstdint>
 
 namespace mchlib {
 	namespace implem {
@@ -146,6 +147,10 @@ namespace mchlib {
 		std::size_t size ( void ) const;
 		std::size_t files_count ( void ) const;
 		std::size_t dir_count ( void ) const;
+		const ListType& sorted_list ( void ) const;
+
+		static void sort_list ( ListType& parList );
+		static ListType::iterator lower_bound ( ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir );
 
 	private:
 		ListType m_list;

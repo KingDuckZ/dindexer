@@ -118,11 +118,20 @@ int main (int parArgc, char* parArgv[]) {
 		return 1;
 	}
 	else {
+		run_hash_calculation(indexer, verbose);
+
+		//TODO: guess_content_type() relies on FileRecordData::path being set to
+		//the relative path already. Unfortunately at this point it just got
+		//default-initialized to be the same as abs_path, so for a video DVD, for
+		//example, it's going to be like "/mnt/cdrom/VIDEO_TS" instead of just
+		//"VIDEO_TS". This will cause guess_content_type() to miss. Relative
+		//paths are populated at the end of calculate_hash(), so until I come up
+		//with a better system I'm just moving content detection to after hash
+		//calculation.
 		const auto set_type_casted = dinlib::char_to_media_type(set_type);
 		const mchlib::ContentTypes content = mchlib::guess_content_type(set_type_casted, indexer.record_data());
 		const char content_type = mchlib::content_type_to_char(content);
 
-		run_hash_calculation(indexer, verbose);
 		if (verbose) {
 			std::cout << "Writing to database...\n";
 		}
