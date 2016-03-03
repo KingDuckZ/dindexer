@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME} SHARED
 	set_listing.cpp
 	globbing.cpp
 	scantask/dirtree.cpp
+	scantask/mediatype.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}
@@ -27,6 +28,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${MAGIC_LIBRARIES}
+	PUBLIC ${bare_name}-common
 )
 
 target_include_directories(${PROJECT_NAME}
