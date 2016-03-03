@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-machinery/filesearcher.hpp"
+#include "filesearcher.hpp"
 
 #if !defined(_XOPEN_SOURCE)
 #define _XOPEN_SOURCE 500
