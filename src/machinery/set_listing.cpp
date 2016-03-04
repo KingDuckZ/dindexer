@@ -41,9 +41,9 @@ namespace mchlib {
 			bool is_directory;
 		};
 
-		template <typename OtherRecord>
-		bool file_record_data_lt (const FileRecordData& parLeft, const OtherRecord& parRight) {
-			const FileRecordData& l = parLeft;
+		template <typename RecordType, typename OtherRecord>
+		bool file_record_data_lt (const RecordType& parLeft, const OtherRecord& parRight) {
+			const RecordType& l = parLeft;
 			const OtherRecord& r = parRight;
 			return
 				(l.level < r.level)
@@ -279,13 +279,19 @@ namespace mchlib {
 	}
 
 	void SetListing::sort_list (ListType& parList) {
-		std::sort(parList.begin(), parList.end(), &file_record_data_lt<FileRecordData>);
+		std::sort(parList.begin(), parList.end(), &file_record_data_lt<FileRecordData, FileRecordData>);
 	}
 
 	SetListing::ListType::iterator SetListing::lower_bound (ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir) {
 		using boost::string_ref;
 		FileRecordDataForSearch find_record(parPath, parLevel, parIsDir);
-		return std::lower_bound(parList.begin(), parList.end(), find_record, &file_record_data_lt<FileRecordDataForSearch>);
+		return std::lower_bound(parList.begin(), parList.end(), find_record, &file_record_data_lt<FileRecordData, FileRecordDataForSearch>);
+	}
+
+	SetListing::ShortListType::iterator SetListing::lower_bound (ShortListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir) {
+		using boost::string_ref;
+		FileRecordDataForSearch find_record(parPath, parLevel, parIsDir);
+		return std::lower_bound(parList.begin(), parList.end(), find_record, &file_record_data_lt<ShortFileRecordData, FileRecordDataForSearch>);
 	}
 
 	SetListingView<false> SetListing::make_view() {

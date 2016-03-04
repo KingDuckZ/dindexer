@@ -23,19 +23,19 @@
 #include <vector>
 
 namespace mchlib {
-	struct FileRecordData;
+	struct ShortFileRecordData;
 
 	namespace scantask {
-		class DirTree : public Base<std::vector<FileRecordData>> {
+		class DirTree : public Base<std::vector<ShortFileRecordData>> {
 		public:
-			typedef std::vector<FileRecordData> PathList;
+			typedef std::vector<ShortFileRecordData> PathList;
 
 			explicit DirTree ( std::string parRoot );
 			virtual ~DirTree ( void ) noexcept = default;
 
 		private:
-			virtual void on_data_destroy ( PathList& parData );
-			virtual void on_data_create ( PathList& parData );
+			virtual void on_data_destroy ( PathList& parData ) override;
+			virtual void on_data_create ( PathList& parData ) override;
 
 			std::string m_root;
 		};

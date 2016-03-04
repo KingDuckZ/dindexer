@@ -79,6 +79,16 @@ namespace mchlib {
 		bool hash_valid;
 	};
 
+	struct ShortFileRecordData {
+		std::string abs_path;
+		std::string path;
+		std::time_t atime;
+		std::time_t mtime;
+		uint16_t level;
+		bool is_directory;
+		bool is_symlink;
+	};
+
 	struct SetRecordData {
 		boost::string_ref name;
 		char type;

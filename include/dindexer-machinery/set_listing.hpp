@@ -128,6 +128,7 @@ namespace mchlib {
 	class SetListing {
 	public:
 		typedef std::vector<FileRecordData> ListType;
+		typedef std::vector<ShortFileRecordData> ShortListType;
 		typedef implem::DirIterator<true> const_iterator;
 
 		explicit SetListing ( ListType&& parList, bool parSort=true );
@@ -151,6 +152,7 @@ namespace mchlib {
 
 		static void sort_list ( ListType& parList );
 		static ListType::iterator lower_bound ( ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir );
+		static ShortListType::iterator lower_bound ( ShortListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir );
 
 	private:
 		ListType m_list;

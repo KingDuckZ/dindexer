@@ -19,25 +19,18 @@
 #include "dindexer-machinery/recorddata.hpp"
 #include "dindexer-machinery/set_listing.hpp"
 #include "filesearcher.hpp"
+#include "pathname.hpp"
 #include <utility>
 #include <cassert>
 #include <ciso646>
 #include <functional>
+#include <algorithm>
 
 namespace mchlib {
 	namespace {
-		FileRecordData make_file_record_data (const char* parPath, const fastf::FileStats& parSt) {
-			return FileRecordData(
-				parPath,
-				parSt.atime,
-				parSt.mtime,
-				parSt.level,
-				parSt.is_dir,
-				parSt.is_symlink
-			);
-		}
+		bool add_path (scantask::DirTree::PathList& parOut, const PathName& parRoot, const char* parPath, const fastf::FileStats& parStats) {
+			using boost::string_ref;
 
-		bool add_path (scantask::DirTree::PathList& parOut, const char* parPath, const fastf::FileStats& parStats) {
 			auto it_before = SetListing::lower_bound(
 				parOut,
 				parPath,
@@ -45,9 +38,25 @@ namespace mchlib {
 				parStats.is_dir
 			);
 
+			//std::string curr_path(parPath);
+			//const std::size_t offset = parBase.str_path_size() + 1;
+			//for (FileRecordData& itm : parItems) {
+			//	const auto curr_offset = std::min(parRelPathOffs, curr_path.size());
+			//	itm.path = boost::string_ref(itm.abs_path).substr(curr_offset);
+			//	assert(itm.path.data());
+			//}
+
 			parOut.insert(
 				it_before,
-				make_file_record_data(parPath, parStats)
+				ShortFileRecordData {
+					std::string(parPath),
+					make_relative_path(parRoot, PathName(string_ref(parPath))).path(),
+					parStats.atime,
+					parStats.mtime,
+					static_cast<uint16_t>(parStats.level),
+					static_cast<bool>(parStats.is_dir),
+					static_cast<bool>(parStats.is_symlink)
+				}
 			);
 			return true;
 		}
@@ -67,6 +76,7 @@ namespace mchlib {
 		void DirTree::on_data_create (PathList& parData) {
 			using std::placeholders::_1;
 			using std::placeholders::_2;
+			using boost::string_ref;
 
 			assert(parData.empty());
 
@@ -74,7 +84,11 @@ namespace mchlib {
 			fastf::FileSearcher::ConstCharVecType ext, ignore;
 
 			searcher.SetFollowSymlinks(true);
-			searcher.SetCallback(fastf::FileSearcher::CallbackType(std::bind(&add_path, std::ref(parData), _1, _2)));
+			searcher.SetCallback(
+				fastf::FileSearcher::CallbackType(
+					std::bind(&add_path, std::ref(parData), PathName(string_ref(m_root)), _1, _2)
+				)
+			);
 			searcher.Search(ext, ignore);
 		}
 	} //namespace scantask

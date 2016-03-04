@@ -30,8 +30,8 @@ namespace mchlib {
 			virtual ~MediaType ( void ) noexcept = default;
 
 		private:
-			virtual void on_data_destroy ( MediaTypes& parData );
-			virtual void on_data_create ( MediaTypes& parData );
+			virtual void on_data_destroy ( MediaTypes& parData ) override;
+			virtual void on_data_create ( MediaTypes& parData ) override;
 
 			MediaTypes m_default;
 #if defined(WITH_MEDIA_AUTODETECT)
