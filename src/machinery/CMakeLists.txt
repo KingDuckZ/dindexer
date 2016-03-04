@@ -11,6 +11,7 @@ add_library(${PROJECT_NAME} SHARED
 	filesearcher.cpp
 	discinfo.cpp
 	mediatype.cpp
+	mediatypes.cpp
 	machinery_info.cpp
 	guess_content_type.cpp
 	set_listing.cpp
@@ -28,7 +29,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${MAGIC_LIBRARIES}
-	PUBLIC ${bare_name}-common
 )
 
 target_include_directories(${PROJECT_NAME}

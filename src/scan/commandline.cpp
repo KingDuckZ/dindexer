@@ -27,14 +27,14 @@ namespace po = boost::program_options;
 namespace din {
 	namespace {
 		const char g_allowed_types[] = {
-			static_cast<char>(dinlib::MediaType_CDRom),
-			static_cast<char>(dinlib::MediaType_Directory),
-			static_cast<char>(dinlib::MediaType_DVD),
-			static_cast<char>(dinlib::MediaType_BluRay),
-			static_cast<char>(dinlib::MediaType_FloppyDisk),
-			static_cast<char>(dinlib::MediaType_HardDisk),
-			static_cast<char>(dinlib::MediaType_IomegaZip),
-			static_cast<char>(dinlib::MediaType_Other)
+			static_cast<char>(mchlib::MediaType_CDRom),
+			static_cast<char>(mchlib::MediaType_Directory),
+			static_cast<char>(mchlib::MediaType_DVD),
+			static_cast<char>(mchlib::MediaType_BluRay),
+			static_cast<char>(mchlib::MediaType_FloppyDisk),
+			static_cast<char>(mchlib::MediaType_HardDisk),
+			static_cast<char>(mchlib::MediaType_IomegaZip),
+			static_cast<char>(mchlib::MediaType_Other)
 		};
 	} //unnamed namespace
 

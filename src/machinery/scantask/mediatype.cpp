@@ -25,7 +25,7 @@
 namespace mchlib {
 	namespace scantask {
 		MediaType::MediaType (char parDefault, bool parForce, std::string parSearchPath) :
-			m_default(dinlib::char_to_media_type(parDefault))
+			m_default(char_to_media_type(parDefault))
 #if defined(WITH_MEDIA_AUTODETECT)
 			, m_search_path(std::move(parSearchPath))
 			, m_force(parForce)
@@ -37,11 +37,11 @@ namespace mchlib {
 #endif
 		}
 
-		void MediaType::on_data_destroy (dinlib::MediaTypes& parData) {
-			parData = dinlib::MediaType_Other;
+		void MediaType::on_data_destroy (MediaTypes& parData) {
+			parData = MediaType_Other;
 		}
 
-		void MediaType::on_data_create (dinlib::MediaTypes& parData) {
+		void MediaType::on_data_create (MediaTypes& parData) {
 #if defined(WITH_MEDIA_AUTODETECT)
 			if (m_force) {
 				parData = m_default;

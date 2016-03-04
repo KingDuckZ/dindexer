@@ -19,7 +19,6 @@
 #define idB6191389C4AD4EE5862CCF1591BE6CE5
 
 #include "dindexer-common/validationerror.hpp"
-#include "dindexer-common/mediatypes.hpp"
 #include <boost/program_options/variables_map.hpp>
 
 namespace din {

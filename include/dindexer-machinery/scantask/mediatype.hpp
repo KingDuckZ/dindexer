@@ -19,21 +19,21 @@
 #define id25B0BCA6D9464754920E1BC7C5D9DB57
 
 #include "dindexer-machinery/scantask/base.hpp"
-#include "dindexer-common/mediatypes.hpp"
+#include "dindexer-machinery/mediatypes.hpp"
 #include <string>
 
 namespace mchlib {
 	namespace scantask {
-		class MediaType : Base<dinlib::MediaTypes> {
+		class MediaType : Base<MediaTypes> {
 		public:
 			MediaType ( char parDefault, bool parForce, std::string parSearchPath );
 			virtual ~MediaType ( void ) noexcept = default;
 
 		private:
-			virtual void on_data_destroy ( dinlib::MediaTypes& parData );
-			virtual void on_data_create ( dinlib::MediaTypes& parData );
+			virtual void on_data_destroy ( MediaTypes& parData );
+			virtual void on_data_create ( MediaTypes& parData );
 
-			dinlib::MediaTypes m_default;
+			MediaTypes m_default;
 #if defined(WITH_MEDIA_AUTODETECT)
 			std::string m_search_path;
 			bool m_force;

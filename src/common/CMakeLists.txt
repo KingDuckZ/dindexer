@@ -2,7 +2,6 @@ project(${bare_name}-common CXX C)
 
 add_library(${PROJECT_NAME}
 	commandline.cpp
-	mediatypes.cpp
 	settings.cpp
 	validationerror.cpp
 	common_info.cpp

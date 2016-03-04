@@ -18,10 +18,10 @@
 #ifndef id700AFD0F33634ACC88079BB8853A9E13
 #define id700AFD0F33634ACC88079BB8853A9E13
 
-#include "dindexer-common/compatibility.h"
+#include "helpers/compatibility.h"
 #include <string>
 
-namespace dinlib {
+namespace mchlib {
 	enum MediaTypes {
 		MediaType_CDRom = 'C',
 		MediaType_Directory = 'D',
@@ -35,6 +35,6 @@ namespace dinlib {
 
 	const std::string& media_type_to_str ( MediaTypes parType );
 	MediaTypes char_to_media_type ( char parMType ) a_pure;
-} //namespace dinlib
+} //namespace mchlib
 
 #endif

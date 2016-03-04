@@ -20,11 +20,11 @@
 
 #include <string>
 #include <stdexcept>
-#include "dindexer-common/mediatypes.hpp"
+#include "dindexer-machinery/mediatypes.hpp"
 
 namespace mchlib {
 #if defined(WITH_MEDIA_AUTODETECT)
-	dinlib::MediaTypes guess_media_type ( std::string&& parPath );
+	MediaTypes guess_media_type ( std::string&& parPath );
 
 	class UnknownMediaTypeException : std::runtime_error {
 	public:
