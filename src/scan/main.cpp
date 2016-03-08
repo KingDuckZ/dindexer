@@ -83,7 +83,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto& hashes = hashing->get_or_create();
 	for (const auto& hash : hashes) {
-		std::cout << mchlib::tiger_to_string(hash.hash) << std::endl;
+		std::cout << '"' << hash.path << "\" -> " << mchlib::tiger_to_string(hash.hash) << std::endl;
 	}
 
 	return 0;
