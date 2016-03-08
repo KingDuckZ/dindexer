@@ -59,6 +59,7 @@ namespace mchlib {
 
 	PathName make_relative_path ( const PathName& parBasePath, const PathName& parOtherPath );
 	std::ostream& operator<< ( std::ostream& parStream, const PathName& parPath );
+	const boost::string_ref basename ( const PathName& parPath );
 } //namespace mchlib
 
 #endif

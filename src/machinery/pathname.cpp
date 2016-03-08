@@ -204,6 +204,17 @@ namespace mchlib {
 		return parStream;
 	}
 
+	const boost::string_ref basename (const PathName& parPath) {
+		static const char* const empty = "";
+		const auto sz = parPath.atom_count();
+		if (not sz) {
+			return boost::string_ref(empty);
+		}
+
+		assert(sz > 0);
+		return parPath[sz - 1];
+	}
+
 	PathName& PathName::pop_right() {
 		m_pool.pop();
 		return *this;
