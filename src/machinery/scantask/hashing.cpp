@@ -31,14 +31,14 @@
 
 namespace mchlib {
 	namespace {
-		void append_to_vec (std::vector<char>& parDest, const TigerHash& parHash, const std::string& parString) {
+		void append_to_vec (std::vector<char>& parDest, const TigerHash& parHash, boost::string_ref parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + sizeof(TigerHash) + parString.size());
 			std::copy(parHash.byte_data, parHash.byte_data + sizeof(TigerHash), parDest.begin() + old_size);
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size + sizeof(TigerHash));
 		}
 
-		void append_to_vec (std::vector<char>& parDest, const std::string& parString) {
+		void append_to_vec (std::vector<char>& parDest, boost::string_ref parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + parString.size());
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
@@ -53,12 +53,11 @@ namespace mchlib {
 #if defined(INDEXER_VERBOSE)
 			std::cout << "Making initial hash for " << parEntry.abs_path << "...\n";
 #endif
-			PathName curr_dir(parEntry.path);
 			for (auto it = parList.begin(); it != parList.end(); ++it) {
 				assert(PathName(parEntry.abs_path) == PathName(it->abs_path).pop_right());
 
 				PathName curr_path(it->path);
-				const std::string basename = make_relative_path(curr_dir, curr_path).path();
+				const auto basename = mchlib::basename(curr_path);
 				if (it->is_directory) {
 					auto cd_list = MutableSetListingView(it);
 					assert(boost::empty(cd_list) or cd_list.begin()->abs_path != it->abs_path);
