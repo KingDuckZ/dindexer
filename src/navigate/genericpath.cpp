@@ -17,8 +17,11 @@
 
 #include "genericpath.hpp"
 #include "helpers/infix_iterator.hpp"
-//TODO: trim #includes
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_core.hpp>
+#include <boost/spirit/include/qi_parse.hpp>
+#include <boost/spirit/include/qi_lit.hpp>
+#include <boost/spirit/include/qi_char_.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <sstream>
 #include <boost/phoenix/bind/bind_function.hpp>

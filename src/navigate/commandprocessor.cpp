@@ -18,8 +18,10 @@
 #define BOOST_SPIRIT_UNICODE
 
 #include "commandprocessor.hpp"
-//TODO: trim #includes
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_core.hpp>
+#include <boost/spirit/include/qi_parse.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
+#include <boost/spirit/include/qi_lexeme.hpp>
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/phoenix/phoenix.hpp>
 #include <ciso646>
