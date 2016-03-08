@@ -29,14 +29,14 @@ namespace mchlib {
 		//to be made.
 		struct FileRecordDataForSearch {
 			FileRecordDataForSearch ( const char* parPath, uint16_t parLevel, bool parIsDir) :
-				path(parPath),
+				abs_path(parPath),
 				level(parLevel),
 				is_directory(parIsDir)
 			{
 				assert(parPath);
 			}
 
-			boost::string_ref path;
+			boost::string_ref abs_path;
 			uint16_t level;
 			bool is_directory;
 		};
@@ -48,7 +48,7 @@ namespace mchlib {
 			return
 				(l.level < r.level)
 				or (l.level == r.level and l.is_directory and not r.is_directory)
-				or (l.level == r.level and l.is_directory == r.is_directory and l.path < r.path)
+				or (l.level == r.level and l.is_directory == r.is_directory and l.abs_path < r.abs_path)
 
 				//sort by directory - parent first, children later
 				//(level == o.level and is_dir and not o.is_dir)

@@ -23,17 +23,22 @@
 #include <boost/range/empty.hpp>
 #include <boost/utility/string_ref.hpp>
 
+//#define INDEXER_VERBOSE
+
+#if defined(INDEXER_VERBOSE)
+#	include <iostream>
+#endif
+
 namespace mchlib {
 	namespace {
-
-		void append_to_vec (std::vector<char>& parDest, const TigerHash& parHash, boost::string_ref parString) {
+		void append_to_vec (std::vector<char>& parDest, const TigerHash& parHash, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + sizeof(TigerHash) + parString.size());
 			std::copy(parHash.byte_data, parHash.byte_data + sizeof(TigerHash), parDest.begin() + old_size);
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size + sizeof(TigerHash));
 		}
 
-		void append_to_vec (std::vector<char>& parDest, boost::string_ref parString) {
+		void append_to_vec (std::vector<char>& parDest, const std::string& parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + parString.size());
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
@@ -46,26 +51,29 @@ namespace mchlib {
 			//is a direct child of current entry
 			std::vector<char> dir_blob;
 #if defined(INDEXER_VERBOSE)
-			std::cout << "Making initial hash for " << parCurrDir << "...\n";
+			std::cout << "Making initial hash for " << parEntry.abs_path << "...\n";
 #endif
+			PathName curr_dir(parEntry.path);
 			for (auto it = parList.begin(); it != parList.end(); ++it) {
 				assert(PathName(parEntry.abs_path) == PathName(it->abs_path).pop_right());
 
+				PathName curr_path(it->path);
+				const std::string basename = make_relative_path(curr_dir, curr_path).path();
 				if (it->is_directory) {
 					auto cd_list = MutableSetListingView(it);
 					assert(boost::empty(cd_list) or cd_list.begin()->abs_path != it->abs_path);
 
 					hash_dir(*it, cd_list, parIgnoreErrors);
-					append_to_vec(dir_blob, it->hash, it->path);
+					append_to_vec(dir_blob, it->hash, basename);
 				}
 				else {
-					append_to_vec(dir_blob, it->path);
+					append_to_vec(dir_blob, basename);
 				}
 			}
 			tiger_data(dir_blob, parEntry.hash);
 
 #if defined(INDEXER_VERBOSE)
-			std::cout << "Got intermediate hash for dir " << parCurrDir <<
+			std::cout << "Got intermediate hash for dir " << parEntry.abs_path <<
 				": " << tiger_to_string(parEntry.hash) <<
 				' ' << parEntry.mime_type << '\n';
 #endif
@@ -74,7 +82,7 @@ namespace mchlib {
 			for (auto it = first_file(parList); it != parList.end(); ++it) {
 				assert(not it->is_directory);
 #if defined(INDEXER_VERBOSE)
-				std::cout << "Hashing file " << it->abs_path << "...";
+				std::cout << "Hashing file " << it->abs_path << "...\n";
 #endif
 				//TODO: notify callback
 				try {
@@ -93,7 +101,7 @@ namespace mchlib {
 			}
 
 #if defined(INDEXER_VERBOSE)
-			std::cout << "Final hash for dir " << parCurrDir << " is " << tiger_to_string(parEntry.hash) << '\n';
+			std::cout << "Final hash for dir " << parEntry.abs_path << " is " << tiger_to_string(parEntry.hash) << '\n';
 #endif
 			parEntry.hash_valid = true;
 		}
