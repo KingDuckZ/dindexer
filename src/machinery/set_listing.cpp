@@ -99,7 +99,7 @@ namespace mchlib {
 		{
 			assert(parBasePath);
 			assert(m_base_path or m_current == m_end);
-			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->path).atom_count());
+			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->path).atom_count() + parLevelOffset);
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level + m_level_offset);
 
 			//Look for the point where the children of this entry start

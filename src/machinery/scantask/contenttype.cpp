@@ -15,31 +15,27 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id25B0BCA6D9464754920E1BC7C5D9DB57
-#define id25B0BCA6D9464754920E1BC7C5D9DB57
-
-#include "dindexer-machinery/scantask/base.hpp"
-#include "dindexer-machinery/mediatypes.hpp"
-#include <string>
+#include "dindexer-machinery/scantask/contenttype.hpp"
+#include <cassert>
 
 namespace mchlib {
 	namespace scantask {
-		class MediaType : public Base<mchlib::MediaTypes> {
-		public:
-			MediaType ( char parDefault, bool parForce, std::string parSearchPath );
-			virtual ~MediaType ( void ) noexcept = default;
+		ContentType::ContentType (DirTreeTaskPtr parDirTree, MediaTypeTaskPtr parMediaType) :
+			m_dir_tree(parDirTree),
+			m_media_type(parMediaType)
+		{
+			assert(m_dir_tree);
+			assert(m_media_type);
+		}
 
-		private:
-			virtual void on_data_destroy ( MediaTypes& parData ) override;
-			virtual void on_data_create ( MediaTypes& parData ) override;
+		void ContentType::on_data_destroy (mchlib::ContentTypes& parData) {
+			parData = ContentType_Unknown;
+		}
 
-			MediaTypes m_default;
-#if defined(WITH_MEDIA_AUTODETECT)
-			std::string m_search_path;
-			bool m_force;
-#endif
-		};
+		void ContentType::on_data_create (mchlib::ContentTypes& parData) {
+			auto media_type = m_media_type->get_or_create();
+			const auto& tree = m_dir_tree->get_or_create();
+			parData = mchlib::guess_content_type(media_type, tree);
+		}
 	} //namespace scantask
 } //namespace mchlib
-
-#endif

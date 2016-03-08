@@ -29,6 +29,7 @@
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/scantask/mediatype.hpp"
 #include "dindexer-machinery/scantask/hashing.hpp"
+#include "dindexer-machinery/scantask/contenttype.hpp"
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
@@ -78,12 +79,15 @@ int main (int parArgc, char* parArgv[]) {
 
 	const std::string search_path(vm["search-path"].as<std::string>());
 	std::shared_ptr<mchlib::scantask::DirTree> scan_dirtree(new mchlib::scantask::DirTree(search_path));
-	std::shared_ptr<mchlib::scantask::MediaType> media_type(new mchlib::scantask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), not vm.count("type"), search_path));
+	std::shared_ptr<mchlib::scantask::MediaType> media_type(new mchlib::scantask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), vm.count("type"), search_path));
 	std::shared_ptr<mchlib::scantask::Hashing> hashing(new mchlib::scantask::Hashing(scan_dirtree, true));
+	std::shared_ptr<mchlib::scantask::ContentType> content_type(new mchlib::scantask::ContentType(scan_dirtree, media_type));
+
+	std::cout << "Content type: " << mchlib::content_type_to_char(content_type->get_or_create()) << std::endl;
 
 	const auto& hashes = hashing->get_or_create();
 	for (const auto& hash : hashes) {
-		std::cout << '"' << hash.path << "\" -> " << mchlib::tiger_to_string(hash.hash) << std::endl;
+		std::cout << '"' << hash.path << "\" -> " << mchlib::tiger_to_string(hash.hash) << "\n";
 	}
 
 	return 0;

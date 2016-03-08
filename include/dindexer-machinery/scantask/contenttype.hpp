@@ -15,29 +15,32 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id25B0BCA6D9464754920E1BC7C5D9DB57
-#define id25B0BCA6D9464754920E1BC7C5D9DB57
+#ifndef id148DBED10A0B45238E810683656BA7D5
+#define id148DBED10A0B45238E810683656BA7D5
 
 #include "dindexer-machinery/scantask/base.hpp"
+#include "dindexer-machinery/guess_content_type.hpp"
 #include "dindexer-machinery/mediatypes.hpp"
-#include <string>
+#include <memory>
+#include <vector>
 
 namespace mchlib {
+	struct FileRecordData;
+
 	namespace scantask {
-		class MediaType : public Base<mchlib::MediaTypes> {
+		class ContentType : public Base<mchlib::ContentTypes> {
 		public:
-			MediaType ( char parDefault, bool parForce, std::string parSearchPath );
-			virtual ~MediaType ( void ) noexcept = default;
+			using DirTreeTaskPtr = std::shared_ptr<Base<std::vector<FileRecordData>>>;
+			using MediaTypeTaskPtr = std::shared_ptr<Base<mchlib::MediaTypes>>;
+
+			ContentType ( DirTreeTaskPtr parDirTree, MediaTypeTaskPtr parMediaType );
 
 		private:
-			virtual void on_data_destroy ( MediaTypes& parData ) override;
-			virtual void on_data_create ( MediaTypes& parData ) override;
+			virtual void on_data_destroy ( mchlib::ContentTypes& parData ) override;
+			virtual void on_data_create ( mchlib::ContentTypes& parData ) override;
 
-			MediaTypes m_default;
-#if defined(WITH_MEDIA_AUTODETECT)
-			std::string m_search_path;
-			bool m_force;
-#endif
+			DirTreeTaskPtr m_dir_tree;
+			MediaTypeTaskPtr m_media_type;
 		};
 	} //namespace scantask
 } //namespace mchlib
