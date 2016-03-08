@@ -18,6 +18,7 @@ add_library(${PROJECT_NAME} SHARED
 	globbing.cpp
 	scantask/dirtree.cpp
 	scantask/mediatype.cpp
+	scantask/hashing.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

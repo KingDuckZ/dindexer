@@ -18,6 +18,7 @@
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include "dindexer-machinery/set_listing.hpp"
+#include "helpers/compatibility.h"
 #include "filesearcher.hpp"
 #include "pathname.hpp"
 #include <utility>
@@ -28,6 +29,17 @@
 
 namespace mchlib {
 	namespace {
+		std::size_t calc_rel_path_offs ( const PathName& parRoot, boost::string_ref parPath ) a_pure;
+
+		std::size_t calc_rel_path_offs (const PathName& parRoot, boost::string_ref parPath) {
+			PathName path(parPath);
+			PathName rel_path = make_relative_path(parRoot, path);
+			const auto rel_path_len = rel_path.str_path_size();
+			const auto path_len = path.str_path_size();
+			assert(rel_path_len <= path_len);
+			return path_len - rel_path_len;
+		}
+
 		bool add_path (scantask::DirTree::PathList& parOut, const PathName& parRoot, const char* parPath, const fastf::FileStats& parStats) {
 			using boost::string_ref;
 
@@ -48,15 +60,15 @@ namespace mchlib {
 
 			parOut.insert(
 				it_before,
-				ShortFileRecordData {
-					std::string(parPath),
-					make_relative_path(parRoot, PathName(string_ref(parPath))).path(),
+				FileRecordData(
+					parPath,
+					calc_rel_path_offs(parRoot, string_ref(parPath)),
 					parStats.atime,
 					parStats.mtime,
 					static_cast<uint16_t>(parStats.level),
 					static_cast<bool>(parStats.is_dir),
 					static_cast<bool>(parStats.is_symlink)
-				}
+				)
 			);
 			return true;
 		}

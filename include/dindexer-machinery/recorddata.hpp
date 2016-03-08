@@ -51,6 +51,24 @@ namespace mchlib {
 		{
 		}
 
+		FileRecordData ( std::string&& parPath, std::size_t parRelPathOffs, std::time_t parATime, std::time_t parMTime, uint16_t parLevel, bool parIsDir, bool parIsSymLink ) :
+			hash {},
+			abs_path(std::move(parPath)),
+			mime_full(),
+			atime(parATime),
+			mtime(parMTime),
+			path(boost::string_ref(abs_path).substr(parRelPathOffs)),
+			mime_type(),
+			mime_charset(),
+			size(0),
+			level(parLevel),
+			is_directory(parIsDir),
+			is_symlink(parIsSymLink),
+			unreadable(false),
+			hash_valid(false)
+	{
+	}
+
 #if defined(NDEBUG)
 		FileRecordData ( const FileRecordData& ) = delete;
 #else
@@ -77,16 +95,6 @@ namespace mchlib {
 		bool is_symlink;
 		bool unreadable;
 		bool hash_valid;
-	};
-
-	struct ShortFileRecordData {
-		std::string abs_path;
-		std::string path;
-		std::time_t atime;
-		std::time_t mtime;
-		uint16_t level;
-		bool is_directory;
-		bool is_symlink;
 	};
 
 	struct SetRecordData {

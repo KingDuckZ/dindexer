@@ -28,6 +28,7 @@
 #include "dbbackend.hpp"
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/scantask/mediatype.hpp"
+#include "dindexer-machinery/scantask/hashing.hpp"
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
@@ -76,8 +77,16 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const std::string search_path(vm["search-path"].as<std::string>());
-	mchlib::scantask::DirTree scan_dirtree(search_path);
-	mchlib::scantask::MediaType media_type(vm["type"].as<char>(), not vm.count("type"), search_path);
+	std::shared_ptr<mchlib::scantask::DirTree> scan_dirtree(new mchlib::scantask::DirTree(search_path));
+	std::shared_ptr<mchlib::scantask::MediaType> media_type(new mchlib::scantask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), not vm.count("type"), search_path));
+	std::shared_ptr<mchlib::scantask::Hashing> hashing(new mchlib::scantask::Hashing(scan_dirtree, true));
+
+	const auto& hashes = hashing->get_or_create();
+	for (const auto& hash : hashes) {
+		std::cout << mchlib::tiger_to_string(hash.hash) << std::endl;
+	}
+
+	return 0;
 
 #if defined(WITH_MEDIA_AUTODETECT)
 	//char set_type;

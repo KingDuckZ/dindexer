@@ -40,19 +40,21 @@ namespace mchlib {
 	template <bool Const>
 	implem::DirIterator<Const> first_file ( SetListingView<Const>& parList );
 
+	typedef FileRecordData SetListingItemType;
+
 	namespace implem {
 		template <bool Const>
-		class DirIterator : public boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> {
+		class DirIterator : public boost::iterator_facade<DirIterator<Const>, SetListingItemType, boost::forward_traversal_tag> {
 			friend class mchlib::SetListingView<Const>;
 			friend class boost::iterator_core_access;
 			template <bool> friend class DirIterator;
-			typedef boost::iterator_facade<DirIterator<Const>, FileRecordData, boost::forward_traversal_tag> base_class;
+			typedef boost::iterator_facade<DirIterator<Const>, SetListingItemType, boost::forward_traversal_tag> base_class;
 			struct enabler {};
 		public:
 			typedef typename std::conditional<
 				Const,
-				std::vector<mchlib::FileRecordData>::const_iterator,
-				std::vector<mchlib::FileRecordData>::iterator
+				std::vector<SetListingItemType>::const_iterator,
+				std::vector<SetListingItemType>::iterator
 			>::type VecIterator;
 			typedef typename base_class::difference_type difference_type;
 			typedef typename base_class::value_type value_type;
@@ -127,8 +129,7 @@ namespace mchlib {
 
 	class SetListing {
 	public:
-		typedef std::vector<FileRecordData> ListType;
-		typedef std::vector<ShortFileRecordData> ShortListType;
+		typedef std::vector<SetListingItemType> ListType;
 		typedef implem::DirIterator<true> const_iterator;
 
 		explicit SetListing ( ListType&& parList, bool parSort=true );
@@ -152,7 +153,6 @@ namespace mchlib {
 
 		static void sort_list ( ListType& parList );
 		static ListType::iterator lower_bound ( ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir );
-		static ShortListType::iterator lower_bound ( ShortListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir );
 
 	private:
 		ListType m_list;

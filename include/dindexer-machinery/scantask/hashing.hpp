@@ -15,29 +15,31 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id0AA31B2E7D6244A08435CF9080E34AAE
-#define id0AA31B2E7D6244A08435CF9080E34AAE
+#ifndef idC7CC55298AC049EAA80604D6C7FD081D
+#define idC7CC55298AC049EAA80604D6C7FD081D
 
-#include "dindexer-machinery/scantask/base.hpp"
-#include <string>
+#include "dindexer-machinery/scantask/leanbase.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include <vector>
+#include <memory>
 
 namespace mchlib {
 	struct FileRecordData;
 
 	namespace scantask {
-		class DirTree : public Base<std::vector<FileRecordData>> {
+		class Hashing : public LeanBase<std::vector<FileRecordData>> {
 		public:
-			typedef std::vector<FileRecordData> PathList;
+			typedef LeanBase<std::vector<FileRecordData>> FileTreeBase;
 
-			explicit DirTree ( std::string parRoot );
-			virtual ~DirTree ( void ) noexcept = default;
+			Hashing ( std::shared_ptr<FileTreeBase> parFileTree, bool parIgnoreErrors );
+			virtual ~Hashing ( void ) noexcept;
 
 		private:
-			virtual void on_data_destroy ( PathList& parData ) override;
-			virtual void on_data_create ( PathList& parData ) override;
+			virtual void on_data_fill ( void ) override;
+			virtual std::vector<FileRecordData>& on_data_get ( void ) override;
 
-			std::string m_root;
+			std::shared_ptr<FileTreeBase> m_file_tree_task;
+			bool m_ignore_errors;
 		};
 	} //namespace scantask
 } //namespace mchlib
