@@ -15,54 +15,51 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idCB253C1A5AFA46A18B8878ED4072CD96
-#define idCB253C1A5AFA46A18B8878ED4072CD96
+#ifndef id982AF1D5C59C415584F56C1E6DDFE55E
+#define id982AF1D5C59C415584F56C1E6DDFE55E
 
-#include "dindexer-machinery/scantask/leanbase.hpp"
 #include <ciso646>
 #include <cassert>
 
 namespace mchlib {
 	namespace scantask {
 		template <typename T>
-		class Base : public LeanBase<T> {
+		class LeanBase {
 		protected:
-			Base ( void );
-			virtual ~Base ( void ) noexcept = default;
+			LeanBase ( void );
+			virtual ~LeanBase ( void ) noexcept = default;
+
+			void unset_data_created ( void );
 
 		public:
-			void clear_data ( void );
+			T& get_or_create ( void );
 
 		private:
-			virtual void on_data_destroy ( T& parData ) = 0;
-			virtual void on_data_create ( T& parData ) = 0;
+			virtual void on_data_fill ( void ) = 0;
+			virtual T& on_data_get ( void ) = 0;
 
-			virtual T& on_data_get ( void ) final;
-			virtual void on_data_fill ( void ) final;
-
-			using LeanBase<T>::unset_data_created;
-
-			T m_data;
+			bool m_data_created;
 		};
 
 		template <typename T>
-		Base<T>::Base() {
+		LeanBase<T>::LeanBase() :
+			m_data_created(false)
+		{
 		}
 
 		template <typename T>
-		void Base<T>::on_data_fill() {
-			this->on_data_create(m_data);
+		T& LeanBase<T>::get_or_create() {
+			if (not m_data_created) {
+				m_data_created = true;
+				this->on_data_fill();
+			}
+			return this->on_data_get();
 		}
 
 		template <typename T>
-		void Base<T>::clear_data() {
-			this->unset_data_created();
-			this->on_data_destroy(m_data);
-		}
-
-		template <typename T>
-		T& Base<T>::on_data_get() {
-			return m_data;
+		void LeanBase<T>::unset_data_created() {
+			assert(m_data_created);
+			m_data_created = false;
 		}
 	} //namespace scantask
 } //namespace mchlib
