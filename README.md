@@ -1,10 +1,14 @@
-#	dindexer	#
-##	Flattr	##
+#	dindexer			#
+##	Project info and status		##
+###	Development news		###
+Follow [My posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project!
+
+###	Flattr				###
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software)
 
 Please support the development of this software if you like it!
 
-##	Debug build status	##
+###	Debug build status		###
 [![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
 
 ##   What is dindexer?   ##
