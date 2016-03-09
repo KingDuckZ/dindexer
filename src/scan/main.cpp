@@ -92,7 +92,10 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto& hashes = filerecdata->get_or_create();
 	for (const auto& hash : hashes) {
-		std::cout << '"' << hash.path << "\" -> " << mchlib::tiger_to_string(hash.hash) << " mime: " << hash.mime_type << "\n";
+		std::cout << '"' << hash.path <<
+			"\" -> " << mchlib::tiger_to_string(hash.hash) <<
+			" size: " << hash.size <<
+			" mime: " << hash.mime_type << "\n";
 	}
 
 	return 0;

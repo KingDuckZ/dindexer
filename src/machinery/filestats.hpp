@@ -19,12 +19,16 @@
 #define id4A7D7AB671954418939FC0BDA19C5B3F
 
 #include <ctime>
+#include <cstdint>
 
 namespace fastf {
 	struct FileStats {
-		int level;
+		static_assert(sizeof(std::time_t) >= sizeof(uint64_t), "Reorder members or comment out this assertion");
+
 		std::time_t atime;
 		std::time_t mtime;
+		uint64_t size;
+		uint16_t level;
 		bool is_dir;
 		bool is_symlink;
 	};
