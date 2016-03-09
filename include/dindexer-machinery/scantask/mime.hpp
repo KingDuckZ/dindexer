@@ -34,7 +34,6 @@ namespace mchlib {
 			explicit Mime ( DirTreeTaskPtr parDirTree );
 			virtual ~Mime ( void ) noexcept;
 
-
 		private:
 			virtual void on_data_fill ( void ) override;
 			virtual std::vector<FileRecordData>& on_data_get ( void ) override;

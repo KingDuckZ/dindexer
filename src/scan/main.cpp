@@ -31,6 +31,7 @@
 #include "dindexer-machinery/scantask/hashing.hpp"
 #include "dindexer-machinery/scantask/contenttype.hpp"
 #include "dindexer-machinery/scantask/mime.hpp"
+#include "dindexer-machinery/scantask/generalfiller.hpp"
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
@@ -52,6 +53,7 @@ int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
 	using std::placeholders::_2;
 	using boost::program_options::variables_map;
+	using FileRecordDataFiller = mchlib::scantask::GeneralFiller<mchlib::scantask::DirTree::PathList>;
 
 	variables_map vm;
 	try {
@@ -84,11 +86,11 @@ int main (int parArgc, char* parArgv[]) {
 	std::shared_ptr<mchlib::scantask::Hashing> hashing(new mchlib::scantask::Hashing(scan_dirtree, true));
 	std::shared_ptr<mchlib::scantask::ContentType> content_type(new mchlib::scantask::ContentType(scan_dirtree, media_type));
 	std::shared_ptr<mchlib::scantask::Mime> mime(new mchlib::scantask::Mime(scan_dirtree));
+	std::shared_ptr<FileRecordDataFiller> filerecdata(new FileRecordDataFiller(mime, hashing));
 
 	std::cout << "Content type: " << mchlib::content_type_to_char(content_type->get_or_create()) << std::endl;
-	mime->get_or_create();
 
-	const auto& hashes = hashing->get_or_create();
+	const auto& hashes = filerecdata->get_or_create();
 	for (const auto& hash : hashes) {
 		std::cout << '"' << hash.path << "\" -> " << mchlib::tiger_to_string(hash.hash) << " mime: " << hash.mime_type << "\n";
 	}
