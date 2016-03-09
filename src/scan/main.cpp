@@ -49,11 +49,13 @@
 //	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, char parContent, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
 //} //unnamed namespace
 
+namespace stask = mchlib::scantask;
+
 int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_1;
 	using std::placeholders::_2;
 	using boost::program_options::variables_map;
-	using FileRecordDataFiller = mchlib::scantask::GeneralFiller<mchlib::scantask::DirTree::PathList>;
+	using FileRecordDataFiller = stask::GeneralFiller<stask::DirTree::PathList>;
 
 	variables_map vm;
 	try {
@@ -81,11 +83,11 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const std::string search_path(vm["search-path"].as<std::string>());
-	std::shared_ptr<mchlib::scantask::DirTree> scan_dirtree(new mchlib::scantask::DirTree(search_path));
-	std::shared_ptr<mchlib::scantask::MediaType> media_type(new mchlib::scantask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), vm.count("type"), search_path));
-	std::shared_ptr<mchlib::scantask::Hashing> hashing(new mchlib::scantask::Hashing(scan_dirtree, true));
-	std::shared_ptr<mchlib::scantask::ContentType> content_type(new mchlib::scantask::ContentType(scan_dirtree, media_type));
-	std::shared_ptr<mchlib::scantask::Mime> mime(new mchlib::scantask::Mime(scan_dirtree));
+	std::shared_ptr<stask::DirTree> scan_dirtree(new stask::DirTree(search_path));
+	std::shared_ptr<stask::MediaType> media_type(new stask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), vm.count("type"), search_path));
+	std::shared_ptr<stask::Hashing> hashing(new stask::Hashing(scan_dirtree, true));
+	std::shared_ptr<stask::ContentType> content_type(new stask::ContentType(scan_dirtree, media_type));
+	std::shared_ptr<stask::Mime> mime(new stask::Mime(scan_dirtree));
 	std::shared_ptr<FileRecordDataFiller> filerecdata(new FileRecordDataFiller(mime, hashing));
 
 	std::cout << "Content type: " << mchlib::content_type_to_char(content_type->get_or_create()) << std::endl;
