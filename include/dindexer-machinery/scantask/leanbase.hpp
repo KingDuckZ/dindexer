@@ -21,8 +21,29 @@
 #include <ciso646>
 #include <cassert>
 
+#if !defined(NDEBUG)
+#	 define LEANBASE_ASSERT_REENTRANCY
+#endif
+
 namespace mchlib {
 	namespace scantask {
+#if defined(LEANBASE_ASSERT_REENTRANCY)
+		struct AutoSetBool {
+			explicit AutoSetBool ( bool* parBool ) :
+				m_bool(parBool)
+			{
+				assert(m_bool);
+				assert(not *m_bool);
+				*m_bool = true;
+			}
+			~AutoSetBool ( void ) noexcept {
+				*m_bool = false;
+			}
+
+			bool* m_bool;
+		};
+#endif
+
 		template <typename T>
 		class LeanBase {
 		protected:
@@ -39,16 +60,27 @@ namespace mchlib {
 			virtual T& on_data_get ( void ) = 0;
 
 			bool m_data_created;
+#if defined(LEANBASE_ASSERT_REENTRANCY)
+			bool m_inside_call;
+#endif
 		};
 
 		template <typename T>
 		LeanBase<T>::LeanBase() :
 			m_data_created(false)
+#if defined(LEANBASE_ASSERT_REENTRANCY)
+			, m_inside_call(false)
+#endif
 		{
 		}
 
 		template <typename T>
 		T& LeanBase<T>::get_or_create() {
+#if defined(LEANBASE_ASSERT_REENTRANCY)
+			assert(not m_inside_call);
+			AutoSetBool auto_bool(&m_inside_call);
+#endif
+
 			if (not m_data_created) {
 				m_data_created = true;
 				this->on_data_fill();
