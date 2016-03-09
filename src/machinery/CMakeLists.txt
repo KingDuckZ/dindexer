@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME} SHARED
 	scantask/mediatype.cpp
 	scantask/hashing.cpp
 	scantask/contenttype.cpp
+	scantask/mime.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}
