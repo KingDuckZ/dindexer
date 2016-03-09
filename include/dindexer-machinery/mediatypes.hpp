@@ -35,6 +35,7 @@ namespace mchlib {
 
 	const std::string& media_type_to_str ( MediaTypes parType );
 	MediaTypes char_to_media_type ( char parMType ) a_pure;
+	char media_type_to_char ( MediaTypes parMType ) a_pure;
 } //namespace mchlib
 
 #endif

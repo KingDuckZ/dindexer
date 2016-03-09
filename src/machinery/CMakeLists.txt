@@ -21,6 +21,7 @@ add_library(${PROJECT_NAME} SHARED
 	scantask/hashing.cpp
 	scantask/contenttype.cpp
 	scantask/mime.cpp
+	scantask/setbasic.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

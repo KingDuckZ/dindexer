@@ -32,6 +32,7 @@
 #include "dindexer-machinery/scantask/contenttype.hpp"
 #include "dindexer-machinery/scantask/mime.hpp"
 #include "dindexer-machinery/scantask/generalfiller.hpp"
+#include "dindexer-machinery/scantask/setbasic.hpp"
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
@@ -56,6 +57,7 @@ int main (int parArgc, char* parArgv[]) {
 	using std::placeholders::_2;
 	using boost::program_options::variables_map;
 	using FileRecordDataFiller = stask::GeneralFiller<stask::DirTree::PathList>;
+	using SetRecordDataFiller = stask::GeneralFiller<mchlib::SetRecordDataFull>;
 
 	variables_map vm;
 	try {
@@ -83,14 +85,16 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const std::string search_path(vm["search-path"].as<std::string>());
+	std::shared_ptr<stask::SetBasic> setbasic(new stask::SetBasic(std::string(vm["setname"].as<std::string>())));
 	std::shared_ptr<stask::DirTree> scan_dirtree(new stask::DirTree(search_path));
-	std::shared_ptr<stask::MediaType> media_type(new stask::MediaType((vm.count("type") ? vm["type"].as<char>() : 'O'), vm.count("type"), search_path));
+	std::shared_ptr<stask::MediaType> media_type(new stask::MediaType(setbasic, (vm.count("type") ? vm["type"].as<char>() : 'O'), vm.count("type"), search_path));
 	std::shared_ptr<stask::Hashing> hashing(new stask::Hashing(scan_dirtree, true));
-	std::shared_ptr<stask::ContentType> content_type(new stask::ContentType(scan_dirtree, media_type));
+	std::shared_ptr<stask::ContentType> content_type(new stask::ContentType(setbasic, scan_dirtree, media_type));
 	std::shared_ptr<stask::Mime> mime(new stask::Mime(scan_dirtree));
 	std::shared_ptr<FileRecordDataFiller> filerecdata(new FileRecordDataFiller(mime, hashing));
+	std::shared_ptr<SetRecordDataFiller> setrecdata(new SetRecordDataFiller(media_type, content_type));
 
-	std::cout << "Content type: " << mchlib::content_type_to_char(content_type->get_or_create()) << std::endl;
+	std::cout << "Content type: " << setrecdata->get_or_create().type << std::endl;
 
 	const auto& hashes = filerecdata->get_or_create();
 	for (const auto& hash : hashes) {

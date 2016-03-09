@@ -20,38 +20,42 @@
 #if defined(WITH_MEDIA_AUTODETECT)
 #	include "dindexer-machinery/mediatype.hpp"
 #endif
+#include "dindexer-machinery/recorddata.hpp"
 #include <utility>
 
 namespace mchlib {
 	namespace scantask {
-		MediaType::MediaType (char parDefault, bool parForce, std::string parSearchPath) :
+		MediaType::MediaType (SetTaskType parSet, char parDefault, bool parForce, std::string parSearchPath) :
+			m_set_task(parSet),
 			m_default(char_to_media_type(parDefault))
 #if defined(WITH_MEDIA_AUTODETECT)
 			, m_search_path(std::move(parSearchPath))
 			, m_force(parForce)
 #endif
 		{
+			assert(m_set_task);
 #if !defined(WITH_MEDIA_AUTODETECT)
 			static_cast<void>(parForce);
 			static_cast<void>(parSearchPath);
 #endif
 		}
 
-		void MediaType::on_data_destroy (MediaTypes& parData) {
-			parData = MediaType_Other;
+		SetRecordDataFull& MediaType::on_data_get() {
+			return m_set_task->get_or_create();
 		}
 
-		void MediaType::on_data_create (MediaTypes& parData) {
+		void MediaType::on_data_fill() {
+			auto& data = m_set_task->get_or_create();
 #if defined(WITH_MEDIA_AUTODETECT)
 			if (m_force) {
-				parData = m_default;
+				data.type = media_type_to_char(m_default);
 			}
 			else {
 				const auto guessed_type = mchlib::guess_media_type(std::string(m_search_path));
-				parData = guessed_type;
+				data.type = media_type_to_char(guessed_type);
 			}
 #else
-			parData = m_default;
+			data.type = media_type_to_char(m_default);
 #endif
 		}
 	} //namespace scantask

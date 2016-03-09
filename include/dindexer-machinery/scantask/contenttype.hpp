@@ -18,27 +18,30 @@
 #ifndef id148DBED10A0B45238E810683656BA7D5
 #define id148DBED10A0B45238E810683656BA7D5
 
+#include "dindexer-machinery/scantask/leanbase.hpp"
 #include "dindexer-machinery/scantask/base.hpp"
-#include "dindexer-machinery/guess_content_type.hpp"
 #include "dindexer-machinery/mediatypes.hpp"
 #include <memory>
 #include <vector>
 
 namespace mchlib {
 	struct FileRecordData;
+	struct SetRecordDataFull;
 
 	namespace scantask {
-		class ContentType : public Base<mchlib::ContentTypes> {
+		class ContentType : public LeanBase<SetRecordDataFull> {
 		public:
 			using DirTreeTaskPtr = std::shared_ptr<Base<std::vector<FileRecordData>>>;
-			using MediaTypeTaskPtr = std::shared_ptr<Base<mchlib::MediaTypes>>;
+			using MediaTypeTaskPtr = std::shared_ptr<LeanBase<SetRecordDataFull>>;
+			using SetTaskType = std::shared_ptr<LeanBase<SetRecordDataFull>>;
 
-			ContentType ( DirTreeTaskPtr parDirTree, MediaTypeTaskPtr parMediaType );
+			ContentType ( SetTaskType parSet, DirTreeTaskPtr parDirTree, MediaTypeTaskPtr parMediaType );
 
 		private:
-			virtual void on_data_destroy ( mchlib::ContentTypes& parData ) override;
-			virtual void on_data_create ( mchlib::ContentTypes& parData ) override;
+			virtual void on_data_fill ( void ) override;
+			virtual SetRecordDataFull& on_data_get ( void ) override;
 
+			SetTaskType m_set_task;
 			DirTreeTaskPtr m_dir_tree;
 			MediaTypeTaskPtr m_media_type;
 		};

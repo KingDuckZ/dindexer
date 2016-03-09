@@ -15,32 +15,27 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-machinery/scantask/contenttype.hpp"
-#include "dindexer-machinery/guess_content_type.hpp"
-#include <cassert>
+#include "dindexer-machinery/scantask/setbasic.hpp"
+#include <utility>
 
 namespace mchlib {
 	namespace scantask {
-		ContentType::ContentType (SetTaskType parSet, DirTreeTaskPtr parDirTree, MediaTypeTaskPtr parMediaType) :
-			m_set_task(parSet),
-			m_dir_tree(parDirTree),
-			m_media_type(parMediaType)
+		SetBasic::SetBasic (std::string&& parName) :
+			m_set_name(std::move(parName))
 		{
-			assert(m_set_task);
-			assert(m_dir_tree);
-			assert(m_media_type);
 		}
 
-		SetRecordDataFull& ContentType::on_data_get() {
-			return m_set_task->get_or_create();
+		SetBasic::~SetBasic() noexcept {
 		}
 
-		void ContentType::on_data_fill() {
-			auto& data = m_set_task->get_or_create();
-			auto media_type = char_to_media_type(m_media_type->get_or_create().type);
-			const auto& tree = m_dir_tree->get_or_create();
-			const auto cont_type = mchlib::guess_content_type(media_type, tree);
-			data.content_type = content_type_to_char(cont_type);
+		void SetBasic::on_data_destroy (SetRecordDataFull& parData) {
+			static_cast<SetRecordData&>(parData).name.clear();
+			parData.name.clear();
+		}
+
+		void SetBasic::on_data_create (SetRecordDataFull& parData) {
+			parData.name = m_set_name;
+			static_cast<SetRecordData&>(parData).name = parData.name;
 		}
 	} //namespace scantask
 } //namespace mchlib

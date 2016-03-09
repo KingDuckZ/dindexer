@@ -43,4 +43,8 @@ namespace mchlib {
 	MediaTypes char_to_media_type (char parMType) {
 		return static_cast<MediaTypes>(parMType);
 	}
+
+	char media_type_to_char (MediaTypes parMType) {
+		return static_cast<char>(parMType);
+	}
 } //namespace mchlib

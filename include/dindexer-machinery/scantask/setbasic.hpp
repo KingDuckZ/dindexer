@@ -15,36 +15,26 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id25B0BCA6D9464754920E1BC7C5D9DB57
-#define id25B0BCA6D9464754920E1BC7C5D9DB57
+#ifndef idB323CEFC89C2468CA0A341C312C6C2C0
+#define idB323CEFC89C2468CA0A341C312C6C2C0
 
-#include "dindexer-machinery/scantask/leanbase.hpp"
 #include "dindexer-machinery/scantask/base.hpp"
-#include "dindexer-machinery/mediatypes.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include <string>
-#include <memory>
 
 namespace mchlib {
-	struct SetRecordDataFull;
-
 	namespace scantask {
-		class MediaType : public LeanBase<SetRecordDataFull> {
+		class SetBasic : public Base<SetRecordDataFull> {
+			typedef Base<SetRecordDataFull> ParentType;
 		public:
-			using SetTaskType = std::shared_ptr<LeanBase<SetRecordDataFull>>;
-
-			MediaType ( SetTaskType parSet, char parDefault, bool parForce, std::string parSearchPath );
-			virtual ~MediaType ( void ) noexcept = default;
+			explicit SetBasic ( std::string&& parName );
+			virtual ~SetBasic ( void ) noexcept;
 
 		private:
-			virtual void on_data_fill ( void ) override;
-			virtual SetRecordDataFull& on_data_get ( void ) override;
+			virtual void on_data_destroy ( SetRecordDataFull& parData ) override;
+			virtual void on_data_create ( SetRecordDataFull& parData ) override;
 
-			SetTaskType m_set_task;
-			MediaTypes m_default;
-#if defined(WITH_MEDIA_AUTODETECT)
-			std::string m_search_path;
-			bool m_force;
-#endif
+			std::string m_set_name;
 		};
 	} //namespace scantask
 } //namespace mchlib
