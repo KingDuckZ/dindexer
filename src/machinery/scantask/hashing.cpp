@@ -18,6 +18,7 @@
 #include "dindexer-machinery/scantask/hashing.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include "dindexer-machinery/set_listing.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include "pathname.hpp"
 #include <cassert>
 #include <boost/range/empty.hpp>
@@ -31,6 +32,18 @@
 
 namespace mchlib {
 	namespace {
+		struct ProgressInfo {
+			scantask::Hashing::ProgressCallback callback;
+			boost::string_ref curr_path;
+			uint64_t file_bytes_read;
+			uint64_t total_bytes_read;
+			uint32_t file_num;
+
+			void notify ( void ) {
+				callback(curr_path, file_bytes_read, total_bytes_read, file_num);
+			}
+		};
+
 		void append_to_vec (std::vector<char>& parDest, const TigerHash& parHash, boost::string_ref parString) {
 			const auto old_size = parDest.size();
 			parDest.resize(old_size + sizeof(TigerHash) + parString.size());
@@ -44,7 +57,7 @@ namespace mchlib {
 			std::copy(parString.begin(), parString.end(), parDest.begin() + old_size);
 		}
 
-		void hash_dir (FileRecordData& parEntry, MutableSetListingView& parList, bool parIgnoreErrors) {
+		void hash_dir (FileRecordData& parEntry, MutableSetListingView& parList, bool parIgnoreErrors, ProgressInfo& parProgressInfo) {
 			assert(parEntry.is_directory);
 
 			//Build a blob with the hashes and filenames of every directory that
@@ -62,7 +75,7 @@ namespace mchlib {
 					auto cd_list = MutableSetListingView(it);
 					assert(boost::empty(cd_list) or cd_list.begin()->abs_path != it->abs_path);
 
-					hash_dir(*it, cd_list, parIgnoreErrors);
+					hash_dir(*it, cd_list, parIgnoreErrors, parProgressInfo);
 					append_to_vec(dir_blob, it->hash, basename);
 				}
 				else {
@@ -85,8 +98,13 @@ namespace mchlib {
 #endif
 				//TODO: notify callback
 				try {
+					++parProgressInfo.file_num;
+					parProgressInfo.curr_path = it->abs_path;
+					parProgressInfo.notify();
+
 					tiger_file(it->abs_path, it->hash, parEntry.hash, it->size);
 					it->hash_valid = true;
+					parProgressInfo.total_bytes_read += it->size;
 				}
 				catch (const std::ios_base::failure& e) {
 					if (parIgnoreErrors) {
@@ -104,11 +122,15 @@ namespace mchlib {
 #endif
 			parEntry.hash_valid = true;
 		}
+
+		void dummy_progress_callback (const boost::string_ref /*parPath*/, uint64_t /*parFileBytes*/, uint64_t /*parTotalBytes*/, uint32_t /*parFileNum*/) {
+		}
 	} //unnamed namespace
 
 	namespace scantask {
 		Hashing::Hashing (std::shared_ptr<FileTreeBase> parFileTree, bool parIgnoreErrors) :
 			m_file_tree_task(parFileTree),
+			m_progress_callback(&dummy_progress_callback),
 			m_ignore_errors(parIgnoreErrors)
 		{
 			assert(m_file_tree_task);
@@ -124,8 +146,24 @@ namespace mchlib {
 		void Hashing::on_data_fill() {
 			std::vector<FileRecordData>& file_list = m_file_tree_task->get_or_create();
 
+			ProgressInfo progr_info;
+			progr_info.callback = m_progress_callback;
+			progr_info.curr_path = "";
+			progr_info.file_bytes_read = 0;
+			progr_info.total_bytes_read = 0;
+			progr_info.file_num = 0;
+
 			MutableSetListingView recordlist(file_list.begin(), file_list.end(), 0);
-			hash_dir(file_list.front(), recordlist, m_ignore_errors);
+			hash_dir(file_list.front(), recordlist, m_ignore_errors, progr_info);
+		}
+
+		void Hashing::set_progress_callback (ProgressCallback parFunc) {
+			if (parFunc) {
+				m_progress_callback = parFunc;
+			}
+			else {
+				m_progress_callback = &dummy_progress_callback;
+			}
 		}
 	} //namespace scantask
 } //namespace mchlib

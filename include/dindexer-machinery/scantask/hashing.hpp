@@ -19,9 +19,11 @@
 #define idC7CC55298AC049EAA80604D6C7FD081D
 
 #include "dindexer-machinery/scantask/leanbase.hpp"
-#include "dindexer-machinery/tiger.hpp"
 #include <vector>
 #include <memory>
+#include <functional>
+#include <boost/utility/string_ref.hpp>
+#include <cstdint>
 
 namespace mchlib {
 	struct FileRecordData;
@@ -30,15 +32,19 @@ namespace mchlib {
 		class Hashing : public LeanBase<std::vector<FileRecordData>> {
 		public:
 			typedef LeanBase<std::vector<FileRecordData>> FileTreeBase;
+			typedef std::function<void(const boost::string_ref, uint64_t, uint64_t, uint32_t)> ProgressCallback;
 
 			Hashing ( std::shared_ptr<FileTreeBase> parFileTree, bool parIgnoreErrors );
 			virtual ~Hashing ( void ) noexcept;
+
+			void set_progress_callback ( ProgressCallback parFunc );
 
 		private:
 			virtual void on_data_fill ( void ) override;
 			virtual std::vector<FileRecordData>& on_data_get ( void ) override;
 
 			std::shared_ptr<FileTreeBase> m_file_tree_task;
+			ProgressCallback m_progress_callback;
 			bool m_ignore_errors;
 		};
 	} //namespace scantask

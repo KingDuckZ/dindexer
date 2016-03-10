@@ -45,10 +45,13 @@
 #	include <condition_variable>
 #endif
 
-//namespace {
+namespace {
 //	void run_hash_calculation ( mchlib::Indexer& parIndexer, bool parShowProgress );
 //	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const std::string& parSetName, char parType, char parContent, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
-//} //unnamed namespace
+#if defined(WITH_PROGRESS_FEEDBACK)
+	void print_progress ( const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum );
+#endif
+} //unnamed namespace
 
 namespace stask = mchlib::scantask;
 
@@ -94,9 +97,14 @@ int main (int parArgc, char* parArgv[]) {
 	std::shared_ptr<FileRecordDataFiller> filerecdata(new FileRecordDataFiller(mime, hashing));
 	std::shared_ptr<SetRecordDataFiller> setrecdata(new SetRecordDataFiller(media_type, content_type));
 
+#if defined(WITH_PROGRESS_FEEDBACK)
+	hashing->set_progress_callback(&print_progress);
+#endif
+
 	std::cout << "Content type: " << setrecdata->get_or_create().type << std::endl;
 
 	const auto& hashes = filerecdata->get_or_create();
+	std::cout << std::endl;
 	for (const auto& hash : hashes) {
 		std::cout << '"' << hash.path <<
 			"\" -> " << mchlib::tiger_to_string(hash.hash) <<
@@ -169,7 +177,7 @@ int main (int parArgc, char* parArgv[]) {
 	return 0;
 }
 
-//namespace {
+namespace {
 //	void run_hash_calculation (mchlib::Indexer& parIndexer, bool parShowProgress) {
 //		if (parIndexer.empty()) {
 //			return;
@@ -246,4 +254,11 @@ int main (int parArgc, char* parArgv[]) {
 //		din::write_to_db(parDBSettings, parData, set_data, signature);
 //		return true;
 //	}
-//} //unnamed namespace
+
+#if defined(WITH_PROGRESS_FEEDBACK)
+	void print_progress (const boost::string_ref parPath, uint64_t /*parFileBytes*/, uint64_t parTotalBytes, uint32_t parFileNum) {
+		std::cout << "Hashing file " << parFileNum << " \"" << parPath << "\" (" << parTotalBytes << " bytes hashed)\r";
+		std::cout.flush();
+	}
+#endif
+} //unnamed namespace
