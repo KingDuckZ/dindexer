@@ -32,4 +32,4 @@ set -f
 find . \( $excl_paths -o $incl_extensions \) -a -type f $excl_files > cscope.files
 set +f
 
-cscope -b -q
+exec cscope -b -q

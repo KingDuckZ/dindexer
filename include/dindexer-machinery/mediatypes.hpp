@@ -15,14 +15,27 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
-#define id1B7A42F6E46547A6AB0F914E2A91399F
+#ifndef id700AFD0F33634ACC88079BB8853A9E13
+#define id700AFD0F33634ACC88079BB8853A9E13
 
-#include "dindexer-common/validationerror.hpp"
-#include <boost/program_options/variables_map.hpp>
+#include "helpers/compatibility.h"
+#include <string>
 
-namespace din {
-	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
-} //namespace din
+namespace mchlib {
+	enum MediaTypes {
+		MediaType_CDRom = 'C',
+		MediaType_Directory = 'D',
+		MediaType_DVD = 'V',
+		MediaType_BluRay = 'B',
+		MediaType_FloppyDisk = 'F',
+		MediaType_HardDisk = 'H',
+		MediaType_IomegaZip = 'Z',
+		MediaType_Other = 'O'
+	};
+
+	const std::string& media_type_to_str ( MediaTypes parType );
+	MediaTypes char_to_media_type ( char parMType ) a_pure;
+	char media_type_to_char ( MediaTypes parMType ) a_pure;
+} //namespace mchlib
 
 #endif

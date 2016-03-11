@@ -17,6 +17,7 @@
 
 #include "postgre_locate.hpp"
 #include "pq/connection.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include <utility>
 #include <sstream>
 #include <boost/utility/string_ref.hpp>
@@ -53,10 +54,25 @@ namespace din {
 
 			return std::move(retval);
 		}
+
+		std::vector<LocatedItem> file_result_to_vec (pq::ResultSet&& parResult) {
+			using boost::lexical_cast;
+
+			std::vector<LocatedItem> retval;
+			retval.reserve(parResult.size());
+			for (const auto& record : parResult) {
+				retval.push_back(LocatedItem{
+					record["path"],
+					lexical_cast<decltype(LocatedItem::id)>(record["id"]),
+					lexical_cast<decltype(LocatedItem::group_id)>(record["group_id"])
+				});
+			}
+
+			return std::move(retval);
+		}
 	} //unnamed namespace
 
 	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
-		using boost::lexical_cast;
 		using boost::string_ref;
 		namespace ba = boost::algorithm;
 
@@ -78,17 +94,15 @@ namespace din {
 		oss << "LIMIT " << g_max_results << ';';
 
 		auto result = conn.query(oss.str());
-		std::vector<LocatedItem> retval;
-		retval.reserve(result.size());
-		for (const auto& record : result) {
-			retval.push_back(LocatedItem{
-				record["path"],
-				lexical_cast<decltype(LocatedItem::id)>(record["id"]),
-				lexical_cast<decltype(LocatedItem::group_id)>(record["group_id"])
-			});
-		}
+		return file_result_to_vec(std::move(result));
+	}
 
-		return std::move(retval);
+	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch) {
+		const std::string query = std::string("SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"hash\"=$1 LIMIT ") + boost::lexical_cast<std::string>(g_max_results) + ';';
+
+		auto conn = make_pq_conn(parDB);
+		auto result = conn.query(query, mchlib::tiger_to_string(parSearch, true));
+		return file_result_to_vec(std::move(result));
 	}
 
 	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {

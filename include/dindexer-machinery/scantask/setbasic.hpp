@@ -15,14 +15,28 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
-#define id1B7A42F6E46547A6AB0F914E2A91399F
+#ifndef idB323CEFC89C2468CA0A341C312C6C2C0
+#define idB323CEFC89C2468CA0A341C312C6C2C0
 
-#include "dindexer-common/validationerror.hpp"
-#include <boost/program_options/variables_map.hpp>
+#include "dindexer-machinery/scantask/base.hpp"
+#include "dindexer-machinery/recorddata.hpp"
+#include <string>
 
-namespace din {
-	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
-} //namespace din
+namespace mchlib {
+	namespace scantask {
+		class SetBasic : public Base<SetRecordDataFull> {
+			typedef Base<SetRecordDataFull> ParentType;
+		public:
+			explicit SetBasic ( std::string&& parName );
+			virtual ~SetBasic ( void ) noexcept;
+
+		private:
+			virtual void on_data_destroy ( SetRecordDataFull& parData ) override;
+			virtual void on_data_create ( SetRecordDataFull& parData ) override;
+
+			std::string m_set_name;
+		};
+	} //namespace scantask
+} //namespace mchlib
 
 #endif

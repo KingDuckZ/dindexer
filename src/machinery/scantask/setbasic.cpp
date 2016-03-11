@@ -15,19 +15,27 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id4A7D7AB671954418939FC0BDA19C5B3F
-#define id4A7D7AB671954418939FC0BDA19C5B3F
+#include "dindexer-machinery/scantask/setbasic.hpp"
+#include <utility>
 
-#include <ctime>
+namespace mchlib {
+	namespace scantask {
+		SetBasic::SetBasic (std::string&& parName) :
+			m_set_name(std::move(parName))
+		{
+		}
 
-namespace fastf {
-	struct FileStats {
-		int level;
-		std::time_t atime;
-		std::time_t mtime;
-		bool is_dir;
-		bool is_symlink;
-	};
-} //namespace fastf
+		SetBasic::~SetBasic() noexcept {
+		}
 
-#endif
+		void SetBasic::on_data_destroy (SetRecordDataFull& parData) {
+			static_cast<SetRecordData&>(parData).name.clear();
+			parData.name.clear();
+		}
+
+		void SetBasic::on_data_create (SetRecordDataFull& parData) {
+			parData.name = m_set_name;
+			static_cast<SetRecordData&>(parData).name = parData.name;
+		}
+	} //namespace scantask
+} //namespace mchlib

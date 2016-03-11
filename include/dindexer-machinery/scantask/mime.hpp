@@ -15,29 +15,32 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id66D41389BC59433CA58E325395A6197B
-#define id66D41389BC59433CA58E325395A6197B
+#ifndef idE173D2BA33744F448B870BB53AF52610
+#define idE173D2BA33744F448B870BB53AF52610
 
-#include <string>
-#include <stdexcept>
-#include "dindexer-machinery/mediatypes.hpp"
+#include "dindexer-machinery/scantask/base.hpp"
+#include "dindexer-machinery/scantask/leanbase.hpp"
+#include <vector>
+#include <memory>
 
 namespace mchlib {
-#if defined(WITH_MEDIA_AUTODETECT)
-	MediaTypes guess_media_type ( std::string&& parPath );
+	struct FileRecordData;
 
-	class UnknownMediaTypeException : std::runtime_error {
-	public:
-		UnknownMediaTypeException ( const std::string& parWhat );
-		UnknownMediaTypeException ( const char* parWhat );
-	};
+	namespace scantask {
+		class Mime : public LeanBase<std::vector<FileRecordData>> {
+		public:
+			using DirTreeTaskPtr = std::shared_ptr<Base<std::vector<FileRecordData>>>;
 
-	class CantAutodetectException : std::runtime_error {
-	public:
-		CantAutodetectException ( const std::string& parWhat );
-		CantAutodetectException ( const char* parWhat );
-	};
-#endif
+			explicit Mime ( DirTreeTaskPtr parDirTree );
+			virtual ~Mime ( void ) noexcept;
+
+		private:
+			virtual void on_data_fill ( void ) override;
+			virtual std::vector<FileRecordData>& on_data_get ( void ) override;
+
+			DirTreeTaskPtr m_file_tree_task;
+		};
+	} //namespace scantask
 } //namespace mchlib
 
 #endif

@@ -42,8 +42,8 @@ namespace mchlib {
 		};
 
 		template <typename OtherRecord>
-		bool file_record_data_lt (const FileRecordData& parLeft, const OtherRecord& parRight) {
-			const FileRecordData& l = parLeft;
+		bool file_record_data_lt (const SetListingItemType& parLeft, const OtherRecord& parRight) {
+			const SetListingItemType& l = parLeft;
 			const OtherRecord& r = parRight;
 			return
 				(l.level < r.level)
@@ -99,14 +99,14 @@ namespace mchlib {
 		{
 			assert(parBasePath);
 			assert(m_base_path or m_current == m_end);
-			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->abs_path).atom_count());
+			assert(m_current == m_end or m_base_path->atom_count() == PathName(m_current->path).atom_count() + parLevelOffset);
 			assert(m_current == m_end or m_base_path->atom_count() == m_current->level + m_level_offset);
 
 			//Look for the point where the children of this entry start
 			while (
 				m_current != m_end and (
 					m_current->level + m_level_offset == m_base_path->atom_count() or
-					*m_base_path != PathName(m_current->abs_path).pop_right()
+					*m_base_path != PathName(m_current->path).pop_right()
 			)) {
 				assert(m_base_path);
 				++m_current;
@@ -157,13 +157,13 @@ namespace mchlib {
 
 		template <bool Const>
 		void DirIterator<Const>::increment() {
-			assert(PathName(m_current->abs_path).pop_right() == *m_base_path);
+			assert(PathName(m_current->path).pop_right() == *m_base_path);
 			do {
 				++m_current;
 			} while(
 				m_current != m_end and
 				m_current->level + m_level_offset == m_base_path->atom_count() + 1 and
-				*m_base_path != PathName(m_current->abs_path).pop_right()
+				*m_base_path != PathName(m_current->path).pop_right()
 			);
 		}
 
@@ -222,7 +222,7 @@ namespace mchlib {
 			assert(std::equal(m_list.begin(), m_list.end(), SetListing(ListType(m_list), true).sorted_list().begin()));
 		}
 		if (not m_list.empty()) {
-			m_base_path.reset(new PathName(m_list.front().abs_path));
+			m_base_path.reset(new PathName(m_list.front().path));
 		}
 	}
 
@@ -258,7 +258,7 @@ namespace mchlib {
 		return std::count_if(
 			m_list.begin(),
 			m_list.end(),
-			[] (const FileRecordData& parItm) {
+			[] (const SetListingItemType& parItm) {
 				return not parItm.is_directory;
 			}
 		);
@@ -268,7 +268,7 @@ namespace mchlib {
 		return std::count_if(
 			m_list.begin(),
 			m_list.end(),
-			[] (const FileRecordData& parItm) {
+			[] (const SetListingItemType& parItm) {
 				return parItm.is_directory;
 			}
 		);
@@ -279,7 +279,7 @@ namespace mchlib {
 	}
 
 	void SetListing::sort_list (ListType& parList) {
-		std::sort(parList.begin(), parList.end(), &file_record_data_lt<FileRecordData>);
+		std::sort(parList.begin(), parList.end(), &file_record_data_lt<SetListingItemType>);
 	}
 
 	SetListing::ListType::iterator SetListing::lower_bound (ListType& parList, const char* parPath, uint16_t parLevel, bool parIsDir) {
@@ -289,17 +289,17 @@ namespace mchlib {
 	}
 
 	SetListingView<false> SetListing::make_view() {
-		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().path).atom_count());
 		return SetListingView<false>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
 	SetListingView<true> SetListing::make_view() const {
-		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().path).atom_count());
 		return SetListingView<true>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
 	SetListingView<true> SetListing::make_cview() const {
-		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().abs_path).atom_count());
+		const auto offs = (m_list.empty() ? 0 : PathName(m_list.front().path).atom_count());
 		return SetListingView<true>(m_list.begin(), m_list.end(), offs, m_base_path);
 	}
 
@@ -311,7 +311,7 @@ namespace mchlib {
 		m_level_offset(parIter.m_level_offset)
 	{
 		if (m_begin != m_end) {
-			m_base_path.reset(new PathName(m_begin->abs_path));
+			m_base_path.reset(new PathName(m_begin->path));
 		}
 	}
 
@@ -323,7 +323,7 @@ namespace mchlib {
 		m_level_offset(parLevelOffset)
 	{
 		if (m_begin != m_end) {
-			m_base_path.reset(new PathName(m_begin->abs_path));
+			m_base_path.reset(new PathName(m_begin->path));
 		}
 	}
 

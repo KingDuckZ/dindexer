@@ -18,9 +18,9 @@
 #ifndef id17F1582F16C8478E8D9795BECBF275A3
 #define id17F1582F16C8478E8D9795BECBF275A3
 
-#include "dindexer-common/mediatypes.hpp"
+#include "dindexer-machinery/mediatypes.hpp"
 #include "dindexer-machinery/recorddata.hpp"
-#include "dindexer-common/compatibility.h"
+#include "helpers/compatibility.h"
 #include <vector>
 
 namespace mchlib {
@@ -36,8 +36,8 @@ namespace mchlib {
 
 	template <bool> class SetListingView;
 
-	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const SetListingView<true>& parContent, std::size_t parEntriesCount=0 );
-	ContentTypes guess_content_type ( dinlib::MediaTypes parMediaType, const std::vector<FileRecordData>& parContent );
+	ContentTypes guess_content_type ( MediaTypes parMediaType, const SetListingView<true>& parContent, std::size_t parEntriesCount=0 );
+	ContentTypes guess_content_type ( MediaTypes parMediaType, const std::vector<FileRecordData>& parContent );
 
 	char content_type_to_char ( ContentTypes parCType ) a_pure;
 	ContentTypes char_to_content_type ( char parCType ) a_pure;

@@ -40,23 +40,23 @@ namespace mchlib {
 	{
 	}
 
-	dinlib::MediaTypes guess_media_type (std::string&& parPath) {
+	MediaTypes guess_media_type (std::string&& parPath) {
 		DiscInfo info(std::move(parPath));
 		const DriveTypes drive_type = info.drive_type();
 		if (DriveType_HardDisk == drive_type) {
 			if (info.mountpoint() == PathName(info.original_path()).path())
-				return dinlib::MediaType_HardDisk;
+				return MediaType_HardDisk;
 			else
-				return dinlib::MediaType_Directory;
+				return MediaType_Directory;
 		}
 		else if (DriveType_Optical == drive_type) {
 			switch (info.optical_type()) {
 			case OpticalType_DVD:
-				return dinlib::MediaType_DVD;
+				return MediaType_DVD;
 			case OpticalType_CDRom:
-				return dinlib::MediaType_CDRom;
+				return MediaType_CDRom;
 			case OpticalType_BluRay:
-				return dinlib::MediaType_BluRay;
+				return MediaType_BluRay;
 			default:
 				throw UnknownMediaTypeException("Set autodetect failed because this media type is unknown, please specify the set type manually");
 			}

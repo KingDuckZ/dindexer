@@ -15,29 +15,38 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id66D41389BC59433CA58E325395A6197B
-#define id66D41389BC59433CA58E325395A6197B
+#ifndef id25B0BCA6D9464754920E1BC7C5D9DB57
+#define id25B0BCA6D9464754920E1BC7C5D9DB57
 
-#include <string>
-#include <stdexcept>
+#include "dindexer-machinery/scantask/leanbase.hpp"
+#include "dindexer-machinery/scantask/base.hpp"
 #include "dindexer-machinery/mediatypes.hpp"
+#include <string>
+#include <memory>
 
 namespace mchlib {
+	struct SetRecordDataFull;
+
+	namespace scantask {
+		class MediaType : public LeanBase<SetRecordDataFull> {
+		public:
+			using SetTaskType = std::shared_ptr<LeanBase<SetRecordDataFull>>;
+
+			MediaType ( SetTaskType parSet, char parDefault, bool parForce, std::string parSearchPath );
+			virtual ~MediaType ( void ) noexcept = default;
+
+		private:
+			virtual void on_data_fill ( void ) override;
+			virtual SetRecordDataFull& on_data_get ( void ) override;
+
+			SetTaskType m_set_task;
+			MediaTypes m_default;
 #if defined(WITH_MEDIA_AUTODETECT)
-	MediaTypes guess_media_type ( std::string&& parPath );
-
-	class UnknownMediaTypeException : std::runtime_error {
-	public:
-		UnknownMediaTypeException ( const std::string& parWhat );
-		UnknownMediaTypeException ( const char* parWhat );
-	};
-
-	class CantAutodetectException : std::runtime_error {
-	public:
-		CantAutodetectException ( const std::string& parWhat );
-		CantAutodetectException ( const char* parWhat );
-	};
+			std::string m_search_path;
+			bool m_force;
 #endif
+		};
+	} //namespace scantask
 } //namespace mchlib
 
 #endif

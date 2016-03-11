@@ -15,14 +15,23 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
-#define id1B7A42F6E46547A6AB0F914E2A91399F
+#ifndef id4A7D7AB671954418939FC0BDA19C5B3F
+#define id4A7D7AB671954418939FC0BDA19C5B3F
 
-#include "dindexer-common/validationerror.hpp"
-#include <boost/program_options/variables_map.hpp>
+#include <ctime>
+#include <cstdint>
 
-namespace din {
-	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
-} //namespace din
+namespace fastf {
+	struct FileStats {
+		static_assert(sizeof(std::time_t) >= sizeof(uint64_t), "Reorder members or comment out this assertion");
+
+		std::time_t atime;
+		std::time_t mtime;
+		uint64_t size;
+		uint16_t level;
+		bool is_dir;
+		bool is_symlink;
+	};
+} //namespace fastf
 
 #endif

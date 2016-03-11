@@ -4,7 +4,6 @@ include(WithMediaAutodetect)
 find_package(Magic REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
-	indexer.cpp
 	pathname.cpp
 	tiger.c
 	tiger.cpp
@@ -12,10 +11,17 @@ add_library(${PROJECT_NAME} SHARED
 	filesearcher.cpp
 	discinfo.cpp
 	mediatype.cpp
+	mediatypes.cpp
 	machinery_info.cpp
 	guess_content_type.cpp
 	set_listing.cpp
 	globbing.cpp
+	scantask/dirtree.cpp
+	scantask/mediatype.cpp
+	scantask/hashing.cpp
+	scantask/contenttype.cpp
+	scantask/mime.cpp
+	scantask/setbasic.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}
@@ -27,6 +33,10 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${MAGIC_LIBRARIES}
+)
+
+target_include_directories(${PROJECT_NAME}
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 if (DINDEXER_WITH_MEDIA_AUTODETECT)

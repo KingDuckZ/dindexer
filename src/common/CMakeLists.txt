@@ -2,7 +2,6 @@ project(${bare_name}-common CXX C)
 
 add_library(${PROJECT_NAME}
 	commandline.cpp
-	mediatypes.cpp
 	settings.cpp
 	validationerror.cpp
 	common_info.cpp
@@ -25,3 +24,10 @@ target_link_libraries(${PROJECT_NAME}
 #	RUNTIME DESTINATION bin
 #	ARCHIVE DESTINATION lib/static
 #)
+
+#Allow to link with .so
+#see https://cmake.org/pipermail/cmake/2007-May/014350.html
+#and http://stackoverflow.com/questions/6093547/what-do-r-x86-64-32s-and-r-x86-64-64-relocation-mean/6093910#6093910
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+	set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()

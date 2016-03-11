@@ -15,14 +15,31 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id1B7A42F6E46547A6AB0F914E2A91399F
-#define id1B7A42F6E46547A6AB0F914E2A91399F
+#ifndef id0AA31B2E7D6244A08435CF9080E34AAE
+#define id0AA31B2E7D6244A08435CF9080E34AAE
 
-#include "dindexer-common/validationerror.hpp"
-#include <boost/program_options/variables_map.hpp>
+#include "dindexer-machinery/scantask/base.hpp"
+#include <string>
+#include <vector>
 
-namespace din {
-	bool parse_commandline ( int parArgc, char* parArgv[], boost::program_options::variables_map& parVarMap );
-} //namespace din
+namespace mchlib {
+	struct FileRecordData;
+
+	namespace scantask {
+		class DirTree : public Base<std::vector<FileRecordData>> {
+		public:
+			typedef std::vector<FileRecordData> PathList;
+
+			explicit DirTree ( std::string parRoot );
+			virtual ~DirTree ( void ) noexcept = default;
+
+		private:
+			virtual void on_data_destroy ( PathList& parData ) override;
+			virtual void on_data_create ( PathList& parData ) override;
+
+			std::string m_root;
+		};
+	} //namespace scantask
+} //namespace mchlib
 
 #endif

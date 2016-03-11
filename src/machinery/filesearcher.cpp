@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-machinery/filesearcher.hpp"
+#include "filesearcher.hpp"
 
 #if !defined(_XOPEN_SOURCE)
 #define _XOPEN_SOURCE 500
@@ -59,6 +59,7 @@ namespace fastf {
       st.is_symlink = parSymlink;
       st.atime = parStat->st_atime;
       st.mtime = parStat->st_mtime;
+      st.size = 0;
 
       if (not (*g_searchOptions.callback)(parPath, st))
         return FTW_STOP;
@@ -81,6 +82,7 @@ namespace fastf {
       st.is_symlink = parSymlink;
       st.atime = parStat->st_atime;
       st.mtime = parStat->st_mtime;
+      st.size = parStat->st_size;
 
       if (extensions.empty()) {
         if (not (*g_searchOptions.callback)(parPath, st)) {

@@ -15,11 +15,11 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-common/mediatypes.hpp"
+#include "dindexer-machinery/mediatypes.hpp"
 #include <map>
 #include <stdexcept>
 
-namespace dinlib {
+namespace mchlib {
 	const std::string& media_type_to_str (MediaTypes parType) {
 		static const std::map<MediaTypes, const std::string> types {
 			{MediaType_CDRom, "CD-Rom"},
@@ -43,4 +43,8 @@ namespace dinlib {
 	MediaTypes char_to_media_type (char parMType) {
 		return static_cast<MediaTypes>(parMType);
 	}
-} //namespace dinlib
+
+	char media_type_to_char (MediaTypes parMType) {
+		return static_cast<char>(parMType);
+	}
+} //namespace mchlib

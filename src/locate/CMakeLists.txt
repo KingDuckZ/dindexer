@@ -4,6 +4,7 @@ add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
 	postgre_locate.cpp
+	hash.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -13,6 +14,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
+	PRIVATE ${bare_name}-machinery
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")

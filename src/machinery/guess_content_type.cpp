@@ -42,7 +42,7 @@ namespace mchlib {
 		};
 
 		struct EntryChecking {
-			typedef bool(*CheckerFunction)(dinlib::MediaTypes, const ConstSetListingView&, const std::vector<const FileRecordData*>&);
+			typedef bool(*CheckerFunction)(MediaTypes, const ConstSetListingView&, const std::vector<const FileRecordData*>&);
 
 			std::size_t max_total_entries;
 			CheckerFunction checker_func;
@@ -87,8 +87,8 @@ namespace mchlib {
 			return std::move(retval);
 		}
 
-		bool identify_video_dvd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent ) {
-			if (parMediaType != dinlib::MediaType_DVD and parMediaType != dinlib::MediaType_Directory)
+		bool identify_video_dvd (MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent ) {
+			if (parMediaType != MediaType_DVD and parMediaType != MediaType_Directory)
 				return false;
 
 			const auto items_count = count_listing_items(parContent);
@@ -103,8 +103,8 @@ namespace mchlib {
 			return check_missing_content(parFlatContent, should_have).empty();
 		}
 
-		bool identify_video_cd (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent) {
-			if (parMediaType != dinlib::MediaType_CDRom and parMediaType != dinlib::MediaType_Directory)
+		bool identify_video_cd (MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent) {
+			if (parMediaType != MediaType_CDRom and parMediaType != MediaType_Directory)
 				return false;
 
 			const auto items_count = count_listing_items(parContent);
@@ -121,7 +121,7 @@ namespace mchlib {
 		}
 	} //unnamed namespace
 
-	ContentTypes guess_content_type (dinlib::MediaTypes parMediaType, const ConstSetListingView& parContent, std::size_t parEntriesCount) {
+	ContentTypes guess_content_type (MediaTypes parMediaType, const ConstSetListingView& parContent, std::size_t parEntriesCount) {
 		if (boost::empty(parContent))
 			return ContentType_Empty;
 
@@ -145,7 +145,7 @@ namespace mchlib {
 		return ContentType_Generic;
 	}
 
-	ContentTypes guess_content_type (dinlib::MediaTypes parMediaType, const std::vector<FileRecordData>& parContent) {
+	ContentTypes guess_content_type (MediaTypes parMediaType, const std::vector<FileRecordData>& parContent) {
 		if (parContent.empty())
 			return ContentType_Empty;
 
@@ -155,7 +155,7 @@ namespace mchlib {
 		assert(std::equal(parContent.begin(), parContent.end(), SetListing(std::vector<FileRecordData>(parContent)).sorted_list().begin()));
 
 		//TODO: assert that the first item in the list is the shortest string
-		std::shared_ptr<PathName> pathname(new PathName(parContent.front().abs_path));
+		std::shared_ptr<PathName> pathname(new PathName(""));
 		ConstSetListingView view(parContent.begin(), parContent.end(), pathname->atom_count(), pathname);
 		assert(parContent.size() >= 1);
 		return guess_content_type(parMediaType, view, parContent.size() - 1);

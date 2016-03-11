@@ -15,26 +15,14 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id700AFD0F33634ACC88079BB8853A9E13
-#define id700AFD0F33634ACC88079BB8853A9E13
+#ifndef id3F3E29B28FAA44A190451198CF1FD166
+#define id3F3E29B28FAA44A190451198CF1FD166
 
-#include "dindexer-common/compatibility.h"
-#include <string>
+#include "dindexer-machinery/tiger.hpp"
+#include <vector>
 
-namespace dinlib {
-	enum MediaTypes {
-		MediaType_CDRom = 'C',
-		MediaType_Directory = 'D',
-		MediaType_DVD = 'V',
-		MediaType_BluRay = 'B',
-		MediaType_FloppyDisk = 'F',
-		MediaType_HardDisk = 'H',
-		MediaType_IomegaZip = 'Z',
-		MediaType_Other = 'O'
-	};
-
-	const std::string& media_type_to_str ( MediaTypes parType );
-	MediaTypes char_to_media_type ( char parMType ) a_pure;
-} //namespace dinlib
+namespace din {
+	mchlib::TigerHash hash ( const std::string& parPath );
+} //namespace din
 
 #endif
