@@ -23,8 +23,6 @@
 
 namespace fastf {
 	struct FileStats {
-		static_assert(sizeof(std::time_t) >= sizeof(uint64_t), "Reorder members or comment out this assertion");
-
 		std::time_t atime;
 		std::time_t mtime;
 		uint64_t size;
