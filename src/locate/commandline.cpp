@@ -28,6 +28,7 @@ namespace din {
 		set_options.add_options()
 			("case-insensitive,i", "Disable case sensitivity during search")
 			("set,s", "Look for matching sets instead of files")
+			("byhash,a", "Paths on the command line are local paths and searching should be done by content hash")
 			//("option,o", po::value<std::string>()->default_value("default_value"), "Help message")
 			//("option2", po::value<int>(), "Help message")
 		;

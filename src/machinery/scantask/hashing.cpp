@@ -145,6 +145,9 @@ namespace mchlib {
 
 		void Hashing::on_data_fill() {
 			std::vector<FileRecordData>& file_list = m_file_tree_task->get_or_create();
+			if (file_list.empty()) {
+				return;
+			}
 
 			ProgressInfo progr_info;
 			progr_info.callback = m_progress_callback;
@@ -153,8 +156,29 @@ namespace mchlib {
 			progr_info.total_bytes_read = 0;
 			progr_info.file_num = 0;
 
-			MutableSetListingView recordlist(file_list.begin(), file_list.end(), 0);
-			hash_dir(file_list.front(), recordlist, m_ignore_errors, progr_info);
+			if (file_list.front().is_directory) {
+				MutableSetListingView recordlist(file_list.begin(), file_list.end(), 0);
+				hash_dir(file_list.front(), recordlist, m_ignore_errors, progr_info);
+			}
+			else {
+				assert(1 == file_list.size());
+				auto& curr_file_rec = file_list.front();
+				TigerHash dummy {};
+
+				try {
+					tiger_file(curr_file_rec.abs_path, curr_file_rec.hash, dummy, curr_file_rec.size);
+					curr_file_rec.hash_valid = true;
+				}
+				catch (const std::ios_base::failure& e) {
+					if (m_ignore_errors) {
+						curr_file_rec.unreadable = true;
+						curr_file_rec.hash = TigerHash {};
+					}
+					else {
+						throw e;
+					}
+				}
+			}
 		}
 
 		void Hashing::set_progress_callback (ProgressCallback parFunc) {

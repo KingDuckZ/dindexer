@@ -23,6 +23,10 @@
 #include <string>
 #include <cstdint>
 
+namespace mchlib {
+	struct TigerHash;
+} //namespace mchlib
+
 namespace din {
 	struct LocatedItem {
 		std::string path;
@@ -38,6 +42,7 @@ namespace din {
 	};
 
 	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
+	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch );
 	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
 	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
 } //namespace din

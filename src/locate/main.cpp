@@ -19,6 +19,7 @@
 #include "postgre_locate.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
+#include "hash.hpp"
 #include <iostream>
 #include <ciso646>
 #include <iterator>
@@ -73,7 +74,15 @@ int main (int parArgc, char* parArgv[]) {
 		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedSet>(std::cout, "\n"));
 	}
 	else {
-		const auto results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		std::vector<din::LocatedItem> results;
+
+		if (vm.count("byhash")) {
+			const auto hash = din::hash(vm["substring"].as<std::string>());
+			results = din::locate_in_db(settings.db, hash);
+		}
+		else {
+			results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		}
 		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
 	}
 	return 0;
