@@ -61,7 +61,7 @@ namespace din {
 			using boost::spirit::_1;
 
 			start %= *lit("/") >> *(diritem >> *lit("/"));
-			diritem %= +(escape | (char_ - '/' - '\\' - ' '));
+			diritem %= +(escape | (char_ - '/' - '\\'));
 			escape %= lit("\\") >> (hex_code | char_);
 			hex_code = lit("x") >> hex_chara[_val += px::bind(&hex_to_str, _1)];
 		}
@@ -82,6 +82,11 @@ namespace din {
 			result
 		);
 
+		assert(parse_result);
+		if (not parse_result) {
+			return;
+		}
+
 		if (not parPiece.empty() and parPiece[0] == '/') {
 			m_stack.clear();
 		}
@@ -98,8 +103,6 @@ namespace din {
 				m_stack.push_back(std::move(itm));
 			}
 		}
-
-		assert(parse_result);
 	}
 
 	std::string GenericPath::to_string() const {
