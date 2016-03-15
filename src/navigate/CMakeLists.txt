@@ -9,6 +9,7 @@ add_executable(${PROJECT_NAME}
 	genericpath.cpp
 	dbsource.cpp
 	linereader.cpp
+	listdircontent.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

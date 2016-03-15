@@ -21,23 +21,21 @@
 #include "genericpath.hpp"
 #include "dbsource.hpp"
 #include "dindexerConfig.h"
-#include "helpers/infix_iterator.hpp"
 #include "linereader.hpp"
+#include "listdircontent.hpp"
 #include <iostream>
 #include <ciso646>
 #include <string>
 #include <vector>
 #include <cassert>
 #include <boost/range/algorithm/copy.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace {
 	void do_navigation ( din::DBSource& parDB );
 
-	template <typename V> void print_db_result ( const V& parResult );
 	bool on_exit ( void );
 	void on_pwd ( const din::GenericPath& parDirMan );
-	void on_ls ( const din::GenericPath& parDirMan, din::DBSource& parDB );
+	void on_ls ( const din::ListDirContent& parLS, const din::GenericPath& parDirMan );
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -70,14 +68,6 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
-	template <typename V>
-	void print_db_result (const V& parResult) {
-		for (const auto& row : parResult) {
-			boost::copy(row, infix_ostream_iterator<std::string>(std::cout, "\t"));
-			std::cout << "\n";
-		}
-	}
-
 	bool on_exit() {
 		return true;
 	}
@@ -86,22 +76,9 @@ namespace {
 		std::cout << parDirMan.to_string() << '\n';
 	}
 
-	void on_ls (const din::GenericPath& parDirMan, din::DBSource& parDB) {
-		using namespace din;
-
-		const auto curr_path = parDirMan.to_string();
-		if ("/" == curr_path) {
-			auto sets_ids = parDB.sets();
-			auto sets_info = parDB.set_details<SetDetail_ID, SetDetail_Desc, SetDetail_CreeationDate>(sets_ids);
-			print_db_result(sets_info);
-		}
-		else {
-			const auto start_from = curr_path.find('/', 1);
-			auto path_prefix = boost::string_ref(curr_path).substr(start_from == curr_path.npos ? curr_path.size() : start_from + 1);
-			const auto set_id = boost::lexical_cast<uint32_t>(parDirMan[0]);
-			auto files_info = parDB.file_details<FileDetail_Path>(set_id, parDirMan.level(), path_prefix);
-			print_db_result(files_info);
-		}
+	void on_ls (const din::ListDirContent& parLS, const din::GenericPath& parDirMan) {
+		const auto& ls_result = parLS.ls(parDirMan);
+		boost::copy(ls_result, std::ostream_iterator<std::string>(std::cout, "\n"));
 	}
 
 	void do_navigation (din::DBSource& parDB) {
@@ -112,11 +89,12 @@ namespace {
 		std::string curr_line;
 		din::CommandProcessor proc;
 		din::GenericPath dir_man;
+		din::ListDirContent ls(&parDB);
 		proc.add_command("exit", &on_exit, 0);
 		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::GenericPath::push_piece, &dir_man, std::placeholders::_1)), 1);
 		proc.add_command("disconnect", std::function<void()>(std::bind(&din::DBSource::disconnect, &parDB)), 0);
 		proc.add_command("pwd", std::function<void()>(std::bind(&on_pwd, std::ref(dir_man))), 0);
-		proc.add_command("ls", std::function<void()>(std::bind(&on_ls, std::ref(dir_man), std::ref(parDB))), 0);
+		proc.add_command("ls", std::function<void()>(std::bind(on_ls, std::ref(ls), std::ref(dir_man))), 0);
 		do {
 			do {
 				curr_line = lines.read(prompt);
