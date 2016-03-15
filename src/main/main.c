@@ -15,67 +15,57 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE 1
+
+#include "dindexerConfig.h"
+#include "findactions.h"
+#include "helpers/lengthof.h"
+#include "builtin_feats.h"
 #include <string.h>
 #include <stdio.h>
 #include <iso646.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "dindexerConfig.h"
-#include "findactions.h"
-#include "helpers/lengthof.h"
-#include "builtin_feats.h"
+#include <getopt.h>
 
 static size_t foreach_avail_action ( int(*parFunc)(const char*, const void*), char** parList, size_t parCount, const void* parPass );
 static int printf_stream ( const char* parMsg, const void* parStream );
 static int same_action ( const char* parAction1, const void* parAction2 );
 static void print_usage ( void );
+static int manage_commandline ( int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit );
 
 int main (int parArgc, char* parArgv[]) {
 	size_t z;
 	size_t actions_count;
 	char** actions;
 	char* action_path;
+	char* specified_action;
 	size_t action_path_length;
 	size_t selected_action;
 	char** argv;
-	FILE* streamout;
 	int retval;
-	int showbuiltin;
+	int should_quit;
 
-	showbuiltin = (parArgc >= 2 ? not strcmp("--builtin", parArgv[1]) : 0);
 	find_actions(&actions, &actions_count);
-	if (0 == actions_count and not showbuiltin) {
+	retval = manage_commandline(parArgc, parArgv, actions, actions_count, &should_quit);
+	if (should_quit) {
+		free_actions(actions, actions_count);
+		return retval;
+	}
+	if (0 == actions_count) {
 		fprintf(stderr, "No actions found in \"%s\"\n", ACTIONS_SEARCH_PATH);
 		return 1;
 	}
 
-	if (parArgc < 2 or strcmp("-h", parArgv[1]) == 0 or strcmp("--help", parArgv[1]) == 0) {
-		if (parArgc < 2) {
-			streamout = stderr;
-			fprintf(stderr, "No action specified. ");
-			retval = 2;
-		}
-		else {
-			print_usage();
-			printf("\n");
-			streamout = stdout;
-			retval = 0;
-		}
-		fprintf(streamout, "Available actions are:\n");
-		foreach_avail_action(&printf_stream, actions, actions_count, streamout);
-		free_actions(actions, actions_count);
-		return retval;
-	}
-	else if (showbuiltin) {
-		print_builtin_feats();
-		free_actions(actions, actions_count);
-		return 0;
-	}
 
-	selected_action = foreach_avail_action(&same_action, actions, actions_count, parArgv[1]);
+	if (optind < parArgc)
+		specified_action = parArgv[optind];
+	else
+		specified_action = "";
+	selected_action = foreach_avail_action(&same_action, actions, actions_count, specified_action);
 
 	if (actions_count == selected_action) {
-		fprintf(stderr, "Unrecognized action \"%s\" - available actions are:\n", parArgv[1]);
+		fprintf(stderr, "Unrecognized action \"%s\" - available actions are:\n", specified_action);
 		foreach_avail_action(&printf_stream, actions, actions_count, stderr);
 		free_actions(actions, actions_count);
 		return 2;
@@ -102,7 +92,7 @@ int main (int parArgc, char* parArgv[]) {
 	argv = (char**)malloc(sizeof(char*) * (parArgc - 1 + 1));
 	argv[0] = action_path;
 	for (z = 2; z <= parArgc; ++z) {
-		argv[z - 1] = parArgv[z];
+		argv[z - 1] = specified_action;
 	}
 
 	/*printf("would call %s\n", action_path);*/
@@ -146,6 +136,63 @@ static int same_action (const char* parAction1, const void* parAction2) {
 }
 
 static void print_usage() {
-	printf("--help - show this help\n");
-	printf("--builtin - show build info\n");
+	printf("--help, -h - show this help\n");
+	printf("--builtin, -b - show build info\n");
+}
+
+static int manage_commandline (int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit) {
+	int showbuiltin;
+	int showhelp;
+	int option_index;
+	int getopt_retval;
+	FILE* streamout;
+	int retval;
+
+	struct option opts[] = {
+		{ "builtin", no_argument, &showbuiltin, 1 },
+		{ "help", no_argument, &showhelp, 1 },
+		{ 0, 0, 0, 0 }
+	};
+
+	option_index = 0;
+	showbuiltin = showhelp = 0;
+	*parShouldQuit = 0;
+	while (0 <= (getopt_retval = getopt_long(parArgc, parArgv, "bh", opts, &option_index))) {
+		switch (getopt_retval) {
+		case 'h':
+			showhelp = 1;
+			break;
+		case 'b':
+			showbuiltin = 1;
+			break;
+		case '?':
+			*parShouldQuit = 1;
+			return 2;
+		}
+		option_index = 0;
+	}
+
+	if (parArgc < 2 or showhelp) {
+		*parShouldQuit = 1;
+		if (parArgc < 2) {
+			streamout = stderr;
+			fprintf(stderr, "No action specified. ");
+			retval = 2;
+		}
+		else {
+			print_usage();
+			printf("\n");
+			streamout = stdout;
+			retval = 0;
+		}
+		fprintf(streamout, "Available actions are:\n");
+		foreach_avail_action(&printf_stream, parActions, parActionCount, streamout);
+		return retval;
+	}
+	else if (showbuiltin) {
+		*parShouldQuit = 1;
+		print_builtin_feats();
+		return 0;
+	}
+	return 0;
 }
