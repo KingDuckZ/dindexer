@@ -22,6 +22,7 @@
 #include "dbsource.hpp"
 #include "dindexerConfig.h"
 #include "helpers/infix_iterator.hpp"
+#include "linereader.hpp"
 #include <iostream>
 #include <ciso646>
 #include <string>
@@ -104,7 +105,8 @@ namespace {
 	}
 
 	void do_navigation (din::DBSource& parDB) {
-		auto& inp = std::cin;
+		const std::string prompt;
+		din::LineReader lines;
 
 		bool running = true;
 		std::string curr_line;
@@ -117,7 +119,7 @@ namespace {
 		proc.add_command("ls", std::function<void()>(std::bind(&on_ls, std::ref(dir_man), std::ref(parDB))), 0);
 		do {
 			do {
-				std::getline(inp, curr_line);
+				curr_line = lines.read(prompt);
 			} while (curr_line.empty());
 			running = proc.exec_command(curr_line);
 		} while (running);

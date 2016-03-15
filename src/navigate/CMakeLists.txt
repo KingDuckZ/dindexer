@@ -1,20 +1,27 @@
 project(${bare_name}-navigate CXX)
 
+find_package(Readline 6.3 REQUIRED)
+
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
 	commandprocessor.cpp
 	genericpath.cpp
 	dbsource.cpp
+	linereader.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
+target_include_directories(${PROJECT_NAME} SYSTEM
+	PRIVATE ${Readline_INCLUDE_DIR}
+)
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
+	PRIVATE ${Readline_LIBRARY}
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
