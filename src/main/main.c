@@ -28,8 +28,16 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+struct PrintContext {
+	FILE* stream;
+	char* prefix_filter;
+	int add_space;
+};
+typedef struct PrintContext PrintContext;
+
 static size_t foreach_avail_action ( int(*parFunc)(const char*, const void*), char** parList, size_t parCount, const void* parPass );
 static int printf_stream ( const char* parMsg, const void* parStream );
+static int printf_stream_inplace ( const char* parMsg, const void* parPrintContext );
 static int same_action ( const char* parAction1, const void* parAction2 );
 static void print_usage ( void );
 static int manage_commandline ( int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit );
@@ -125,6 +133,19 @@ static int printf_stream (const char* parMsg, const void* parStream) {
 	return 0;
 }
 
+static int printf_stream_inplace (const char* parMsg, const void* parPrintContext) {
+	size_t prefix_len;
+	struct PrintContext* context = (PrintContext*)parPrintContext;
+	const char* separator = (context->add_space ? "\n" : "");
+
+	prefix_len = (context->prefix_filter ? strlen(context->prefix_filter) : 0);
+	if (0 == prefix_len or strncmp(context->prefix_filter, parMsg, prefix_len) == 0) {
+		context->add_space = 1;
+		fprintf(context->stream, "%s%s", separator, parMsg);
+	}
+	return 0;
+}
+
 static int same_action (const char* parAction1, const void* parAction2) {
 	const char* const action2 = (const char*)parAction2;
 	if (0 == strcmp(parAction1, action2)) {
@@ -138,25 +159,31 @@ static int same_action (const char* parAction1, const void* parAction2) {
 static void print_usage() {
 	printf("--help, -h - show this help\n");
 	printf("--builtin, -b - show build info\n");
+	printf("--printactions=[prefix] - print a complete-friendly list of available commands, filtered by an optional prefix\n");
 }
 
 static int manage_commandline (int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit) {
 	int showbuiltin;
 	int showhelp;
+	int showactions_for_completion;
 	int option_index;
 	int getopt_retval;
 	FILE* streamout;
 	int retval;
+	struct PrintContext actions_print_context;
 
 	struct option opts[] = {
+		{ "printactions", optional_argument, NULL, 'a' },
 		{ "builtin", no_argument, &showbuiltin, 1 },
 		{ "help", no_argument, &showhelp, 1 },
 		{ 0, 0, 0, 0 }
 	};
 
+	memset(&actions_print_context, 0, sizeof(actions_print_context));
 	option_index = 0;
-	showbuiltin = showhelp = 0;
+	showbuiltin = showhelp = showactions_for_completion = 0;
 	*parShouldQuit = 0;
+
 	while (0 <= (getopt_retval = getopt_long(parArgc, parArgv, "bh", opts, &option_index))) {
 		switch (getopt_retval) {
 		case 'h':
@@ -168,6 +195,9 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 		case '?':
 			*parShouldQuit = 1;
 			return 2;
+		case 'a':
+			showactions_for_completion = 1;
+			actions_print_context.prefix_filter = (optarg ? optarg : "");
 		}
 		option_index = 0;
 	}
@@ -193,6 +223,14 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 		*parShouldQuit = 1;
 		print_builtin_feats();
 		return 0;
+	}
+	else if (showactions_for_completion) {
+		*parShouldQuit = 1;
+		actions_print_context.stream = stdout;
+		foreach_avail_action(&printf_stream_inplace, parActions, parActionCount, &actions_print_context);
+		if (actions_print_context.add_space) {
+			printf("\n");
+		}
 	}
 	return 0;
 }

@@ -61,6 +61,11 @@ configure_file(
 	"${PROJECT_SOURCE_DIR}/dindexer.sql.in"
 	"${PROJECT_BINARY_DIR}/dindexer.sql"
 )
+configure_file(
+	"${PROJECT_SOURCE_DIR}/dindexer_cmd_complete.sh.in"
+	"${PROJECT_BINARY_DIR}/dindexer_cmd_complete.sh"
+	@ONLY
+)
 
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+if [ "$3" == "@bare_name@" ]; then
+    exec @bare_name@ --printactions=$2
+fi
