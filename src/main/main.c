@@ -27,6 +27,22 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <errno.h>
+
+/* This program can be run either with the name of a subcommand as its first
+ * parameter (eg: dindexer locate), plus some optional parameters that are just
+ * passed on to the subcommand, or with options that are really meant for this
+ * program itself, and no subcommand is invoked.
+ * In the first case the program won't try to parse any parameters except from
+ * the first (the subcommand name), which is removed from the parameters list.
+ * The appropriate command is the invoked and all the remanining parameters are
+ * passed to it. No further action is taken by this program, which in fact
+ * terminates right after the subcommand is invoked.
+ * In the second case, the program won't try to invoke any other command. It will
+ * try to parse the command line itself and behave on itself. Passing an action
+ * name in this case is wrong. For example, the command "dindexer --version scan"
+ * is wrong and should be rejected.
+ */
 
 struct PrintContext {
 	FILE* stream;
@@ -65,9 +81,8 @@ int main (int parArgc, char* parArgv[]) {
 		return 1;
 	}
 
-
-	if (optind < parArgc)
-		specified_action = parArgv[optind];
+	if (1 < parArgc)
+		specified_action = parArgv[1];
 	else
 		specified_action = "";
 	selected_action = foreach_avail_action(&same_action, actions, actions_count, specified_action);
@@ -99,12 +114,18 @@ int main (int parArgc, char* parArgv[]) {
 
 	argv = (char**)malloc(sizeof(char*) * (parArgc - 1 + 1));
 	argv[0] = action_path;
-	for (z = 2; z <= parArgc; ++z) {
-		argv[z - 1] = specified_action;
+	for (z = 2; z < parArgc; ++z) {
+		argv[z - 1] = parArgv[z];
 	}
+	argv[parArgc - 1] = NULL;
 
 	/*printf("would call %s\n", action_path);*/
-	execv(action_path, argv);
+	retval = execv(action_path, argv);
+	if (retval < 0) {
+		fprintf(stderr, "Error executing \"%s\": %d:\n%s\n", action_path, errno, strerror(errno));
+		free(action_path);
+		return 1;
+	}
 
 	/* the program won't get here, but just to be clean... */
 	free(action_path);
@@ -172,6 +193,13 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 	int retval;
 	struct PrintContext actions_print_context;
 
+	/*Check if the program should just forward the invocation to some
+	subcommand*/
+	if (2 <= parArgc and parArgv[1][0] != '\0' and parArgv[1][0] != '-') {
+		*parShouldQuit = 0;
+		return 0;
+	}
+
 	struct option opts[] = {
 		{ "printactions", optional_argument, NULL, 'a' },
 		{ "builtin", no_argument, &showbuiltin, 1 },
@@ -200,6 +228,12 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 			actions_print_context.prefix_filter = (optarg ? optarg : "");
 		}
 		option_index = 0;
+	}
+
+	if (optind != parArgc) {
+		fprintf(stderr, "Invalid command line - unexpected \"%s\"\n", parArgv[optind]);
+		*parShouldQuit = 1;
+		return 2;
 	}
 
 	if (parArgc < 2 or showhelp) {
