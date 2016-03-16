@@ -181,12 +181,14 @@ static void print_usage() {
 	printf("--help, -h - show this help\n");
 	printf("--builtin, -b - show build info\n");
 	printf("--printactions=[prefix] - print a complete-friendly list of available commands, filtered by an optional prefix\n");
+	printf("--version, -v - show %s's version and quit", PROGRAM_NAME);
 }
 
 static int manage_commandline (int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit) {
 	int showbuiltin;
 	int showhelp;
 	int showactions_for_completion;
+	int showversion;
 	int option_index;
 	int getopt_retval;
 	FILE* streamout;
@@ -204,15 +206,16 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 		{ "printactions", optional_argument, NULL, 'a' },
 		{ "builtin", no_argument, &showbuiltin, 1 },
 		{ "help", no_argument, &showhelp, 1 },
+		{ "version", no_argument, &showversion, 1 },
 		{ 0, 0, 0, 0 }
 	};
 
 	memset(&actions_print_context, 0, sizeof(actions_print_context));
 	option_index = 0;
-	showbuiltin = showhelp = showactions_for_completion = 0;
+	showversion = showbuiltin = showhelp = showactions_for_completion = 0;
 	*parShouldQuit = 0;
 
-	while (0 <= (getopt_retval = getopt_long(parArgc, parArgv, "bh", opts, &option_index))) {
+	while (0 <= (getopt_retval = getopt_long(parArgc, parArgv, "bhv", opts, &option_index))) {
 		switch (getopt_retval) {
 		case 'h':
 			showhelp = 1;
@@ -226,6 +229,10 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 		case 'a':
 			showactions_for_completion = 1;
 			actions_print_context.prefix_filter = (optarg ? optarg : "");
+			break;
+		case 'v':
+			showversion = 1;
+			break;
 		}
 		option_index = 0;
 	}
@@ -249,6 +256,7 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 			streamout = stdout;
 			retval = 0;
 		}
+		fprintf(streamout, "\n");
 		fprintf(streamout, "Available actions are:\n");
 		foreach_avail_action(&printf_stream, parActions, parActionCount, streamout);
 		return retval;
@@ -256,6 +264,11 @@ static int manage_commandline (int parArgc, char* parArgv[], char** parActions, 
 	else if (showbuiltin) {
 		*parShouldQuit = 1;
 		print_builtin_feats();
+		return 0;
+	}
+	else if (showversion) {
+		*parShouldQuit = 1;
+		print_version();
 		return 0;
 	}
 	else if (showactions_for_completion) {

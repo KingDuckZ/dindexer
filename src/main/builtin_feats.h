@@ -19,5 +19,6 @@
 #define id17B851C76AD54C8B9A2098323FC83038
 
 void print_builtin_feats ( void );
+void print_version ( void );
 
 #endif
