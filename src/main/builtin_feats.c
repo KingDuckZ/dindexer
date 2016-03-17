@@ -35,6 +35,10 @@ void print_builtin_feats() {
 #else
 	printf("NDEBUG = no (Debug build)\n");
 #endif
+	printf("Built on %s (CMake %s)\n", CMAKE_SYSTEM, CMAKE_VERSION);
+	printf("Build flags:\n");
+	printf("  %s %s\n", CMAKE_CXX_COMPILER, CMAKE_CXX_FLAGS);
+	printf("  %s %s\n", CMAKE_C_COMPILER, CMAKE_C_FLAGS);
 	printf("DB_OWNER_NAME = \"%s\"\n", DB_OWNER_NAME);
 }
 
