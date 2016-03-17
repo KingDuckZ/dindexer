@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-function (import_libpqtypes_project PostgreSQL_INCLUDE_DIRS)
+function (import_libpqtypes_project PostgreSQL_INCLUDE_DIRS RELEASE_C_FLAGS)
 	#find_path(libpqtypes_base_path NAMES src/libpqtypes.h PATHS ${CMAKE_CURRENT_SOURCE_DIR}/lib NO_DEFAULT_PATH)
 	file(GLOB_RECURSE libpqtypes_base_path "lib/**libpqtypes.h")
 
@@ -13,7 +13,8 @@ function (import_libpqtypes_project PostgreSQL_INCLUDE_DIRS)
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR ${libpqtypes_base_path}
 		PREFIX ${libpqtypes_prefix}
-		CONFIGURE_COMMAND ${libpqtypes_base_path}/configure --prefix ${libpqtypes_prefix} "CPPFLAGS=${libpqtypes_inc_dirs}" --quiet
+		CONFIGURE_COMMAND ${libpqtypes_base_path}/configure --prefix ${libpqtypes_prefix} "CPPFLAGS=${libpqtypes_inc_dirs}"
+			"CFLAGS=$<$<CONFIG:Release>:${RELEASE_C_FLAGS}>" --quiet
 		BUILD_COMMAND ${MAKE}
 		BUILD_IN_SOURCE 0
 	)
