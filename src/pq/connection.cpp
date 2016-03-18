@@ -187,13 +187,13 @@ namespace pq {
 		call_PQputf(retval.get(), parTypes, argp);
 		va_end(argp);
 
-		return std::move(retval);
+		return retval;
 	}
 
 	auto Connection::make_empty_params() const -> PGParams {
 		assert(is_connected());
 		auto ret = PGParams(PQparamCreate(m_localData->connection), &PQparamClear);
 		assert(ret.get());
-		return std::move(ret);
+		return ret;
 	}
 } //namespace pq

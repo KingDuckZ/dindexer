@@ -42,7 +42,7 @@ namespace din {
 				boost::copy(row, infix_ostream_iterator<std::string>(oss, "\t"));
 				result.push_back(oss.str());
 			}
-			return std::move(result);
+			return result;
 		}
 	} //unnamed namespace
 

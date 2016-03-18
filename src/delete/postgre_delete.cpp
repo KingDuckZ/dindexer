@@ -34,7 +34,7 @@ namespace din {
 
 			IDDescMap retmap;
 			if (parIDs.empty()) {
-				return std::move(retmap);
+				return retmap;
 			}
 
 			std::ostringstream oss;
@@ -46,7 +46,7 @@ namespace din {
 			for (const auto& record : resultset) {
 				retmap[lexical_cast<IDDescMap::key_type>(record["id"])] = record["desc"];
 			}
-			return std::move(retmap);
+			return retmap;
 		}
 	} //unnamed namespace
 

@@ -45,7 +45,7 @@ namespace dinlib {
 			("version", "Prints the program's version and quits")
 			//("dump-raw,D", po::value<std::string>(), "Saves the retrieved html to the named file; use - for stdout")
 		;
-		return std::move(desc);
+		return desc;
 	}
 
 	void print_commandline_help (std::ostream& parStream, const std::string& parSummary, const boost::program_options::options_description& parOpts) {

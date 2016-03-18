@@ -35,7 +35,7 @@ namespace din {
 			if (parOpen) {
 				conn.connect();
 			}
-			return std::move(conn);
+			return conn;
 		}
 
 		std::vector<LocatedSet> sets_result_to_vec (pq::ResultSet&& parResult) {
@@ -52,7 +52,7 @@ namespace din {
 				});
 			}
 
-			return std::move(retval);
+			return retval;
 		}
 
 		std::vector<LocatedItem> file_result_to_vec (pq::ResultSet&& parResult) {
@@ -68,7 +68,7 @@ namespace din {
 				});
 			}
 
-			return std::move(retval);
+			return retval;
 		}
 	} //unnamed namespace
 

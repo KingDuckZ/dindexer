@@ -64,7 +64,7 @@ namespace mchlib {
 			for (; it_begin != it_end; ++it_begin) {
 				retval.push_back(&*it_begin);
 			}
-			return std::move(retval);
+			return retval;
 		}
 
 		std::vector<int> check_missing_content (const std::vector<const FileRecordData*>& parContent, const std::vector<const char*>& parCheck) {
@@ -84,7 +84,7 @@ namespace mchlib {
 					retval.push_back(z);
 				}
 			}
-			return std::move(retval);
+			return retval;
 		}
 
 		bool identify_video_dvd (MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent ) {

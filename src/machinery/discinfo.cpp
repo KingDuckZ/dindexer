@@ -136,7 +136,7 @@ namespace mchlib {
 				retmap[std::move(mount)] = std::move(dev);
 			}
 
-			return std::move(retmap);
+			return retmap;
 		}
 
 #if defined(WITH_MEDIA_AUTODETECT)

@@ -109,7 +109,7 @@ namespace mchlib {
 		std::vector<typename std::conditional<Const, const FileRecordData*, FileRecordData*>::type> retval;
 
 		implem::flattened_listing(parContent, retval);
-		return std::move(retval);
+		return retval;
 	}
 } //namespace mchlib
 

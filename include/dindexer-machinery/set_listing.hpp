@@ -164,7 +164,7 @@ namespace mchlib {
 		auto end = parList.end();
 		for (auto it = parList.begin(); it != end; ++it) {
 			if (not it->is_directory)
-				return std::move(it);
+				return it;
 		}
 		return parList.end();
 	}
@@ -174,7 +174,7 @@ namespace mchlib {
 		auto end = parList.end();
 		for (auto it = parList.begin(); it != end; ++it) {
 			if (not it->is_directory)
-				return std::move(it);
+				return it;
 		}
 		return parList.end();
 	}

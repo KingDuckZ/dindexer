@@ -110,7 +110,7 @@ namespace din {
 		for (const auto& row : res) {
 			retval.push_back(lexical_cast<uint32_t>(row[0]));
 		}
-		return std::move(retval);
+		return retval;
 	}
 
 	void DBSource::query_no_conditions (const ColumnList& parCols, boost::string_ref parTable, const std::vector<uint32_t>& parIDs, std::function<void(std::string&&)> parCallback) {

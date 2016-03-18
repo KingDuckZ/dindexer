@@ -105,13 +105,13 @@ namespace din {
 			std::vector<std::string> columns;
 			columns.reserve(sizeof...(Details));
 
-			const std::array<M, sizeof...(Details)> details { Details... };
+			const std::array<M, sizeof...(Details)> details { {Details...} };
 			//AtFunc at_func = &SetDetailsMap::at;
 			//std::generate(details.begin(), details.end(), columns.begin(), std::bind(at_func, &details_dic, std::placeholders::_1));
 			for (auto detail : details) {
 				columns.push_back(parDic.at(detail));
 			}
-			return std::move(columns);
+			return columns;
 		}
 	} //namespace implem
 
@@ -126,7 +126,7 @@ namespace din {
 		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
 		FlatPushBackFunc pback_func = &FlatInsertIn2DList<ReturnType>::push_back;
 		this->query_no_conditions(columns, "sets", parIDs, std::bind(pback_func, &flat_list, std::placeholders::_1));
-		return std::move(list);
+		return list;
 	}
 
 	template <FileDetails... D>
@@ -140,7 +140,7 @@ namespace din {
 		FlatInsertIn2DList<ReturnType> flat_list(&list, sizeof...(D));
 		FlatPushBackFunc pback_func = &FlatInsertIn2DList<ReturnType>::push_back;
 		this->query_files_in_dir(columns, parDir, parLevel, parSetID, std::bind(pback_func, &flat_list, std::placeholders::_1));
-		return std::move(list);
+		return list;
 	}
 } //namespace din
 

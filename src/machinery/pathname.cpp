@@ -107,7 +107,7 @@ namespace mchlib {
 				slash = "/";
 			}
 			assert(reserve == out.size());
-			return std::move(out);
+			return out;
 		}
 	} //unnamed namespace
 
@@ -185,7 +185,7 @@ namespace mchlib {
 		for (std::size_t z = 0; z < remaining_atoms; ++z) {
 			retval.join(parOtherPath[z + common_atoms], parOtherPath.get_stringref_source(z + common_atoms));
 		}
-		return std::move(retval);
+		return retval;
 	}
 
 	const std::string* PathName::get_stringref_source (std::size_t parIndex) const {
