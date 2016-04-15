@@ -16,14 +16,53 @@
  */
 
 #include "linereader.hpp"
+#include "listdircontent.hpp"
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <cassert>
+#include <ciso646>
 
 namespace din {
-	LineReader::LineReader() {
+	namespace {
+		char* custom_generator (const char* parText, int parState) {
+			static int list_index, len;
+
+			if (not parState) {
+				list_index = 0;
+				len = std::strlen(parText);
+			}
+			return nullptr;
+		}
+
+		//char* custom_generator (const char* parText, int parState) {
+		//}
+
+		//char** custom_completion (const char* parText, int parStart, int parEnd) {
+		//	char** matches = nullptr;
+
+		//	if (0 == parStart) {
+		//		matches = rl_completion_matches(const_cast<char*>(parText), &custom_generator);
+		//	}
+		//	else {
+		//		//See the hack described here:
+		//		//http://cc.byexamples.com/2008/06/16/gnu-readline-implement-custom-auto-complete/
+		//		rl_bind_key('\t', &rl_abort);
+		//	}
+		//	return matches;
+		//}
+	} //unnamed namespace
+
+	LineReader::LineReader (const ListDirContent* parLS) :
+		m_ls(parLS)
+	{
+		assert(m_ls);
+
+		//rl_attempted_completion_function = &custom_completion;
+		rl_completion_entry_function = &custom_generator;
+		rl_bind_key('\t', &rl_complete);
 	}
 
 	std::string LineReader::read (const std::string& parMessage) {

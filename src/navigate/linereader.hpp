@@ -21,12 +21,17 @@
 #include <string>
 
 namespace din {
+	class ListDirContent;
+
 	class LineReader {
 	public:
-		LineReader ( void );
+		explicit LineReader ( const ListDirContent* parLS );
 		~LineReader ( void ) noexcept = default;
 
 		std::string read ( const std::string& parMessage );
+
+	private:
+		const ListDirContent* m_ls;
 	};
 } //namespace din
 
