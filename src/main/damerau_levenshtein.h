@@ -15,24 +15,30 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idBB92A7743E75400CBA486A241F13D35C
-#define idBB92A7743E75400CBA486A241F13D35C
+#ifndef id88738025C6B24BDEB604A5AE3C36EE8D
+#define id88738025C6B24BDEB604A5AE3C36EE8D
 
-#include <string>
+#include "helpers/compatibility.h"
+#include "stddef.h"
 
-namespace din {
-	class ListDirContent;
+int damerau_levenshtein (
+	const char* parSource,
+	const char* parTarget,
+	int parDeleteCost,
+	int parInsertCost,
+	int parReplaceCost,
+	int parSwapCost
+) a_pure;
 
-	class LineReader {
-	public:
-		explicit LineReader ( const ListDirContent* parLS );
-		~LineReader ( void ) noexcept = default;
-
-		std::string read ( const std::string& parMessage );
-
-	private:
-		const ListDirContent* m_ls;
-	};
-} //namespace din
+int damerau_levenshtein_with_size (
+	const char* parSource,
+	size_t parSourceLen,
+	const char* parTarget,
+	size_t parTargetLen,
+	int parDeleteCost,
+	int parInsertCost,
+	int parReplaceCost,
+	int parSwapCost
+) a_pure;
 
 #endif

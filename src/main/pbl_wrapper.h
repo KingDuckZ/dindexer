@@ -15,24 +15,11 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idBB92A7743E75400CBA486A241F13D35C
-#define idBB92A7743E75400CBA486A241F13D35C
+#ifndef idDB955D222C4A4AF5B9BD1A4A0BBDD9E3
+#define idDB955D222C4A4AF5B9BD1A4A0BBDD9E3
 
-#include <string>
-
-namespace din {
-	class ListDirContent;
-
-	class LineReader {
-	public:
-		explicit LineReader ( const ListDirContent* parLS );
-		~LineReader ( void ) noexcept = default;
-
-		std::string read ( const std::string& parMessage );
-
-	private:
-		const ListDirContent* m_ls;
-	};
-} //namespace din
+#include <stdio.h>
+#include <memory.h>
+#include "pbl.h"
 
 #endif

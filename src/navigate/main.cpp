@@ -83,13 +83,13 @@ namespace {
 
 	void do_navigation (din::DBSource& parDB) {
 		const std::string prompt;
-		din::LineReader lines;
+		din::ListDirContent ls(&parDB);
+		din::LineReader lines(&ls);
 
 		bool running = true;
 		std::string curr_line;
 		din::CommandProcessor proc;
 		din::GenericPath dir_man;
-		din::ListDirContent ls(&parDB);
 		proc.add_command("exit", &on_exit, 0);
 		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::GenericPath::push_piece, &dir_man, std::placeholders::_1)), 1);
 		proc.add_command("disconnect", std::function<void()>(std::bind(&din::DBSource::disconnect, &parDB)), 0);

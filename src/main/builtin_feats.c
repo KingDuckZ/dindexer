@@ -15,24 +15,12 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "builtin_feats.h"
 #include <stdio.h>
 #include "dindexerConfig.h"
 
 void print_builtin_feats() {
-#if VERSION_BETA
-	char beta_str[2] = "b";
-#else
-	char beta_str[1] = "";
-#endif
-
-	printf("%s v %d.%d.%d%s\nRev %s\n",
-		PROGRAM_NAME,
-		VERSION_MAJOR,
-		VERSION_MINOR,
-		VERSION_PATCH,
-		beta_str,
-		VERSION_GIT
-	);
+	print_version();
 
 	printf("CONFIG_FILE_PATH = \"%s\"\n", CONFIG_FILE_PATH);
 	printf("ACTIONS_SEARCH_PATH = \"%s\"\n", ACTIONS_SEARCH_PATH);
@@ -47,5 +35,26 @@ void print_builtin_feats() {
 #else
 	printf("NDEBUG = no (Debug build)\n");
 #endif
+	printf("Built on %s (CMake %s)\n", CMAKE_SYSTEM, CMAKE_VERSION);
+	printf("Build flags:\n");
+	printf("  %s %s\n", CMAKE_CXX_COMPILER, CMAKE_CXX_FLAGS);
+	printf("  %s %s\n", CMAKE_C_COMPILER, CMAKE_C_FLAGS);
 	printf("DB_OWNER_NAME = \"%s\"\n", DB_OWNER_NAME);
+}
+
+void print_version() {
+#if VERSION_BETA
+	char beta_str[2] = "b";
+#else
+	char beta_str[1] = "";
+#endif
+
+	printf("%s v%d.%d.%d%s\nRev %s\n",
+		PROGRAM_NAME,
+		VERSION_MAJOR,
+		VERSION_MINOR,
+		VERSION_PATCH,
+		beta_str,
+		VERSION_GIT
+	);
 }
