@@ -100,6 +100,7 @@ endif()
 add_subdirectory(src/pq)
 add_subdirectory(src/common)
 add_subdirectory(src/machinery)
+add_subdirectory(lib/pbl)
 
 #Actions
 add_subdirectory(src/main)

@@ -10,10 +10,12 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_SOURCE_DIR}/include
+	PRIVATE ${CMAKE_SOURCE_DIR}/lib/pbl/pbl/src
 )
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-inc
+	PRIVATE pbl
 )
 
 if (DINDEXER_WITH_MEDIA_AUTODETECT)
