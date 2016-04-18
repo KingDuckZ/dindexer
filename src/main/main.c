@@ -21,6 +21,7 @@
 #include "findactions.h"
 #include "helpers/lengthof.h"
 #include "builtin_feats.h"
+#include "damerau_levenshtein.h"
 #include <string.h>
 #include <stdio.h>
 #include <iso646.h>
@@ -55,6 +56,7 @@ static size_t foreach_avail_action ( int(*parFunc)(const char*, const void*), ch
 static int printf_stream ( const char* parMsg, const void* parStream );
 static int printf_stream_inplace ( const char* parMsg, const void* parPrintContext );
 static int same_action ( const char* parAction1, const void* parAction2 );
+static int find_similar ( const char* parAction, const void* parUserInput );
 static void print_usage ( void );
 static int manage_commandline ( int parArgc, char* parArgv[], char** parActions, size_t parActionCount, int* parShouldQuit );
 
@@ -88,8 +90,17 @@ int main (int parArgc, char* parArgv[]) {
 	selected_action = foreach_avail_action(&same_action, actions, actions_count, specified_action);
 
 	if (actions_count == selected_action) {
-		fprintf(stderr, "Unrecognized action \"%s\" - available actions are:\n", specified_action);
-		foreach_avail_action(&printf_stream, actions, actions_count, stderr);
+		//Find a possible mispelling and show a hint to the user if any
+		selected_action = foreach_avail_action(&find_similar, actions, actions_count, specified_action);
+		if (selected_action < actions_count) {
+			fprintf(stderr, "Unrecognized action \"%s\" - maybe you meant \"%s\"?\n",
+				specified_action,
+				get_actionname(actions[selected_action])
+			);
+		}
+		else {
+			fprintf(stderr, "Unrecognized action \"%s\"\n", specified_action);
+		}
 		free_actions(actions, actions_count);
 		return 2;
 	}
@@ -175,6 +186,14 @@ static int same_action (const char* parAction1, const void* parAction2) {
 	else {
 		return 0;
 	}
+}
+
+static int find_similar (const char* parAction, const void* parUserInput) {
+	const int distance = damerau_levenshtein((const char*)parUserInput, parAction, 1, 1, 1, 1);
+	if (distance <= 2)
+		return 1;
+	else
+		return 0;
 }
 
 static void print_usage() {
