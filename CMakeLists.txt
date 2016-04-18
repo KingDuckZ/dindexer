@@ -38,6 +38,7 @@ set(PROJECT_VERSION_BETA "1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra -Wno-missing-field-initializers -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra -fomit-frame-pointer -Wno-missing-field-initializers ${march_flag}")
 set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(PBL_WITH_TESTS OFF)
 get_git_head_revision(GIT_REFSPEC PROJECT_VERSION_GIT)
 
 if ("${DINDEXER_CONFIG_FILE}" STREQUAL "")
