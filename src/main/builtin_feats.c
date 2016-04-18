@@ -36,6 +36,8 @@ void print_builtin_feats() {
 	printf("NDEBUG = no (Debug build)\n");
 #endif
 	printf("Built on %s (CMake %s)\n", CMAKE_SYSTEM, CMAKE_VERSION);
+	printf("C compiler = %s %s\n", CMAKE_C_COMPILER_ID, CMAKE_C_COMPILER_VERSION);
+	printf("C++ compiler = %s %s\n", CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION);
 	printf("Build flags:\n");
 	printf("  %s %s\n", CMAKE_CXX_COMPILER, CMAKE_CXX_FLAGS);
 	printf("  %s %s\n", CMAKE_C_COMPILER, CMAKE_C_FLAGS);
