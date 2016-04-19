@@ -169,7 +169,7 @@ int damerau_levenshtein_with_size (
 		return parSourceLen * parDeleteCost;
 
 	const int table_length = parSourceLen * parTargetLen;
-	table = (int*)malloc(sizeof(int) * table_length);
+	table = malloc(sizeof(int) * table_length);
 	memset(table, 0, sizeof(int) * table_length);
 
 	sourceIndexByCharacter = pblMapNewHashMap();

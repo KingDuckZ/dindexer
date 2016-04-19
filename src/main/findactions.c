@@ -46,7 +46,7 @@ void find_actions (char*** parOut, size_t* parCount) {
 		return;
 	}
 
-	*parOut = (char**)malloc(sizeof(char*) * list.count);
+	*parOut = malloc(sizeof(char*) * list.count);
 	list.list = *parOut;
 	list.used = 0;
 	foreach_dir(&push_action, &list);
@@ -79,7 +79,7 @@ static void foreach_dir (void(*parAction)(const char*, ActionList*), ActionList*
 	d = opendir(ACTIONS_SEARCH_PATH);
 	if (d) {
 		path_buff_length = lengthof(ACTIONS_SEARCH_PATH) + 512;
-		path_buff = (char*)malloc(path_buff_length);
+		path_buff = malloc(path_buff_length);
 		strncpy(path_buff, ACTIONS_SEARCH_PATH, lengthof(ACTIONS_SEARCH_PATH));
 		search_path_length = lengthof(ACTIONS_SEARCH_PATH) - 1;
 		if ('/' != path_buff[search_path_length - 1]) {
@@ -133,7 +133,7 @@ static void push_action (const char* parName, ActionList* parList) {
 	}
 
 	name_len = strlen(parName);
-	parList->list[parList->used] = (char*)malloc(1 + name_len);
+	parList->list[parList->used] = malloc(1 + name_len);
 	strcpy(parList->list[parList->used], parName);
 	++parList->used;
 }

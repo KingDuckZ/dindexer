@@ -112,7 +112,7 @@ int main (int parArgc, char* parArgv[]) {
 	action_path_length += strlen(actions[selected_action]);
 	++action_path_length;
 
-	action_path = (char*)malloc(action_path_length);
+	action_path = malloc(action_path_length);
 	memcpy(action_path, ACTIONS_SEARCH_PATH, lengthof(ACTIONS_SEARCH_PATH) - 1);
 	z = lengthof(ACTIONS_SEARCH_PATH) - 1;
 	if (ACTIONS_SEARCH_PATH[lengthof(ACTIONS_SEARCH_PATH) - 2] != '/') {
@@ -123,7 +123,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	free_actions(actions, actions_count);
 
-	argv = (char**)malloc(sizeof(char*) * (parArgc - 1 + 1));
+	argv = malloc(sizeof(char*) * (parArgc - 1 + 1));
 	argv[0] = action_path;
 	for (z = 2; z < parArgc; ++z) {
 		argv[z - 1] = parArgv[z];
