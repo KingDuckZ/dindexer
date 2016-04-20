@@ -19,7 +19,15 @@
 #define id88738025C6B24BDEB604A5AE3C36EE8D
 
 #include "helpers/compatibility.h"
-#include "stddef.h"
+#if defined(__cplusplus)
+#	include <cstddef>
+#else
+#	include <stddef.h>
+#endif
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 int damerau_levenshtein (
 	const char* parSource,
@@ -40,5 +48,9 @@ int damerau_levenshtein_with_size (
 	int parReplaceCost,
 	int parSwapCost
 ) a_pure;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif
