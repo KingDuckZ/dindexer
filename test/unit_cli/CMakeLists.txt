@@ -23,3 +23,9 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE gtest_main
 	PRIVATE pbl
 )
+
+add_test(
+	NAME CliTests
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	COMMAND ${PROJECT_NAME}
+)

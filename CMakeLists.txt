@@ -112,9 +112,12 @@ add_subdirectory(src/locate)
 add_subdirectory(src/navigate)
 
 #Tests
-add_subdirectory(test/gtest)
-add_subdirectory(test/unit)
-add_subdirectory(test/unit_cli)
+if (BUILD_TESTING)
+	enable_testing()
+	add_subdirectory(test/gtest)
+	add_subdirectory(test/unit)
+	add_subdirectory(test/unit_cli)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${PostgreSQL_LIBRARIES}
