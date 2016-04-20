@@ -60,7 +60,7 @@ ascii:
 }
 
 Character utf8_advance (const char** parString, const char* parStringEnd) {
-	const Character masks[6] = {0x00, 0x1f, 0x0f, 0x07, 0x03, 0x03};
+	const Character masks[6] = {0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x03};
 	Character retval;
 	uint8_t curr_code;
 	int seq_len;
@@ -79,9 +79,9 @@ Character utf8_advance (const char** parString, const char* parStringEnd) {
 	}
 	retval = curr_code bitand masks[seq_len - 1];
 
-	for (z = 0; z < (seq_len - 1) and ++(*parString) < parStringEnd; ++z) {
+	for (z = 0; ++(*parString) < parStringEnd and z < (seq_len - 1); ++z) {
 		curr_code = **parString;
-		if (curr_code bitand 0xc0 != 0x80)
+		if ((curr_code bitand 0xc0) != 0x80)
 			return 0;
 		retval = (retval << 6) bitor (curr_code bitand 0x3f);
 	}

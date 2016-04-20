@@ -153,6 +153,8 @@ int damerau_levenshtein_with_size (
 	const char* target;
 	const char* source_index_1;
 	const char* target_index_1;
+	const char* source_end = parSource + strlen(parSource);
+	const char* target_end = parTarget + strlen(parTarget);
 	Character source_char;
 	Character target_char;
 	Character source_char_0;
@@ -184,8 +186,8 @@ int damerau_levenshtein_with_size (
 
 	source = parSource;
 	target = parTarget;
-	source_char_0 = utf8_advance(&source, parSource + parSourceLen);
-	target_char_0 = utf8_advance(&target, parTarget + parTargetLen);
+	source_char_0 = utf8_advance(&source, source_end);
+	target_char_0 = utf8_advance(&target, target_end);
 	source_index_1 = source;
 	target_index_1 = target;
 	if (source_char_0 != target_char_0) {
@@ -196,7 +198,7 @@ int damerau_levenshtein_with_size (
 
 	assert(source = source_index_1);
 	for (i = 1; i < parSourceLen; ++i) {
-		source_char = utf8_advance(&source, parSource + parSourceLen);
+		source_char = utf8_advance(&source, source_end);
 		delete_distance = table[i - 1 + 0 * parSourceLen] + parDeleteCost;
 		insert_distance = (i + 1) * parDeleteCost + parInsertCost;
 		match_distance = i * parDeleteCost +
@@ -208,7 +210,7 @@ int damerau_levenshtein_with_size (
 
 	assert(target == target_index_1);
 	for (j = 1; j < parTargetLen; ++j) {
-		target_char = utf8_advance(&target, parTarget + parTargetLen);
+		target_char = utf8_advance(&target, target_end);
 		delete_distance = (j + 1) * parInsertCost + parDeleteCost;
 		insert_distance = table[0 + (j - 1) * parSourceLen] + parInsertCost;
 		match_distance = j * parInsertCost +
@@ -220,11 +222,11 @@ int damerau_levenshtein_with_size (
 
 	source = source_index_1;
 	for (i = 1; i < parSourceLen; ++i) {
-		source_char = utf8_advance(&source, parSource + parSourceLen);
+		source_char = utf8_advance(&source, source_end);
 		maxSourceLetterMatchIndex = (source_char == target_char_0 ? 0 : -1);
 		target = target_index_1;
 		for (j = 1; j < parTargetLen; ++j) {
-			target_char = utf8_advance(&target, parTarget + parTargetLen);
+			target_char = utf8_advance(&target, target_end);
 			candidateSwapIndex = get_value(sourceIndexByCharacter, target_char);
 			j_swap = maxSourceLetterMatchIndex;
 			delete_distance = table[(i - 1) + j * parSourceLen] + parDeleteCost;
