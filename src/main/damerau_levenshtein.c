@@ -64,6 +64,7 @@
 
 #include "damerau_levenshtein.h"
 #include "pbl_wrapper.h"
+#include "utf8_ops.h"
 #include <string.h>
 #include <iso646.h>
 #include <assert.h>
@@ -79,8 +80,6 @@
 	({ __typeof__ (a) _a = (a); \
 	__typeof__ (b) _b = (b); \
 	_a > _b ? _a : _b; })
-
-typedef wchar_t Character;
 
 static void insert_pair (PblMap* parMap, Character parKey, int parValue) {
 	const int retval = pblMapAdd(
@@ -111,9 +110,9 @@ int damerau_levenshtein (
 {
 	return damerau_levenshtein_with_size(
 		parSource,
-		strlen(parSource),
+		utf8_strlen(parSource),
 		parTarget,
-		strlen(parTarget),
+		utf8_strlen(parTarget),
 		parDeleteCost,
 		parInsertCost,
 		parReplaceCost,
@@ -150,6 +149,14 @@ int damerau_levenshtein_with_size (
 	int j_swap;
 	int pre_swap_cost;
 	int retval;
+	const char* source;
+	const char* target;
+	const char* source_index_1;
+	const char* target_index_1;
+	Character source_char;
+	Character target_char;
+	Character source_char_0;
+	Character target_char_0;
 
 	assert(parSource);
 	assert(parTarget);
@@ -175,42 +182,55 @@ int damerau_levenshtein_with_size (
 	sourceIndexByCharacter = pblMapNewHashMap();
 	assert(sourceIndexByCharacter);
 
-	if (parSource[0] != parTarget[0]) {
+	source = parSource;
+	target = parTarget;
+	source_char_0 = utf8_advance(&source, parSource + parSourceLen);
+	target_char_0 = utf8_advance(&target, parTarget + parTargetLen);
+	source_index_1 = source;
+	target_index_1 = target;
+	if (source_char_0 != target_char_0) {
 		table[0 /*source*/ + 0 /*target*/ * parSourceLen] =
 			min(parReplaceCost, parDeleteCost + parInsertCost);
 	}
-	insert_pair(sourceIndexByCharacter, parSource[0], 0);
+	insert_pair(sourceIndexByCharacter, source_char_0, 0);
 
+	assert(source = source_index_1);
 	for (i = 1; i < parSourceLen; ++i) {
-		delete_distance = table[i - 1 + 0 * parSourceLen];
+		source_char = utf8_advance(&source, parSource + parSourceLen);
+		delete_distance = table[i - 1 + 0 * parSourceLen] + parDeleteCost;
 		insert_distance = (i + 1) * parDeleteCost + parInsertCost;
 		match_distance = i * parDeleteCost +
-			(parSource[i] == parTarget[i] ? 0 : parReplaceCost);
+			(source_char == target_char_0 ? 0 : parReplaceCost);
 		table[i + 0 * parSourceLen] = min(
 			min(delete_distance, insert_distance), match_distance
 		);
 	}
 
+	assert(target == target_index_1);
 	for (j = 1; j < parTargetLen; ++j) {
+		target_char = utf8_advance(&target, parTarget + parTargetLen);
 		delete_distance = (j + 1) * parInsertCost + parDeleteCost;
 		insert_distance = table[0 + (j - 1) * parSourceLen] + parInsertCost;
 		match_distance = j * parInsertCost +
-			(parSource[0] == parTarget[j] ? 0 : parReplaceCost);
+			(source_char_0 == target_char ? 0 : parReplaceCost);
 		table[0 + j * parSourceLen] = min(
 			min(delete_distance, insert_distance), match_distance
 		);
 	}
 
+	source = source_index_1;
 	for (i = 1; i < parSourceLen; ++i) {
-		maxSourceLetterMatchIndex = (parSource[i] == parTarget[0] ? 0 : -1);
+		source_char = utf8_advance(&source, parSource + parSourceLen);
+		maxSourceLetterMatchIndex = (source_char == target_char_0 ? 0 : -1);
+		target = target_index_1;
 		for (j = 1; j < parTargetLen; ++j) {
-			candidateSwapIndex =
-				get_value(sourceIndexByCharacter, parTarget[j]);
+			target_char = utf8_advance(&target, parTarget + parTargetLen);
+			candidateSwapIndex = get_value(sourceIndexByCharacter, target_char);
 			j_swap = maxSourceLetterMatchIndex;
 			delete_distance = table[(i - 1) + j * parSourceLen] + parDeleteCost;
 			insert_distance = table[i + (j - 1) * parSourceLen] + parInsertCost;
 			match_distance = table[(i - 1) + (j - 1) * parSourceLen];
-			if (parSource[i] != parTarget[j])
+			if (source_char != target_char)
 				match_distance += parReplaceCost;
 			else
 				maxSourceLetterMatchIndex = j;
@@ -238,7 +258,7 @@ int damerau_levenshtein_with_size (
 				swap_distance
 			);
 		}
-		insert_pair(sourceIndexByCharacter, parSource[i], i);
+		insert_pair(sourceIndexByCharacter, source_char, i);
 	}
 
 	retval = table[(parSourceLen - 1) + (parTargetLen - 1) * parSourceLen];

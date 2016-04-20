@@ -7,6 +7,7 @@ add_executable(${PROJECT_NAME}
 	findactions.c
 	builtin_feats.c
 	damerau_levenshtein.c
+	utf8_ops.c
 )
 
 target_include_directories(${PROJECT_NAME}
