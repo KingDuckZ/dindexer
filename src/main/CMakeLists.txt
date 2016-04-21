@@ -10,9 +10,11 @@ add_executable(${PROJECT_NAME}
 	utf8_ops.c
 )
 
+make_timestamp(${bare_name} timestamp.h.in)
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_SOURCE_DIR}/include
 	PRIVATE ${CMAKE_SOURCE_DIR}/lib/pbl/pbl/src/src
+	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}

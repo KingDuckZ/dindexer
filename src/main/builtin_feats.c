@@ -18,6 +18,7 @@
 #include "builtin_feats.h"
 #include <stdio.h>
 #include "dindexerConfig.h"
+#include "timestamp.h"
 
 void print_builtin_feats() {
 	print_version();
@@ -42,6 +43,9 @@ void print_builtin_feats() {
 	printf("  %s %s\n", CMAKE_CXX_COMPILER, CMAKE_CXX_FLAGS);
 	printf("  %s %s\n", CMAKE_C_COMPILER, CMAKE_C_FLAGS);
 	printf("DB_OWNER_NAME = \"%s\"\n", DB_OWNER_NAME);
+#if defined(DINDEXER_BUILD_DATE)
+	printf("BUILD_DATE = %s\n", DINDEXER_BUILD_DATE);
+#endif
 }
 
 void print_version() {

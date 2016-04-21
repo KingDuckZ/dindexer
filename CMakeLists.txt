@@ -19,6 +19,7 @@ include(GetGitRevisionDescription)
 include(Buildlibpqtypes)
 include(gccversion)
 include(CPack)
+include(timestamp)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
