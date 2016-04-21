@@ -1,15 +1,19 @@
 #	dindexer			#
 ##	Project info and status		##
-###	Development news		###
-Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project!
+### Quick project info			###
+####	Release build status		####
+[![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
 
-###	Flattr				###
+####	Latest release		###
+Latest release is __0.1.4__. However there are several known problems with that release. Please use the latest version from master instead.
+
+####	Flattr				####
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software)
 
 Please support the development of this software if you like it!
 
-###	Debug build status		###
-[![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
+###	Development news		###
+Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project!
 
 ##   What is dindexer?   ##
 ###  Purpose  ###
@@ -65,6 +69,13 @@ Using dindexer is pretty straightforward: mount your DVD and scan it. For exampl
 The program will go through every file in the path you specify. Hashing everything in that path could take a bit of time, so please be patient.
 
 You can run dindexer --help to see a list of available switches.
+To get a list of all commands you can just run `dindexer --help`. To get help on a specific command, run `dindexer <command> --help`.
+
+###		Code architecture		###
+I wrote dindexer with the idea of having at least one GUI for it at som point.
+Since I'm just writing a CLI interface for now, I've decided to put all of the 'core' functionalities in a shared object (*machinery*). Other useful, lower level bits can be found in *common*.
+
+As the code is being changed all the time, I'll be waiting to get a more stable interface before writing any detailed documentation. In the meantime you can have a look at the various command line programs to find examples of how to use the different parts of machinery, or you can get in touch with me on IRC (see *Contact me* at the bottom).
 
 ##   Build instructions   ##
 ###  Dependencies  ###
@@ -78,17 +89,27 @@ The following libraries must be available on your system:
 *Note:* Although the CMakeLists.txt will say minimum required version for PostgreSQL is 8.3, this program has only ever been tested with 9.4. 8.3 is simply the threshold under which I'm sure the code will not work. If you want to try dindexer with a PostgreSQL version less than 9.4 you are welcome to do so, but please note I won't be able to make sure everything will work. Patches that address eventual issues are welcome.
 
 ###  Linux  ###
+If you are a regular user and want to make a release build for yourself:
 
     mkdir dindexer_build
     cd dindexer_build
-    cmake -DCMAKE_BUILD_TYPE=Release <path to dindexer source>
+    cmake -DCMAKE_BUILD_TYPE=Release -DINDEXER_NATIVE_RELEASE=ON \
+	    -DINDEXER_WITH_BUILD_DATE=ON <path_to_source>
     make -j2
+
+Or any variation of the above options.
+If you plan to hack on the code and do some development instead:
+
+    mkdir dindexer_build
+	cd dindxexer_build
+	cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON <path_to_source>
+	make -j2
+	ctest
+
+Binaries will be in the src directory. Use `make install` to install them to your selected install prefix (`-CMAKE_INSTALL_PREFIX:PATH=<your_path>` option in CMake). For development purposes, I create a symlink to the main program in the root of my build directory with the command `ln -s src/main/dindexer`, so I can run the various subcommands from the top-level build directory directly (eg: `./dindexer navigate`).
 
 ###  Other platforms  ###
 I never tested dindexer on anything other than Linux. Note that the code assumes paths to be Unix-like. It also makes other assumptions about the current platform being Linux, so porting could be not so straightforward.
-
-##  Project status  ##
-This project is at an early stage and is still being developed. Currently, only the indexer has been implemented. You can search the database manually if you know how to write the SQL queries you will need.
 
 ##   Useful technical details   ##
 ###  Program overview  ###
@@ -141,3 +162,34 @@ For your convenience, you can store the type of the disc you are going to index.
 * **H** - Hard Disk
 * **Z** - Iomega Zip
 * **O** - Other
+
+##	Future development		##
+This section contains simple ideas for features I'd like to add in the future.
+
+###		Project name	###
+Although "dindexer" sounds like a very intuitive name for what this program does, I'm not entirely satisfied with the name. I'm open to suggestions for a new name.
+
+###		Autosetup		###
+When you first run dindexer you have to make sure the database already exists and the tables have already been created. While this is somewhat fine for developers, and you get an auto-generated sql script in your build directory to make this step as easy as possible, I think it should be completely automated so first time users can just start dindexer from the very first time.
+
+###		Database		###
+Currently dindexer only works with PostgreSQL databases. This will sound like a very heavy dependency, but having to access my database from multiple machines I thought this would be the best backend to start from. In my case the database is running on a raspberry pi.
+
+In the future I'd like to add support for other storage backends, such as:
+
+* SQLite
+* MySql
+* Redis (?)
+* ...and possibly others, depending on how much help I get from the community
+
+###		Multiusers		###
+As it is, dindexer can already be used by multiple users at the same time, as it relies on PostgreSQL. It would be nice however to have some other features, such as what user scanned a given disc and from which machine.
+
+###		GUI				###
+I've been developing this program with GUIs in mind. However, since I don't have much experience with GUI designing and programming, I decided to leave this for later and go for a more straightforward CLI. This is definitely an area I'd like to get help with.
+
+While I was tempted to look into QT5, some people on IRC suggested I write a Dolphin plugin instead of a full-blown GUI program. Neither option exclude the other, since all the core functionality is in shared libraries. In fact if you want to program your own GUI around dindexer you just need to pass the user's input on to the right function.
+Or at least that's the idea behind the design of the code :)
+
+##		Contact me		##
+The best way to get in touch is to find me on IRC freenode. You can find me as either King_DuckZ, or you can try Ccdc_DuckZ if you get any afk autoreply.
