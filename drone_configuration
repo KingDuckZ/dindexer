@@ -17,6 +17,7 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /u
 echo 3 | sudo update-alternatives --config gcc
 mkdir dindexer_build
 cd dindexer_build
-cmake -DCMAKE_BUILD_TYPE=Release -DDINDEXER_WITH_BUILD_DATE=on ../dindexer
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on ../dindexer
 make
+ctest
 make package
