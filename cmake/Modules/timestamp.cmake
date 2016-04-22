@@ -21,11 +21,11 @@ function (make_timestamp project_name file_input)
 	FILE (WRITE ${CMAKE_CURRENT_BINARY_DIR}/timestamp.cmake
 "if (${bare_name_upper}_WITH_BUILD_DATE)
 #	string(TIMESTAMP ${bare_name_upper}_BUILD_DATE \"%Y-%m-%d %H:%M:%S\" UTC)
-	string(TIMESTAMP ${bare_name_upper}_BUILD_DATE \"%Y-%m-%d %H:%M:%S\" UTC)
+	string(TIMESTAMP ${bare_name_upper}_BUILD_DATE \"%Y-%m-%d\" UTC)
 else()
 	set(${bare_name_upper}_BUILD_DATE \"\")
 endif()
-#set(${bare_name_upper}_BUILD_DATE \"$\{${bare_name_upper}_BUILD_DATE}\" PARENT_SCOPE)
+#set(${bare_name_upper}_BUILD_DATE \"\${${bare_name_upper}_BUILD_DATE}\" PARENT_SCOPE)
 configure_file(\"${CMAKE_CURRENT_SOURCE_DIR}/${file_input}\" \"${CMAKE_CURRENT_BINARY_DIR}/${file_name}\")\n"
 	)
 
