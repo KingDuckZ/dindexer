@@ -19,6 +19,7 @@ include(GetGitRevisionDescription)
 include(Buildlibpqtypes)
 include(gccversion)
 include(CPack)
+include(CTest)
 include(timestamp)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
@@ -114,7 +115,6 @@ add_subdirectory(src/navigate)
 
 #Tests
 if (BUILD_TESTING)
-	enable_testing()
 	add_subdirectory(test/gtest)
 	add_subdirectory(test/unit)
 	add_subdirectory(test/unit_cli)

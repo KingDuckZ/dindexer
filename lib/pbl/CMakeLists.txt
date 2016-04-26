@@ -6,10 +6,9 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -O3")
 
 option(PBL_WITH_TESTS "Enable building test programs" ON)
 
-#add_library(${PROJECT_NAME} INTERFACE)
-#target_include_directories(${PROJECT_NAME}
-#	INTERFACE .
-#)
+if (PBL_WITH_TESTS)
+	include(CTest)
+endif()
 
 add_library(pbl STATIC
 	pbl/src/src/pblStringBuilder.c
@@ -33,8 +32,6 @@ target_compile_definitions(pbl
 )
 
 if (BUILD_TESTING AND PBL_WITH_TESTS)
-	enable_testing()
-
 	set(pbl_tests
 		httst
 		#kftst
