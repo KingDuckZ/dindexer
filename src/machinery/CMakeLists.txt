@@ -4,7 +4,6 @@ include(WithMediaAutodetect)
 find_package(Magic REQUIRED)
 
 option(DINDEXER_WITH_NICE_MEDIA_TYPES "Enable this if C++14 is available in order to get some nicer media type names, like CD-Rom instead of CDRom" OFF)
-string(TOUPPER ${DINDEXER_WITH_NICE_MEDIA_TYPES} DINDEXER_WITH_NICE_MEDIA_TYPES)
 
 add_library(${PROJECT_NAME} SHARED
 	pathname.cpp

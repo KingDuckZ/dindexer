@@ -20,9 +20,19 @@
 
 #if !defined(CMAKE_ON)
 #	define CMAKE_ON 1
+#	define CMAKE_on 1
+#	define CMAKE_On 1
+#	define CMAKE_oN 1
 #endif
 #if !defined(CMAKE_OFF)
 #	define CMAKE_OFF 0
+#	define CMAKE_OFf 0
+#	define CMAKE_OfF 0
+#	define CMAKE_Off 0
+#	define CMAKE_oFF 0
+#	define CMAKE_oFf 0
+#	define CMAKE_ofF 0
+#	define CMAKE_off 0
 #endif
 
 #endif
