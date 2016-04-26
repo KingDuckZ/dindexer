@@ -15,6 +15,11 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE pqtypes
 )
 
+target_compile_features(${PROJECT_NAME}
+	PUBLIC cxx_constexpr
+	PUBLIC cxx_alignof
+)
+
 #install(TARGETS ${PROJECT_NAME}
 #	LIBRARY DESTINATION lib
 #	RUNTIME DESTINATION bin

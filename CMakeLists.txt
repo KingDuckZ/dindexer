@@ -37,8 +37,8 @@ set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Action
 string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
 set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall -Wextra -Wno-missing-field-initializers -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wall -Wextra -fomit-frame-pointer -Wno-missing-field-initializers ${march_flag}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wno-missing-field-initializers -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -fomit-frame-pointer -Wno-missing-field-initializers ${march_flag}")
 set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(PBL_WITH_TESTS OFF)
 get_git_head_revision(GIT_REFSPEC PROJECT_VERSION_GIT)
@@ -79,6 +79,20 @@ configure_file(
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}
 	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
+)
+
+target_compile_definitions(${PROJECT_NAME}
+	INTERFACE cxx_nullptr
+	INTERFACE cxx_range_for
+	INTERFACE cxx_lambdas
+	INTERFACE cxx_decltype_auto
+	INTERFACE cxx_defaulted_functions
+	INTERFACE cxx_deleted_functions
+	INTERFACE cxx_auto_type
+	INTERFACE cxx_decltype_incomplete_return_types
+	INTERFACE cxx_defaulted_move_initializers
+	INTERFACE cxx_noexcept
+	INTERFACE cxx_rvalue_references
 )
 
 target_include_directories(${bare_name}-inc

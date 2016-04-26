@@ -24,8 +24,6 @@ add_library(${PROJECT_NAME} SHARED
 	scantask/setbasic.cpp
 )
 
-#target_include_directories(${PROJECT_NAME}
-#)
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${MAGIC_INCLUDE_DIR}
 )
@@ -37,6 +35,13 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_compile_features(${PROJECT_NAME}
+	PUBLIC cxx_constexpr
+	PRIVATE cxx_relaxed_constexpr
+	PUBLIC cxx_nullptr
+	PUBLIC cxx_override
 )
 
 if (DINDEXER_WITH_MEDIA_AUTODETECT)

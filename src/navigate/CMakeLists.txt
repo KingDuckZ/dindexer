@@ -25,6 +25,10 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${Readline_LIBRARY}
 )
 
+target_compile_features(${PROJECT_NAME}
+	PUBLIC cxx_alignof
+)
+
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE ACTION_NAME="${ACTION_NAME}"
