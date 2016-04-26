@@ -88,7 +88,7 @@ namespace mchlib {
 		}
 
 		bool identify_video_dvd (MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent ) {
-			if (parMediaType != MediaType_DVD and parMediaType != MediaType_Directory)
+			if (parMediaType != +MediaTypes::DVD and parMediaType != +MediaTypes::Directory)
 				return false;
 
 			const auto items_count = count_listing_items(parContent);
@@ -104,7 +104,7 @@ namespace mchlib {
 		}
 
 		bool identify_video_cd (MediaTypes parMediaType, const ConstSetListingView& parContent, const std::vector<const FileRecordData*>& parFlatContent) {
-			if (parMediaType != MediaType_CDRom and parMediaType != MediaType_Directory)
+			if (parMediaType != +MediaTypes::CDRom and parMediaType != +MediaTypes::Directory)
 				return false;
 
 			const auto items_count = count_listing_items(parContent);

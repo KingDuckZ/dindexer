@@ -15,28 +15,18 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id700AFD0F33634ACC88079BB8853A9E13
-#define id700AFD0F33634ACC88079BB8853A9E13
+#ifndef id32A00B72E29D463795CBF66517387E8D
+#define id32A00B72E29D463795CBF66517387E8D
 
-#include "helpers/compatibility.h"
-#include "enum.h"
-#include <string>
+#if !defined(CMAKE_ON)
+#	define CMAKE_ON 1
+#endif
+#if !defined(CMAKE_OFF)
+#	define CMAKE_OFF 0
+#endif
 
-namespace mchlib {
-	BETTER_ENUM(MediaTypes, char,
-		CDRom = 'C',
-		Directory = 'D',
-		DVD = 'V',
-		BluRay = 'B',
-		FloppyDisk = 'F',
-		HardDisk = 'H',
-		IomegaZip = 'Z',
-		Other = 'O'
-	);
-
-	std::string media_type_to_str ( MediaTypes parType );
-	MediaTypes char_to_media_type ( char parMType ) a_pure;
-	char media_type_to_char ( MediaTypes parMType ) a_pure;
-} //namespace mchlib
+#if CMAKE_@DINDEXER_WITH_NICE_MEDIA_TYPES@
+#	define WITH_NICE_MEDIA_TYPES
+#endif
 
 #endif

@@ -3,6 +3,9 @@ project(${bare_name}-machinery CXX C)
 include(WithMediaAutodetect)
 find_package(Magic REQUIRED)
 
+option(DINDEXER_WITH_NICE_MEDIA_TYPES "Enable this if C++14 is available in order to get some nicer media type names, like CD-Rom instead of CDRom" OFF)
+string(TOUPPER ${DINDEXER_WITH_NICE_MEDIA_TYPES} DINDEXER_WITH_NICE_MEDIA_TYPES)
+
 add_library(${PROJECT_NAME} SHARED
 	pathname.cpp
 	tiger.c
@@ -26,6 +29,7 @@ add_library(${PROJECT_NAME} SHARED
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${MAGIC_INCLUDE_DIR}
+	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -35,14 +39,17 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+	PUBLIC ${CMAKE_SOURCE_DIR}/lib/better-enums
 )
 
 target_compile_features(${PROJECT_NAME}
 	PUBLIC cxx_constexpr
-	PRIVATE cxx_relaxed_constexpr
 	PUBLIC cxx_nullptr
 	PUBLIC cxx_override
 )
+if (DINDEXER_WITH_NICE_MEDIA_TYPES)
+	target_compile_features(${PROJECT_NAME} PRIVATE cxx_relaxed_constexpr)
+endif()
 
 if (DINDEXER_WITH_MEDIA_AUTODETECT)
 	target_include_directories(${PROJECT_NAME} SYSTEM
@@ -61,3 +68,5 @@ install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib/static
 )
+
+configure_file(machineryConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/machineryConfig.h)

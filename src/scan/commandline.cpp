@@ -16,26 +16,14 @@
  */
 
 #include "commandline.hpp"
-#include "helpers/lengthof.h"
 #include "dindexer-common/commandline.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <algorithm>
 
 namespace po = boost::program_options;
 
 namespace din {
 	namespace {
-		const char g_allowed_types[] = {
-			static_cast<char>(mchlib::MediaType_CDRom),
-			static_cast<char>(mchlib::MediaType_Directory),
-			static_cast<char>(mchlib::MediaType_DVD),
-			static_cast<char>(mchlib::MediaType_BluRay),
-			static_cast<char>(mchlib::MediaType_FloppyDisk),
-			static_cast<char>(mchlib::MediaType_HardDisk),
-			static_cast<char>(mchlib::MediaType_IomegaZip),
-			static_cast<char>(mchlib::MediaType_Other)
-		};
 	} //unnamed namespace
 
 	bool parse_commandline (int parArgc, char* parArgv[], po::variables_map& parVarMap) {
@@ -43,9 +31,10 @@ namespace din {
 		{
 			std::ostringstream oss;
 			oss << "Default set type. Valid values are ";
-			oss << g_allowed_types[0];
-			for (std::size_t z = 1; z < lengthof(g_allowed_types); ++z) {
-				oss << ", " << g_allowed_types[z];
+			const char* comma = "";
+			for (auto mediatype : mchlib::MediaTypes::_values()) {
+				oss << comma << mediatype._to_integral() << " (" << mediatype << ')';
+				comma = ", ";
 			}
 			oss << '.';
 #if defined(WITH_MEDIA_AUTODETECT)
@@ -95,7 +84,8 @@ namespace din {
 #if defined(WITH_MEDIA_AUTODETECT)
 		if (parVarMap.count("type")) {
 #endif
-		if (g_allowed_types + lengthof(g_allowed_types) == std::find(g_allowed_types, g_allowed_types + lengthof(g_allowed_types), parVarMap["type"].as<char>())) {
+		better_enums::optional<mchlib::MediaTypes> maybe_mediatype = mchlib::MediaTypes::_from_integral_nothrow(parVarMap["type"].as<char>());
+		if (!maybe_mediatype) {
 			throw std::invalid_argument("Invalid value for parameter \"type\"");
 		}
 #if defined(WITH_MEDIA_AUTODETECT)

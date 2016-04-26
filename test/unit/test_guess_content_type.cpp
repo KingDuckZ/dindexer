@@ -52,7 +52,7 @@ TEST(machinery, guess_content_type) {
 			FileRecordData("VIDEO_TS/VTS_01_0.VOB",0,0,2,false,false),
 			FileRecordData("VIDEO_TS/VIDEO_TS.VOB",0,0,2,false,false)
 		};
-		detect_type(test_data, mchlib::ContentType_VideoDVD, mchlib::MediaType_DVD);
+		detect_type(test_data, mchlib::ContentType_VideoDVD, mchlib::MediaTypes::DVD);
 	}
 
 	{
@@ -63,7 +63,7 @@ TEST(machinery, guess_content_type) {
 			FileRecordData("some_file.bin",0,0,1,false,false),
 			FileRecordData("another_dir/VTS_01_0.BUP",0,0,2,false,false)
 		};
-		detect_type(test_data, mchlib::ContentType_Generic, mchlib::MediaType_Directory);
+		detect_type(test_data, mchlib::ContentType_Generic, mchlib::MediaTypes::Directory);
 	}
 
 	{
@@ -81,6 +81,6 @@ TEST(machinery, guess_content_type) {
 			FileRecordData("CDI",0,0,1,true,false),
 			FileRecordData("KARAOKE",0,0,1,true,false)
 		};
-		detect_type(test_data, mchlib::ContentType_VideoCD, mchlib::MediaType_CDRom);
+		detect_type(test_data, mchlib::ContentType_VideoCD, mchlib::MediaTypes::CDRom);
 	}
 }

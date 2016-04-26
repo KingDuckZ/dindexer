@@ -16,35 +16,49 @@
  */
 
 #include "dindexer-machinery/mediatypes.hpp"
-#include <map>
+#include "machineryConfig.h"
 #include <stdexcept>
 
 namespace mchlib {
-	const std::string& media_type_to_str (MediaTypes parType) {
-		static const std::map<MediaTypes, const std::string> types {
-			{MediaType_CDRom, "CD-Rom"},
-			{MediaType_Directory, "Directory"},
-			{MediaType_DVD, "DVD"},
-			{MediaType_BluRay, "BluRay"},
-			{MediaType_FloppyDisk, "Floppy Disk"},
-			{MediaType_HardDisk, "Hard Disk"},
-			{MediaType_IomegaZip, "Iomega Zip"},
-			{MediaType_Other, "Other"}
-		};
+	namespace {
+#if defined(WITH_NICE_MEDIA_TYPES)
+		constexpr const char* get_enum_desc (MediaTypes parType) {
+			switch (parType) {
+			case MediaTypes::CDRom: return "CD-Rom";
+			case MediaTypes::Directory: return "Directory";
+			case MediaTypes::DVD: return "DVD";
+			case MediaTypes::BluRay: return "BluRay";
+			case MediaTypes::FloppyDisk: return "Floppy Disk";
+			case MediaTypes::HardDisk: return "Hard Disk";
+			case MediaTypes::IomegaZip: return "Iomega Zip";
+			case MediaTypes::Other: return "Other";
+			}
+			return "needed for gcc 5";
+		}
 
-		auto it_ret = types.find(parType);
-		if (types.end() == it_ret) {
+		constexpr auto g_descriptions = ::better_enums::make_map(get_enum_desc);
+#endif
+	} //unnamed namespace
+
+	std::string media_type_to_str (MediaTypes parType) {
+		try {
+#if defined(WITH_NICE_MEDIA_TYPES)
+			return std::string(g_descriptions[parType]);
+#else
+			return std::string(parType._to_string());
+#endif
+		}
+		catch (const std::runtime_error&) {
 			const char err[2] = {static_cast<char>(parType), '\0'};
 			throw std::out_of_range(err);
 		}
-		return it_ret->second;
 	}
 
 	MediaTypes char_to_media_type (char parMType) {
-		return static_cast<MediaTypes>(parMType);
+		return MediaTypes::_from_integral(parMType);
 	}
 
 	char media_type_to_char (MediaTypes parMType) {
-		return static_cast<char>(parMType);
+		return parMType._to_integral();
 	}
 } //namespace mchlib
