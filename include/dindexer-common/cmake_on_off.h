@@ -15,13 +15,14 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id4A9E94ACFA43498097637025A5BA69E5
-#define id4A9E94ACFA43498097637025A5BA69E5
+#ifndef id9B6B373E88404330ADEE51A4EC861787
+#define id9B6B373E88404330ADEE51A4EC861787
 
-#include "dindexer-common/cmake_on_off.h"
-
-#if CMAKE_@DINDEXER_WITH_BUILD_DATE@
-#	define DINDEXER_BUILD_DATE "@DINDEXER_BUILD_DATE@"
+#if !defined(CMAKE_ON)
+#	define CMAKE_ON 1
+#endif
+#if !defined(CMAKE_OFF)
+#	define CMAKE_OFF 0
 #endif
 
 #endif
