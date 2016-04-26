@@ -46,6 +46,11 @@ void print_builtin_feats() {
 #if defined(DINDEXER_BUILD_DATE)
 	printf("BUILD_DATE = %s\n", DINDEXER_BUILD_DATE);
 #endif
+#if defined(WITH_NICE_MEDIA_TYPES)
+	printf("WITH_NICE_MEDIA_TYPES = yes\n");
+#else
+	printf("WITH_NICE_MEDIA_TYPES = no\n");
+#endif
 }
 
 void print_version() {
