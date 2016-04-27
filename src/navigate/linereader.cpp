@@ -17,67 +17,38 @@
 
 #include "linereader.hpp"
 #include "listdircontent.hpp"
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "dindexer-common/readline_wrapper.hpp"
+#include "genericpath.hpp"
 #include <cassert>
 #include <ciso646>
+#include <vector>
+#include <functional>
 
 namespace din {
 	namespace {
-		char* custom_generator (const char* parText, int parState) {
-			static int list_index, len;
-
-			if (not parState) {
-				list_index = 0;
-				len = std::strlen(parText);
+		std::vector<std::string> list_matches (const ListDirContent& parLS, const std::string& parCurrPath, const std::string& parPrefix) {
+			GenericPath full_prefix;
+			if (not parCurrPath.empty()) {
+				full_prefix.push_piece(parCurrPath);
 			}
-			return nullptr;
+			if (not parPrefix.empty()) {
+				return parLS.ls(full_prefix, parPrefix);
+			}
+			else {
+				return parLS.ls(full_prefix);
+			}
 		}
-
-		//char* custom_generator (const char* parText, int parState) {
-		//}
-
-		//char** custom_completion (const char* parText, int parStart, int parEnd) {
-		//	char** matches = nullptr;
-
-		//	if (0 == parStart) {
-		//		matches = rl_completion_matches(const_cast<char*>(parText), &custom_generator);
-		//	}
-		//	else {
-		//		//See the hack described here:
-		//		//http://cc.byexamples.com/2008/06/16/gnu-readline-implement-custom-auto-complete/
-		//		rl_bind_key('\t', &rl_abort);
-		//	}
-		//	return matches;
-		//}
 	} //unnamed namespace
 
 	LineReader::LineReader (const ListDirContent* parLS) :
 		m_ls(parLS)
 	{
 		assert(m_ls);
-
-		//rl_attempted_completion_function = &custom_completion;
-		rl_completion_entry_function = &custom_generator;
-		rl_bind_key('\t', &rl_complete);
 	}
 
-	std::string LineReader::read (const std::string& parMessage) {
-		typedef std::unique_ptr<char, void(*)(void*)> RawCharMemory;
+	std::string LineReader::read (const std::string& parMessage, const std::string& parCurrPath) {
+		dinlib::ReadlineWrapper rl(std::bind(&list_matches, std::cref(*m_ls), std::cref(parCurrPath), std::placeholders::_1));
 
-		RawCharMemory line(readline(parMessage.c_str()), &std::free);
-
-		if (line) {
-			if (*line) {
-				add_history(line.get());
-			}
-			return std::string(line.get());
-		}
-		else {
-			return std::string();
-		}
+		return rl.read(parMessage);
 	}
 } //namespace din

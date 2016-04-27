@@ -21,6 +21,7 @@
 #include <boost/circular_buffer.hpp>
 #include <utility>
 #include <string>
+#include <vector>
 
 namespace din {
 	class GenericPath;
@@ -34,6 +35,7 @@ namespace din {
 		~ListDirContent ( void ) noexcept = default;
 
 		const ListType& ls ( const GenericPath& parDir ) const;
+		const ListType& ls ( GenericPath parDir, const std::string& parStartWith ) const;
 
 	private:
 		mutable boost::circular_buffer<CachedItemType> m_cache;

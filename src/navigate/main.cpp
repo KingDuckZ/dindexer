@@ -97,7 +97,7 @@ namespace {
 		proc.add_command("ls", std::function<void()>(std::bind(on_ls, std::ref(ls), std::ref(dir_man))), 0);
 		do {
 			do {
-				curr_line = lines.read(prompt);
+				curr_line = lines.read(prompt, dir_man.to_string());
 			} while (curr_line.empty());
 			running = proc.exec_command(curr_line);
 		} while (running);

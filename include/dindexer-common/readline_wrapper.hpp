@@ -15,24 +15,29 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idBB92A7743E75400CBA486A241F13D35C
-#define idBB92A7743E75400CBA486A241F13D35C
+#ifndef id4DDE1979258D40A2973E2FC2AC3DF854
+#define id4DDE1979258D40A2973E2FC2AC3DF854
 
 #include <string>
+#include <vector>
+#include <functional>
 
-namespace din {
-	class ListDirContent;
-
-	class LineReader {
+namespace dinlib {
+	class ReadlineWrapper {
 	public:
-		explicit LineReader ( const ListDirContent* parLS );
-		~LineReader ( void ) noexcept = default;
+		using MatchesCallback = std::function<std::vector<std::string>(const std::string&)>;
 
-		std::string read ( const std::string& parMessage, const std::string& parCurrPath );
+		explicit ReadlineWrapper ( MatchesCallback parMatchesCallback );
+		~ReadlineWrapper ( void ) noexcept;
+
+		std::string read ( const std::string& parMessage ) const;
+		const std::vector<std::string>& matches ( const std::string& parPrefix ) const;
 
 	private:
-		const ListDirContent* m_ls;
+		mutable std::string m_last_prefix;
+		mutable std::vector<std::string> m_last_matches;
+		MatchesCallback m_fetch_matches;
 	};
-} //namespace din
+} //namespace dinlib
 
 #endif

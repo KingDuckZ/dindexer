@@ -79,6 +79,8 @@ namespace din {
 		template <FileDetails... D>
 		auto file_details ( uint32_t parSetID, uint16_t parLevel, boost::string_ref parDir ) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>>;
 
+		std::vector<std::string> paths_starting_by ( uint32_t parGroupID, uint16_t parLevel, boost::string_ref parPath );
+
 	private:
 		struct LocalData;
 		typedef std::map<SetDetails, std::string> SetDetailsMap;

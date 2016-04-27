@@ -1,7 +1,5 @@
 project(${bare_name}-navigate CXX)
 
-find_package(Readline 6.3 REQUIRED)
-
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
@@ -15,14 +13,10 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
-target_include_directories(${PROJECT_NAME} SYSTEM
-	PRIVATE ${Readline_INCLUDE_DIR}
-)
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
-	PRIVATE ${Readline_LIBRARY}
 )
 
 target_compile_features(${PROJECT_NAME}

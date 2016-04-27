@@ -1,10 +1,13 @@
 project(${bare_name}-common CXX C)
 
+find_package(Readline 6.3 REQUIRED)
+
 add_library(${PROJECT_NAME}
 	commandline.cpp
 	settings.cpp
 	validationerror.cpp
 	common_info.cpp
+	readline_wrapper.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -12,11 +15,13 @@ target_include_directories(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ${YAMLCPP_INCLUDE_DIR}
+	PRIVATE ${Readline_INCLUDE_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${YAMLCPP_LIBRARY}
+	PRIVATE ${Readline_LIBRARY}
 )
 
 #install(TARGETS ${PROJECT_NAME}

@@ -44,6 +44,29 @@ namespace din {
 			}
 			return result;
 		}
+
+		std::vector<std::string>* find_and_refresh_in_cache (boost::circular_buffer<std::pair<std::string, std::vector<std::string>>>& parCache, const std::string& parCurrPath) {
+			using CachedItemType = std::pair<std::string, std::vector<std::string>>;
+
+			//Check if requested item is already cached
+			auto it_found = std::find_if(parCache.begin(), parCache.end(), [&parCurrPath](const CachedItemType& itm) { return itm.first == parCurrPath; });
+			if (it_found != parCache.end()) {
+				CachedItemType tmp;
+				std::swap(tmp, *it_found);
+				assert(it_found->first.empty());
+				assert(it_found->second.empty());
+				assert(tmp.first == parCurrPath);
+				parCache.erase(it_found);
+				assert(parCache.size() < g_max_cached_lists);
+				parCache.push_back(std::move(tmp));
+				assert(not parCache.empty());
+				assert(parCache.back().first == parCurrPath);
+				return &parCache.back().second;
+			}
+			else {
+				return nullptr;
+			}
+		}
 	} //unnamed namespace
 
 	ListDirContent::ListDirContent (DBSource* parDB) :
@@ -54,22 +77,11 @@ namespace din {
 	}
 
 	auto ListDirContent::ls (const GenericPath& parDir) const -> const ListType& {
-		const auto curr_path = parDir.to_string();
-
-		//Check if requested item is already cached
-		auto it_found = std::find_if(m_cache.begin(), m_cache.end(), [&curr_path](const CachedItemType& itm) { return itm.first == curr_path; });
-		if (it_found != m_cache.end()) {
-			CachedItemType tmp;
-			std::swap(tmp, *it_found);
-			assert(it_found->first.empty());
-			assert(it_found->second.empty());
-			assert(tmp.first == curr_path);
-			m_cache.erase(it_found);
-			assert(m_cache.size() < g_max_cached_lists);
-			m_cache.push_back(std::move(tmp));
-			assert(not m_cache.empty());
-			assert(m_cache.back().first == curr_path);
-			return m_cache.back().second;
+		const std::string curr_path = parDir.to_string();
+		{
+			const auto* cached_item = find_and_refresh_in_cache(m_cache, curr_path);
+			if (cached_item)
+				return *cached_item;
 		}
 
 		//Requested item is not cached, so we need to query the db now
@@ -84,6 +96,32 @@ namespace din {
 			const auto set_id = boost::lexical_cast<uint32_t>(parDir[0]);
 			auto files_info = m_db->file_details<FileDetail_Path>(set_id, parDir.level(), path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(files_info)));
+		}
+		assert(not m_cache.empty());
+		assert(m_cache.back().first == curr_path);
+		return m_cache.back().second;
+	}
+
+	auto ListDirContent::ls ( GenericPath parDir, const std::string& parStartWith ) const -> const ListType& {
+		parDir.push_piece(parStartWith);
+		const std::string curr_path = parDir.to_string();
+
+		{
+			const auto* cached_item = find_and_refresh_in_cache(m_cache, curr_path);
+			if (cached_item)
+				return *cached_item;
+		}
+
+		if ("/" == curr_path) {
+			assert(false); //not implemented
+		}
+		else {
+			const auto start_from = curr_path.find('/', 1);
+			auto path_prefix = boost::string_ref(curr_path).substr(start_from == curr_path.npos ? curr_path.size() : start_from + 1);
+			const auto set_id = boost::lexical_cast<uint32_t>(parDir[0]);
+			assert(parDir.level() > 0);
+			auto file_list = m_db->paths_starting_by(set_id, parDir.level() - 1, path_prefix);
+			m_cache.push_back(std::make_pair(curr_path, file_list));
 		}
 		assert(not m_cache.empty());
 		assert(m_cache.back().first == curr_path);

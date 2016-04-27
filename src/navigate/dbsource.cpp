@@ -153,4 +153,24 @@ namespace din {
 			}
 		}
 	}
+
+	std::vector<std::string> DBSource::paths_starting_by (uint32_t parGroupID, uint16_t parLevel, boost::string_ref parPath) {
+		std::ostringstream oss;
+		oss << "SELECT \"path\" FROM \"files\" WHERE \"group_id\"=$1 AND \"level\"=$2 AND str_begins_with(\"path\", COALESCE($3, '')) ORDER BY \"is_directory\" DESC, \"path\" ASC LIMIT " << g_files_query_limit << ';';
+
+		auto& conn = get_conn();
+		auto result = conn.query(
+			oss.str(),
+			parGroupID,
+			parLevel,
+			parPath
+		);
+		std::vector<std::string> retval;
+		retval.reserve(retval.size());
+		for (auto row : result) {
+			assert(not row.empty());
+			retval.push_back(row[0]);
+		}
+		return retval;
+	}
 } //namespace din
