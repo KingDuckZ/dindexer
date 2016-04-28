@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "genericpath.hpp"
+#include "entrypath.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <boost/spirit/include/qi_core.hpp>
 #include <boost/spirit/include/qi_parse.hpp>
@@ -67,7 +67,7 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	void GenericPath::push_piece (const std::string& parPiece) {
+	void EntryPath::push_piece (const std::string& parPiece) {
 		using boost::spirit::qi::parse;
 
 		PathGrammar<std::string::const_iterator> gramm;
@@ -105,18 +105,18 @@ namespace din {
 		}
 	}
 
-	std::string GenericPath::to_string() const {
+	std::string EntryPath::to_string() const {
 		std::ostringstream oss;
 		oss << '/';
 		boost::copy(m_stack, infix_ostream_iterator<std::string>(oss, "/"));
 		return oss.str();
 	}
 
-	uint16_t GenericPath::level() const {
+	uint16_t EntryPath::level() const {
 		return static_cast<uint16_t>(m_stack.size());
 	}
 
-	const std::string& GenericPath::operator[] (std::size_t parIndex) const {
+	const std::string& EntryPath::operator[] (std::size_t parIndex) const {
 		assert(parIndex < level());
 		return m_stack[parIndex];
 	}

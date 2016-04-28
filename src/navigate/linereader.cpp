@@ -18,7 +18,7 @@
 #include "linereader.hpp"
 #include "listdircontent.hpp"
 #include "dindexer-common/readline_wrapper.hpp"
-#include "genericpath.hpp"
+#include "entrypath.hpp"
 #include <cassert>
 #include <ciso646>
 #include <vector>
@@ -27,7 +27,7 @@
 namespace din {
 	namespace {
 		std::vector<std::string> list_matches (const ListDirContent& parLS, const std::string& parCurrPath, const std::string& parPrefix) {
-			GenericPath full_prefix;
+			EntryPath full_prefix;
 			if (not parCurrPath.empty()) {
 				full_prefix.push_piece(parCurrPath);
 			}

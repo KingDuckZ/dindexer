@@ -23,9 +23,9 @@
 #include <cstdint>
 
 namespace din {
-	class GenericPath {
+	class EntryPath {
 	public:
-		GenericPath ( void ) = default;
+		EntryPath ( void ) = default;
 
 		void push_piece ( const std::string& parPiece );
 		std::string to_string ( void ) const;

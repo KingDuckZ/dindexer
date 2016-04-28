@@ -16,7 +16,7 @@
  */
 
 #include "listdircontent.hpp"
-#include "genericpath.hpp"
+#include "entrypath.hpp"
 #include "dbsource.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <cassert>
@@ -76,7 +76,7 @@ namespace din {
 		assert(m_db);
 	}
 
-	auto ListDirContent::ls (const GenericPath& parDir) const -> const ListType& {
+	auto ListDirContent::ls (const EntryPath& parDir) const -> const ListType& {
 		const std::string curr_path = parDir.to_string();
 		{
 			const auto* cached_item = find_and_refresh_in_cache(m_cache, curr_path);
@@ -102,7 +102,7 @@ namespace din {
 		return m_cache.back().second;
 	}
 
-	auto ListDirContent::ls ( GenericPath parDir, const std::string& parStartWith ) const -> const ListType& {
+	auto ListDirContent::ls ( EntryPath parDir, const std::string& parStartWith ) const -> const ListType& {
 		parDir.push_piece(parStartWith);
 		const std::string curr_path = parDir.to_string();
 

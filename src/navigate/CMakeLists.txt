@@ -4,7 +4,7 @@ add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
 	commandprocessor.cpp
-	genericpath.cpp
+	entrypath.cpp
 	dbsource.cpp
 	linereader.cpp
 	listdircontent.cpp

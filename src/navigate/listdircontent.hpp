@@ -24,7 +24,7 @@
 #include <vector>
 
 namespace din {
-	class GenericPath;
+	class EntryPath;
 	class DBSource;
 
 	class ListDirContent {
@@ -34,8 +34,8 @@ namespace din {
 		explicit ListDirContent ( DBSource* parDB );
 		~ListDirContent ( void ) noexcept = default;
 
-		const ListType& ls ( const GenericPath& parDir ) const;
-		const ListType& ls ( GenericPath parDir, const std::string& parStartWith ) const;
+		const ListType& ls ( const EntryPath& parDir ) const;
+		const ListType& ls ( EntryPath parDir, const std::string& parStartWith ) const;
 
 	private:
 		mutable boost::circular_buffer<CachedItemType> m_cache;
