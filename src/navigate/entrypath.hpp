@@ -32,6 +32,10 @@ namespace din {
 		uint16_t level ( void ) const;
 		const std::string& operator[] ( std::size_t parIndex ) const;
 
+		uint32_t group_id ( void ) const;
+		const std::string& group_id_as_string ( void ) const;
+		std::string file_path ( void ) const;
+
 	private:
 		using StackType = std::vector<std::string>;
 

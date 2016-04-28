@@ -27,6 +27,8 @@
 #include <boost/phoenix/bind/bind_function.hpp>
 #include <boost/phoenix/operator.hpp>
 #include <cassert>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/iterator_range_core.hpp>
 
 namespace qi = boost::spirit::qi;
 
@@ -119,5 +121,29 @@ namespace din {
 	const std::string& EntryPath::operator[] (std::size_t parIndex) const {
 		assert(parIndex < level());
 		return m_stack[parIndex];
+	}
+
+	uint32_t EntryPath::group_id() const {
+		if (m_stack.empty())
+			return 0;
+		else
+			return boost::lexical_cast<uint32_t>(m_stack.front());
+	}
+
+	const std::string& EntryPath::group_id_as_string () const {
+		static const std::string empty_string;
+		if (m_stack.empty())
+			return empty_string;
+		else
+			return m_stack.front();
+	}
+
+	std::string EntryPath::file_path() const {
+		if (m_stack.empty())
+			return std::string();
+
+		std::ostringstream oss;
+		boost::copy(boost::make_iterator_range(m_stack.begin() + 1, m_stack.end()), infix_ostream_iterator<std::string>(oss, "/"));
+		return oss.str();
 	}
 } //namespace din

@@ -24,7 +24,6 @@
 #include <boost/range/algorithm/copy.hpp>
 #include <sstream>
 #include <ciso646>
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
 
 namespace din {
@@ -91,9 +90,8 @@ namespace din {
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(sets_info)));
 		}
 		else {
-			const auto start_from = curr_path.find('/', 1);
-			auto path_prefix = boost::string_ref(curr_path).substr(start_from == curr_path.npos ? curr_path.size() : start_from + 1);
-			const auto set_id = boost::lexical_cast<uint32_t>(parDir[0]);
+			auto path_prefix = parDir.file_path();
+			const auto set_id = parDir.group_id();
 			auto files_info = m_db->file_details<FileDetail_Path>(set_id, parDir.level(), path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(files_info)));
 		}
@@ -116,10 +114,9 @@ namespace din {
 			assert(false); //not implemented
 		}
 		else {
-			const auto start_from = curr_path.find('/', 1);
-			auto path_prefix = boost::string_ref(curr_path).substr(start_from == curr_path.npos ? curr_path.size() : start_from + 1);
-			const auto set_id = boost::lexical_cast<uint32_t>(parDir[0]);
 			assert(parDir.level() > 0);
+			const auto set_id = parDir.group_id();
+			const auto path_prefix = parDir.file_path();
 			auto file_list = m_db->paths_starting_by(set_id, parDir.level() - 1, path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, file_list));
 		}
