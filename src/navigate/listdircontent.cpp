@@ -84,7 +84,7 @@ namespace din {
 		}
 
 		//Requested item is not cached, so we need to query the db now
-		if ("/" == curr_path) {
+		if (parDir.points_to_group()) {
 			auto sets_ids = m_db->sets();
 			auto sets_info = m_db->set_details<SetDetail_ID, SetDetail_Desc, SetDetail_CreeationDate>(sets_ids);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(sets_info)));
@@ -92,12 +92,10 @@ namespace din {
 		else {
 			auto path_prefix = parDir.file_path();
 			const auto set_id = parDir.group_id();
-			auto files_info = m_db->file_details<FileDetail_Path>(set_id, parDir.level(), path_prefix);
+			auto files_info = m_db->file_details<FileDetail_Path>(set_id, parDir.level() + 1, path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(files_info)));
 		}
-		assert(not m_cache.empty());
-		assert(m_cache.back().first == curr_path);
-		return m_cache.back().second;
+		return last_cached_item(curr_path);
 	}
 
 	auto ListDirContent::ls ( EntryPath parDir, const std::string& parStartWith ) const -> const ListType& {
@@ -110,18 +108,24 @@ namespace din {
 				return *cached_item;
 		}
 
-		if ("/" == curr_path) {
+		if (parDir.points_to_group()) {
 			assert(false); //not implemented
 		}
 		else {
-			assert(parDir.level() > 0);
 			const auto set_id = parDir.group_id();
 			const auto path_prefix = parDir.file_path();
-			auto file_list = m_db->paths_starting_by(set_id, parDir.level() - 1, path_prefix);
+			auto file_list = m_db->paths_starting_by(set_id, parDir.level(), path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, file_list));
 		}
-		assert(not m_cache.empty());
-		assert(m_cache.back().first == curr_path);
-		return m_cache.back().second;
+		return last_cached_item(curr_path);
 	}
+
+	auto ListDirContent::last_cached_item (const std::string& parCurrPath) const -> const ListType& {
+		assert(not m_cache.empty());
+		assert(m_cache.back().first == parCurrPath);
+#ifdef NDEBUG
+		(void)parCurrPath;
+#endif
+		return m_cache.back().second;
+	};
 } //namespace din

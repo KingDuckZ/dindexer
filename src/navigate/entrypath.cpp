@@ -115,7 +115,7 @@ namespace din {
 	}
 
 	uint16_t EntryPath::level() const {
-		return static_cast<uint16_t>(m_stack.size());
+		return (m_stack.empty() ? static_cast<uint16_t>(0) : static_cast<uint16_t>(m_stack.size() - 1));
 	}
 
 	const std::string& EntryPath::operator[] (std::size_t parIndex) const {
@@ -145,5 +145,9 @@ namespace din {
 		std::ostringstream oss;
 		boost::copy(boost::make_iterator_range(m_stack.begin() + 1, m_stack.end()), infix_ostream_iterator<std::string>(oss, "/"));
 		return oss.str();
+	}
+
+	bool EntryPath::points_to_group(void) const {
+		return m_stack.empty();
 	}
 } //namespace din

@@ -38,6 +38,8 @@ namespace din {
 		const ListType& ls ( EntryPath parDir, const std::string& parStartWith ) const;
 
 	private:
+		const ListType& last_cached_item ( const std::string& parCurrPath ) const;
+
 		mutable boost::circular_buffer<CachedItemType> m_cache;
 		DBSource* m_db;
 	};
