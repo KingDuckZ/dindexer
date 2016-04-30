@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
+#include <assert.h>
 
 /* This program can be run either with the name of a subcommand as its first
  * parameter (eg: dindexer locate), plus some optional parameters that are just
@@ -87,6 +88,7 @@ int main (int parArgc, char* parArgv[]) {
 		specified_action = parArgv[1];
 	else
 		specified_action = "";
+	assert((actions and actions_count) or (not actions and not actions_count));
 	selected_action = foreach_avail_action(&same_action, actions, actions_count, specified_action);
 
 	if (actions_count == selected_action) {

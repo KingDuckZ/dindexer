@@ -24,6 +24,7 @@
 #include <iso646.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <assert.h>
 
 typedef struct ActionListStruct {
 	char** list;
@@ -39,10 +40,14 @@ static int strcmp_wrapper ( const void* parA, const void* parB );
 void find_actions (char*** parOut, size_t* parCount) {
 	ActionList list;
 
+	assert(parOut);
+	assert(parCount);
+
 	list.count = 0;
 	foreach_dir(&increase_actionlist, &list);
 	if (0 == list.count) {
 		*parOut = NULL;
+		*parCount = 0;
 		return;
 	}
 
