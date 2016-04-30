@@ -26,6 +26,7 @@ namespace din {
 	class EntryPath {
 	public:
 		EntryPath ( void ) = default;
+		explicit EntryPath ( const std::string& parPiece );
 
 		void push_piece ( const std::string& parPiece );
 		std::string to_string ( void ) const;

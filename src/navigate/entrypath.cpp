@@ -69,6 +69,10 @@ namespace din {
 		}
 	} //unnamed namespace
 
+	EntryPath::EntryPath (const std::string& parPiece) {
+		this->push_piece(parPiece);
+	}
+
 	void EntryPath::push_piece (const std::string& parPiece) {
 		using boost::spirit::qi::parse;
 
@@ -119,7 +123,7 @@ namespace din {
 	}
 
 	const std::string& EntryPath::operator[] (std::size_t parIndex) const {
-		assert(parIndex < level());
+		assert(parIndex < m_stack.size());
 		return m_stack[parIndex];
 	}
 

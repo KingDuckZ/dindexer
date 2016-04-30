@@ -45,6 +45,9 @@ namespace dinlib {
 			static std::size_t list_index;
 			static std::vector<std::string> possible_values;
 
+			//see: https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC28
+			rl_completion_suppress_append = 1;
+
 			if (not parState) {
 				list_index = 0;
 				possible_values = g_current_wrapper->matches(parText);

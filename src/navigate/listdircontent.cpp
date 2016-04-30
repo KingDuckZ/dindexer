@@ -99,6 +99,7 @@ namespace din {
 	}
 
 	auto ListDirContent::ls ( EntryPath parDir, const std::string& parStartWith ) const -> const ListType& {
+		const auto return_level = parDir.level();
 		parDir.push_piece(parStartWith);
 		const std::string curr_path = parDir.to_string();
 
@@ -115,6 +116,9 @@ namespace din {
 			const auto set_id = parDir.group_id();
 			const auto path_prefix = parDir.file_path();
 			auto file_list = m_db->paths_starting_by(set_id, parDir.level(), path_prefix);
+			for (auto& file_item : file_list) {
+				file_item = EntryPath(file_item)[return_level];
+			}
 			m_cache.push_back(std::make_pair(curr_path, file_list));
 		}
 		return last_cached_item(curr_path);

@@ -156,7 +156,14 @@ namespace din {
 
 	std::vector<std::string> DBSource::paths_starting_by (uint32_t parGroupID, uint16_t parLevel, boost::string_ref parPath) {
 		std::ostringstream oss;
-		oss << "SELECT \"path\" FROM \"files\" WHERE \"group_id\"=$1 AND \"level\"=$2 AND str_begins_with(\"path\", COALESCE($3, '')) ORDER BY \"is_directory\" DESC, \"path\" ASC LIMIT " << g_files_query_limit << ';';
+		oss << "SELECT \"path\" ||\n" <<
+			"(SELECT CASE \"is_directory\"\n" <<
+			"WHEN TRUE THEN '/'\n" <<
+			"ELSE ''\n" <<
+			"END) as path FROM \"files\" WHERE \"group_id\"=$1 AND " <<
+			"\"level\"=$2 AND str_begins_with(\"path\", COALESCE($3, '')) " <<
+			"ORDER BY \"is_directory\" DESC, \"path\" ASC LIMIT " <<
+			g_files_query_limit << ';';
 
 		auto& conn = get_conn();
 		auto result = conn.query(
