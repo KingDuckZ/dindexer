@@ -13,6 +13,7 @@ Latest stable release is __0.1.5b__.
 Please support the development of this software if you like it!
 
 ###	Development news		###
+[![dindexer on Diaspora*](http://i.imgur.com/DcBZykA.png)](https://mondiaspora.net/tags/dindexer)
 Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project!
 
 ##   What is dindexer?   ##

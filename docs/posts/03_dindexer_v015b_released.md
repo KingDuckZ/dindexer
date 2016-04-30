@@ -1,7 +1,7 @@
-#     v0.1.5b released     #
-##    Release notes       ##
+#     dindexer v0.1.5b released     #
+##    Release notes                ##
 
-It's been a while since the last version number change, and as you might already know from reading the README file v0.1.4b had a major flaw and it shouldn't be used at all. I've been exceptionally busy between that release and now, thus the long wait. dindexer however has not been put aside during this time! Here is what has changed in this release:
+It's been a while since the last version number change, and as you might already know from reading the README file v0.1.4b had a major flaw and it shouldn't be used at all. I've been exceptionally busy between that release and now, thus the long wait. #dindexer however has not been put aside during this time! Here is what has changed in this release:
 
 *Features and usability*
 
@@ -30,7 +30,7 @@ It's been a while since the last version number change, and as you might already
 * Many improvements in the code
 * Improve the build system (cmake scripts)
 
-##    Final notes         ##
+##    Final notes                  ##
 
 As you might guess from the "b" in the version number this is still an early release, and there is still a lot more I want to do.
 
