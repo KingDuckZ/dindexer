@@ -5,7 +5,7 @@
 [![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
 
 ####	Latest release		###
-Latest release is __0.1.4__. However there are several known problems with that release. Please use the latest version from master instead.
+Latest stable release is __0.1.5b__.
 
 ####	Flattr				####
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software)
