@@ -29,7 +29,7 @@ incl_extensions="-name *.$(join " -o -name *." "${include_extensions[@]}")"
 
 #Don't expand * - see http://stackoverflow.com/questions/102049/how-do-i-escape-the-wildcard-asterisk-character-in-bash
 set -f
-find . \( $excl_paths -o $incl_extensions \) -a -type f $excl_files > cscope.files
+find . \( $excl_paths -o \( $incl_extensions \) \) -a -type f $excl_files > cscope.files
 set +f
 
 exec cscope -b -q
