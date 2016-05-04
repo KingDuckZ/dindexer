@@ -16,6 +16,7 @@
  */
 
 #include "commandline.hpp"
+#include "tag_postgres.hpp"
 #include <iostream>
 #include <ciso646>
 
@@ -31,6 +32,16 @@ int main (int parArgc, char* parArgv[]) {
 	catch (const std::invalid_argument& err) {
 		std::cerr << err.what() << "\nUse --help for help" << std::endl;
 		return 2;
+	}
+
+	if (not vm.count("ids")) {
+		std::cerr << "No IDs specified\n";
+		return 2;
+	}
+
+	const auto ids = vm["ids"].as<std::vector<uint64_t>>();
+	for (auto id : ids) {
+		std::cout << id << '\n';
 	}
 	return 0;
 }

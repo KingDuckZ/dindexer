@@ -19,6 +19,7 @@
 #include "dindexer-common/commandline.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
+#include <vector>
 
 namespace po = boost::program_options;
 
@@ -31,18 +32,18 @@ namespace din {
 			//("option2", po::value<int>(), "Help message")
 		//;
 
-		//po::options_description positional_options("Positional options");
-		//positional_options.add_options()
-			//("pos_option", po::value<std::string>(), "pos_option description")
-		//;
+		po::options_description positional_options("Positional options");
+		positional_options.add_options()
+			("ids", po::value<std::vector<uint64_t>>(), "pos_option description")
+		;
 
 		const auto desc = dinlib::get_default_commandline();
 		po::options_description all("Available options");
-		//po::positional_options_description pd;
-		all.add(desc)./*add(positional_options).*/add(set_options);
-		//pd.add("pos_option", 1);//.add("pos_option2", 1);
+		po::positional_options_description pd;
+		all.add(desc).add(positional_options).add(set_options);
+		pd.add("ids", -1);//.add("pos_option2", 1);
 		try {
-			po::store(po::command_line_parser(parArgc, parArgv).options(all)/*.positional(pd)*/.run(), parVarMap);
+			po::store(po::command_line_parser(parArgc, parArgv).options(all).positional(pd).run(), parVarMap);
 		}
 		catch (const po::validation_error& err) {
 			throw dinlib::ValidationError(err);
@@ -50,7 +51,7 @@ namespace din {
 
 		po::notify(parVarMap);
 
-		if (dinlib::manage_common_commandline(std::cout, ACTION_NAME, "[options...] <search-path>", parVarMap, {std::cref(desc), std::cref(set_options)})) {
+		if (dinlib::manage_common_commandline(std::cout, ACTION_NAME, "[options...] ids...", parVarMap, {std::cref(desc), std::cref(set_options)})) {
 			return true;
 		}
 
