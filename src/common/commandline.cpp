@@ -19,9 +19,12 @@
 #include "dindexerConfig.h"
 #include "helpers/lengthof.h"
 #include "helpers/stringize.h"
+#include "helpers/infix_iterator.hpp"
 #include <boost/program_options.hpp>
 #include <ostream>
 #include <utility>
+#include <cstdint>
+#include <algorithm>
 
 namespace po = boost::program_options;
 
@@ -55,7 +58,10 @@ namespace dinlib {
 			parStream << "*******************\n";
 			parStream << '\n';
 #endif
-			parStream << PROGRAM_NAME << " Copyright (C) 2015  Michele Santullo\n";
+			parStream << PROGRAM_NAME << " Copyright (C) ";
+			const uint32_t copyright_years[] = { COPYRIGHT_YEARS_LIST };
+			std::copy(copyright_years, copyright_years + lengthof(copyright_years), infix_ostream_iterator<uint32_t>(parStream, ", "));
+			parStream << "  Michele Santullo\n";
 			parStream << "This program comes with ABSOLUTELY NO WARRANTY.\n"; //for details type `show w'.
 			parStream << "This is free software, and you are welcome to\n";
 			parStream << "redistribute it under certain conditions.\n"; //type `show c' for details.
