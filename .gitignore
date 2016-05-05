@@ -4,3 +4,8 @@ cscope.out
 cscope.files
 tags
 autom4te.cache/
+.idea/
+.kdev4/
+*.kdev4
+*.old
+*.orig
