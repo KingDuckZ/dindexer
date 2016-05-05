@@ -16,9 +16,12 @@
  */
 
 #include "commandline.hpp"
-#include "tag_postgres.hpp"
+#include "split_tags.hpp"
 #include <iostream>
 #include <ciso646>
+
+namespace {
+} //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
@@ -42,6 +45,13 @@ int main (int parArgc, char* parArgv[]) {
 	const auto ids = vm["ids"].as<std::vector<uint64_t>>();
 	for (auto id : ids) {
 		std::cout << id << '\n';
+	}
+
+	const auto master_tags_string = vm["tags"].as<std::string>();
+	std::vector<boost::string_ref> tags = din::split_tags(master_tags_string);
+
+	for (auto tag : tags) {
+		std::cout << '"' << tag << "\"\n";
 	}
 	return 0;
 }
