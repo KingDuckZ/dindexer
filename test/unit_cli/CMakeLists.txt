@@ -4,6 +4,8 @@ add_executable(${PROJECT_NAME}
 	${CMAKE_SOURCE_DIR}/src/main/damerau_levenshtein.c
 	${CMAKE_SOURCE_DIR}/src/main/utf8_ops.c
 	test_damerau_levenshtein.cpp
+	${CMAKE_SOURCE_DIR}/src/tag/split_tags.cpp
+	test_tag_splitting.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

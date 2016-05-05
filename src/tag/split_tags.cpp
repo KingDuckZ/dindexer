@@ -22,6 +22,7 @@
 #include <boost/utility/string_ref.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <ciso646>
 
 namespace din {
 	std::vector<boost::string_ref> split_tags (const std::string& parCommaSeparatedList) {
