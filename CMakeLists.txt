@@ -82,7 +82,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
 )
 
-target_compile_definitions(${PROJECT_NAME}
+target_compile_features(${PROJECT_NAME}
 	INTERFACE cxx_nullptr
 	INTERFACE cxx_range_for
 	INTERFACE cxx_lambdas
