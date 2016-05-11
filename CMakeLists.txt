@@ -119,6 +119,7 @@ add_subdirectory(src/pq)
 add_subdirectory(src/common)
 add_subdirectory(src/machinery)
 add_subdirectory(lib/pbl)
+add_subdirectory(lib/glob2regex)
 
 #Actions
 add_subdirectory(src/main)
