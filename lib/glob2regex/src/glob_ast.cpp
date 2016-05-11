@@ -31,6 +31,12 @@
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/operator.hpp>
 
+//#define AST_DEBUG_OUTPUT
+
+#if defined(AST_DEBUG_OUTPUT)
+#	include <iostream>
+#endif
+
 namespace qi = boost::spirit::qi;
 
 namespace g2r {
@@ -41,10 +47,10 @@ namespace g2r {
 			~GlobGrammar ( void ) = default;
 
 			qi::rule<Iterator, AstType()> start;
+			qi::rule<Iterator, AstType()> alternation_list;
 			qi::rule<Iterator, GlobAlternation()> alternation;
 			qi::rule<Iterator, GlobGroup()> group;
 			qi::rule<Iterator, std::string()> literal;
-			qi::rule<Iterator, std::vector<std::vector<GlobNode>>()> comma_list;
 			qi::rule<Iterator, std::string()> single_char_comma_list;
 			qi::rule<Iterator, char()> escaped_glob;
 			qi::rule<Iterator, GlobJolly()> jolly;
@@ -69,9 +75,9 @@ namespace g2r {
 			const uint16_t uint16_one = 1;
 
 			start = *(group | alternation | literal | jolly);
-			comma_list = start % ",";
+			alternation_list = *(group | alternation | as_string[+(~char_("{}[]*\\+? ,") | escaped_glob)] | jolly);
 			single_char_comma_list = ~char_(special_char_list) % ",";
-			alternation = eps >> lit("{") >> comma_list >> "}";
+			alternation = eps >> lit("{") >> (alternation_list % ",") >> "}";
 			group =
 				(lit("[") >> matches[lit("!")] >> as_string[-string("]") >> *(~char_(']') | escaped_glob)] >> "]") |
 				(attr(false) >> lit("{") >> single_char_comma_list >> lit("}"));
@@ -96,12 +102,14 @@ namespace g2r {
 			glob_ast
 		);
 
-		std::cout << "make_ast() - parse_ret = ";
+#if defined(AST_DEBUG_OUTPUT)
+		std::cout << "make_ast(\"" << parGlob << "\") - parse_ret = ";
 		if (parse_ret)
 			std::cout << "true";
 		else
 			std::cout << "false";
 		std::cout << ", glob_ast.size() = " << glob_ast.size() << std::endl;
+#endif
 
 		return glob_ast;
 	}

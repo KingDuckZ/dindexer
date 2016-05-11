@@ -26,4 +26,39 @@ TEST(glob2regex, convert) {
 		const auto auto_regex = g2r::convert(glob);
 		EXPECT_EQ(expected_regex, auto_regex);
 	}
+
+	{
+		const std::string glob = "*.jp*g";
+		const std::string expected_regex = "[^/]*\\.jp[^/]*g$";
+		const auto auto_regex = g2r::convert(glob);
+		EXPECT_EQ(expected_regex, auto_regex);
+	}
+
+	{
+		const std::string glob = "/home/duckz/sample_file.bin";
+		const std::string expected_regex = "/home/duckz/sample_file\\.bin$";
+		const auto auto_regex = g2r::convert(glob);
+		EXPECT_EQ(expected_regex, auto_regex);
+	}
+
+	{
+		const std::string glob = "**/main.{c,h}pp";
+		const std::string expected_regex = ".*/main\\.[ch]pp$";
+		const auto auto_regex = g2r::convert(glob);
+		EXPECT_EQ(expected_regex, auto_regex);
+	}
+
+	{
+		const std::string glob = "photo_???.JPG";
+		const std::string expected_regex = "photo_[^/][^/][^/]\\.JPG$";
+		const auto auto_regex = g2r::convert(glob);
+		EXPECT_EQ(expected_regex, auto_regex);
+	}
+
+	{
+		const std::string glob = "nested_{example,*sample,test}";
+		const std::string expected_regex = "nested_(?:example|[^/]*sample|test)$";
+		const auto auto_regex = g2r::convert(glob);
+		EXPECT_EQ(expected_regex, auto_regex);
+	}
 }
