@@ -20,6 +20,7 @@
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
 #include "hash.hpp"
+#include "glob2regex/glob2regex.hpp"
 #include <iostream>
 #include <ciso646>
 #include <iterator>
@@ -81,7 +82,8 @@ int main (int parArgc, char* parArgv[]) {
 			results = din::locate_in_db(settings.db, hash);
 		}
 		else {
-			results = din::locate_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+			const auto search_regex = g2r::convert(vm["substring"].as<std::string>());
+			results = din::locate_in_db(settings.db, search_regex, not not vm.count("case-insensitive"));
 		}
 		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
 	}

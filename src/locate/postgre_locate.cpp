@@ -19,8 +19,6 @@
 #include "pq/connection.hpp"
 #include "dindexer-machinery/tiger.hpp"
 #include <utility>
-#include <sstream>
-#include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -73,27 +71,17 @@ namespace din {
 	} //unnamed namespace
 
 	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
-		using boost::string_ref;
-		namespace ba = boost::algorithm;
-
 		auto conn = make_pq_conn(parDB);
 
 		const auto clean_string_with_quotes = conn.escaped_literal(parSearch);
-		const auto clean_string = string_ref(clean_string_with_quotes).substr(1, clean_string_with_quotes.size() - 2);
 
-		std::ostringstream oss;
-		oss << "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE ";
-		if (parCaseInsensitive) {
-			std::string lower(clean_string);
-			ba::to_lower(lower);
-			oss << "LOWER(\"path\") LIKE '%" << lower << "%' ";
-		}
-		else {
-			oss << "\"path\" LIKE '%" << clean_string << "%' ";
-		}
-		oss << "LIMIT " << g_max_results << ';';
+		const std::string search_regex = (parCaseInsensitive ? "(?i)" : "") + parSearch;
+		const std::string query =
+			std::string("SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1 LIMIT ") +
+			boost::lexical_cast<std::string>(g_max_results) +
+			";";
 
-		auto result = conn.query(oss.str());
+		auto result = conn.query(query, search_regex);
 		return file_result_to_vec(std::move(result));
 	}
 
