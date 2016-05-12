@@ -61,4 +61,14 @@ TEST(glob2regex, convert) {
 		const auto auto_regex = g2r::convert(glob);
 		EXPECT_EQ(expected_regex, auto_regex);
 	}
+
+	{
+		const std::string glob = "nested_{example,*sample,test";
+		EXPECT_THROW(g2r::convert(glob), g2r::ParsingError);
+	}
+
+	{
+		const std::string glob = "]";
+		EXPECT_THROW(g2r::convert(glob), g2r::ParsingError);
+	}
 }

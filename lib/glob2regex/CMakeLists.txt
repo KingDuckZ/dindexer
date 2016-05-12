@@ -7,6 +7,7 @@ add_library(${PROJECT_NAME}
 	src/glob2regex.cpp
 	src/glob_ast.cpp
 	src/render_ast.cpp
+	src/exceptions.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

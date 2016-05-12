@@ -16,6 +16,7 @@
  */
 
 #include "glob_ast.hpp"
+#include "glob2regex/exceptions.hpp"
 #include <boost/spirit/include/qi.hpp>
 //#include <boost/spirit/include/qi_core.hpp>
 //#include <boost/spirit/include/qi_parse.hpp>
@@ -30,6 +31,7 @@
 #include <boost/phoenix/stl/container.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/operator.hpp>
+#include <ciso646>
 
 //#define AST_DEBUG_OUTPUT
 
@@ -110,6 +112,9 @@ namespace g2r {
 			std::cout << "false";
 		std::cout << ", glob_ast.size() = " << glob_ast.size() << std::endl;
 #endif
+
+		if (not parse_ret or parGlob.end() != glob_beg)
+			throw ParsingError(parGlob, parGlob.end() - glob_beg);
 
 		return glob_ast;
 	}

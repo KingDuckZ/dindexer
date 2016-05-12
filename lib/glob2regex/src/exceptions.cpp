@@ -15,14 +15,35 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id98DC1C17239B4DD38C8697EC91BC3DA4
-#define id98DC1C17239B4DD38C8697EC91BC3DA4
-
 #include "glob2regex/exceptions.hpp"
-#include <string>
+#include <sstream>
+#include <cassert>
 
 namespace g2r {
-	std::string convert ( const std::string& parGlob );
+	namespace {
+		std::string compose_err_msg (const std::string& parGlob, unsigned int parPosition) {
+			assert(parPosition <= parGlob.size());
+
+			std::ostringstream oss;
+			oss << "Error parsing glob \"" << parGlob << "\" at character " << (parPosition + 1);
+
+			return oss.str();
+		}
+	} //unnamed namespace
+
+	ParsingError::ParsingError (const std::string& parGlob, unsigned int parPosition) :
+		std::runtime_error(compose_err_msg(parGlob, parPosition)),
+		m_glob(parGlob),
+		m_position(parPosition)
+	{
+	}
+
+	const std::string& ParsingError::glob() const noexcept {
+		return m_glob;
+	}
+
+	unsigned int ParsingError::position() const noexcept {
+		return m_position;
+	}
 } //namespace g2r
 
-#endif
