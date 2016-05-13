@@ -25,10 +25,10 @@ namespace ka = boost::spirit::karma;
 namespace g2r {
 	namespace {
 		template <typename Iterator>
-		struct RegexGen : ka::grammar<Iterator, AstType()> {
+		struct RegexGen : ka::grammar<Iterator, GlobExpression()> {
 			RegexGen ( void );
 
-			boost::spirit::karma::rule<Iterator, AstType()> start;
+			boost::spirit::karma::rule<Iterator, GlobExpression()> start;
 			boost::spirit::karma::rule<Iterator, GlobAlternation()> alternation;
 			boost::spirit::karma::rule<Iterator, GlobGroup()> group;
 			boost::spirit::karma::rule<Iterator, std::string()> literal;
@@ -63,7 +63,7 @@ namespace g2r {
 		}
 	} //unnamed namespace
 
-	std::string render_ast (const AstType& parAst) {
+	std::string render_ast (const GlobExpression& parAst) {
 		RegexGen<boost::spirit::ostream_iterator> gramm;
 		std::ostringstream oss;
 		oss << ka::format(gramm, parAst);

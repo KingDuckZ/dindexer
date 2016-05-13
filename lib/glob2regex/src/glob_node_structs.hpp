@@ -82,16 +82,16 @@ namespace g2r {
 		GlobJolly
 	>;
 
-	struct GlobAlternation {
-		std::vector<std::vector<GlobNode>> alternatives;
-	};
+	using GlobExpression = std::vector<GlobNode>;
 
-	using AstType = std::vector<GlobNode>;
+	struct GlobAlternation {
+		std::vector<GlobExpression> alternatives;
+	};
 } //namespace g2r
 
 BOOST_FUSION_ADAPT_STRUCT(
 	g2r::GlobAlternation,
-	(std::vector<std::vector<g2r::GlobNode>>, alternatives)
+	(std::vector<g2r::GlobExpression>, alternatives)
 );
 
 static_assert(g2r::GlobJolly(1, 2, false) < g2r::GlobJolly(0, 0, true), "Wrong less than");

@@ -23,7 +23,7 @@
 #include <string>
 
 namespace g2r {
-	std::string render_ast ( const AstType& parAst );
+	std::string render_ast ( const GlobExpression& parAst );
 } //namespace g2r
 
 #endif

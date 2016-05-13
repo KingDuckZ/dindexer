@@ -23,7 +23,7 @@
 #include <string>
 
 namespace g2r {
-	AstType make_ast ( const std::string& parGlob );
+	GlobExpression make_ast ( const std::string& parGlob );
 } //namespace g2r
 
 #endif

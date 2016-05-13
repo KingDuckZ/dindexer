@@ -44,12 +44,12 @@ namespace qi = boost::spirit::qi;
 namespace g2r {
 	namespace {
 		template <typename Iterator>
-		struct GlobGrammar : qi::grammar<Iterator, AstType()> {
+		struct GlobGrammar : qi::grammar<Iterator, GlobExpression()> {
 			GlobGrammar ( void );
 			~GlobGrammar ( void ) = default;
 
-			qi::rule<Iterator, AstType()> start;
-			qi::rule<Iterator, AstType()> alternation_list;
+			qi::rule<Iterator, GlobExpression()> start;
+			qi::rule<Iterator, GlobExpression()> alternation_list;
 			qi::rule<Iterator, GlobAlternation()> alternation;
 			qi::rule<Iterator, GlobGroup()> group;
 			qi::rule<Iterator, std::string()> literal;
@@ -92,11 +92,11 @@ namespace g2r {
 		}
 	} //unnamed namespace
 
-	AstType make_ast (const std::string& parGlob) {
+	GlobExpression make_ast (const std::string& parGlob) {
 		GlobGrammar<std::string::const_iterator> gramm;
 
 		auto glob_beg = parGlob.cbegin();
-		AstType glob_ast;
+		GlobExpression glob_ast;
 		const bool parse_ret = boost::spirit::qi::parse(
 			glob_beg,
 			parGlob.end(),
