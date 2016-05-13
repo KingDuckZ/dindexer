@@ -68,6 +68,10 @@ configure_file(
 	"${PROJECT_BINARY_DIR}/${bare_name}Config.h"
 )
 configure_file(
+	"${PROJECT_SOURCE_DIR}/src/gitinfo.h.in"
+	"${PROJECT_BINARY_DIR}/gitinfo.h"
+)
+configure_file(
 	"${PROJECT_SOURCE_DIR}/dindexer.sql.in"
 	"${PROJECT_BINARY_DIR}/dindexer.sql"
 )

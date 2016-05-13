@@ -17,6 +17,7 @@
 
 #include "dindexer-common/commandline.hpp"
 #include "dindexerConfig.h"
+#include "gitinfo.h"
 #include "helpers/lengthof.h"
 #include "helpers/stringize.h"
 #include "helpers/infix_iterator.hpp"

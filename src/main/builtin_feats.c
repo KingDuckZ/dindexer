@@ -18,6 +18,7 @@
 #include "builtin_feats.h"
 #include <stdio.h>
 #include "dindexerConfig.h"
+#include "gitinfo.h"
 #include "timestamp.h"
 
 void print_builtin_feats() {
