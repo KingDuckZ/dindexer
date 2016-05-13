@@ -19805,7 +19805,6 @@ fi
 
 
 CPPFLAGS="$CPPFLAGS -Isrc"
-if test "$CC" = "gcc" ; then
 	# always want reentrant funcs, not just thread-safe mode. -s
 	CFLAGS="$CFLAGS -O3 -Wall -Wpointer-arith -D_GNU_SOURCE -D_REENTRANT -fsigned-char"
 
@@ -20646,10 +20645,6 @@ case ".$ac_cv_cflags_gcc_option__funit_at_a_time" in
    fi
  ;;
 esac
-
-else
-	as_fn_error $? "Using $CC instead of gcc, currently not supported" "$LINENO" 5
-fi
 
 # Each case has an example of what target_os contains
 case ${target_os} in

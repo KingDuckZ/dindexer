@@ -13,7 +13,7 @@ function (import_libpqtypes_project PostgreSQL_INCLUDE_DIRS RELEASE_C_FLAGS)
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR ${libpqtypes_base_path}
 		PREFIX ${libpqtypes_prefix}
-		CONFIGURE_COMMAND ${libpqtypes_base_path}/configure --prefix ${libpqtypes_prefix} "CPPFLAGS=${libpqtypes_inc_dirs}"
+		CONFIGURE_COMMAND ${libpqtypes_base_path}/configure --prefix ${libpqtypes_prefix} "CC=${CMAKE_C_COMPILER}" "CPPFLAGS=${libpqtypes_inc_dirs}"
 			"CFLAGS=$<$<CONFIG:Release>:${RELEASE_C_FLAGS}>" --quiet
 		BUILD_COMMAND ${MAKE}
 		BUILD_IN_SOURCE 0
