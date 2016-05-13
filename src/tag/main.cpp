@@ -16,6 +16,9 @@
  */
 
 #include "commandline.hpp"
+#include "dindexer-common/settings.hpp"
+#include "dindexerConfig.h"
+#include "tag_postgres.hpp"
 #include "split_tags.hpp"
 #include <iostream>
 #include <ciso646>
@@ -42,6 +45,15 @@ int main (int parArgc, char* parArgv[]) {
 		return 2;
 	}
 
+	dinlib::Settings settings;
+	{
+		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
+		if (not loaded) {
+			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
+			return 1;
+		}
+	}
+
 	const auto ids = vm["ids"].as<std::vector<uint64_t>>();
 	for (auto id : ids) {
 		std::cout << id << '\n';
@@ -50,8 +62,6 @@ int main (int parArgc, char* parArgv[]) {
 	const auto master_tags_string = vm["tags"].as<std::string>();
 	std::vector<boost::string_ref> tags = din::split_tags(master_tags_string);
 
-	for (auto tag : tags) {
-		std::cout << '"' << tag << "\"\n";
-	}
+	din::tag_files(settings.db, ids, tags);
 	return 0;
 }
