@@ -39,13 +39,13 @@ namespace pq {
 		template <typename T>
 		struct get_pqlib_c_type_struct {
 			using type = T;
-			explicit get_pqlib_c_type_struct ( const Connection& ) { }
+			explicit get_pqlib_c_type_struct ( const Connection* ) { }
 			static type conv ( T parParam ) { return parParam; }
 		};
 		template <>
 		struct get_pqlib_c_type_struct<std::string> {
 			using type = const char*;
-			explicit get_pqlib_c_type_struct ( const Connection& ) { }
+			explicit get_pqlib_c_type_struct ( const Connection* ) { }
 			static type conv ( const std::string& parParam ) { return parParam.c_str(); }
 		};
 		template <>
@@ -54,13 +54,13 @@ namespace pq {
 			std::string m_str;
 		public:
 			using type = const char*;
-			explicit get_pqlib_c_type_struct ( const Connection& ) { }
+			explicit get_pqlib_c_type_struct ( const Connection* ) { }
 			type conv ( boost::string_ref parParam ) { m_str = std::string(parParam.data(), parParam.size()); return m_str.c_str(); }
 		};
 		template <>
 		struct get_pqlib_c_type_struct<bool> {
 			using type = int;
-			explicit get_pqlib_c_type_struct ( const Connection& ) { }
+			explicit get_pqlib_c_type_struct ( const Connection* ) { }
 			static type conv ( bool parParam ) { return (parParam ? 1 : 0); }
 		};
 		template <>
@@ -78,7 +78,7 @@ namespace pq {
 		public:
 			using type = const storage*;
 
-			explicit get_pqlib_c_type_struct ( const Connection& ) { }
+			explicit get_pqlib_c_type_struct ( const Connection* ) { }
 			type conv ( const std::chrono::system_clock::time_point& parParam );
 			~get_pqlib_c_type_struct ( void ) noexcept;
 		};
@@ -173,8 +173,10 @@ namespace pq {
 			storage m_storage;
 			PGParams m_par;
 
+			const Connection* m_conn;
+
 		protected:
-			explicit get_pqlib_c_type_struct_arr ( const Connection& parConn );
+			explicit get_pqlib_c_type_struct_arr ( const Connection* parConn );
 			~get_pqlib_c_type_struct_arr ( void ) noexcept;
 			void par_reset ( void );
 			const void* get_return_ptr ( void );
@@ -182,13 +184,13 @@ namespace pq {
 			void push_param ( const T& parParam ) {
 				static_assert(std::is_fundamental<T>::value or std::is_same<std::string, T>::value or std::is_same<boost::string_ref, T>::value or std::is_same<std::chrono::system_clock::time_point, T>::value, "Unsupported type in array");
 
-				this->push_param(make_pqtypes_name<T>().data(), get_pqlib_c_type_struct<T>::conv(parParam));
+				this->push_param(make_pqtypes_name<T>().data(), get_pqlib_c_type_struct<T>(m_conn).conv(parParam));
 			}
 		};
 		template <typename VT, typename VU>
 		struct get_pqlib_c_type_struct<std::vector<VT, VU>> : private get_pqlib_c_type_struct_arr {
 			using type = const void*;
-			explicit get_pqlib_c_type_struct ( const Connection& parConn ) : get_pqlib_c_type_struct_arr(parConn) { }
+			explicit get_pqlib_c_type_struct ( const Connection* parConn ) : get_pqlib_c_type_struct_arr(parConn) { }
 			type conv ( const std::vector<VT, VU>& parParam) {
 				this->par_reset();
 				for (const auto& i : parParam) {

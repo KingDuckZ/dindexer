@@ -80,7 +80,7 @@ namespace pq {
 			auto types_bt = concat_strings(make_pqtypes_name<typename remove_cv<typename remove_reference<Args>::type>::type>()...);
 			static_assert(types_bt.size() > 0, "Invalid empty types string (function called with no arguments?)");
 			const std::string types(types_bt.data(), types_bt.size());
-			return this->make_params(&types, implem::get_pqlib_c_type_struct<typename remove_cv<typename remove_reference<Args>::type>::type>(*this).conv(parArgs)...);
+			return this->make_params(&types, implem::get_pqlib_c_type_struct<typename remove_cv<typename remove_reference<Args>::type>::type>(this).conv(parArgs)...);
 		};
 		PGParams pgparams = make_pgparams();
 

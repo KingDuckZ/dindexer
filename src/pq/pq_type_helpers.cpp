@@ -26,6 +26,13 @@
 #endif
 
 namespace pq {
+	namespace {
+		const Connection* assert_not_null_and_return (const Connection* parConn) {
+			assert(parConn);
+			return parConn;
+		}
+	} //unnamed namespace
+
 	namespace implem {
 		template <
 			typename Expected,
@@ -76,10 +83,12 @@ namespace pq {
 			return;
 		}
 
-		get_pqlib_c_type_struct_arr::get_pqlib_c_type_struct_arr (const Connection& parConn) :
-			m_par(parConn.make_empty_params())
+		get_pqlib_c_type_struct_arr::get_pqlib_c_type_struct_arr (const Connection* parConn) :
+			m_par(assert_not_null_and_return(parConn)->make_empty_params()),
+			m_conn(parConn)
 		{
 			static_assert_size<PGarray, storage>();
+			assert(m_conn);
 
 			PGarray arr;
 			std::fill(reinterpret_cast<char*>(&arr), reinterpret_cast<char*>(&arr) + sizeof(PGarray), '\0');
