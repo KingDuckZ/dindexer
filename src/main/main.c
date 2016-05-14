@@ -127,7 +127,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	argv = malloc(sizeof(char*) * (parArgc - 1 + 1));
 	argv[0] = action_path;
-	for (z = 2; z < parArgc; ++z) {
+	for (z = 2; z < (size_t)parArgc; ++z) {
 		argv[z - 1] = parArgv[z];
 	}
 	argv[parArgc - 1] = NULL;

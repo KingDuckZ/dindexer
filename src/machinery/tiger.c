@@ -710,8 +710,10 @@ void tiger(const char *str, t_word length, t_res res, char pad)
 
 void tiger_2_chunk(const char *str1, const char *str2, t_word length, t_res res1, t_res res2)
 {
+#if defined(USE_BIG_ENDIAN) || defined(FORCE_ALIGNMENT)
     t_block tmp1;
     t_block tmp2;
+#endif
     const char * end = str1 + (length&(-64));
 
     while(str1<end)
@@ -745,6 +747,9 @@ void tiger_2_last_chunk (const char *str1, const char *str2, t_word length, t_wo
     t_block tmp1;
     t_block tmp2;
     endianvars_2;
+
+    (void)reallength1;
+    (void)reallength2;
 
     i=length & 63;
     //Padding on last block
@@ -803,8 +808,10 @@ void tiger_2(const char *str1, const char *str2, t_word length, t_res res1, t_re
 #ifdef __SSE2__
 void tiger_sse2_chunk(const char *str1, const char *str2, t_word length, t_res res1, t_res res2)
 {
+#ifdef FORCE_ALIGNMENT
     t_block tmp1;
     t_block tmp2;
+#endif
     const char * end = str1 + length;
 
     while(str1<end)

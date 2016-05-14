@@ -74,7 +74,6 @@ void free_actions (char** parActions, size_t parCount) {
 static void foreach_dir (void(*parAction)(const char*, ActionList*), ActionList* parList) {
 	DIR* d;
 	struct dirent* dir;
-	size_t z;
 	struct stat st;
 	char* path_buff;
 	size_t path_buff_length;
@@ -127,6 +126,7 @@ static void foreach_dir (void(*parAction)(const char*, ActionList*), ActionList*
 }
 
 static void increase_actionlist (const char* parName, ActionList* parList) {
+	(void)parName;
 	++parList->count;
 }
 

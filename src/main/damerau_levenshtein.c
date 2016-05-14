@@ -90,6 +90,9 @@ static void insert_pair (PblMap* parMap, Character parKey, int parValue) {
 		sizeof(parValue)
 	);
 	assert(0 <= retval);
+#ifdef NDEBUG
+	(void)retval;
+#endif
 }
 
 static int get_value (PblMap* parMap, Character parKey) {
@@ -177,7 +180,7 @@ int damerau_levenshtein_with_size (
 	if (0 == parTargetLen)
 		return parSourceLen * parDeleteCost;
 
-	const int table_length = parSourceLen * parTargetLen;
+	const size_t table_length = parSourceLen * parTargetLen;
 	table = malloc(sizeof(int) * table_length);
 	memset(table, 0, sizeof(int) * table_length);
 
@@ -197,7 +200,8 @@ int damerau_levenshtein_with_size (
 	insert_pair(sourceIndexByCharacter, source_char_0, 0);
 
 	assert(source = source_index_1);
-	for (i = 1; i < parSourceLen; ++i) {
+	assert(parSourceLen <= INT_MAX);
+	for (i = 1; i < (int)parSourceLen; ++i) {
 		source_char = utf8_advance(&source, source_end);
 		delete_distance = table[i - 1 + 0 * parSourceLen] + parDeleteCost;
 		insert_distance = (i + 1) * parDeleteCost + parInsertCost;
@@ -209,7 +213,8 @@ int damerau_levenshtein_with_size (
 	}
 
 	assert(target == target_index_1);
-	for (j = 1; j < parTargetLen; ++j) {
+	assert(parTargetLen <= INT_MAX);
+	for (j = 1; j < (int)parTargetLen; ++j) {
 		target_char = utf8_advance(&target, target_end);
 		delete_distance = (j + 1) * parInsertCost + parDeleteCost;
 		insert_distance = table[0 + (j - 1) * parSourceLen] + parInsertCost;
@@ -221,11 +226,13 @@ int damerau_levenshtein_with_size (
 	}
 
 	source = source_index_1;
-	for (i = 1; i < parSourceLen; ++i) {
+	assert(parSourceLen <= INT_MAX);
+	for (i = 1; i < (int)parSourceLen; ++i) {
 		source_char = utf8_advance(&source, source_end);
 		maxSourceLetterMatchIndex = (source_char == target_char_0 ? 0 : -1);
 		target = target_index_1;
-		for (j = 1; j < parTargetLen; ++j) {
+		assert(parTargetLen <= INT_MAX);
+		for (j = 1; j < (int)parTargetLen; ++j) {
 			target_char = utf8_advance(&target, target_end);
 			candidateSwapIndex = get_value(sourceIndexByCharacter, target_char);
 			j_swap = maxSourceLetterMatchIndex;
