@@ -38,8 +38,12 @@ set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Action
 string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
 set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wno-missing-field-initializers -O0")
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wno-missing-field-initializers -fno-omit-frame-pointer -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -fomit-frame-pointer -Wno-missing-field-initializers ${march_flag}")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -fno-omit-frame-pointer -O0")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -Wextra -fomit-frame-pointer ${march_flag}")
+
 set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(PBL_WITH_TESTS OFF)
 get_git_head_revision(GIT_REFSPEC PROJECT_VERSION_GIT)
