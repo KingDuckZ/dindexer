@@ -18,6 +18,7 @@
 #include "commandline.hpp"
 #include "postgre_locate.hpp"
 #include "dindexer-common/settings.hpp"
+#include "dindexer-common/split_tags.hpp"
 #include "dindexerConfig.h"
 #include "hash.hpp"
 #include "glob2regex/glob2regex.hpp"
@@ -41,6 +42,15 @@ namespace din {
 		return parStream;
 	}
 } //namespace din
+
+namespace {
+	std::vector<boost::string_ref> extract_tags (const boost::program_options::variables_map& parVM) {
+		if (not parVM.count("tags"))
+			return std::vector<boost::string_ref>();
+		else
+			return dinlib::split_tags(parVM["tags"].as<std::string>());
+	}
+} //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
@@ -76,14 +86,15 @@ int main (int parArgc, char* parArgv[]) {
 	}
 	else {
 		std::vector<din::LocatedItem> results;
+		const std::vector<boost::string_ref> tags = extract_tags(vm);
 
 		if (vm.count("byhash")) {
 			const auto hash = din::hash(vm["substring"].as<std::string>());
-			results = din::locate_in_db(settings.db, hash);
+			results = din::locate_in_db(settings.db, hash, tags);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>());
-			results = din::locate_in_db(settings.db, search_regex, not not vm.count("case-insensitive"));
+			results = din::locate_in_db(settings.db, search_regex, not not vm.count("case-insensitive"), tags);
 		}
 		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
 	}

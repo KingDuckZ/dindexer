@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <boost/utility/string_ref.hpp>
 
 namespace mchlib {
 	struct TigerHash;
@@ -41,8 +42,10 @@ namespace din {
 		uint32_t dir_count;
 	};
 
-	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
-	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch );
+	using TagList = std::vector<boost::string_ref>;
+
+	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive, const TagList& parTags );
+	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
 	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
 	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
 } //namespace din

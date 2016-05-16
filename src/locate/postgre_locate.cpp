@@ -68,29 +68,46 @@ namespace din {
 
 			return retval;
 		}
+
+		template <typename... P>
+		std::vector<LocatedItem> locate_in_db (pq::Connection& parConn, const char* parBaseQuery, std::size_t parBaseQueryLength, const char* parTagsParamToken, const TagList& parTags, const P&... parParams) {
+			using boost::lexical_cast;
+
+			assert(parTagsParamToken or parTags.empty());
+			auto query = std::string(parBaseQuery, parBaseQueryLength);
+			if (not parTags.empty()) {
+				query += " AND \"tags\" @> ";
+				query += parTagsParamToken;
+			}
+			query += " LIMIT ";
+			query += lexical_cast<std::string>(g_max_results);
+			query += ";";
+
+			if (parTags.empty()) {
+				auto result = parConn.query(query, parParams...);
+				return file_result_to_vec(std::move(result));
+			}
+			else {
+				auto result = parConn.query(query, parParams..., parTags);
+				return file_result_to_vec(std::move(result));
+			}
+		}
 	} //unnamed namespace
 
-	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
+	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive, const TagList& parTags) {
 		auto conn = make_pq_conn(parDB);
 
 		const auto clean_string_with_quotes = conn.escaped_literal(parSearch);
 
 		const std::string search_regex = (parCaseInsensitive ? "(?i)" : "") + parSearch;
-		const std::string query =
-			std::string("SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1 LIMIT ") +
-			boost::lexical_cast<std::string>(g_max_results) +
-			";";
-
-		auto result = conn.query(query, search_regex);
-		return file_result_to_vec(std::move(result));
+		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1";
+		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, search_regex);
 	}
 
-	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch) {
-		const std::string query = std::string("SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"hash\"=$1 LIMIT ") + boost::lexical_cast<std::string>(g_max_results) + ';';
-
+	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
 		auto conn = make_pq_conn(parDB);
-		auto result = conn.query(query, mchlib::tiger_to_string(parSearch, true));
-		return file_result_to_vec(std::move(result));
+		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"hash\"=$1";
+		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, mchlib::tiger_to_string(parSearch, true));
 	}
 
 	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
