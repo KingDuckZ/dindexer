@@ -23,8 +23,8 @@
 #include <boost/utility/string_ref.hpp>
 #include "helpers/compatibility.h"
 
-namespace din {
+namespace dinlib {
 	std::vector<boost::string_ref> split_tags ( const std::string& parCommaSeparatedList ) a_pure;
-} //namespace din
+} //namespace dinlib
 
 #endif

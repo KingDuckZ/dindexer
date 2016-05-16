@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
 	validationerror.cpp
 	common_info.cpp
 	readline_wrapper.cpp
+	split_tags.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

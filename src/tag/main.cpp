@@ -19,7 +19,7 @@
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
 #include "tag_postgres.hpp"
-#include "split_tags.hpp"
+#include "dindexer-common/split_tags.hpp"
 #include <iostream>
 #include <ciso646>
 
@@ -60,7 +60,7 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const auto master_tags_string = vm["tags"].as<std::string>();
-	std::vector<boost::string_ref> tags = din::split_tags(master_tags_string);
+	std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
 
 	din::tag_files(settings.db, ids, tags);
 	return 0;

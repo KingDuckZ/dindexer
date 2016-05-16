@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "split_tags.hpp"
+#include "dindexer-common/split_tags.hpp"
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -24,7 +24,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <ciso646>
 
-namespace din {
+namespace dinlib {
 	std::vector<boost::string_ref> split_tags (const std::string& parCommaSeparatedList) {
 		using OutRange = boost::iterator_range<std::string::const_iterator>;
 		using boost::token_finder;
@@ -48,4 +48,4 @@ namespace din {
 				filtered([](const string_ref& r){return not r.empty();})
 		);
 	}
-} //namespace din
+} //namespace dinlib
