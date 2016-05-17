@@ -69,7 +69,7 @@ namespace mchlib {
 			for (auto it = parList.begin(); it != parList.end(); ++it) {
 				assert(PathName(parEntry.abs_path) == PathName(it->abs_path).pop_right());
 
-				PathName curr_path(it->path);
+				PathName curr_path(it->path());
 				const auto basename = mchlib::basename(curr_path);
 				if (it->is_directory) {
 					auto cd_list = MutableSetListingView(it);

@@ -60,7 +60,7 @@ namespace din {
 			if (parItem.abs_path.size() != 1 or parItem.abs_path != "/") {
 				parItem.abs_path = std::string("/") + parItem.abs_path;
 			}
-			parItem.path = boost::string_ref(parItem.abs_path).substr(1);
+			parItem.path_offset = 1;
 		}
 
 		{
@@ -125,9 +125,9 @@ namespace din {
 				"($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);";
 
 			const auto& itm = parData[z];
-			assert(itm.path.data());
+			assert(itm.path().data());
 			conn.query(query,
-				(itm.path.empty() ? empty_path_string : itm.path),
+				(itm.path().empty() ? empty_path_string : itm.path()),
 				tiger_to_string(itm.hash),
 				itm.level,
 				new_group_id,

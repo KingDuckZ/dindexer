@@ -24,14 +24,14 @@
 namespace mchlib {
 	namespace implem {
 		bool glob_matches (const FileRecordData& parData, const char* parGlob) {
-			assert(parData.path.data());
+			assert(parData.path().data());
 			//assert that the substring in path terminates at the same place
 			//where the one in abs_path terminates (ie: it's null-terminated).
-			assert(parData.path == std::string(parData.path.data()));
+			assert(parData.path() == std::string(parData.path().data()));
 
 			//See https://github.com/FlibbleMr/neolib/blob/master/include/neolib/string_utils.hpp
 			//for an alternative to fnmatch() (grep wildcard_match)
-			const int match = fnmatch(parGlob, parData.path.data(), FNM_PATHNAME);
+			const int match = fnmatch(parGlob, parData.path().data(), FNM_PATHNAME);
 			return not match;
 		}
 	} //namespace implem

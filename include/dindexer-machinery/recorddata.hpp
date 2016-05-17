@@ -39,11 +39,11 @@ namespace mchlib {
 			mime_full(),
 			atime(parATime),
 			mtime(parMTime),
-			path(abs_path),
 			mime_type(),
 			mime_charset(),
 			size(0),
 			level(parLevel),
+			path_offset(0),
 			is_directory(parIsDir),
 			is_symlink(parIsSymLink),
 			unreadable(false),
@@ -51,22 +51,23 @@ namespace mchlib {
 		{
 		}
 
-		FileRecordData ( std::string&& parPath, std::size_t parRelPathOffs, std::time_t parATime, std::time_t parMTime, uint16_t parLevel, bool parIsDir, bool parIsSymLink ) :
+		FileRecordData ( std::string&& parPath, uint16_t parRelPathOffs, std::time_t parATime, std::time_t parMTime, uint16_t parLevel, bool parIsDir, bool parIsSymLink ) :
 			hash {},
 			abs_path(std::move(parPath)),
 			mime_full(),
 			atime(parATime),
 			mtime(parMTime),
-			path(boost::string_ref(abs_path).substr(parRelPathOffs)),
 			mime_type(),
 			mime_charset(),
 			size(0),
 			level(parLevel),
+			path_offset(parRelPathOffs),
 			is_directory(parIsDir),
 			is_symlink(parIsSymLink),
 			unreadable(false),
 			hash_valid(false)
 	{
+		assert(path_offset <= abs_path.size());
 	}
 
 #if defined(NDEBUG)
@@ -81,16 +82,18 @@ namespace mchlib {
 		bool operator== ( const FileRecordData& parOther ) const;
 #endif
 
+		boost::string_ref path ( void ) const { return boost::string_ref(abs_path).substr(path_offset); }
+
 		TigerHash hash;
 		std::string abs_path;
 		mime_string mime_full;
 		std::time_t atime;
 		std::time_t mtime;
-		boost::string_ref path;
 		boost::string_ref mime_type;
 		boost::string_ref mime_charset;
 		uint64_t size;
 		uint16_t level;
+		uint16_t path_offset; //Relative path starting character into abs_path
 		bool is_directory;
 		bool is_symlink;
 		bool unreadable;
