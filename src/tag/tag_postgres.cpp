@@ -18,6 +18,7 @@
 #include "tag_postgres.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-common/settings.hpp"
+#include <ciso646>
 
 namespace din {
 	void tag_files (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags) {
@@ -28,5 +29,18 @@ namespace din {
 			"UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"id\"=ANY($2);";
 
 		conn.query(query, parTags, parFiles);
+	}
+
+	void tag_files (const dinlib::SettingsDB& parDB, std::string parRegex, bool parCaseSensitive, const std::vector<boost::string_ref>& parTags) {
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		if (not parCaseSensitive)
+			parRegex = "(?i)" + parRegex;
+
+		const std::string query =
+			"UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"path\" ~ $2;";
+
+		conn.query(query, parTags, parRegex);
 	}
 } //namespace din

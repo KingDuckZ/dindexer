@@ -28,6 +28,7 @@ namespace dinlib {
 
 namespace din {
 	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags );
+	void tag_files ( const dinlib::SettingsDB& parDB, std::string parRegex, bool parCaseSensitive, const std::vector<boost::string_ref>& parTags );
 } //namespace din
 
 #endif

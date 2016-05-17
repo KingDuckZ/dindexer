@@ -20,14 +20,19 @@
 #include "dindexerConfig.h"
 #include "tag_postgres.hpp"
 #include "dindexer-common/split_tags.hpp"
+#include "glob2regex/glob2regex.hpp"
 #include <iostream>
 #include <ciso646>
+#include <algorithm>
+#include <boost/lexical_cast.hpp>
 
 namespace {
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
+	using boost::lexical_cast;
+	using boost::string_ref;
 
 	variables_map vm;
 	try {
@@ -40,10 +45,17 @@ int main (int parArgc, char* parArgv[]) {
 		return 2;
 	}
 
-	if (not vm.count("ids")) {
-		std::cerr << "No IDs specified\n";
+	const bool id_mode = static_cast<bool>(vm.count("ids"));
+	const bool glob_mode = static_cast<bool>(vm.count("glob"));
+	if (not id_mode and not glob_mode) {
+		std::cerr << "No IDs or glob specified\n";
 		return 2;
 	}
+	else if (id_mode and glob_mode) {
+		std::cerr << "Can't specify both a glob and IDs, please only use one of them\n";
+		return 2;
+	}
+	assert(id_mode xor glob_mode);
 
 	dinlib::Settings settings;
 	{
@@ -54,14 +66,24 @@ int main (int parArgc, char* parArgv[]) {
 		}
 	}
 
-	const auto ids = vm["ids"].as<std::vector<uint64_t>>();
-	for (auto id : ids) {
-		std::cout << id << '\n';
+	const auto master_tags_string = vm["tags"].as<std::string>();
+	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
+
+	if (id_mode) {
+		auto ids_string = dinlib::split_tags(vm["ids"].as<std::string>());
+		std::vector<uint64_t> ids;
+		ids.reserve(ids_string.size());
+		std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
+		din::tag_files(settings.db, ids, tags);
+	}
+	else if (glob_mode) {
+		const auto regex = g2r::convert(vm["glob"].as<std::string>());
+		din::tag_files(settings.db, regex, true, tags);
+	}
+	else {
+		assert(false);
+		return 1;
 	}
 
-	const auto master_tags_string = vm["tags"].as<std::string>();
-	std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
-
-	din::tag_files(settings.db, ids, tags);
 	return 0;
 }
