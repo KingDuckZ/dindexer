@@ -25,6 +25,7 @@
 #include <ctime>
 #include <boost/flyweight.hpp>
 #include <boost/flyweight/no_locking.hpp>
+#include <functional>
 
 namespace mchlib {
 	struct FileRecordData {
@@ -39,11 +40,13 @@ namespace mchlib {
 			mime_full(),
 			atime(parATime),
 			mtime(parMTime),
-			mime_type(),
-			mime_charset(),
 			size(0),
 			level(parLevel),
 			path_offset(0),
+			mime_type_offset(0),
+			mime_type_length(0),
+			mime_charset_offset(0),
+			mime_charset_length(0),
 			is_directory(parIsDir),
 			is_symlink(parIsSymLink),
 			unreadable(false),
@@ -57,11 +60,13 @@ namespace mchlib {
 			mime_full(),
 			atime(parATime),
 			mtime(parMTime),
-			mime_type(),
-			mime_charset(),
 			size(0),
 			level(parLevel),
 			path_offset(parRelPathOffs),
+			mime_type_offset(0),
+			mime_type_length(0),
+			mime_charset_offset(0),
+			mime_charset_length(0),
 			is_directory(parIsDir),
 			is_symlink(parIsSymLink),
 			unreadable(false),
@@ -83,17 +88,42 @@ namespace mchlib {
 #endif
 
 		boost::string_ref path ( void ) const { return boost::string_ref(abs_path).substr(path_offset); }
+		boost::string_ref mime_type ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_type_offset, mime_type_length); }
+		boost::string_ref mime_charset ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_charset_offset, mime_charset_length); }
+		void set_mime_parts ( boost::string_ref parType, boost::string_ref parCharset ) {
+			const auto& mime = mime_full.get();
+			{
+				assert(std::less<const char*>()(mime.data(), parType.data()));
+				assert(std::less_equal<const char*>()(parType.data() + parType.size(), mime.data()));
+				assert(parType.data() - mime.data() < USHRT_MAX);
+				assert(parType.size() < USHRT_MAX);
+				assert(parType.size() + (parType.data() - mime.data()) <= mime.size());
+				mime_type_offset = static_cast<uint16_t>(parType.data() - mime.data());
+				mime_type_length = static_cast<uint16_t>(parType.size());
+			}
+			{
+				assert(std::less<const char*>()(mime.data(), parCharset.data()));
+				assert(std::less_equal<const char*>()(parCharset.data() + parCharset.size(), mime.data()));
+				assert(parCharset.data() - mime.data() < USHRT_MAX);
+				assert(parCharset.size() < USHRT_MAX);
+				assert(parCharset.size() + (parCharset.data() - mime.data()) <= mime.size());
+				mime_charset_offset = static_cast<uint16_t>(parCharset.data() - mime.data());
+				mime_charset_length = static_cast<uint16_t>(parCharset.size());
+			}
+		}
 
 		TigerHash hash;
 		std::string abs_path;
 		mime_string mime_full;
 		std::time_t atime;
 		std::time_t mtime;
-		boost::string_ref mime_type;
-		boost::string_ref mime_charset;
 		uint64_t size;
 		uint16_t level;
 		uint16_t path_offset; //Relative path starting character into abs_path
+		uint16_t mime_type_offset; //Mime type starting character into mime_full
+		uint16_t mime_type_length; //Mime type string length
+		uint16_t mime_charset_offset; //Mime charset starting character into mime_full
+		uint16_t mime_charset_length; //Mime charset string length
 		bool is_directory;
 		bool is_symlink;
 		bool unreadable;

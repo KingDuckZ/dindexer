@@ -41,8 +41,7 @@ namespace mchlib {
 			for (auto& itm : list) {
 				itm.mime_full = mime.analyze(itm.abs_path);
 				auto mime_pair = split_mime(itm.mime_full);
-				itm.mime_type = mime_pair.first;
-				itm.mime_charset = mime_pair.second;
+				itm.set_mime_parts(mime_pair.first, mime_pair.second);
 			}
 		}
 

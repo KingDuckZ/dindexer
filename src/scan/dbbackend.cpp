@@ -138,8 +138,8 @@ namespace din {
 				system_clock::from_time_t(itm.mtime),
 				itm.hash_valid,
 				itm.unreadable,
-				itm.mime_type,
-				itm.mime_charset
+				itm.mime_type(),
+				itm.mime_charset()
 			);
 		}
 		conn.query("COMMIT;");
