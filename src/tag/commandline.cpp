@@ -36,14 +36,14 @@ namespace din {
 		po::options_description positional_options("Positional options");
 		positional_options.add_options()
 			("tags", po::value<std::string>(), "comma-separated tag list")
-			("glob", po::value<std::string>(), "glob to match against")
+			("globs", po::value<std::vector<std::string>>(), "List of globs to match against")
 		;
 
 		const auto desc = dinlib::get_default_commandline();
 		po::options_description all("Available options");
 		po::positional_options_description pd;
 		all.add(desc).add(positional_options).add(set_options);
-		pd.add("tags", 1).add("glob", 1);
+		pd.add("tags", 1).add("globs", -1);
 		try {
 			po::store(po::command_line_parser(parArgc, parArgv).options(all).positional(pd).run(), parVarMap);
 		}
@@ -53,7 +53,7 @@ namespace din {
 
 		po::notify(parVarMap);
 
-		const char* const help_text = "[options...] tag[,tag2...] (--ids id1[,id2...] | <glob>)";
+		const char* const help_text = "[options...] tag[,tag2...] (--ids id1[,id2...] | <glob> [glob...])";
 		if (dinlib::manage_common_commandline(std::cout, ACTION_NAME, help_text, parVarMap, {std::cref(desc), std::cref(set_options)})) {
 			return true;
 		}

@@ -31,16 +31,21 @@ namespace din {
 		conn.query(query, parTags, parFiles);
 	}
 
-	void tag_files (const dinlib::SettingsDB& parDB, std::string parRegex, bool parCaseSensitive, const std::vector<boost::string_ref>& parTags) {
+	void tag_files (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
-		if (not parCaseSensitive)
-			parRegex = "(?i)" + parRegex;
-
-		const std::string query =
-			"UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"path\" ~ $2;";
-
-		conn.query(query, parTags, parRegex);
+		if (parRegexes.size() == 1) {
+			const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"path\" ~ $2;";
+			conn.query(query, parTags, parRegexes.front());
+		}
+		else if (parRegexes.size() > 1) {
+			const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"path\" ~ ANY($2);";
+			conn.query(query, parTags, parRegexes);
+		}
+		else if (parRegexes.size() == 0) {
+			const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1);";
+			conn.query(query, parTags);
+		}
 	}
 } //namespace din

@@ -25,8 +25,21 @@
 #include <ciso646>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <vector>
+#include <iterator>
 
 namespace {
+	std::vector<std::string> globs_to_regex_list (const std::vector<std::string>& parGlobs) {
+		std::vector<std::string> retval;
+		retval.reserve(parGlobs.size());
+		std::transform(
+			parGlobs.begin(),
+			parGlobs.end(),
+			std::back_inserter(retval),
+			[](const std::string& s) { return g2r::convert(s, false); }
+		);
+		return retval;
+	}
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -46,7 +59,7 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const bool id_mode = static_cast<bool>(vm.count("ids"));
-	const bool glob_mode = static_cast<bool>(vm.count("glob"));
+	const bool glob_mode = static_cast<bool>(vm.count("globs"));
 	if (not id_mode and not glob_mode) {
 		std::cerr << "No IDs or glob specified\n";
 		return 2;
@@ -77,8 +90,8 @@ int main (int parArgc, char* parArgv[]) {
 		din::tag_files(settings.db, ids, tags);
 	}
 	else if (glob_mode) {
-		const auto regex = g2r::convert(vm["glob"].as<std::string>());
-		din::tag_files(settings.db, regex, true, tags);
+		const auto regexes(globs_to_regex_list(vm["globs"].as<std::vector<std::string>>()));
+		din::tag_files(settings.db, regexes, tags);
 	}
 	else {
 		assert(false);
