@@ -93,8 +93,8 @@ int main (int parArgc, char* parArgv[]) {
 			results = din::locate_in_db(settings.db, hash, tags);
 		}
 		else {
-			const auto search_regex = g2r::convert(vm["substring"].as<std::string>());
-			results = din::locate_in_db(settings.db, search_regex, not not vm.count("case-insensitive"), tags);
+			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));
+			results = din::locate_in_db(settings.db, search_regex, tags);
 		}
 		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
 	}

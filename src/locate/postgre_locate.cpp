@@ -94,14 +94,11 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive, const TagList& parTags) {
+	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, const TagList& parTags) {
 		auto conn = make_pq_conn(parDB);
 
-		const auto clean_string_with_quotes = conn.escaped_literal(parSearch);
-
-		const std::string search_regex = (parCaseInsensitive ? "(?i)" : "") + parSearch;
 		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1";
-		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, search_regex);
+		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, parSearch);
 	}
 
 	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
