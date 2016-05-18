@@ -22,7 +22,7 @@
 #include <string>
 
 namespace g2r {
-	std::string convert ( const std::string& parGlob );
+	std::string convert ( const std::string& parGlob, bool parCaseSensitive=true );
 } //namespace g2r
 
 #endif

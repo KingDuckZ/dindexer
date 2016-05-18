@@ -19,6 +19,7 @@
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <sstream>
+#include <ciso646>
 
 namespace ka = boost::spirit::karma;
 
@@ -63,9 +64,11 @@ namespace g2r {
 		}
 	} //unnamed namespace
 
-	std::string render_ast (const GlobExpression& parAst) {
+	std::string render_ast (const GlobExpression& parAst, bool parCaseSensitive) {
 		RegexGen<boost::spirit::ostream_iterator> gramm;
 		std::ostringstream oss;
+		if (not parCaseSensitive)
+			oss << "(?i)";
 		oss << ka::format(gramm, parAst);
 		oss << '$';
 		return oss.str();

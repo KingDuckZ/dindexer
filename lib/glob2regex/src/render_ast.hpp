@@ -23,7 +23,7 @@
 #include <string>
 
 namespace g2r {
-	std::string render_ast ( const GlobExpression& parAst );
+	std::string render_ast ( const GlobExpression& parAst, bool parCaseSensitive );
 } //namespace g2r
 
 #endif

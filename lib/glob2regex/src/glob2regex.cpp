@@ -24,8 +24,8 @@ namespace g2r {
 	namespace {
 	} //unnamed namespace
 
-	std::string convert (const std::string& parGlob) {
+	std::string convert (const std::string& parGlob, bool parCaseSensitive) {
 		const auto glob_ast = make_ast(parGlob);
-		return render_ast(glob_ast);
+		return render_ast(glob_ast, parCaseSensitive);
 	}
 } //namespace g2r
