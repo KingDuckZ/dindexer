@@ -93,8 +93,8 @@ namespace mchlib {
 		void set_mime_parts ( boost::string_ref parType, boost::string_ref parCharset ) {
 			const auto& mime = mime_full.get();
 			{
-				assert(std::less<const char*>()(mime.data(), parType.data()));
-				assert(std::less_equal<const char*>()(parType.data() + parType.size(), mime.data()));
+				assert(std::less_equal<const char*>()(mime.data(), parType.data()));
+				assert(std::less_equal<const char*>()(parType.data() + parType.size(), mime.data() + mime.size()));
 				assert(parType.data() - mime.data() < USHRT_MAX);
 				assert(parType.size() < USHRT_MAX);
 				assert(parType.size() + (parType.data() - mime.data()) <= mime.size());
@@ -102,8 +102,8 @@ namespace mchlib {
 				mime_type_length = static_cast<uint16_t>(parType.size());
 			}
 			{
-				assert(std::less<const char*>()(mime.data(), parCharset.data()));
-				assert(std::less_equal<const char*>()(parCharset.data() + parCharset.size(), mime.data()));
+				assert(std::less_equal<const char*>()(mime.data(), parCharset.data()));
+				assert(std::less_equal<const char*>()(parCharset.data() + parCharset.size(), mime.data() + mime.size()));
 				assert(parCharset.data() - mime.data() < USHRT_MAX);
 				assert(parCharset.size() < USHRT_MAX);
 				assert(parCharset.size() + (parCharset.data() - mime.data()) <= mime.size());
