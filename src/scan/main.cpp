@@ -36,19 +36,24 @@
 #include <iostream>
 #include <iomanip>
 #include <ciso646>
+#if defined(WITH_PROGRESS_FEEDBACK)
+#	include <sstream>
+#	include <functional>
+#endif
 
 namespace {
 	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
 #if defined(WITH_PROGRESS_FEEDBACK)
-	void print_progress ( const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum );
+	void print_progress ( const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum, std::size_t& parClearCount );
 #endif
 } //unnamed namespace
 
 namespace stask = mchlib::scantask;
+#if defined(WITH_PROGRESS_FEEDBACK)
+namespace ph = std::placeholders;
+#endif
 
 int main (int parArgc, char* parArgv[]) {
-	using std::placeholders::_1;
-	using std::placeholders::_2;
 	using boost::program_options::variables_map;
 	using FileRecordDataFiller = stask::GeneralFiller<stask::DirTree::PathList>;
 	using SetRecordDataFiller = stask::GeneralFiller<mchlib::SetRecordDataFull>;
@@ -92,10 +97,14 @@ int main (int parArgc, char* parArgv[]) {
 	std::shared_ptr<SetRecordDataFiller> setrecdata(new SetRecordDataFiller(media_type, content_type));
 
 #if defined(WITH_PROGRESS_FEEDBACK)
-	hashing->set_progress_callback(&print_progress);
+	hashing->set_progress_callback(std::bind(&print_progress, ph::_1, ph::_2, ph::_3, ph::_4, std::size_t(0)));
 #endif
 
-	if (not add_to_db(filerecdata->get_or_create(), setrecdata->get_or_create(), settings.db)) {
+	const bool added_to_db = add_to_db(filerecdata->get_or_create(), setrecdata->get_or_create(), settings.db);
+#if defined(WITH_PROGRESS_FEEDBACK)
+		std::cout << '\n';
+#endif
+	if (not added_to_db) {
 		std::cerr << "Not written to DB, likely because a set with the same hash already exists\n";
 	}
 	return 0;
@@ -126,8 +135,16 @@ namespace {
 	}
 
 #if defined(WITH_PROGRESS_FEEDBACK)
-	void print_progress (const boost::string_ref parPath, uint64_t /*parFileBytes*/, uint64_t parTotalBytes, uint32_t parFileNum) {
-		std::cout << "Hashing file " << parFileNum << " \"" << parPath << "\" (" << parTotalBytes << " bytes hashed)\r";
+	void print_progress (const boost::string_ref parPath, uint64_t /*parFileBytes*/, uint64_t parTotalBytes, uint32_t parFileNum, std::size_t& parClearCount) {
+		std::ostringstream oss;
+
+		std::fill_n(std::ostream_iterator<char>(std::cout), parClearCount, ' ');
+		std::cout << '\r';
+		oss << "Hashing file " << parFileNum << " \"" << parPath << "\" (" << parTotalBytes << " bytes hashed)";
+		const auto msg = oss.str();
+		parClearCount = msg.size();
+
+		std::cout << msg << '\r';
 		std::cout.flush();
 	}
 #endif
