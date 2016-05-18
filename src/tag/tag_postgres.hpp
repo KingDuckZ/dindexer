@@ -32,8 +32,8 @@ namespace din {
 		bool is_valid;
 	};
 
-	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags );
-	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags );
+	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
+	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
 } //namespace din
 
 #endif

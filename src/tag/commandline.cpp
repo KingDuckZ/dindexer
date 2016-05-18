@@ -29,8 +29,8 @@ namespace din {
 		set_options.add_options()
 			//("switch,s", "Help message")
 			//("option,o", po::value<std::string>()->default_value("default_value"), "Help message")
-			//("option2", po::value<int>(), "Help message")
 			("ids", po::value<std::string>(), "Comma-separated list of IDs of files to be tagged")
+			("set,s", po::value<uint32_t>(), "Limit matching to files belonging to the specified set ID")
 		;
 
 		po::options_description positional_options("Positional options");

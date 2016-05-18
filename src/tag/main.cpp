@@ -82,16 +82,26 @@ int main (int parArgc, char* parArgv[]) {
 	const auto master_tags_string = vm["tags"].as<std::string>();
 	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
 
+	din::OwnerSetInfo set_info;
+	if (vm.count("set")) {
+		set_info.is_valid = true;
+		set_info.group_id = vm["set"].as<uint32_t>();
+	}
+	else {
+		set_info.is_valid = false;
+		set_info.group_id = 0;
+	}
+
 	if (id_mode) {
 		auto ids_string = dinlib::split_tags(vm["ids"].as<std::string>());
 		std::vector<uint64_t> ids;
 		ids.reserve(ids_string.size());
 		std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
-		din::tag_files(settings.db, ids, tags);
+		din::tag_files(settings.db, ids, tags, set_info);
 	}
 	else if (glob_mode) {
 		const auto regexes(globs_to_regex_list(vm["globs"].as<std::vector<std::string>>()));
-		din::tag_files(settings.db, regexes, tags);
+		din::tag_files(settings.db, regexes, tags, set_info);
 	}
 	else {
 		assert(false);
