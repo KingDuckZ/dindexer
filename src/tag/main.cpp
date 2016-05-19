@@ -29,6 +29,11 @@
 #include <iterator>
 
 namespace {
+	enum TaggingModes {
+		TaggingMode_Glob,
+		TaggingMode_ID
+	};
+
 	std::vector<std::string> globs_to_regex_list (const std::vector<std::string>& parGlobs) {
 		std::vector<std::string> retval;
 		retval.reserve(parGlobs.size());
@@ -40,12 +45,48 @@ namespace {
 		);
 		return retval;
 	}
+
+	int tag_files (const dinlib::SettingsDB& parDB, TaggingModes parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+		using boost::lexical_cast;
+		using boost::string_ref;
+
+		din::OwnerSetInfo set_info;
+		if (parVM.count("set")) {
+			set_info.is_valid = true;
+			set_info.group_id = parVM["set"].as<uint32_t>();
+		}
+		else {
+			set_info.is_valid = false;
+			set_info.group_id = 0;
+		}
+
+		switch (parMode) {
+		case TaggingMode_ID:
+		{
+			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			std::vector<uint64_t> ids;
+			ids.reserve(ids_string.size());
+			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
+			din::tag_files(parDB, ids, parTags, set_info);
+			return 0;
+		}
+
+		case TaggingMode_Glob:
+		{
+			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
+			din::tag_files(parDB, regexes, parTags, set_info);
+			return 0;
+		}
+
+		default:
+			assert(false);
+			return 1;
+		}
+	}
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
 	using boost::program_options::variables_map;
-	using boost::lexical_cast;
-	using boost::string_ref;
 
 	variables_map vm;
 	try {
@@ -82,31 +123,10 @@ int main (int parArgc, char* parArgv[]) {
 	const auto master_tags_string = vm["tags"].as<std::string>();
 	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
 
-	din::OwnerSetInfo set_info;
-	if (vm.count("set")) {
-		set_info.is_valid = true;
-		set_info.group_id = vm["set"].as<uint32_t>();
-	}
-	else {
-		set_info.is_valid = false;
-		set_info.group_id = 0;
-	}
-
-	if (id_mode) {
-		auto ids_string = dinlib::split_tags(vm["ids"].as<std::string>());
-		std::vector<uint64_t> ids;
-		ids.reserve(ids_string.size());
-		std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
-		din::tag_files(settings.db, ids, tags, set_info);
-	}
-	else if (glob_mode) {
-		const auto regexes(globs_to_regex_list(vm["globs"].as<std::vector<std::string>>()));
-		din::tag_files(settings.db, regexes, tags, set_info);
-	}
-	else {
-		assert(false);
-		return 1;
-	}
-
-	return 0;
+	return tag_files(
+		settings.db,
+		(glob_mode ? TaggingMode_Glob : TaggingMode_ID),
+		vm,
+		tags
+	);
 }
