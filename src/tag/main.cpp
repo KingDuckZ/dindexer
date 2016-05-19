@@ -29,11 +29,12 @@
 #include <vector>
 #include <iterator>
 
-namespace {
-	BETTER_ENUM(TaggingMode, char,
-		Glob, ID
-	);
+//Leave this out of the unnamed namespace to avoid all the "unused function" warnings
+BETTER_ENUM(TaggingMode, char,
+	Glob, ID
+);
 
+namespace {
 	std::vector<std::string> globs_to_regex_list (const std::vector<std::string>& parGlobs) {
 		std::vector<std::string> retval;
 		retval.reserve(parGlobs.size());
