@@ -70,4 +70,86 @@ namespace din {
 			}
 		}
 	}
+
+	void delete_tags (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		if (parTags.size() == 1) {
+			if (parSet.is_valid) {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY_REMOVE(tags, $1) WHERE \"id\" = ANY($2) AND \"group_id\" = $3;";
+				conn.query(query, parTags.front(), parFiles, parSet.group_id);
+			}
+			else {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY_REMOVE(tags, $1) WHERE \"id\" = ANY($2);";
+				conn.query(query, parTags.front(), parFiles);
+			}
+		}
+		else {
+			if (parSet.is_valid) {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT UNNEST(\"tags\") EXCEPT SELECT UNNEST($1)) WHERE \"id\" = ANY($2) AND \"group_id\" = $3;";
+				conn.query(query, parTags, parFiles, parSet.group_id);
+			}
+			else {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT UNNEST(\"tags\") EXCEPT SELECT UNNEST($1)) WHERE \"id\" = ANY($2);";
+				conn.query(query, parTags, parFiles);
+			}
+		}
+	}
+
+	void delete_tags (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		if (parTags.size() == 1) {
+			if (parSet.is_valid) {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY_REMOVE(tags, $1) WHERE  \"group_id\" = $3 AND \"path\" ~ ANY($3);";
+				conn.query(query, parTags.front(), parSet.group_id, parRegexes);
+			}
+			else {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY_REMOVE(tags, $1) WHERE \"path\" ~ ANY($2);";
+				conn.query(query, parTags.front(), parRegexes);
+			}
+		}
+		else {
+			if (parSet.is_valid) {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT UNNEST(\"tags\") EXCEPT SELECT UNNEST($1)) WHERE \"group_id\" = $2 AND \"path\" ~ ANY($3);";
+				conn.query(query, parTags, parSet.group_id, parRegexes);
+			}
+			else {
+				const std::string query = "UPDATE \"files\" SET \"tags\" = ARRAY(SELECT UNNEST(\"tags\") EXCEPT SELECT UNNEST($1)) WHERE \"path\" = ANY($2);";
+				conn.query(query, parTags, parRegexes);
+			}
+		}
+	}
+
+	void delete_all_tags (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet) {
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		if (parSet.is_valid) {
+			const std::string query =
+				"UPDATE \"files\" SET \"tags\" = '{}' WHERE \"id\"=ANY($1) AND \"group_id\"=$2;";
+			conn.query(query, parFiles, parSet.group_id);
+		}
+		else {
+			const std::string query =
+				"UPDATE \"files\" SET \"tags\" = '{}' WHERE \"id\"=ANY($1);";
+			conn.query(query, parFiles);
+		}
+	}
+
+	void delete_all_tags (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet) {
+		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
+		conn.connect();
+
+		if (parSet.is_valid) {
+			const std::string query = "UPDATE \"files\" SET \"tags\" = '{}' WHERE \"group_id\"=$1 AND \"path\" ~ ANY($2);";
+			conn.query(query, parSet.group_id, parRegexes);
+		}
+		else {
+			const std::string query = "UPDATE \"files\" SET \"tags\" = '{}' WHERE \"path\" ~ ANY($2);";
+			conn.query(query, parRegexes);
+		}
+	}
 } //namespace din

@@ -34,6 +34,11 @@ namespace din {
 
 	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
 	void tag_files ( const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
+
+	void delete_tags ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
+	void delete_tags ( const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
+	void delete_all_tags ( const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet );
+	void delete_all_tags ( const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet );
 } //namespace din
 
 #endif

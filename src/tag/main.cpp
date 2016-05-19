@@ -21,6 +21,7 @@
 #include "tag_postgres.hpp"
 #include "dindexer-common/split_tags.hpp"
 #include "glob2regex/glob2regex.hpp"
+#include "enum.h"
 #include <iostream>
 #include <ciso646>
 #include <algorithm>
@@ -29,10 +30,9 @@
 #include <iterator>
 
 namespace {
-	enum TaggingModes {
-		TaggingMode_Glob,
-		TaggingMode_ID
-	};
+	BETTER_ENUM(TaggingMode, char,
+		Glob, ID
+	);
 
 	std::vector<std::string> globs_to_regex_list (const std::vector<std::string>& parGlobs) {
 		std::vector<std::string> retval;
@@ -46,10 +46,7 @@ namespace {
 		return retval;
 	}
 
-	int tag_files (const dinlib::SettingsDB& parDB, TaggingModes parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
-		using boost::lexical_cast;
-		using boost::string_ref;
-
+	din::OwnerSetInfo make_owner_set_info (const boost::program_options::variables_map& parVM) {
 		din::OwnerSetInfo set_info;
 		if (parVM.count("set")) {
 			set_info.is_valid = true;
@@ -59,9 +56,17 @@ namespace {
 			set_info.is_valid = false;
 			set_info.group_id = 0;
 		}
+		return set_info;
+	}
+
+	int tag_files (const dinlib::SettingsDB& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+		using boost::lexical_cast;
+		using boost::string_ref;
+
+		const din::OwnerSetInfo set_info = make_owner_set_info(parVM);
 
 		switch (parMode) {
-		case TaggingMode_ID:
+		case TaggingMode::ID:
 		{
 			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
 			std::vector<uint64_t> ids;
@@ -71,10 +76,46 @@ namespace {
 			return 0;
 		}
 
-		case TaggingMode_Glob:
+		case TaggingMode::Glob:
 		{
 			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
 			din::tag_files(parDB, regexes, parTags, set_info);
+			return 0;
+		}
+
+		default:
+			assert(false);
+			return 1;
+		}
+	}
+
+	int delete_tags (const dinlib::SettingsDB& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+		using boost::lexical_cast;
+		using boost::string_ref;
+
+		assert(parVM.count("delete"));
+
+		switch (parMode) {
+		case TaggingMode::ID:
+		{
+			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			std::vector<uint64_t> ids;
+			ids.reserve(ids_string.size());
+			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
+			if (parVM.count("alltags"))
+				din::delete_all_tags(parDB, ids, make_owner_set_info(parVM));
+			else
+				din::delete_tags(parDB, ids, parTags, make_owner_set_info(parVM));
+			return 0;
+		}
+
+		case TaggingMode::Glob:
+		{
+			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
+			if (parVM.count("alltags"))
+				din::delete_all_tags(parDB, regexes, make_owner_set_info(parVM));
+			else
+				din::delete_tags(parDB, regexes, parTags, make_owner_set_info(parVM));
 			return 0;
 		}
 
@@ -122,11 +163,10 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto master_tags_string = vm["tags"].as<std::string>();
 	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
+	const auto mode = (glob_mode ? TaggingMode::Glob : TaggingMode::ID);
 
-	return tag_files(
-		settings.db,
-		(glob_mode ? TaggingMode_Glob : TaggingMode_ID),
-		vm,
-		tags
-	);
+	if (not vm.count("delete"))
+		return tag_files(settings.db, mode, vm, tags);
+	else
+		return delete_tags(settings.db, mode, vm, tags);
 }

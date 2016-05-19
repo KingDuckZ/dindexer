@@ -9,6 +9,7 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 	PRIVATE ${CMAKE_SOURCE_DIR}/lib/glob2regex/include
+	PRIVATE ${CMAKE_SOURCE_DIR}/lib/better-enums
 )
 
 target_link_libraries(${PROJECT_NAME}

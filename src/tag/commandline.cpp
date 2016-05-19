@@ -27,7 +27,8 @@ namespace din {
 	bool parse_commandline (int parArgc, char* parArgv[], po::variables_map& parVarMap) {
 		po::options_description set_options(ACTION_NAME " options");
 		set_options.add_options()
-			//("switch,s", "Help message")
+			("delete,d", "Delete tags instead of adding")
+			("alltags,a", "Only allowed when --delete is also specified - ignores any given tag list and delete all tags associated to the matching elements instead")
 			//("option,o", po::value<std::string>()->default_value("default_value"), "Help message")
 			("ids", po::value<std::string>(), "Comma-separated list of IDs of files to be tagged")
 			("set,s", po::value<uint32_t>(), "Limit matching to files belonging to the specified set ID")
