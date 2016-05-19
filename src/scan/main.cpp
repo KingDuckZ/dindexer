@@ -38,7 +38,6 @@
 #include <ciso646>
 #if defined(WITH_PROGRESS_FEEDBACK)
 #	include <sstream>
-#	include <functional>
 #endif
 
 namespace {
@@ -97,7 +96,12 @@ int main (int parArgc, char* parArgv[]) {
 	std::shared_ptr<SetRecordDataFiller> setrecdata(new SetRecordDataFiller(media_type, content_type));
 
 #if defined(WITH_PROGRESS_FEEDBACK)
-	hashing->set_progress_callback(std::bind(&print_progress, ph::_1, ph::_2, ph::_3, ph::_4, std::size_t(0)));
+	std::size_t local_size_t = 0;
+	hashing->set_progress_callback(
+		[local_size_t](const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum) mutable {
+			print_progress(parPath, parFileBytes, parTotalBytes, parFileNum, local_size_t);
+		}
+	);
 #endif
 
 	const bool added_to_db = add_to_db(filerecdata->get_or_create(), setrecdata->get_or_create(), settings.db);
