@@ -16,7 +16,7 @@
  */
 
 #include "commandline.hpp"
-#include "postgre_locate.hpp"
+#include "backends/postgresql/locate.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexer-common/split_tags.hpp"
 #include "dindexerConfig.h"

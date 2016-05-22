@@ -3,7 +3,6 @@ project(${bare_name}-locate CXX)
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
-	postgre_locate.cpp
 	hash.cpp
 )
 
@@ -17,6 +16,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-common
 	PRIVATE ${bare_name}-machinery
 	PRIVATE glob2regex
+	PRIVATE ${bare_name}-backend-postgresql
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")

@@ -3,6 +3,7 @@ project(${bare_name}-backend-postgresql CXX)
 add_library(${PROJECT_NAME} STATIC
 	tag.cpp
 	delete.cpp
+	locate.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}
