@@ -3,7 +3,6 @@ project(${bare_name}-tag CXX)
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
-	tag_postgres.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -16,6 +15,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
 	PRIVATE glob2regex
+	PRIVATE ${bare_name}-backend-postgresql
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")

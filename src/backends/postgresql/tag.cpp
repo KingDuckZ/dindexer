@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tag_postgres.hpp"
+#include "backends/postgresql/tag.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-common/settings.hpp"
 #include <ciso646>
