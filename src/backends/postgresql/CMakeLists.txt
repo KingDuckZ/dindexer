@@ -2,6 +2,7 @@ project(${bare_name}-backend-postgresql CXX)
 
 add_library(${PROJECT_NAME} STATIC
 	tag.cpp
+	delete.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}
@@ -11,7 +12,7 @@ add_library(${PROJECT_NAME} STATIC
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
-	PRIVATE pq
+	PRIVATE ${bare_name}-pq
 )
 
 install(TARGETS ${PROJECT_NAME}
