@@ -4,6 +4,7 @@ add_library(${PROJECT_NAME} STATIC
 	tag.cpp
 	delete.cpp
 	locate.cpp
+	scan.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

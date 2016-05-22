@@ -4,7 +4,6 @@ include(WithMediaAutodetect)
 
 add_executable(${PROJECT_NAME}
 	main.cpp
-	dbbackend.cpp
 	commandline.cpp
 )
 
@@ -16,6 +15,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
 	PRIVATE ${bare_name}-machinery
+	PRIVATE ${bare_name}-backend-postgresql
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")
