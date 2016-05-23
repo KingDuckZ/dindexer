@@ -22,8 +22,8 @@
 
 namespace YAML {
 	template<>
-	struct convert<dinlib::SettingsDB> {
-		static Node encode (const dinlib::SettingsDB& parSettings) {
+	struct convert<dinbpostgres::Settings> {
+		static Node encode (const dinbpostgres::Settings& parSettings) {
 			Node node;
 			node["address"] = parSettings.address;
 			node["username"] = parSettings.username;
@@ -33,7 +33,7 @@ namespace YAML {
 			return node;
 		}
 
-		static bool decode (const Node& parNode, dinlib::SettingsDB& parSettings) {
+		static bool decode (const Node& parNode, dinbpostgres::Settings& parSettings) {
 			if (not parNode.IsMap() or parNode.size() != 5) {
 				return false;
 			}
@@ -60,7 +60,7 @@ namespace dinlib {
 			auto settings = YAML::LoadFile(path);
 
 			if (settings["db_settings"]) {
-				parOut.db = settings["db_settings"].as<dinlib::SettingsDB>();
+				parOut.db = settings["db_settings"].as<dinbpostgres::Settings>();
 				return true;
 			}
 		}

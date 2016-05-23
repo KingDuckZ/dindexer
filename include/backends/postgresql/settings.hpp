@@ -15,25 +15,20 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id842AF56BD80A4CF59957451DF9082AA2
-#define id842AF56BD80A4CF59957451DF9082AA2
+#ifndef idC895D12FEB324387A37FF631E0C09560
+#define idC895D12FEB324387A37FF631E0C09560
 
 #include <string>
-#include <vector>
 #include <cstdint>
 
-namespace mchlib {
-	struct FileRecordData;
-	struct SetRecordData;
-	struct SetRecordDataFull;
-	struct TigerHash;
-} //namespace mchlib
-
 namespace dinbpostgres {
-	struct Settings;;
-
-	void write_to_db ( const Settings& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature );
-	bool read_from_db ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const Settings& parDB, const mchlib::TigerHash& parHash );
+	struct Settings {
+		std::string address;
+		std::string username;
+		std::string password;
+		std::string dbname;
+		uint16_t port;
+	};
 } //namespace dinbpostgres
 
 #endif

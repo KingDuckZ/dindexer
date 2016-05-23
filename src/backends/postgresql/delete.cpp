@@ -16,8 +16,8 @@
  */
 
 #include "backends/postgresql/delete.hpp"
+#include "backends/postgresql/settings.hpp"
 #include "pq/connection.hpp"
-#include "dindexer-common/settings.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <sstream>
 #include <utility>
@@ -27,7 +27,7 @@
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace din {
+namespace dinbpostgres {
 	namespace {
 		IDDescMap fetch_existing_ids (pq::Connection& parConn, const std::vector<uint32_t>& parIDs) {
 			using boost::lexical_cast;
@@ -50,7 +50,7 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	void delete_group_from_db (const dinlib::SettingsDB& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+	void delete_group_from_db (const Settings& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 		const auto dele_ids = fetch_existing_ids(conn, parIDs);
@@ -72,4 +72,4 @@ namespace din {
 
 		conn.query(oss.str());
 	}
-} //namespace din
+} //namespace dinbpostgres

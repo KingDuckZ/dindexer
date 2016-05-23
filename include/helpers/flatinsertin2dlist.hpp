@@ -18,13 +18,21 @@
 #ifndef idAA901DA47E234E37B325B3192EF50423
 #define idAA901DA47E234E37B325B3192EF50423
 
+//Use this function to turn a 1D sequence of elements that are logically grouped
+//together by position into a 2D list. For example, if you have an input sequence
+//like {A1, B1, C1, A2, B2, C2, A3, B3, C3} and you want to turn it into
+//{ {A1, B1, C1}, {A2, B2, C2}, {A3, B3, C3} } you can use these functions to
+//achieve that. You need to specify the size of the innermost groups, 3 in the
+//example just given, and push_back() will automatically move to the next
+//sublist every 3 items.
+
 #include <cstddef>
 #include <cassert>
 #include <ciso646>
 #include <stdexcept>
 #include <utility>
 
-namespace din {
+namespace dinhelp {
 	template <typename OuterList, typename InnerList=typename OuterList::value_type, typename InnerVal=typename InnerList::value_type>
 	class FlatInsertIn2DList {
 	public:
@@ -44,8 +52,8 @@ namespace din {
 		const std::size_t m_inner_count;
 		const std::size_t m_outer_count;
 	};
-} //namespace din
+} //namespace dinhelp
 
-#include "flatinsertin2dlist.inl"
+#include "implem/flatinsertin2dlist.inl"
 
 #endif

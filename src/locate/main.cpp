@@ -27,7 +27,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace din {
+namespace dinbpostgres {
 	std::ostream& operator<< (std::ostream& parStream, const LocatedItem& parItem) {
 		parStream << parItem.group_id << '\t' << parItem.id << '\t' << parItem.path;
 		return parStream;
@@ -41,7 +41,7 @@ namespace din {
 			'\t' << parItem.files_count << '\t' << dircount;
 		return parStream;
 	}
-} //namespace din
+} //namespace dinbpostgres
 
 namespace {
 	std::vector<boost::string_ref> extract_tags (const boost::program_options::variables_map& parVM) {
@@ -81,22 +81,22 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	if (vm.count("set")) {
-		const auto results = din::locate_sets_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
-		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedSet>(std::cout, "\n"));
+		const auto results = dinbpostgres::locate_sets_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<dinbpostgres::LocatedSet>(std::cout, "\n"));
 	}
 	else {
-		std::vector<din::LocatedItem> results;
+		std::vector<dinbpostgres::LocatedItem> results;
 		const std::vector<boost::string_ref> tags = extract_tags(vm);
 
 		if (vm.count("byhash")) {
 			const auto hash = din::hash(vm["substring"].as<std::string>());
-			results = din::locate_in_db(settings.db, hash, tags);
+			results = dinbpostgres::locate_in_db(settings.db, hash, tags);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));
-			results = din::locate_in_db(settings.db, search_regex, tags);
+			results = dinbpostgres::locate_in_db(settings.db, search_regex, tags);
 		}
-		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<dinbpostgres::LocatedItem>(std::cout, "\n"));
 	}
 	return 0;
 }

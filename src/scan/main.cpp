@@ -41,7 +41,7 @@
 #endif
 
 namespace {
-	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDBSettings, bool parForce=false );
+	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dinbpostgres::Settings& parDBSettings, bool parForce=false );
 #if defined(WITH_PROGRESS_FEEDBACK)
 	void print_progress ( const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum, std::size_t& parClearCount );
 #endif
@@ -115,7 +115,7 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
-	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDBSettings, bool parForce) {
+	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dinbpostgres::Settings& parDBSettings, bool parForce) {
 		using mchlib::FileRecordData;
 		using mchlib::SetRecordDataFull;
 		using mchlib::SetRecordData;
@@ -124,7 +124,7 @@ namespace {
 			const auto& first_hash = parData.front().hash;
 			FileRecordData itm;
 			SetRecordDataFull set;
-			const bool already_in_db = din::read_from_db(itm, set, parDBSettings, first_hash);
+			const bool already_in_db = dinbpostgres::read_from_db(itm, set, parDBSettings, first_hash);
 			if (already_in_db) {
 				return false;
 			}
@@ -134,7 +134,7 @@ namespace {
 		const auto app_signature = dinlib::dindexer_signature();
 		const auto lib_signature = mchlib::lib_signature();
 		const std::string signature = std::string(app_signature.data(), app_signature.size()) + "/" + std::string(lib_signature.data(), lib_signature.size());
-		din::write_to_db(parDBSettings, parData, set_data, signature);
+		dinbpostgres::write_to_db(parDBSettings, parData, set_data, signature);
 		return true;
 	}
 

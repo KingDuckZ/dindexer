@@ -16,12 +16,13 @@
  */
 
 #include "backends/postgresql/tag.hpp"
+#include "backends/postgresql/settings.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-common/settings.hpp"
 #include <ciso646>
 
-namespace din {
-	void tag_files (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+namespace dinbpostgres {
+	void tag_files (const Settings& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -37,7 +38,7 @@ namespace din {
 		}
 	}
 
-	void tag_files (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+	void tag_files (const Settings& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -71,7 +72,7 @@ namespace din {
 		}
 	}
 
-	void delete_tags (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+	void delete_tags (const Settings& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -97,7 +98,7 @@ namespace din {
 		}
 	}
 
-	void delete_tags (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
+	void delete_tags (const Settings& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -123,7 +124,7 @@ namespace din {
 		}
 	}
 
-	void delete_all_tags (const dinlib::SettingsDB& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet) {
+	void delete_all_tags (const Settings& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -139,7 +140,7 @@ namespace din {
 		}
 	}
 
-	void delete_all_tags (const dinlib::SettingsDB& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet) {
+	void delete_all_tags (const Settings& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
 
@@ -152,4 +153,4 @@ namespace din {
 			conn.query(query, parRegexes);
 		}
 	}
-} //namespace din
+} //namespace dinbpostgres

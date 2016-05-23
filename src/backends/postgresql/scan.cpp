@@ -16,8 +16,8 @@
  */
 
 #include "backends/postgresql/scan.hpp"
+#include "backends/postgresql/settings.hpp"
 #include "pq/connection.hpp"
-#include "dindexer-common/settings.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include <string>
 #include <sstream>
@@ -28,11 +28,11 @@
 #include <boost/utility/string_ref.hpp>
 #include <chrono>
 
-namespace din {
+namespace dinbpostgres {
 	namespace {
 	} //unnamed namespace
 
-	bool read_from_db (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parHash) {
+	bool read_from_db (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const Settings& parDB, const mchlib::TigerHash& parHash) {
 		using boost::lexical_cast;
 
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
@@ -82,7 +82,7 @@ namespace din {
 		return true;
 	}
 
-	void write_to_db (const dinlib::SettingsDB& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
+	void write_to_db (const Settings& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
 		using std::chrono::system_clock;
 		using boost::lexical_cast;
 
@@ -144,4 +144,4 @@ namespace din {
 		}
 		conn.query("COMMIT;");
 	}
-} //namespace din
+} //namespace dinbpostgres

@@ -15,8 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbsource.hpp"
-#include "dindexer-common/settings.hpp"
+#include "backends/postgresql/dbsource.hpp"
+#include "backends/postgresql/settings.hpp"
 #include "pq/connection.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <ciso646>
@@ -25,7 +25,7 @@
 #include <sstream>
 #include <boost/range/algorithm/copy.hpp>
 
-namespace din {
+namespace dinbpostgres {
 	namespace {
 		const uint32_t g_files_query_limit = 500;
 
@@ -62,7 +62,7 @@ namespace din {
 	};
 
 	struct DBSource::LocalData {
-		explicit LocalData ( const dinlib::SettingsDB& parDBSettings ) :
+		explicit LocalData ( const Settings& parDBSettings ) :
 			conn(
 				std::string(parDBSettings.username),
 				std::string(parDBSettings.password),
@@ -76,7 +76,7 @@ namespace din {
 		pq::Connection conn;
 	};
 
-	DBSource::DBSource (const dinlib::SettingsDB& parDBSettings) :
+	DBSource::DBSource (const Settings& parDBSettings) :
 		m_local_data(new LocalData(parDBSettings))
 	{
 		assert(not m_local_data->conn.is_connected());
@@ -180,4 +180,4 @@ namespace din {
 		}
 		return retval;
 	}
-} //namespace din
+} //namespace dinbpostgres

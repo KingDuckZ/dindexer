@@ -19,7 +19,7 @@
 #include "commandprocessor.hpp"
 #include "dindexer-common/settings.hpp"
 #include "entrypath.hpp"
-#include "dbsource.hpp"
+#include "backends/postgresql/dbsource.hpp"
 #include "dindexerConfig.h"
 #include "linereader.hpp"
 #include "listdircontent.hpp"
@@ -31,7 +31,7 @@
 #include <boost/range/algorithm/copy.hpp>
 
 namespace {
-	void do_navigation ( din::DBSource& parDB );
+	void do_navigation ( dinbpostgres::DBSource& parDB );
 
 	bool on_exit ( void );
 	void on_pwd ( const din::EntryPath& parDirMan );
@@ -61,7 +61,7 @@ int main (int parArgc, char* parArgv[]) {
 		}
 	}
 
-	din::DBSource db_source(settings.db);
+	dinbpostgres::DBSource db_source(settings.db);
 
 	do_navigation(db_source);
 	return 0;
@@ -81,7 +81,7 @@ namespace {
 		boost::copy(ls_result, std::ostream_iterator<std::string>(std::cout, "\n"));
 	}
 
-	void do_navigation (din::DBSource& parDB) {
+	void do_navigation (dinbpostgres::DBSource& parDB) {
 		const std::string prompt;
 		din::ListDirContent ls(&parDB);
 		din::LineReader lines(&ls);
@@ -92,7 +92,7 @@ namespace {
 		din::EntryPath dir_man;
 		proc.add_command("exit", &on_exit, 0);
 		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::EntryPath::push_piece, &dir_man, std::placeholders::_1)), 1);
-		proc.add_command("disconnect", std::function<void()>(std::bind(&din::DBSource::disconnect, &parDB)), 0);
+		proc.add_command("disconnect", std::function<void()>(std::bind(&dinbpostgres::DBSource::disconnect, &parDB)), 0);
 		proc.add_command("pwd", std::function<void()>(std::bind(&on_pwd, std::ref(dir_man))), 0);
 		proc.add_command("ls", std::function<void()>(std::bind(on_ls, std::ref(ls), std::ref(dir_man))), 0);
 		do {

@@ -5,7 +5,6 @@ add_executable(${PROJECT_NAME}
 	commandline.cpp
 	commandprocessor.cpp
 	entrypath.cpp
-	dbsource.cpp
 	linereader.cpp
 	listdircontent.cpp
 )
@@ -17,6 +16,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${bare_name}-common
+	PRIVATE ${bare_name}-backend-postgresql
 )
 
 target_compile_features(${PROJECT_NAME}

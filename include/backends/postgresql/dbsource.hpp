@@ -19,7 +19,7 @@
 #define id63F35BA8B3C94A129291D963ABE66018
 
 #include "dindexer-machinery/recorddata.hpp"
-#include "flatinsertin2dlist.hpp"
+#include "helpers/flatinsertin2dlist.hpp"
 #include "helpers/MaxSizedArray.hpp"
 #include <memory>
 #include <cstdint>
@@ -31,16 +31,14 @@
 #include <functional>
 #include <boost/utility/string_ref.hpp>
 
-namespace dinlib {
-	struct SettingsDB;
-} //namespace dinlib
-
 namespace pq {
 	class Connection;
 } //namespace pq
 
-namespace din {
+namespace dinbpostgres {
 	using dinhelp::MaxSizedArray;
+
+	struct Settings;
 
 	enum SetDetails {
 		SetDetail_Desc = 0x01,
@@ -69,7 +67,7 @@ namespace din {
 
 	class DBSource {
 	public:
-		explicit DBSource ( const dinlib::SettingsDB& parDBSettings );
+		explicit DBSource ( const Settings& parDBSettings );
 		~DBSource ( void ) noexcept;
 
 		void disconnect ( void );
@@ -121,8 +119,9 @@ namespace din {
 
 	template <SetDetails... D>
 	auto DBSource::set_details (const std::vector<uint32_t>& parIDs) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
+		using dinhelp::FlatInsertIn2DList;
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
-		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
+		typedef void(FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
 		const auto columns = implem::make_columns_vec<SetDetails, D...>(m_set_details_map);
 
@@ -135,8 +134,9 @@ namespace din {
 
 	template <FileDetails... D>
 	auto DBSource::file_details (uint32_t parSetID, uint16_t parLevel, boost::string_ref parDir) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
+		using dinhelp::FlatInsertIn2DList;
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
-		typedef void(din::FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
+		typedef void(FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
 		const auto columns = implem::make_columns_vec<FileDetails, D...>(m_file_details_map);
 
@@ -146,6 +146,6 @@ namespace din {
 		this->query_files_in_dir(columns, parDir, parLevel, parSetID, std::bind(pback_func, &flat_list, std::placeholders::_1));
 		return list;
 	}
-} //namespace din
+} //namespace dinbpostgres
 
 #endif

@@ -5,6 +5,7 @@ add_library(${PROJECT_NAME} STATIC
 	delete.cpp
 	locate.cpp
 	scan.cpp
+	dbsource.cpp
 )
 
 #target_include_directories(${PROJECT_NAME}

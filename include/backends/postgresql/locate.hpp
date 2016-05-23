@@ -18,7 +18,6 @@
 #ifndef id1AE05A59AE0E4A4490040FD85D9AF665
 #define id1AE05A59AE0E4A4490040FD85D9AF665
 
-#include "dindexer-common/settings.hpp"
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -28,7 +27,9 @@ namespace mchlib {
 	struct TigerHash;
 } //namespace mchlib
 
-namespace din {
+namespace dinbpostgres {
+	struct Settings;
+
 	struct LocatedItem {
 		std::string path;
 		uint64_t id;
@@ -44,10 +45,10 @@ namespace din {
 
 	using TagList = std::vector<boost::string_ref>;
 
-	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, const TagList& parTags );
-	std::vector<LocatedItem> locate_in_db ( const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
-	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive );
-	std::vector<LocatedSet> locate_sets_in_db ( const dinlib::SettingsDB& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
-} //namespace din
+	std::vector<LocatedItem> locate_in_db ( const Settings& parDB, const std::string& parSearch, const TagList& parTags );
+	std::vector<LocatedItem> locate_in_db ( const Settings& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
+	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, bool parCaseInsensitive );
+	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
+} //namespace dinbpostgres
 
 #endif

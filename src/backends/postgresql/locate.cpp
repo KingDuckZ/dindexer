@@ -16,19 +16,20 @@
  */
 
 #include "backends/postgresql/locate.hpp"
+#include "backends/postgresql/settings.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-machinery/tiger.hpp"
 #include <utility>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace din {
+namespace dinbpostgres {
 	namespace {
 		const int g_max_results = 200;
 
-		pq::Connection make_pq_conn ( const dinlib::SettingsDB& parDB, bool parOpen=true );
+		pq::Connection make_pq_conn ( const Settings& parDB, bool parOpen=true );
 
-		pq::Connection make_pq_conn (const dinlib::SettingsDB& parDB, bool parOpen) {
+		pq::Connection make_pq_conn (const Settings& parDB, bool parOpen) {
 			auto conn = pq::Connection(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 			if (parOpen) {
 				conn.connect();
@@ -94,20 +95,20 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, const TagList& parTags) {
+	std::vector<LocatedItem> locate_in_db (const Settings& parDB, const std::string& parSearch, const TagList& parTags) {
 		auto conn = make_pq_conn(parDB);
 
 		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1";
 		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, parSearch);
 	}
 
-	std::vector<LocatedItem> locate_in_db (const dinlib::SettingsDB& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
+	std::vector<LocatedItem> locate_in_db (const Settings& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
 		auto conn = make_pq_conn(parDB);
 		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"hash\"=$1";
 		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, mchlib::tiger_to_string(parSearch, true));
 	}
 
-	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, bool parCaseInsensitive) {
+	std::vector<LocatedSet> locate_sets_in_db (const Settings& parDB, const std::string& parSearch, bool parCaseInsensitive) {
 		auto conn = make_pq_conn(parDB);
 
 		const std::string query = std::string("SELECT \"id\", \"desc\", "
@@ -120,7 +121,7 @@ namespace din {
 		return sets_result_to_vec(std::move(result));
 	}
 
-	std::vector<LocatedSet> locate_sets_in_db (const dinlib::SettingsDB& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive) {
+	std::vector<LocatedSet> locate_sets_in_db (const Settings& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive) {
 		if (parSets.empty()) {
 			return locate_sets_in_db(parDB, parSearch, parCaseInsensitive);
 		}
@@ -136,4 +137,4 @@ namespace din {
 		auto result = conn.query(query, parSearch, parCaseInsensitive, parSets);
 		return sets_result_to_vec(std::move(result));
 	}
-} //namespace din
+} //namespace dinbpostgres
