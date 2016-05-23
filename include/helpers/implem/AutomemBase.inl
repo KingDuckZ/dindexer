@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace din {
+namespace dinhelp {
 	namespace {
 #if defined(ASSERTIONSENABLED)
 		const char g_guard = 0xAB;
@@ -115,4 +115,4 @@ namespace din {
 #endif
 		return new(location) T(std::forward<Args...>(parArgs)...);
 	}
-} //namespace din
+} //namespace dinhelp

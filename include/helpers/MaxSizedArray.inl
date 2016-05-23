@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace din {
+namespace dinhelp {
 	///-------------------------------------------------------------------------
 	///-------------------------------------------------------------------------
 	template <typename T, size_t S, typename A>
@@ -278,4 +278,4 @@ namespace din {
 			throw std::length_error("Unable to reserve more memory than the build-time size for MaxSizedArray");
 		}
 	}
-} //namespace din
+} //namespace dinhelp

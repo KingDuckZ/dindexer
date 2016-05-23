@@ -18,15 +18,15 @@
 #ifndef idBC9F804ADD33468A9C7657E823FFC706
 #define idBC9F804ADD33468A9C7657E823FFC706
 
-#include "AutomemBase.hpp"
-#include "IteratorOnPtr.hpp"
+#include "implem/AutomemBase.hpp"
+#include "implem/IteratorOnPtr.hpp"
 #include <memory>
 #include <cstddef>
 #include <type_traits>
 #include <cassert>
 #include <utility>
 
-namespace din {
+namespace dinhelp {
 	const size_t MAXSZARR_MAX_STACK_ALLOC_SIZE = MAX_STACK_ALLOC_SIZE;
 
 	//TODO: add a template parameter to force stack allocation regardless of
@@ -107,7 +107,7 @@ namespace din {
 		T* m_localMem; //A copy of memory pointer is required
 		size_type m_used;
 	};
-} //namespace din
+} //namespace dinhelp
 
 #include "MaxSizedArray.inl"
 

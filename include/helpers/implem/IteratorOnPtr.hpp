@@ -23,7 +23,7 @@
 #include <type_traits>
 #include <cassert>
 
-namespace din {
+namespace dinhelp {
 	namespace implem_iop {
 		template <typename P, typename T, int32_t I>
 		class IteratorOnPtr_base : public std::iterator<std::random_access_iterator_tag, T> {
@@ -309,6 +309,6 @@ namespace din {
 		this->MoveIterator(-parOther);
 		return *this;
 	}
-} //namespace din
+} //namespace dinhelp
 
 #endif

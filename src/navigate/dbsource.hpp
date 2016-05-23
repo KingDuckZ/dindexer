@@ -20,7 +20,7 @@
 
 #include "dindexer-machinery/recorddata.hpp"
 #include "flatinsertin2dlist.hpp"
-#include "MaxSizedArray.hpp"
+#include "helpers/MaxSizedArray.hpp"
 #include <memory>
 #include <cstdint>
 #include <vector>
@@ -40,6 +40,8 @@ namespace pq {
 } //namespace pq
 
 namespace din {
+	using dinhelp::MaxSizedArray;
+
 	enum SetDetails {
 		SetDetail_Desc = 0x01,
 		SetDetail_Type = 0x02,

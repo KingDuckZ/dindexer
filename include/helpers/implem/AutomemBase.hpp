@@ -30,7 +30,7 @@
 #	define ASSERTIONSENABLED
 #endif
 
-namespace din {
+namespace dinhelp {
 	const size_t MAX_STACK_ALLOC_SIZE = 128;
 
 	///-------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace din {
 		void operator= (const AutomemRawBase_stack&);
 		typename std::aligned_storage<sizeof(T), alignof(T)>::type m_localMem[S];
 	};
-} //namespace din
+} //namespace dinhelp
 
 #include "AutomemBase.inl"
 
