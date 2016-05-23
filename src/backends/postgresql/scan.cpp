@@ -15,8 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backends/postgresql/scan.hpp"
-#include "backends/postgresql/settings.hpp"
+#include "db/scan.hpp"
+#include "db/settings.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include <string>

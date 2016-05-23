@@ -15,8 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backends/postgresql/delete.hpp"
-#include "backends/postgresql/settings.hpp"
+#include "db/delete.hpp"
+#include "db/settings.hpp"
 #include "pq/connection.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <sstream>

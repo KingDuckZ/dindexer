@@ -15,8 +15,8 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backends/postgresql/locate.hpp"
-#include "backends/postgresql/settings.hpp"
+#include "db/locate.hpp"
+#include "db/settings.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-machinery/tiger.hpp"
 #include <utility>

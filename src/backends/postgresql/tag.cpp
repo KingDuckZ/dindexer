@@ -15,10 +15,9 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backends/postgresql/tag.hpp"
-#include "backends/postgresql/settings.hpp"
+#include "db/tag.hpp"
+#include "db/settings.hpp"
 #include "pq/connection.hpp"
-#include "dindexer-common/settings.hpp"
 #include <ciso646>
 
 namespace dinbpostgres {

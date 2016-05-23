@@ -8,8 +8,9 @@ add_library(${PROJECT_NAME} STATIC
 	dbsource.cpp
 )
 
-#target_include_directories(${PROJECT_NAME}
-#)
+target_include_directories(${PROJECT_NAME}
+	PUBLIC ${CMAKE_SOURCE_DIR}/include/backends/postgresql
+)
 #target_include_directories(${PROJECT_NAME} SYSTEM
 #)
 
