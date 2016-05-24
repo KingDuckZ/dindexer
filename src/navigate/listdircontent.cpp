@@ -17,7 +17,7 @@
 
 #include "listdircontent.hpp"
 #include "entrypath.hpp"
-#include "backends/postgresql/dbsource.hpp"
+#include "db/dbsource.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <cassert>
 #include <utility>

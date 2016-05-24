@@ -18,7 +18,7 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "backends/postgresql/delete.hpp"
+#include "db/delete.hpp"
 #include <iostream>
 #include <ciso646>
 #include <ios>

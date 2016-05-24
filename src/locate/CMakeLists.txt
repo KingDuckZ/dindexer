@@ -16,7 +16,6 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-common
 	PRIVATE ${bare_name}-machinery
 	PRIVATE glob2regex
-	PRIVATE ${bare_name}-backend-postgresql
 )
 
 string(REPLACE "${bare_name}-" "" ACTION_NAME "${PROJECT_NAME}")

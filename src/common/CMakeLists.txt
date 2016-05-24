@@ -19,10 +19,13 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ${Readline_INCLUDE_DIR}
 )
 
+string(TOLOWER "${DINDEXER_DB_BACKEND}" DINDEXER_DB_BACKEND_LOWERCASE)
+
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${YAMLCPP_LIBRARY}
 	PRIVATE ${Readline_LIBRARY}
+	PUBLIC ${bare_name}-backend-${DINDEXER_DB_BACKEND_LOWERCASE}
 )
 
 #install(TARGETS ${PROJECT_NAME}

@@ -18,7 +18,7 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "backends/postgresql/tag.hpp"
+#include "db/tag.hpp"
 #include "dindexer-common/split_tags.hpp"
 #include "glob2regex/glob2regex.hpp"
 #include "enum.h"

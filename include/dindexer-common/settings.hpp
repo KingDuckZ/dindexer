@@ -19,7 +19,7 @@
 #define idDC29E3C667BD4793BA0644AE7DC5BD3F
 
 #include <string>
-#include "backends/postgresql/settings.hpp"
+#include "db/settings.hpp"
 
 namespace dinlib {
 	struct Settings {

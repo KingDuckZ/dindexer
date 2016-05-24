@@ -25,7 +25,7 @@
 #include "dindexer-common/common_info.hpp"
 #include "dindexer-common/settings.hpp"
 #include "commandline.hpp"
-#include "backends/postgresql/scan.hpp"
+#include "db/scan.hpp"
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/scantask/mediatype.hpp"
 #include "dindexer-machinery/scantask/hashing.hpp"

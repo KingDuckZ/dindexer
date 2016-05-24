@@ -19,7 +19,7 @@
 #include "commandprocessor.hpp"
 #include "dindexer-common/settings.hpp"
 #include "entrypath.hpp"
-#include "backends/postgresql/dbsource.hpp"
+#include "db/dbsource.hpp"
 #include "dindexerConfig.h"
 #include "linereader.hpp"
 #include "listdircontent.hpp"
