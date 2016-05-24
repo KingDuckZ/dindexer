@@ -27,7 +27,7 @@
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace dinbpostgres {
+namespace dindb {
 	namespace {
 		IDDescMap fetch_existing_ids (pq::Connection& parConn, const std::vector<uint32_t>& parIDs) {
 			using boost::lexical_cast;
@@ -72,4 +72,4 @@ namespace dinbpostgres {
 
 		conn.query(oss.str());
 	}
-} //namespace dinbpostgres
+} //namespace dindb

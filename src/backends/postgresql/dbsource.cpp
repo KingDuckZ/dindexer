@@ -25,7 +25,7 @@
 #include <sstream>
 #include <boost/range/algorithm/copy.hpp>
 
-namespace dinbpostgres {
+namespace dindb {
 	namespace {
 		const uint32_t g_files_query_limit = 500;
 
@@ -180,4 +180,4 @@ namespace dinbpostgres {
 		}
 		return retval;
 	}
-} //namespace dinbpostgres
+} //namespace dindb

@@ -22,7 +22,7 @@
 #include <boost/utility/string_ref.hpp>
 #include <cstdint>
 
-namespace dinbpostgres {
+namespace dindb {
 	struct Settings;
 
 	struct OwnerSetInfo {
@@ -37,6 +37,6 @@ namespace dinbpostgres {
 	void delete_tags ( const Settings& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
 	void delete_all_tags ( const Settings& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet );
 	void delete_all_tags ( const Settings& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet );
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

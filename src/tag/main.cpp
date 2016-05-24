@@ -47,8 +47,8 @@ namespace {
 		return retval;
 	}
 
-	dinbpostgres::OwnerSetInfo make_owner_set_info (const boost::program_options::variables_map& parVM) {
-		dinbpostgres::OwnerSetInfo set_info;
+	dindb::OwnerSetInfo make_owner_set_info (const boost::program_options::variables_map& parVM) {
+		dindb::OwnerSetInfo set_info;
 		if (parVM.count("set")) {
 			set_info.is_valid = true;
 			set_info.group_id = parVM["set"].as<uint32_t>();
@@ -60,11 +60,11 @@ namespace {
 		return set_info;
 	}
 
-	int tag_files (const dinbpostgres::Settings& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+	int tag_files (const dindb::Settings& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
 		using boost::lexical_cast;
 		using boost::string_ref;
 
-		const dinbpostgres::OwnerSetInfo set_info = make_owner_set_info(parVM);
+		const dindb::OwnerSetInfo set_info = make_owner_set_info(parVM);
 
 		switch (parMode) {
 		case TaggingMode::ID:
@@ -73,14 +73,14 @@ namespace {
 			std::vector<uint64_t> ids;
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
-			dinbpostgres::tag_files(parDB, ids, parTags, set_info);
+			dindb::tag_files(parDB, ids, parTags, set_info);
 			return 0;
 		}
 
 		case TaggingMode::Glob:
 		{
 			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
-			dinbpostgres::tag_files(parDB, regexes, parTags, set_info);
+			dindb::tag_files(parDB, regexes, parTags, set_info);
 			return 0;
 		}
 
@@ -90,7 +90,7 @@ namespace {
 		}
 	}
 
-	int delete_tags (const dinbpostgres::Settings& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+	int delete_tags (const dindb::Settings& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
 		using boost::lexical_cast;
 		using boost::string_ref;
 
@@ -104,9 +104,9 @@ namespace {
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
 			if (parVM.count("alltags"))
-				dinbpostgres::delete_all_tags(parDB, ids, make_owner_set_info(parVM));
+				dindb::delete_all_tags(parDB, ids, make_owner_set_info(parVM));
 			else
-				dinbpostgres::delete_tags(parDB, ids, parTags, make_owner_set_info(parVM));
+				dindb::delete_tags(parDB, ids, parTags, make_owner_set_info(parVM));
 			return 0;
 		}
 
@@ -114,9 +114,9 @@ namespace {
 		{
 			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
 			if (parVM.count("alltags"))
-				dinbpostgres::delete_all_tags(parDB, regexes, make_owner_set_info(parVM));
+				dindb::delete_all_tags(parDB, regexes, make_owner_set_info(parVM));
 			else
-				dinbpostgres::delete_tags(parDB, regexes, parTags, make_owner_set_info(parVM));
+				dindb::delete_tags(parDB, regexes, parTags, make_owner_set_info(parVM));
 			return 0;
 		}
 

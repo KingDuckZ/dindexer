@@ -28,7 +28,7 @@
 #include <boost/utility/string_ref.hpp>
 #include <chrono>
 
-namespace dinbpostgres {
+namespace dindb {
 	namespace {
 	} //unnamed namespace
 
@@ -144,4 +144,4 @@ namespace dinbpostgres {
 		}
 		conn.query("COMMIT;");
 	}
-} //namespace dinbpostgres
+} //namespace dindb

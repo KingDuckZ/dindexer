@@ -20,7 +20,7 @@
 #include "pq/connection.hpp"
 #include <ciso646>
 
-namespace dinbpostgres {
+namespace dindb {
 	void tag_files (const Settings& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet) {
 		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
 		conn.connect();
@@ -152,4 +152,4 @@ namespace dinbpostgres {
 			conn.query(query, parRegexes);
 		}
 	}
-} //namespace dinbpostgres
+} //namespace dindb

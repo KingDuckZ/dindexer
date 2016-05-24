@@ -24,13 +24,13 @@
 #include <cstdint>
 #include <map>
 
-namespace dinbpostgres {
+namespace dindb {
 	struct Settings;
 
 	using IDDescMap = std::map<uint32_t, std::string>;
 	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
 
 	void delete_group_from_db ( const Settings& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf );
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

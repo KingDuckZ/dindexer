@@ -27,7 +27,7 @@ namespace mchlib {
 	struct TigerHash;
 } //namespace mchlib
 
-namespace dinbpostgres {
+namespace dindb {
 	struct Settings;
 
 	struct LocatedItem {
@@ -49,6 +49,6 @@ namespace dinbpostgres {
 	std::vector<LocatedItem> locate_in_db ( const Settings& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
 	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, bool parCaseInsensitive );
 	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

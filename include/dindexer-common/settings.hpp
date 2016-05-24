@@ -23,7 +23,7 @@
 
 namespace dinlib {
 	struct Settings {
-		dinbpostgres::Settings db;
+		dindb::Settings db;
 	};
 
 	bool load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );

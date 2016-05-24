@@ -35,7 +35,7 @@ namespace pq {
 	class Connection;
 } //namespace pq
 
-namespace dinbpostgres {
+namespace dindb {
 	using dinhelp::MaxSizedArray;
 
 	struct Settings;
@@ -146,6 +146,6 @@ namespace dinbpostgres {
 		this->query_files_in_dir(columns, parDir, parLevel, parSetID, std::bind(pback_func, &flat_list, std::placeholders::_1));
 		return list;
 	}
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

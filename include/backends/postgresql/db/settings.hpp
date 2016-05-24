@@ -21,7 +21,7 @@
 #include <string>
 #include <cstdint>
 
-namespace dinbpostgres {
+namespace dindb {
 	struct Settings {
 		std::string address;
 		std::string username;
@@ -29,6 +29,6 @@ namespace dinbpostgres {
 		std::string dbname;
 		uint16_t port;
 	};
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

@@ -26,7 +26,7 @@
 #include <cstdint>
 
 namespace {
-	bool confirm_delete (const dinbpostgres::IDDescMap& parMap) {
+	bool confirm_delete (const dindb::IDDescMap& parMap) {
 		for (const auto& itm : parMap) {
 			std::cout << "ID " << itm.first << '\t' << itm.second << '\n';
 		}
@@ -38,7 +38,7 @@ namespace {
 		return (answer.empty() or "y" == answer or "Y" == answer);
 	}
 
-	bool always_delete (const dinbpostgres::IDDescMap&) {
+	bool always_delete (const dindb::IDDescMap&) {
 		return true;
 	}
 } //unnamed namespace
@@ -77,7 +77,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto ids = vm["groupid"].as<std::vector<uint32_t>>();
 	auto confirm_func = (vm.count("confirm") ? &always_delete : &confirm_delete);
-	dinbpostgres::delete_group_from_db(settings.db, ids, confirm_func);
+	dindb::delete_group_from_db(settings.db, ids, confirm_func);
 	return 0;
 }
 

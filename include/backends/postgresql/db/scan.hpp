@@ -29,11 +29,11 @@ namespace mchlib {
 	struct TigerHash;
 } //namespace mchlib
 
-namespace dinbpostgres {
+namespace dindb {
 	struct Settings;;
 
 	void write_to_db ( const Settings& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature );
 	bool read_from_db ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const Settings& parDB, const mchlib::TigerHash& parHash );
-} //namespace dinbpostgres
+} //namespace dindb
 
 #endif

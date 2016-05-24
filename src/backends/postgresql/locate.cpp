@@ -23,7 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace dinbpostgres {
+namespace dindb {
 	namespace {
 		const int g_max_results = 200;
 
@@ -137,4 +137,4 @@ namespace dinbpostgres {
 		auto result = conn.query(query, parSearch, parCaseInsensitive, parSets);
 		return sets_result_to_vec(std::move(result));
 	}
-} //namespace dinbpostgres
+} //namespace dindb
