@@ -52,7 +52,6 @@ void print_builtin_feats() {
 #else
 	printf("WITH_NICE_MEDIA_TYPES = no\n");
 #endif
-	printf("DB_BACKEND = \"%s\"\n", DB_BACKEND);
 }
 
 void print_version() {
