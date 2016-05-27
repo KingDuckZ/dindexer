@@ -34,12 +34,12 @@ namespace dindb {
 		BackendPostgreSql ( std::string&& parUser, std::string&& parPass, std::string&& parDB, std::string&& parAddr, uint16_t parPort );
 		virtual ~BackendPostgreSql ( void ) noexcept;
 
-		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const override;
-		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const override;
-		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const override;
-		virtual void delete_tags ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const override;
-		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) const override;
-		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) const override;
+		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
+		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
+		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
+		virtual void delete_tags ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
+		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) override;
+		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) override;
 
 	private:
 		std::unique_ptr<pq::Connection> m_conn;

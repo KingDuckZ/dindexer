@@ -36,12 +36,12 @@ namespace dindb {
 		Backend ( void ) = default;
 		virtual ~Backend ( void ) noexcept = default;
 
-		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const = 0;
-		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const = 0;
-		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const = 0;
-		virtual void delete_tags ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) const = 0;
-		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) const = 0;
-		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) const = 0;
+		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
+		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
+		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
+		virtual void delete_tags ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
+		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) = 0;
+		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) = 0;
 
 	};
 } //namespace dindb

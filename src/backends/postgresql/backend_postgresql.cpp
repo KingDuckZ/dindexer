@@ -17,6 +17,7 @@
 
 #include "backend_postgresql.hpp"
 #include "backends/exposed_functions.hpp"
+#include "tag.hpp"
 #include "pq/connection.hpp"
 #include <ciso646>
 #include <utility>
@@ -75,32 +76,28 @@ namespace dindb {
 		m_conn->disconnect();
 	}
 
-	void BackendPostgreSql::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) const {
-		if (InvalidGroupID != parSet) {
-			const std::string query =
-				"UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"id\"=ANY($2) AND \"group_id\"=$3;";
-			m_conn->query(query, parTags, parFiles, parSet);
-		}
-		else {
-			const std::string query =
-				"UPDATE \"files\" SET \"tags\" = ARRAY(SELECT DISTINCT UNNEST(\"tags\" || $1) ORDER BY 1) WHERE \"id\"=ANY($2);";
-			m_conn->query(query, parTags, parFiles);
-		}
+	void BackendPostgreSql::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::tag_files(*m_conn, parFiles, parTags, parSet);
 	}
 
-	void BackendPostgreSql::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) const {
+	void BackendPostgreSql::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::tag_files(*m_conn, parRegexes, parTags, parSet);
 	}
 
-	void BackendPostgreSql::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) const {
+	void BackendPostgreSql::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::delete_tags(*m_conn, parFiles, parTags, parSet);
 	}
 
-	void BackendPostgreSql::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) const {
+	void BackendPostgreSql::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::delete_tags(*m_conn, parRegexes, parTags, parSet);
 	}
 
-	void BackendPostgreSql::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) const {
+	void BackendPostgreSql::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
+		dindb::delete_all_tags(*m_conn, parFiles, parSet);
 	}
 
-	void BackendPostgreSql::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) const {
+	void BackendPostgreSql::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
+		dindb::delete_all_tags(*m_conn, parRegexes, parSet);
 	}
 } //namespace dindb
 

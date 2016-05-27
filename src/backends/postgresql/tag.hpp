@@ -18,25 +18,26 @@
 #ifndef idE1E1650A8CAA4949BD6D4D58BF2599F5
 #define idE1E1650A8CAA4949BD6D4D58BF2599F5
 
+#include "backends/db_backend.hpp"
 #include <vector>
 #include <boost/utility/string_ref.hpp>
 #include <cstdint>
+#include <pq/connection.hpp>
+
+namespace pq {
+	class Connection;
+} //namespace pq
 
 namespace dindb {
 	struct Settings;
 
-	struct OwnerSetInfo {
-		uint32_t group_id;
-		bool is_valid;
-	};
+	void tag_files ( pq::Connection& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet );
+	void tag_files ( pq::Connection& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet );
 
-	void tag_files ( const Settings& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
-	void tag_files ( const Settings& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
-
-	void delete_tags ( const Settings& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
-	void delete_tags ( const Settings& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, OwnerSetInfo parSet );
-	void delete_all_tags ( const Settings& parDB, const std::vector<uint64_t>& parFiles, OwnerSetInfo parSet );
-	void delete_all_tags ( const Settings& parDB, const std::vector<std::string>& parRegexes, OwnerSetInfo parSet );
+	void delete_tags ( pq::Connection& parDB, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet );
+	void delete_tags ( pq::Connection& parDB, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet );
+	void delete_all_tags ( pq::Connection& parDB, const std::vector<uint64_t>& parFiles, GroupIDType parSet );
+	void delete_all_tags ( pq::Connection& parDB, const std::vector<std::string>& parRegexes, GroupIDType parSet );
 } //namespace dindb
 
 #endif
