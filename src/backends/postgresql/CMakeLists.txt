@@ -9,9 +9,6 @@ add_library(${PROJECT_NAME} SHARED
 	backend_postgresql.cpp
 )
 
-target_include_directories(${PROJECT_NAME}
-	PUBLIC ${DINDEXER_PUB_INCLUDE_DIR}/backends/postgresql
-)
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PUBLIC ${Boost_INCLUDE_DIRS}
 )
