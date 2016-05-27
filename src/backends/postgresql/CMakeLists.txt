@@ -6,6 +6,7 @@ add_library(${PROJECT_NAME} STATIC
 	locate.cpp
 	scan.cpp
 	dbsource.cpp
+	backend_postgresql.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

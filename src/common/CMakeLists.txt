@@ -19,8 +19,6 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ${Readline_INCLUDE_DIR}
 )
 
-string(TOLOWER "${DINDEXER_DB_BACKEND}" DINDEXER_DB_BACKEND_LOWERCASE)
-
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${YAMLCPP_LIBRARY}

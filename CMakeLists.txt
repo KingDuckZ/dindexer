@@ -129,7 +129,7 @@ add_subdirectory(src/common)
 add_subdirectory(src/machinery)
 add_subdirectory(lib/pbl)
 add_subdirectory(lib/glob2regex)
-add_subdirectory(src/backends/postgresql)
+add_subdirectory(src/backends)
 
 #Actions
 add_subdirectory(src/main)
