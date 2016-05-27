@@ -2,10 +2,10 @@ project(${bare_name}-backend-postgresql CXX)
 
 add_library(${PROJECT_NAME} SHARED
 	tag.cpp
-	delete.cpp
-	locate.cpp
-	scan.cpp
-	dbsource.cpp
+	#delete.cpp
+	#locate.cpp
+	#scan.cpp
+	#dbsource.cpp
 	backend_postgresql.cpp
 )
 
