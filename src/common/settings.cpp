@@ -16,41 +16,15 @@
  */
 
 #include "dindexer-common/settings.hpp"
+#include "dindexerConfig.h"
 #include <yaml-cpp/yaml.h>
 #include <ciso646>
 #include <wordexp.h>
 
-namespace YAML {
-	template<>
-	struct convert<dindb::Settings> {
-		static Node encode (const dindb::Settings& parSettings) {
-			Node node;
-			node["address"] = parSettings.address;
-			node["username"] = parSettings.username;
-			node["password"] = parSettings.password;
-			node["port"] = parSettings.port;
-			node["dbname"] = parSettings.dbname;
-			return node;
-		}
-
-		static bool decode (const Node& parNode, dindb::Settings& parSettings) {
-			if (not parNode.IsMap() or parNode.size() != 5) {
-				return false;
-			}
-
-			parSettings.address = parNode["address"].as<std::string>();
-			parSettings.username = parNode["username"].as<std::string>();
-			parSettings.password = parNode["password"].as<std::string>();
-			parSettings.dbname = parNode["dbname"].as<std::string>();
-			parSettings.port = parNode["port"].as<uint16_t>();
-			return true;
-		}
-	};
-} //namespace YAML
-
 namespace dinlib {
 	namespace {
 		std::string expand ( const char* parString );
+		std::string find_plugin_by_name ( const std::string& parName );
 	} //unnamed namespace
 
 	bool load_settings (const std::string& parPath, dinlib::Settings& parOut, bool parExpand) {
@@ -59,8 +33,14 @@ namespace dinlib {
 		try {
 			auto settings = YAML::LoadFile(path);
 
-			if (settings["db_settings"]) {
-				parOut.db = settings["db_settings"].as<dindb::Settings>();
+			if (not settings["db_backend_name"]) {
+				return false;
+			}
+			parOut.backend_name = settings["db_backend_name"].as<std::string>();
+			if (settings["db_backend_settings"]) {
+				//parOut.db = settings["db_backend_settings"].as<dindb::Settings>();
+				auto settings_node = settings["db_backend_settings"];
+				parOut.backend_plugin = dindb::BackendPlugin(find_plugin_by_name(parOut.backend_name), &settings_node);
 				return true;
 			}
 		}
@@ -82,6 +62,16 @@ namespace dinlib {
 			}
 			wordfree(&p);
 			return oss.str();
+		}
+
+		std::string find_plugin_by_name (const std::string& parName) {
+			//assert(false); //not implemented
+			//TODO: write a proper implementation
+			std::string path = ACTIONS_SEARCH_PATH;
+			path += "/backends/postgresql/libdindexer-backend-postgresql.so";
+
+			assert(dindb::backend_name(path) == parName);
+			return path;
 		}
 	} //unnamed namespace
 } //namespace dinlib

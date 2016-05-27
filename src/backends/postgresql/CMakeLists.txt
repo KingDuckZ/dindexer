@@ -1,6 +1,6 @@
 project(${bare_name}-backend-postgresql CXX)
 
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} SHARED
 	tag.cpp
 	delete.cpp
 	locate.cpp
@@ -10,7 +10,7 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_include_directories(${PROJECT_NAME}
-	PUBLIC ${CMAKE_SOURCE_DIR}/include/backends/postgresql
+	PUBLIC ${DINDEXER_PUB_INCLUDE_DIR}/backends/postgresql
 )
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PUBLIC ${Boost_INCLUDE_DIRS}

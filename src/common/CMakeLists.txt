@@ -23,7 +23,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE ${YAMLCPP_LIBRARY}
 	PRIVATE ${Readline_LIBRARY}
-	PUBLIC ${bare_name}-backend-${DINDEXER_DB_BACKEND_LOWERCASE}
+	${bare_name}-backend
 )
 
 #install(TARGETS ${PROJECT_NAME}

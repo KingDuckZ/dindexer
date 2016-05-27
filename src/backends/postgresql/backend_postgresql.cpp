@@ -23,10 +23,22 @@
 #include <cassert>
 #include <yaml-cpp/yaml.h>
 
+namespace dindb {
+	namespace {
+		struct PostgreConnectionSettings {
+			std::string address;
+			std::string username;
+			std::string password;
+			std::string dbname;
+			uint16_t port;
+		};
+	} //unnamed namespace
+} //namespace dindb
+
 namespace YAML {
 	template<>
-	struct convert<dindb::Settings> {
-		static Node encode (const dindb::Settings& parSettings) {
+	struct convert<dindb::PostgreConnectionSettings> {
+		static Node encode (const dindb::PostgreConnectionSettings& parSettings) {
 			Node node;
 			node["address"] = parSettings.address;
 			node["username"] = parSettings.username;
@@ -36,7 +48,7 @@ namespace YAML {
 			return node;
 		}
 
-		static bool decode (const Node& parNode, dindb::Settings& parSettings) {
+		static bool decode (const Node& parNode, dindb::PostgreConnectionSettings& parSettings) {
 			if (not parNode.IsMap() or parNode.size() != 5) {
 				return false;
 			}
@@ -92,11 +104,25 @@ namespace dindb {
 	}
 } //namespace dindb
 
-extern "C" dindb::Backend* create_backend (const YAML::Node*) {
-	return new dindb::BackendPostgreSql("A", "B", "C", "D", 1);
+extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig) {
+	if (not parConfig)
+		return nullptr;
+
+	auto config = parConfig->as<dindb::PostgreConnectionSettings>();
+	return new dindb::BackendPostgreSql(
+		std::move(config.username),
+		std::move(config.password),
+		std::move(config.dbname),
+		std::move(config.address),
+		config.port
+	);
 }
 
-extern "C" void destroy_backend (dindb::Backend* parDele) {
+extern "C" void dindexer_destroy_backend (dindb::Backend* parDele) {
 	if (parDele)
 		delete parDele;
+}
+
+extern "C" const char* dindexer_backend_name() {
+	return "postgresql";
 }

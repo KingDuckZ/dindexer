@@ -1,5 +1,8 @@
 project(${bare_name}-pq CXX)
 
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fPIC")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC")
+
 add_library(${PROJECT_NAME} STATIC
 	connection.cpp
 	databaseexception.cpp

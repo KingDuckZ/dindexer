@@ -1,6 +1,7 @@
 %YAML 1.2
 ---
-db_settings:
+db_backend_name: postgresql
+db_backend_settings:
     username: your_username
     password: your_password
     dbname: dindexer
