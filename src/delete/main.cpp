@@ -18,7 +18,6 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "db/delete.hpp"
 #include <iostream>
 #include <ciso646>
 #include <ios>
@@ -69,6 +68,9 @@ int main (int parArgc, char* parArgv[]) {
 			return 1;
 		}
 	}
+	//TODO: throw if plugin loading failed
+	assert(settings.backend_plugin.name() == settings.backend_name);
+	assert(settings.backend_plugin.is_loaded());
 
 	if (not vm.count("groupid")) {
 		std::cerr << "No IDs specified\n";
@@ -77,7 +79,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto ids = vm["groupid"].as<std::vector<uint32_t>>();
 	auto confirm_func = (vm.count("confirm") ? &always_delete : &confirm_delete);
-	dindb::delete_group_from_db(settings.db, ids, confirm_func);
+	settings.backend_plugin.backend().delete_group(ids, confirm_func);
 	return 0;
 }
 

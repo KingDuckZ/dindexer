@@ -18,6 +18,7 @@
 #include "backend_postgresql.hpp"
 #include "backends/exposed_functions.hpp"
 #include "tag.hpp"
+#include "delete.hpp"
 #include "pq/connection.hpp"
 #include <ciso646>
 #include <utility>
@@ -98,6 +99,10 @@ namespace dindb {
 
 	void BackendPostgreSql::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
 		dindb::delete_all_tags(*m_conn, parRegexes, parSet);
+	}
+
+	void BackendPostgreSql::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+		dindb::delete_group_from_db(*m_conn, parIDs, parConf);
 	}
 } //namespace dindb
 

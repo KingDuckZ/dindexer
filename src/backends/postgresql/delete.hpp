@@ -18,19 +18,22 @@
 #ifndef idB070B86E0E4047B1AF4144DEF2759F3C
 #define idB070B86E0E4047B1AF4144DEF2759F3C
 
+#include "backends/db_backend.hpp"
 #include <functional>
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <map>
 
-namespace dindb {
-	struct Settings;
+namespace pq {
+	class Connection;
+} //namespace pq
 
+namespace dindb {
 	using IDDescMap = std::map<uint32_t, std::string>;
 	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
 
-	void delete_group_from_db ( const Settings& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf );
+	void delete_group_from_db ( pq::Connection& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf );
 } //namespace dindb
 
 #endif

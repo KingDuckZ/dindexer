@@ -23,10 +23,14 @@
 #include <string>
 #include <vector>
 #include <boost/utility/string_ref.hpp>
+#include <map>
+#include <functional>
 
 namespace dindb {
 	using GroupIDType = uint32_t;
 	using FileIDType = uint64_t;
+	using IDDescMap = std::map<uint32_t, std::string>;
+	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
 
 	constexpr const GroupIDType InvalidGroupID = 0;
 	constexpr const FileIDType InvalidFileID = 0;
@@ -43,6 +47,7 @@ namespace dindb {
 		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) = 0;
 		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) = 0;
 
+		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) = 0;
 	};
 } //namespace dindb
 

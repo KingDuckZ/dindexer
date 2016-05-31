@@ -41,6 +41,8 @@ namespace dindb {
 		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) override;
 		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) override;
 
+		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) override;
+
 	private:
 		std::unique_ptr<pq::Connection> m_conn;
 	};

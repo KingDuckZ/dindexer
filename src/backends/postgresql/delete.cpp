@@ -15,8 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "db/delete.hpp"
-#include "db/settings.hpp"
+#include "delete.hpp"
 #include "pq/connection.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <sstream>
@@ -26,6 +25,7 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/lexical_cast.hpp>
+#include <cassert>
 
 namespace dindb {
 	namespace {
@@ -50,10 +50,10 @@ namespace dindb {
 		}
 	} //unnamed namespace
 
-	void delete_group_from_db (const Settings& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
-		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
-		conn.connect();
-		const auto dele_ids = fetch_existing_ids(conn, parIDs);
+	void delete_group_from_db (pq::Connection& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+		assert(parDB.is_connected());
+
+		const auto dele_ids = fetch_existing_ids(parDB, parIDs);
 		if (dele_ids.empty()) {
 			return;
 		}
@@ -70,6 +70,6 @@ namespace dindb {
 		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<uint32_t>(oss, " OR \"id\"="));
 		oss << ";\nCOMMIT;";
 
-		conn.query(oss.str());
+		parDB.query(oss.str());
 	}
 } //namespace dindb
