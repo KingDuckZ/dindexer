@@ -13,8 +13,9 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
-	PUBLIC ${YAMLCPP_LIBRARY}
-	PUBLIC dl
+	INTERFACE ${YAMLCPP_LIBRARY}
+	INTERFACE dl
+	INTERFACE ${bare_name}-machinery
 )
 
 #install(TARGETS ${PROJECT_NAME}

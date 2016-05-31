@@ -132,7 +132,7 @@ add_subdirectory(src/backends)
 
 #Actions
 add_subdirectory(src/main)
-#add_subdirectory(src/scan)
+add_subdirectory(src/scan)
 add_subdirectory(src/delete)
 #add_subdirectory(src/query)
 #add_subdirectory(src/locate)

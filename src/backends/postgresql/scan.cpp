@@ -15,8 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "db/scan.hpp"
-#include "db/settings.hpp"
+#include "scan.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include <string>
@@ -27,20 +26,20 @@
 #include <memory>
 #include <boost/utility/string_ref.hpp>
 #include <chrono>
+#include <cassert>
 
 namespace dindb {
 	namespace {
 	} //unnamed namespace
 
-	bool read_from_db (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const Settings& parDB, const mchlib::TigerHash& parHash) {
+	bool read_from_db (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, pq::Connection& parDB, const mchlib::TigerHash& parHash) {
 		using boost::lexical_cast;
 
-		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
-		conn.connect();
+		assert(parDB.is_connected());
 
 		uint32_t group_id;
 		{
-			auto resultset = conn.query(
+			auto resultset = parDB.query(
 				"SELECT path,level,group_id,is_directory,is_symlink,size FROM files WHERE hash=$1 LIMIT 1;",
 				tiger_to_string(parHash, true)
 			);
@@ -64,7 +63,7 @@ namespace dindb {
 		}
 
 		{
-			auto resultset = conn.query(
+			auto resultset = parDB.query(
 				"SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=$1;",
 				group_id
 			);
@@ -82,21 +81,20 @@ namespace dindb {
 		return true;
 	}
 
-	void write_to_db (const Settings& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
+	void write_to_db (pq::Connection& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
 		using std::chrono::system_clock;
 		using boost::lexical_cast;
+
+		assert(parDB.is_connected());
 
 		if (parData.empty()) {
 			return;
 		}
 
-		pq::Connection conn(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
-		conn.connect();
-
-		conn.query("BEGIN;");
+		parDB.query("BEGIN;");
 		uint32_t new_group_id;
 		{
-			auto id_res = conn.query("INSERT INTO \"sets\" "
+			auto id_res = parDB.query("INSERT INTO \"sets\" "
 				"(\"desc\",\"type\",\"app_name\""
 				",\"content_type\") "
 				"VALUES ($1, $2, $3, $4) RETURNING \"id\";",
@@ -126,7 +124,7 @@ namespace dindb {
 
 			const auto& itm = parData[z];
 			assert(itm.path().data());
-			conn.query(query,
+			parDB.query(query,
 				(itm.path().empty() ? empty_path_string : itm.path()),
 				tiger_to_string(itm.hash),
 				itm.level,
@@ -142,6 +140,6 @@ namespace dindb {
 				itm.mime_charset()
 			);
 		}
-		conn.query("COMMIT;");
+		parDB.query("COMMIT;");
 	}
 } //namespace dindb

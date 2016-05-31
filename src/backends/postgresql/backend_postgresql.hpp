@@ -43,6 +43,9 @@ namespace dindb {
 
 		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) override;
 
+		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature );
+		virtual bool search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash );
+
 	private:
 		std::unique_ptr<pq::Connection> m_conn;
 	};

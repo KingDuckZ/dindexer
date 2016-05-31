@@ -25,7 +25,6 @@
 #include "dindexer-common/common_info.hpp"
 #include "dindexer-common/settings.hpp"
 #include "commandline.hpp"
-#include "db/scan.hpp"
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/scantask/mediatype.hpp"
 #include "dindexer-machinery/scantask/hashing.hpp"
@@ -41,7 +40,7 @@
 #endif
 
 namespace {
-	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dindb::Settings& parDBSettings, bool parForce=false );
+	bool add_to_db ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, dindb::Backend& parDB, bool parForce=false );
 #if defined(WITH_PROGRESS_FEEDBACK)
 	void print_progress ( const boost::string_ref parPath, uint64_t parFileBytes, uint64_t parTotalBytes, uint32_t parFileNum, std::size_t& parClearCount );
 #endif
@@ -81,6 +80,9 @@ int main (int parArgc, char* parArgv[]) {
 			return 1;
 		}
 	}
+	//TODO: throw if plugin loading failed
+	assert(settings.backend_plugin.name() == settings.backend_name);
+	assert(settings.backend_plugin.is_loaded());
 
 	bool ignore_read_errors = (vm.count("ignore-errors") > 0);
 	const std::string search_path(vm["search-path"].as<std::string>());
@@ -104,7 +106,7 @@ int main (int parArgc, char* parArgv[]) {
 	);
 #endif
 
-	const bool added_to_db = add_to_db(filerecdata->get_or_create(), setrecdata->get_or_create(), settings.db);
+	const bool added_to_db = add_to_db(filerecdata->get_or_create(), setrecdata->get_or_create(), settings.backend_plugin.backend());
 #if defined(WITH_PROGRESS_FEEDBACK)
 		std::cout << '\n';
 #endif
@@ -115,7 +117,7 @@ int main (int parArgc, char* parArgv[]) {
 }
 
 namespace {
-	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, const dindb::Settings& parDBSettings, bool parForce) {
+	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, dindb::Backend& parDB, bool parForce) {
 		using mchlib::FileRecordData;
 		using mchlib::SetRecordDataFull;
 		using mchlib::SetRecordData;
@@ -124,7 +126,7 @@ namespace {
 			const auto& first_hash = parData.front().hash;
 			FileRecordData itm;
 			SetRecordDataFull set;
-			const bool already_in_db = dindb::read_from_db(itm, set, parDBSettings, first_hash);
+			const bool already_in_db = parDB.search_file_by_hash(itm, set, first_hash);
 			if (already_in_db) {
 				return false;
 			}
@@ -134,7 +136,7 @@ namespace {
 		const auto app_signature = dinlib::dindexer_signature();
 		const auto lib_signature = mchlib::lib_signature();
 		const std::string signature = std::string(app_signature.data(), app_signature.size()) + "/" + std::string(lib_signature.data(), lib_signature.size());
-		dindb::write_to_db(parDBSettings, parData, set_data, signature);
+		parDB.write_files(parData, set_data, signature);
 		return true;
 	}
 

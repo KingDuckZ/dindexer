@@ -19,6 +19,7 @@
 #include "backends/exposed_functions.hpp"
 #include "tag.hpp"
 #include "delete.hpp"
+#include "scan.hpp"
 #include "pq/connection.hpp"
 #include <ciso646>
 #include <utility>
@@ -103,6 +104,14 @@ namespace dindb {
 
 	void BackendPostgreSql::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
 		dindb::delete_group_from_db(*m_conn, parIDs, parConf);
+	}
+
+	void BackendPostgreSql::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
+		dindb::write_to_db(*m_conn, parData, parSetData, parSignature);
+	}
+
+	bool BackendPostgreSql::search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
+		return dindb::read_from_db(parItem, parSet, *m_conn, parHash);
 	}
 } //namespace dindb
 

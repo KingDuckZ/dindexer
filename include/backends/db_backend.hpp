@@ -19,6 +19,7 @@
 #define id7506CA9825454B80856154ACFE8A9DE2
 
 #include "backends/backend_loader.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -48,6 +49,9 @@ namespace dindb {
 		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) = 0;
 
 		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) = 0;
+
+		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature ) = 0;
+		virtual bool search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash ) = 0;
 	};
 } //namespace dindb
 
