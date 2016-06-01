@@ -19,7 +19,6 @@
 #define id7506CA9825454B80856154ACFE8A9DE2
 
 #include "backends/backend_loader.hpp"
-#include "dindexer-machinery/recorddata.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -27,14 +26,35 @@
 #include <map>
 #include <functional>
 
+namespace mchlib {
+	struct TigerHash;
+	struct FileRecordData;
+	struct SetRecordData;
+	struct SetRecordDataFull;
+} //namespace mchlib
+
 namespace dindb {
 	using GroupIDType = uint32_t;
 	using FileIDType = uint64_t;
 	using IDDescMap = std::map<uint32_t, std::string>;
 	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
+	using TagList = std::vector<boost::string_ref>;
 
 	constexpr const GroupIDType InvalidGroupID = 0;
 	constexpr const FileIDType InvalidFileID = 0;
+
+	struct LocatedItem {
+		std::string path;
+		FileIDType id;
+		GroupIDType group_id;
+	};
+
+	struct LocatedSet {
+		std::string desc;
+		GroupIDType id;
+		uint32_t files_count;
+		uint32_t dir_count;
+	};
 
 	class Backend {
 	public:
@@ -52,6 +72,11 @@ namespace dindb {
 
 		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature ) = 0;
 		virtual bool search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash ) = 0;
+
+		virtual std::vector<LocatedItem> locate_in_db ( const std::string& parSearch, const TagList& parTags ) = 0;
+		virtual std::vector<LocatedItem> locate_in_db ( const mchlib::TigerHash& parSearch, const TagList& parTags ) = 0;
+		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, bool parCaseInsensitive ) = 0;
+		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive ) = 0;
 	};
 } //namespace dindb
 

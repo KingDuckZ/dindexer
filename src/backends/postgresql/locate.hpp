@@ -21,34 +21,17 @@
 #include <vector>
 #include <string>
 #include <cstdint>
-#include <boost/utility/string_ref.hpp>
+#include "backends/db_backend.hpp"
 
-namespace mchlib {
-	struct TigerHash;
-} //namespace mchlib
+namespace pq {
+	class Connection;
+} //namespace pq
 
 namespace dindb {
-	struct Settings;
-
-	struct LocatedItem {
-		std::string path;
-		uint64_t id;
-		uint32_t group_id;
-	};
-
-	struct LocatedSet {
-		std::string desc;
-		uint32_t id;
-		uint32_t files_count;
-		uint32_t dir_count;
-	};
-
-	using TagList = std::vector<boost::string_ref>;
-
-	std::vector<LocatedItem> locate_in_db ( const Settings& parDB, const std::string& parSearch, const TagList& parTags );
-	std::vector<LocatedItem> locate_in_db ( const Settings& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
-	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, bool parCaseInsensitive );
-	std::vector<LocatedSet> locate_sets_in_db ( const Settings& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive );
+	std::vector<LocatedItem> locate_in_db ( pq::Connection& parDB, const std::string& parSearch, const TagList& parTags );
+	std::vector<LocatedItem> locate_in_db ( pq::Connection& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags );
+	std::vector<LocatedSet> locate_sets_in_db ( pq::Connection& parDB, const std::string& parSearch, bool parCaseInsensitive );
+	std::vector<LocatedSet> locate_sets_in_db ( pq::Connection& parDB, const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive );
 } //namespace dindb
 
 #endif

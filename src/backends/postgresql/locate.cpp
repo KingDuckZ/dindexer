@@ -15,27 +15,18 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "db/locate.hpp"
-#include "db/settings.hpp"
+#include "locate.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include "pq/connection.hpp"
 #include "dindexer-machinery/tiger.hpp"
 #include <utility>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <cassert>
 
 namespace dindb {
 	namespace {
 		const int g_max_results = 200;
-
-		pq::Connection make_pq_conn ( const Settings& parDB, bool parOpen=true );
-
-		pq::Connection make_pq_conn (const Settings& parDB, bool parOpen) {
-			auto conn = pq::Connection(std::string(parDB.username), std::string(parDB.password), std::string(parDB.dbname), std::string(parDB.address), parDB.port);
-			if (parOpen) {
-				conn.connect();
-			}
-			return conn;
-		}
 
 		std::vector<LocatedSet> sets_result_to_vec (pq::ResultSet&& parResult) {
 			using boost::lexical_cast;
@@ -95,21 +86,21 @@ namespace dindb {
 		}
 	} //unnamed namespace
 
-	std::vector<LocatedItem> locate_in_db (const Settings& parDB, const std::string& parSearch, const TagList& parTags) {
-		auto conn = make_pq_conn(parDB);
+	std::vector<LocatedItem> locate_in_db (pq::Connection& parDB, const std::string& parSearch, const TagList& parTags) {
+		assert(parDB.is_connected());
 
 		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"path\" ~ $1";
-		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, parSearch);
+		return locate_in_db(parDB, base_query, sizeof(base_query) - 1, "$2", parTags, parSearch);
 	}
 
-	std::vector<LocatedItem> locate_in_db (const Settings& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
-		auto conn = make_pq_conn(parDB);
+	std::vector<LocatedItem> locate_in_db (pq::Connection& parDB, const mchlib::TigerHash& parSearch, const TagList& parTags) {
+		assert(parDB.is_connected());
 		const char base_query[] = "SELECT \"path\",\"id\",\"group_id\" FROM \"files\" WHERE \"hash\"=$1";
-		return locate_in_db(conn, base_query, sizeof(base_query) - 1, "$2", parTags, mchlib::tiger_to_string(parSearch, true));
+		return locate_in_db(parDB, base_query, sizeof(base_query) - 1, "$2", parTags, mchlib::tiger_to_string(parSearch, true));
 	}
 
-	std::vector<LocatedSet> locate_sets_in_db (const Settings& parDB, const std::string& parSearch, bool parCaseInsensitive) {
-		auto conn = make_pq_conn(parDB);
+	std::vector<LocatedSet> locate_sets_in_db (pq::Connection& parDB, const std::string& parSearch, bool parCaseInsensitive) {
+		assert(parDB.is_connected());
 
 		const std::string query = std::string("SELECT \"id\", \"desc\", "
 			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND NOT \"is_directory\") as \"file_count\", "
@@ -117,16 +108,16 @@ namespace dindb {
 			"FROM \"sets\" WHERE str_match_partial(\"desc\", $1, $2) LIMIT "
 		) + std::to_string(g_max_results) + ";";
 
-		auto result = conn.query(query, parSearch, parCaseInsensitive);
+		auto result = parDB.query(query, parSearch, parCaseInsensitive);
 		return sets_result_to_vec(std::move(result));
 	}
 
-	std::vector<LocatedSet> locate_sets_in_db (const Settings& parDB, const std::string& parSearch, const std::vector<uint32_t>& parSets, bool parCaseInsensitive) {
+	std::vector<LocatedSet> locate_sets_in_db (pq::Connection& parDB, const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
 		if (parSets.empty()) {
 			return locate_sets_in_db(parDB, parSearch, parCaseInsensitive);
 		}
 
-		auto conn = make_pq_conn(parDB);
+		assert(parDB.is_connected());
 
 		const std::string query = std::string("SELECT \"id\", \"desc\", "
 			"(SELECT COUNT(*) FROM \"files\" WHERE \"group_id\"=\"sets\".\"id\" AND NOT \"is_directory\") as \"file_count\", "
@@ -134,7 +125,7 @@ namespace dindb {
 			"FROM \"sets\" WHERE \"id\" = ANY($1) AND str_match_partial(\"desc\", $3, $2) LIMIT "
 		) + std::to_string(g_max_results) + ";";
 
-		auto result = conn.query(query, parSearch, parCaseInsensitive, parSets);
+		auto result = parDB.query(query, parSearch, parCaseInsensitive, parSets);
 		return sets_result_to_vec(std::move(result));
 	}
 } //namespace dindb

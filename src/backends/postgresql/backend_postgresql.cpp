@@ -20,6 +20,7 @@
 #include "tag.hpp"
 #include "delete.hpp"
 #include "scan.hpp"
+#include "locate.hpp"
 #include "pq/connection.hpp"
 #include <ciso646>
 #include <utility>
@@ -112,6 +113,22 @@ namespace dindb {
 
 	bool BackendPostgreSql::search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
 		return dindb::read_from_db(parItem, parSet, *m_conn, parHash);
+	}
+
+	std::vector<LocatedItem> BackendPostgreSql::locate_in_db (const std::string& parSearch, const TagList& parTags) {
+		return dindb::locate_in_db(*m_conn, parSearch, parTags);
+	}
+
+	std::vector<LocatedItem> BackendPostgreSql::locate_in_db (const mchlib::TigerHash& parSearch, const TagList& parTags) {
+		return dindb::locate_in_db(*m_conn, parSearch, parTags);
+	}
+
+	std::vector<LocatedSet> BackendPostgreSql::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {
+		return dindb::locate_sets_in_db(*m_conn, parSearch, parCaseInsensitive);
+	}
+
+	std::vector<LocatedSet> BackendPostgreSql::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
+		return dindb::locate_sets_in_db(*m_conn, parSearch, parSets, parCaseInsensitive);
 	}
 } //namespace dindb
 

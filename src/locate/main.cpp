@@ -16,7 +16,6 @@
  */
 
 #include "commandline.hpp"
-#include "db/locate.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexer-common/split_tags.hpp"
 #include "dindexerConfig.h"
@@ -79,9 +78,13 @@ int main (int parArgc, char* parArgv[]) {
 			return 1;
 		}
 	}
+	//TODO: throw if plugin loading failed
+	assert(settings.backend_plugin.name() == settings.backend_name);
+	assert(settings.backend_plugin.is_loaded());
 
+	auto& db = settings.backend_plugin.backend();
 	if (vm.count("set")) {
-		const auto results = dindb::locate_sets_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		const auto results = db.locate_sets_in_db(vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
 		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedSet>(std::cout, "\n"));
 	}
 	else {
@@ -90,11 +93,11 @@ int main (int parArgc, char* parArgv[]) {
 
 		if (vm.count("byhash")) {
 			const auto hash = din::hash(vm["substring"].as<std::string>());
-			results = dindb::locate_in_db(settings.db, hash, tags);
+			results = db.locate_in_db(hash, tags);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));
-			results = dindb::locate_in_db(settings.db, search_regex, tags);
+			results = db.locate_in_db(search_regex, tags);
 		}
 		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedItem>(std::cout, "\n"));
 	}
