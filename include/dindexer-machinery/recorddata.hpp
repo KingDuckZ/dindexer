@@ -34,7 +34,7 @@ namespace mchlib {
 		typedef boost::flyweight<std::string, boost::flyweights::no_locking, MimeStringTag> mime_string;
 
 		FileRecordData ( void ) = default;
-		FileRecordData ( const char* parPath, std::time_t parATime, std::time_t parMTime, uint64_t parLevel, bool parIsDir, bool parIsSymLink ) :
+		FileRecordData ( const char* parPath, std::time_t parATime, std::time_t parMTime, uint16_t parLevel, bool parIsDir, bool parIsSymLink ) :
 			hash {},
 			abs_path(parPath),
 			mime_full(),
