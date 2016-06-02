@@ -34,6 +34,9 @@ namespace dindb {
 		BackendPostgreSql ( std::string&& parUser, std::string&& parPass, std::string&& parDB, std::string&& parAddr, uint16_t parPort );
 		virtual ~BackendPostgreSql ( void ) noexcept;
 
+		virtual void connect ( void );
+		virtual void disconnect ( void );
+
 		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
 		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
 		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) override;
@@ -50,6 +53,11 @@ namespace dindb {
 		virtual std::vector<LocatedItem> locate_in_db ( const mchlib::TigerHash& parSearch, const TagList& parTags );
 		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, bool parCaseInsensitive );
 		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive );
+
+		virtual std::vector<GroupIDType> find_all_sets ( void );
+		virtual std::vector<dinhelp::MaxSizedArray<std::string, 3>> find_set_details ( const std::vector<GroupIDType>& parSets );
+		virtual std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details ( GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir );
+		virtual std::vector<std::string> find_paths_starting_by ( GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath );
 
 	private:
 		std::unique_ptr<pq::Connection> m_conn;

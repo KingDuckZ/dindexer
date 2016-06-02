@@ -21,6 +21,7 @@
 #include "delete.hpp"
 #include "scan.hpp"
 #include "locate.hpp"
+#include "navigate.hpp"
 #include "pq/connection.hpp"
 #include <ciso646>
 #include <utility>
@@ -79,6 +80,14 @@ namespace dindb {
 		m_conn->disconnect();
 	}
 
+	void BackendPostgreSql::connect() {
+		m_conn->connect();
+	}
+
+	void BackendPostgreSql::disconnect() {
+		m_conn->disconnect();
+	}
+
 	void BackendPostgreSql::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 		dindb::tag_files(*m_conn, parFiles, parTags, parSet);
 	}
@@ -129,6 +138,22 @@ namespace dindb {
 
 	std::vector<LocatedSet> BackendPostgreSql::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
 		return dindb::locate_sets_in_db(*m_conn, parSearch, parSets, parCaseInsensitive);
+	}
+
+	std::vector<GroupIDType> BackendPostgreSql::find_all_sets() {
+		return dindb::find_all_sets(*m_conn);
+	}
+
+	std::vector<dinhelp::MaxSizedArray<std::string, 3>> BackendPostgreSql::find_set_details (const std::vector<GroupIDType>& parSets) {
+		return dindb::find_set_details<dindb::SetDetail_ID, dindb::SetDetail_Desc, dindb::SetDetail_CreeationDate>(*m_conn, parSets);
+	}
+
+	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendPostgreSql::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+		return dindb::find_file_details<dindb::FileDetail_Path>(*m_conn, parSetID, parLevel, parDir);
+	}
+
+	std::vector<std::string> BackendPostgreSql::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
+		return dindb::find_paths_starting_by(*m_conn, parGroupID, parLevel, parPath);
 	}
 } //namespace dindb
 

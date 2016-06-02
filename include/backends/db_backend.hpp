@@ -19,6 +19,7 @@
 #define id7506CA9825454B80856154ACFE8A9DE2
 
 #include "backends/backend_loader.hpp"
+#include "helpers/MaxSizedArray.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -61,6 +62,9 @@ namespace dindb {
 		Backend ( void ) = default;
 		virtual ~Backend ( void ) noexcept = default;
 
+		virtual void connect ( void ) = 0;
+		virtual void disconnect ( void ) = 0;
+
 		virtual void tag_files ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
 		virtual void tag_files ( const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
 		virtual void delete_tags ( const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet ) = 0;
@@ -77,6 +81,11 @@ namespace dindb {
 		virtual std::vector<LocatedItem> locate_in_db ( const mchlib::TigerHash& parSearch, const TagList& parTags ) = 0;
 		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, bool parCaseInsensitive ) = 0;
 		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive ) = 0;
+
+		virtual std::vector<GroupIDType> find_all_sets ( void ) = 0;
+		virtual std::vector<dinhelp::MaxSizedArray<std::string, 3>> find_set_details ( const std::vector<GroupIDType>& parSets ) = 0;
+		virtual std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details ( GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir ) = 0;
+		virtual std::vector<std::string> find_paths_starting_by ( GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath ) = 0;
 	};
 } //namespace dindb
 

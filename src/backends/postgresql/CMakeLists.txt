@@ -5,7 +5,7 @@ add_library(${PROJECT_NAME} SHARED
 	delete.cpp
 	locate.cpp
 	scan.cpp
-	#dbsource.cpp
+	navigate.cpp
 	backend_postgresql.cpp
 )
 

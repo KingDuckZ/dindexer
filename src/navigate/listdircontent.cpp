@@ -17,7 +17,7 @@
 
 #include "listdircontent.hpp"
 #include "entrypath.hpp"
-#include "db/dbsource.hpp"
+#include "backends/db_backend.hpp"
 #include "helpers/infix_iterator.hpp"
 #include <cassert>
 #include <utility>
@@ -68,7 +68,7 @@ namespace din {
 		}
 	} //unnamed namespace
 
-	ListDirContent::ListDirContent (dindb::DBSource* parDB) :
+	ListDirContent::ListDirContent (dindb::Backend* parDB) :
 		m_cache(g_max_cached_lists),
 		m_db(parDB)
 	{
@@ -85,14 +85,14 @@ namespace din {
 
 		//Requested item is not cached, so we need to query the db now
 		if (parDir.points_to_group()) {
-			auto sets_ids = m_db->sets();
-			auto sets_info = m_db->set_details<dindb::SetDetail_ID, dindb::SetDetail_Desc, dindb::SetDetail_CreeationDate>(sets_ids);
+			auto sets_ids = m_db->find_all_sets();
+			auto sets_info = m_db->find_set_details(sets_ids);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(sets_info)));
 		}
 		else {
 			auto path_prefix = parDir.file_path();
 			const auto set_id = parDir.group_id();
-			auto files_info = m_db->file_details<dindb::FileDetail_Path>(set_id, parDir.level() + 1, path_prefix);
+			auto files_info = m_db->find_file_details(set_id, parDir.level() + 1, path_prefix);
 			m_cache.push_back(std::make_pair(curr_path, db_result_to_vec(files_info)));
 		}
 		return last_cached_item(curr_path);
@@ -115,7 +115,7 @@ namespace din {
 		else {
 			const auto set_id = parDir.group_id();
 			const auto path_prefix = parDir.file_path();
-			auto file_list = m_db->paths_starting_by(set_id, parDir.level(), path_prefix);
+			auto file_list = m_db->find_paths_starting_by(set_id, parDir.level(), path_prefix);
 			for (auto& file_item : file_list) {
 				file_item = EntryPath(file_item)[return_level];
 			}
