@@ -15,20 +15,11 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idA9E47E37E2FA49EE84C2E93FB701C368
-#define idA9E47E37E2FA49EE84C2E93FB701C368
-
-namespace YAML {
-	class Node;
-} //namespace YAML
+#ifndef idAA27B58429DB41C2AF53204CC5010E94
+#define idAA27B58429DB41C2AF53204CC5010E94
 
 namespace dindb {
-	class Backend;
+	constexpr const int g_current_iface_version = 1;
 } //namespace dindb
-
-extern "C" dindb::Backend* dindexer_create_backend ( const YAML::Node* parConfig );
-extern "C" void dindexer_destroy_backend ( dindb::Backend* parDele );
-extern "C" const char* dindexer_backend_name ( void );
-extern "C" int dindexer_backend_iface_version ( void );
 
 #endif

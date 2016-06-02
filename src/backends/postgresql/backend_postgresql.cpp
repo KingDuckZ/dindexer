@@ -17,6 +17,7 @@
 
 #include "backend_postgresql.hpp"
 #include "backends/exposed_functions.hpp"
+#include "backends/backend_version.hpp"
 #include "tag.hpp"
 #include "delete.hpp"
 #include "scan.hpp"
@@ -178,4 +179,8 @@ extern "C" void dindexer_destroy_backend (dindb::Backend* parDele) {
 
 extern "C" const char* dindexer_backend_name() {
 	return "postgresql";
+}
+
+extern "C" int dindexer_backend_iface_version() {
+	return dindb::g_current_iface_version;
 }

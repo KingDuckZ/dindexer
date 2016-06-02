@@ -20,6 +20,7 @@
 
 #include "backends/backend_loader.hpp"
 #include "backends/exposed_functions.hpp"
+#include "backends/backend_version.hpp"
 #include <dlfcn.h>
 #include <cassert>
 #include <functional>
@@ -50,6 +51,13 @@ namespace dindb {
 
 		void nop_destroy (Backend*) {
 		}
+
+		int backend_iface_version (void* parSOHandle) {
+			typedef decltype(&dindexer_backend_iface_version) GetVersionFun;
+
+			auto get_version = reinterpret_cast<GetVersionFun>(dlsym(parSOHandle, "dindexer_backend_iface_version"));
+			return get_version();
+		}
 	} //unnamed namespace
 
 	std::string backend_name (const std::string& parSOPath) {
@@ -70,8 +78,13 @@ namespace dindb {
 	BackendPlugin::BackendPlugin (const std::string& parSOPath, const YAML::Node* parConfig) :
 		m_lib(dlopen(parSOPath.c_str(), RTLD_LAZY), &dlclose),
 		m_backend(load_backend(m_lib.get(), parConfig)),
-		m_name(backend_name(m_lib.get()))
+		m_name(backend_name(m_lib.get())),
+		m_iface_ver(backend_iface_version(m_lib.get()))
 	{
+		if (g_current_iface_version != m_iface_ver) {
+			m_backend.reset();
+			m_lib.reset();
+		}
 	}
 
 	BackendPlugin::~BackendPlugin() noexcept {
@@ -103,5 +116,13 @@ namespace dindb {
 
 	bool BackendPlugin::is_loaded() const {
 		return static_cast<bool>(m_backend);
+	}
+
+	int BackendPlugin::backend_interface_version() const {
+		return m_iface_ver;
+	}
+
+	int BackendPlugin::max_supported_interface_version() const {
+		return g_current_iface_version;
 	}
 } //namespace dindb

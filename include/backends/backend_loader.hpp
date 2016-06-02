@@ -42,6 +42,8 @@ namespace dindb {
 		Backend& backend ( void );
 		const Backend& backend ( void ) const;
 		bool is_loaded ( void ) const;
+		int backend_interface_version ( void ) const;
+		int max_supported_interface_version ( void ) const;
 
 		BackendPlugin& operator= ( BackendPlugin&& ) = default;
 
@@ -51,6 +53,7 @@ namespace dindb {
 		SoHandle m_lib;
 		BackendPtr m_backend;
 		boost::string_ref m_name;
+		int m_iface_ver;
 	};
 
 	std::string backend_name ( const std::string& parSOPath );
