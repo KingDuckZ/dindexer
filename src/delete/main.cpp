@@ -61,16 +61,14 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
 	}
-	//TODO: throw if plugin loading failed
-	assert(settings.backend_plugin.name() == settings.backend_name);
-	assert(settings.backend_plugin.is_loaded());
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
+	}
 
 	if (not vm.count("groupid")) {
 		std::cerr << "No IDs specified\n";

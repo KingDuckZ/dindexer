@@ -147,15 +147,13 @@ int main (int parArgc, char* parArgv[]) {
 	assert(id_mode xor glob_mode);
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
-		//TODO: throw if plugin loading failed
-		assert(settings.backend_plugin.name() == settings.backend_name);
-		assert(settings.backend_plugin.is_loaded());
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
 	const auto master_tags_string = vm["tags"].as<std::string>();

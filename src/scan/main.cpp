@@ -73,16 +73,15 @@ int main (int parArgc, char* parArgv[]) {
 #endif
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
+	try {
+		if (din::parse_commandline(parArgc, parArgv, vm)) {
+			return 0;
 		}
 	}
-	//TODO: throw if plugin loading failed
-	assert(settings.backend_plugin.name() == settings.backend_name);
-	assert(settings.backend_plugin.is_loaded());
+	catch (const std::invalid_argument& err) {
+		std::cerr << err.what() << "\nUse --help for help" << std::endl;
+		return 2;
+	}
 
 	bool ignore_read_errors = (vm.count("ignore-errors") > 0);
 	const std::string search_path(vm["search-path"].as<std::string>());

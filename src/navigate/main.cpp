@@ -26,7 +26,6 @@
 #include <ciso646>
 #include <string>
 #include <vector>
-#include <cassert>
 #include <boost/range/algorithm/copy.hpp>
 
 namespace {
@@ -52,16 +51,14 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
 	}
-	//TODO: throw if plugin loading failed
-	assert(settings.backend_plugin.name() == settings.backend_name);
-	assert(settings.backend_plugin.is_loaded());
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
+	}
 
 	do_navigation(settings.backend_plugin.backend());
 	return 0;

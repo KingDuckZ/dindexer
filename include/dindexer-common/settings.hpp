@@ -28,7 +28,7 @@ namespace dinlib {
 		dindb::BackendPlugin backend_plugin;
 	};
 
-	bool load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );
+	void load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );
 } //namespace dinlib
 
 #endif
