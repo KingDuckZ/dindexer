@@ -33,13 +33,13 @@ namespace dinlib {
 		try {
 			auto settings = YAML::LoadFile(path);
 
-			if (not settings["db_backend_name"]) {
+			if (not settings["backend_name"]) {
 				return false;
 			}
-			parOut.backend_name = settings["db_backend_name"].as<std::string>();
-			if (settings["db_backend_settings"]) {
-				//parOut.db = settings["db_backend_settings"].as<dindb::Settings>();
-				auto settings_node = settings["db_backend_settings"];
+			parOut.backend_name = settings["backend_name"].as<std::string>();
+			const std::string backend_settings_section = parOut.backend_name + "_settings";
+			if (settings[backend_settings_section]) {
+				auto settings_node = settings[backend_settings_section];
 				parOut.backend_plugin = dindb::BackendPlugin(find_plugin_by_name(parOut.backend_name), &settings_node);
 				return true;
 			}
