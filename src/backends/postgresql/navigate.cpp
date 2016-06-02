@@ -18,6 +18,7 @@
 #include "navigate.hpp"
 #include "pq/connection.hpp"
 #include "helpers/infix_iterator.hpp"
+#include "query_count_limit.hpp"
 #include <ciso646>
 #include <utility>
 #include <boost/lexical_cast.hpp>
@@ -27,7 +28,7 @@
 
 namespace dindb {
 	namespace {
-		const uint32_t g_files_query_limit = 500;
+		const uint32_t g_files_query_limit = g_query_count_limit;
 
 		std::ostream& operator<< (std::ostream& parOut, const std::vector<std::string>& parCols) {
 			parOut << '"';

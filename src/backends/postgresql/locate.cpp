@@ -18,6 +18,7 @@
 #include "locate.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include "pq/connection.hpp"
+#include "query_count_limit.hpp"
 #include "dindexer-machinery/tiger.hpp"
 #include <utility>
 #include <boost/algorithm/string.hpp>
@@ -26,7 +27,7 @@
 
 namespace dindb {
 	namespace {
-		const int g_max_results = 200;
+		const int g_max_results = g_query_count_limit;
 
 		std::vector<LocatedSet> sets_result_to_vec (pq::ResultSet&& parResult) {
 			using boost::lexical_cast;
