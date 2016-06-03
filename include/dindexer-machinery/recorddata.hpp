@@ -130,17 +130,13 @@ namespace mchlib {
 		bool hash_valid;
 	};
 
-	struct SetRecordData {
-		boost::string_ref name;
-		char type;
-		char content_type;
-	};
-
-	struct SetRecordDataFull : public SetRecordData {
+	struct SetRecordDataFull {
 		std::string name;
 		std::string disk_label;
 		std::string fs_uuid;
 		uint32_t disk_number;
+		char type;
+		char content_type;
 	};
 
 #if !defined(NDEBUG)

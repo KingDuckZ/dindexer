@@ -29,13 +29,11 @@ namespace mchlib {
 		}
 
 		void SetBasic::on_data_destroy (SetRecordDataFull& parData) {
-			static_cast<SetRecordData&>(parData).name.clear();
 			parData.name.clear();
 		}
 
 		void SetBasic::on_data_create (SetRecordDataFull& parData) {
 			parData.name = m_set_name;
-			static_cast<SetRecordData&>(parData).name = parData.name;
 		}
 	} //namespace scantask
 } //namespace mchlib

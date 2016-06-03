@@ -24,7 +24,6 @@
 
 namespace mchlib {
 	struct FileRecordData;
-	struct SetRecordData;
 	struct SetRecordDataFull;
 	struct TigerHash;
 } //namespace mchlib

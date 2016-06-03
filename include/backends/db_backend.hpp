@@ -30,7 +30,6 @@
 namespace mchlib {
 	struct TigerHash;
 	struct FileRecordData;
-	struct SetRecordData;
 	struct SetRecordDataFull;
 } //namespace mchlib
 
