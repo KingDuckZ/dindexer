@@ -190,7 +190,7 @@ namespace mchlib {
 
 			for (const fs::directory_entry& itm : make_iterator_range(fs::directory_iterator(p), fs::directory_iterator())) {
 				struct stat curr_st;
-				if (stat(itm.path().c_str(), &curr_st) and inode == curr_st.st_ino)
+				if (not stat(itm.path().c_str(), &curr_st) and inode == curr_st.st_ino)
 					return fs::basename(itm);
 			}
 
@@ -199,12 +199,12 @@ namespace mchlib {
 
 		//Get disc label by doing the equivalent of:
 		//find -L /dev/disk/by-label -inum $(stat -c %i /dev/sda1) -print
-		std::string retrieve_label (const std::string& parMountpoint) {
-			return find_with_same_inode(parMountpoint, "/dev/disk/by-label");
+		std::string retrieve_label (const std::string& parDev) {
+			return find_with_same_inode(parDev, "/dev/disk/by-label");
 		}
 
-		std::string retrieve_uuid (const std::string& parMountpoint) {
-			return find_with_same_inode(parMountpoint, "/dev/disk/by-uuid");
+		std::string retrieve_uuid (const std::string& parDev) {
+			return find_with_same_inode(parDev, "/dev/disk/by-uuid");
 		}
 	} //unnamed namespace
 
@@ -228,8 +228,8 @@ namespace mchlib {
 		} while(input_path.atom_count() > 0);
 
 		if (mountpoint_found()) {
-			m_label = retrieve_label(mountpoint());
-			m_uuid = retrieve_uuid(mountpoint());
+			m_label = retrieve_label(m_device);
+			m_uuid = retrieve_uuid(m_device);
 		}
 	}
 
