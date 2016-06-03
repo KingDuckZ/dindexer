@@ -74,13 +74,12 @@ int main (int parArgc, char* parArgv[]) {
 
 	dinlib::Settings settings;
 	try {
-		if (din::parse_commandline(parArgc, parArgv, vm)) {
-			return 0;
-		}
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
 	}
-	catch (const std::invalid_argument& err) {
-		std::cerr << err.what() << "\nUse --help for help" << std::endl;
-		return 2;
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
 	bool ignore_read_errors = (vm.count("ignore-errors") > 0);
