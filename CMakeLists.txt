@@ -57,7 +57,7 @@ if ("${DINDEXER_CONFIG_FILE}" STREQUAL "")
 endif()
 message(STATUS "Config file set to \"${DINDEXER_CONFIG_FILE}\"")
 
-find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem)
 find_package(PostgreSQL 8.3 REQUIRED)
 find_package(YamlCpp 0.5.1 REQUIRED)
 import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}" "-O3 ${march_flag}")

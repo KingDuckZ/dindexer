@@ -52,11 +52,15 @@ namespace mchlib {
 		OpticalTypes optical_type ( void ) const;
 		DriveTypes drive_type ( void ) const;
 #endif
+		const std::string& label ( void ) const;
+		const std::string& filesystem_uuid ( void ) const;
 
 	private:
 		const std::string m_initial_path;
 		std::string m_mountpoint;
 		std::string m_device;
+		std::string m_label;
+		std::string m_uuid;
 	};
 } //namespace mchlib
 
