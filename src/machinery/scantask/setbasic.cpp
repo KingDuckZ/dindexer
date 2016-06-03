@@ -30,10 +30,14 @@ namespace mchlib {
 
 		void SetBasic::on_data_destroy (SetRecordDataFull& parData) {
 			parData.name.clear();
+			parData.fs_uuid.clear();
+			parData.disk_label.clear();
 		}
 
 		void SetBasic::on_data_create (SetRecordDataFull& parData) {
 			parData.name = m_set_name;
+			parData.fs_uuid.clear();
+			parData.disk_label.clear();
 		}
 	} //namespace scantask
 } //namespace mchlib
