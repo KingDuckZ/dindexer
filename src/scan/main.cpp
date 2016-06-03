@@ -118,7 +118,6 @@ namespace {
 	bool add_to_db (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSet, dindb::Backend& parDB, bool parForce) {
 		using mchlib::FileRecordData;
 		using mchlib::SetRecordDataFull;
-		using mchlib::SetRecordData;
 
 		if (not parForce) {
 			const auto& first_hash = parData.front().hash;
@@ -130,11 +129,10 @@ namespace {
 			}
 		}
 
-		const SetRecordData& set_data {parSet.name, parSet.type, parSet.content_type };
 		const auto app_signature = dinlib::dindexer_signature();
 		const auto lib_signature = mchlib::lib_signature();
 		const std::string signature = std::string(app_signature.data(), app_signature.size()) + "/" + std::string(lib_signature.data(), lib_signature.size());
-		parDB.write_files(parData, set_data, signature);
+		parDB.write_files(parData, parSet, signature);
 		return true;
 	}
 

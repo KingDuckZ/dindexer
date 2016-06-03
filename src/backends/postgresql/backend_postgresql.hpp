@@ -46,7 +46,7 @@ namespace dindb {
 
 		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) override;
 
-		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature ) override;
+		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature ) override;
 		virtual bool search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash ) override;
 
 		virtual std::vector<LocatedItem> locate_in_db ( const std::string& parSearch, const TagList& parTags ) override;
@@ -55,7 +55,7 @@ namespace dindb {
 		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive ) override;
 
 		virtual std::vector<GroupIDType> find_all_sets ( void ) override;
-		virtual std::vector<dinhelp::MaxSizedArray<std::string, 3>> find_set_details ( const std::vector<GroupIDType>& parSets ) override;
+		virtual std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details ( const std::vector<GroupIDType>& parSets ) override;
 		virtual std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details ( GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir ) override;
 		virtual std::vector<std::string> find_paths_starting_by ( GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath ) override;
 

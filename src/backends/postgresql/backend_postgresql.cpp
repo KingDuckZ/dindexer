@@ -117,7 +117,7 @@ namespace dindb {
 		dindb::delete_group_from_db(*m_conn, parIDs, parConf);
 	}
 
-	void BackendPostgreSql::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
+	void BackendPostgreSql::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		dindb::write_to_db(*m_conn, parData, parSetData, parSignature);
 	}
 
@@ -145,8 +145,13 @@ namespace dindb {
 		return dindb::find_all_sets(*m_conn);
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 3>> BackendPostgreSql::find_set_details (const std::vector<GroupIDType>& parSets) {
-		return dindb::find_set_details<dindb::SetDetail_ID, dindb::SetDetail_Desc, dindb::SetDetail_CreeationDate>(*m_conn, parSets);
+	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendPostgreSql::find_set_details (const std::vector<GroupIDType>& parSets) {
+		return dindb::find_set_details<
+			dindb::SetDetail_ID,
+			dindb::SetDetail_Desc,
+			dindb::SetDetail_CreeationDate,
+			dindb::SetDetail_DiskLabel
+		>(*m_conn, parSets);
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendPostgreSql::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {

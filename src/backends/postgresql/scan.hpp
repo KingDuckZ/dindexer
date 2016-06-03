@@ -36,7 +36,7 @@ namespace pq {
 namespace dindb {
 	struct Settings;;
 
-	void write_to_db ( pq::Connection& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature );
+	void write_to_db ( pq::Connection& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature );
 	bool read_from_db ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, pq::Connection& parDB, const mchlib::TigerHash& parHash );
 } //namespace dindb
 

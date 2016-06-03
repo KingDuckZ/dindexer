@@ -138,6 +138,8 @@ namespace mchlib {
 
 	struct SetRecordDataFull : public SetRecordData {
 		std::string name;
+		std::string disk_label;
+		std::string fs_uuid;
 		uint32_t disk_number;
 	};
 

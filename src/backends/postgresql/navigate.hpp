@@ -44,7 +44,9 @@ namespace dindb {
 		SetDetail_Type = 0x02,
 		SetDetail_CreeationDate = 0x04,
 		SetDetail_AppName = 0x08,
-		SetDetail_ID = 0x10
+		SetDetail_ID = 0x10,
+		SetDetail_DiskLabel = 0x20,
+		SetDetail_FSUuid = 0x40
 	};
 
 	enum FileDetails {

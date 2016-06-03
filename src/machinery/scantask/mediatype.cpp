@@ -21,6 +21,7 @@
 #	include "dindexer-machinery/mediatype.hpp"
 #endif
 #include "dindexer-machinery/recorddata.hpp"
+#include "discinfo.hpp"
 #include <utility>
 
 namespace mchlib {
@@ -57,6 +58,12 @@ namespace mchlib {
 #else
 			data.type = media_type_to_char(m_default);
 #endif
+
+			{
+				DiscInfo info((std::string(m_search_path)));
+				data.disk_label = info.label();
+				data.fs_uuid = info.filesystem_uuid();
+			}
 		}
 	} //namespace scantask
 } //namespace mchlib

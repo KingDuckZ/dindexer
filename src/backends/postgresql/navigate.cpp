@@ -44,7 +44,9 @@ namespace dindb {
 			{SetDetail_Type, "type"},
 			{SetDetail_CreeationDate, "creation"},
 			{SetDetail_AppName, "app_name"},
-			{SetDetail_ID, "id"}
+			{SetDetail_ID, "id"},
+			{SetDetail_DiskLabel, "disk_label"},
+			{SetDetail_FSUuid, "fs_uuid"}
 		};
 		const FileDetailsMap g_file_details_map {
 			{FileDetail_ID, "id"},

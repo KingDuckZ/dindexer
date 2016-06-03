@@ -64,7 +64,7 @@ namespace dindb {
 
 		{
 			auto resultset = parDB.query(
-				"SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=$1;",
+				"SELECT \"desc\",\"type\",\"disk_number\",\"fs_uuid\",\"disk_label\" FROM sets WHERE \"id\"=$1;",
 				group_id
 			);
 			if (resultset.empty()) {
@@ -77,11 +77,13 @@ namespace dindb {
 			parSet.type = lexical_cast<char>(row["type"]);
 			parSet.name = row["desc"];
 			parSet.disk_number = lexical_cast<uint32_t>(row["disk_number"]);
+			parSet.fs_uuid = row["fs_uuid"];
+			parSet.disk_label = row["disk_label"];
 		}
 		return true;
 	}
 
-	void write_to_db (pq::Connection& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordData& parSetData, const std::string& parSignature) {
+	void write_to_db (pq::Connection& parDB, const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		using std::chrono::system_clock;
 		using boost::lexical_cast;
 
@@ -96,12 +98,14 @@ namespace dindb {
 		{
 			auto id_res = parDB.query("INSERT INTO \"sets\" "
 				"(\"desc\",\"type\",\"app_name\""
-				",\"content_type\") "
-				"VALUES ($1, $2, $3, $4) RETURNING \"id\";",
+				",\"content_type\",\"fs_uuid\",\"disk_label\") "
+				"VALUES ($1, $2, $3, $4, $5, $6) RETURNING \"id\";",
 				parSetData.name,
 				boost::string_ref(&parSetData.type, 1),
 				parSignature,
-				boost::string_ref(&parSetData.content_type, 1)
+				boost::string_ref(&parSetData.content_type, 1),
+			    parSetData.fs_uuid,
+			    parSetData.disk_label
 			);
 			assert(id_res.size() == 1);
 			assert(id_res[0].size() == 1);
