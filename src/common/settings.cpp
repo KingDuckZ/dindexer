@@ -35,7 +35,7 @@ namespace dinlib {
 
 	void load_settings (const std::string& parPath, dinlib::Settings& parOut, bool parExpand) {
 		const std::string path = (parExpand ? expand(parPath.c_str()) : parPath);
-		std::string search_paths(ACTIONS_SEARCH_PATH);
+		std::string search_paths;
 
 		auto settings = YAML::LoadFile(path);
 
