@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #include <cassert>
 #include <functional>
+#include <sstream>
 
 namespace dindb {
 	namespace {
@@ -34,9 +35,22 @@ namespace dindb {
 			assert(parSOHandle);
 			assert(parConfig);
 
-			auto create = reinterpret_cast<CreateBackendFun>(dlsym(parSOHandle, "dindexer_create_backend"));
-			auto destroy = reinterpret_cast<DeleteBackendFun>(dlsym(parSOHandle, "dindexer_destroy_backend"));
+			const char* const fun_name_create = "dindexer_create_backend";
+			const char* const fun_name_destroy = "dindexer_destroy_backend";
 
+			auto create = reinterpret_cast<CreateBackendFun>(dlsym(parSOHandle, fun_name_create));
+			auto destroy = reinterpret_cast<DeleteBackendFun>(dlsym(parSOHandle, fun_name_destroy));
+
+			if (not create) {
+				std::ostringstream oss;
+				oss << "Unable to find function " << fun_name_create;
+				throw std::runtime_error(oss.str());
+			}
+			if (not destroy) {
+				std::ostringstream oss;
+				oss << "Unable to find function " << fun_name_destroy;
+				throw std::runtime_error(oss.str());
+			}
 			return BackendPtr(create(parConfig), destroy);
 		}
 
@@ -65,7 +79,10 @@ namespace dindb {
 		using SoHandle = std::unique_ptr<void, int(*)(void*)>;
 
 		auto handle = SoHandle(dlopen(parSOPath.c_str(), RTLD_LAZY), &dlclose);
-		return backend_name(handle.get());
+		if (handle)
+			return backend_name(handle.get());
+		else
+			return std::string();
 	}
 
 	BackendPlugin::BackendPlugin() :

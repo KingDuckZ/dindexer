@@ -26,6 +26,10 @@
 
 namespace dinlib {
 	std::vector<boost::string_ref> split_tags (const std::string& parCommaSeparatedList) {
+		return split_and_trim(parCommaSeparatedList, ',');
+	}
+
+	std::vector<boost::string_ref> split_and_trim (const std::string& parList, char parSeparator) {
 		using OutRange = boost::iterator_range<std::string::const_iterator>;
 		using boost::token_finder;
 		using boost::adaptors::transformed;
@@ -42,7 +46,7 @@ namespace dinlib {
 		//http://www.boost.org/doc/libs/1_60_0/doc/html/boost/algorithm/token_finder.html
 		//https://stackoverflow.com/questions/20781090/difference-between-boostsplit-vs-boostiter-split
 		return boost::copy_range<std::vector<string_ref>>(
-			iter_split(out_range, parCommaSeparatedList, token_finder([](char c){return ','==c;})) |
+			iter_split(out_range, parList, token_finder([parSeparator](char c){return parSeparator==c;})) |
 				transformed([](const OutRange& r){return trim_copy(r);}) |
 				transformed([](const OutRange& r){return string_ref(&*r.begin(), r.size());}) |
 				filtered([](const string_ref& r){return not r.empty();})
