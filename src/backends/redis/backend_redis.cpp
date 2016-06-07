@@ -17,6 +17,8 @@
 
 #include "backend_redis.hpp"
 #include "dindexer-machinery/recorddata.hpp"
+#include "backends/exposed_functions.hpp"
+#include "backends/backend_version.hpp"
 #include <utility>
 #include <hiredis/hiredis.h>
 #include <ciso646>
@@ -24,12 +26,42 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <yaml-cpp/yaml.h>
 
 namespace dindb {
 	namespace {
         using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
-	} //unnamed namespace
 
+		struct RedisConnectionSettings {
+			std::string address;
+			uint16_t port;
+		};
+	} //unnamed namespace
+} //namespace dindb
+
+namespace YAML {
+	template<>
+	struct convert<dindb::RedisConnectionSettings> {
+		static Node encode (const dindb::RedisConnectionSettings& parSettings) {
+			Node node;
+			node["address"] = parSettings.address;
+			node["port"] = parSettings.port;
+			return node;
+		}
+
+		static bool decode (const Node& parNode, dindb::RedisConnectionSettings& parSettings) {
+			if (not parNode.IsMap() or parNode.size() != 2) {
+				return false;
+			}
+
+			parSettings.address = parNode["address"].as<std::string>();
+			parSettings.port = parNode["port"].as<uint16_t>();
+			return true;
+		}
+	};
+} //namespace YAML
+
+namespace dindb {
     BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort,
                                bool parConnect) :
             m_conn(nullptr, &redisFree),
@@ -156,3 +188,28 @@ namespace dindb {
 		return m_conn and not m_conn->err;
 	}
 } //namespace dindb
+
+extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig) {
+	if (not parConfig)
+		return nullptr;
+
+	auto config = parConfig->as<dindb::RedisConnectionSettings>();
+	return new dindb::BackendRedis(
+		std::move(config.address),
+		config.port,
+		true
+	);
+}
+
+extern "C" void dindexer_destroy_backend (dindb::Backend* parDele) {
+	if (parDele)
+		delete parDele;
+}
+
+extern "C" const char* dindexer_backend_name() {
+	return "redis";
+}
+
+extern "C" int dindexer_backend_iface_version() {
+	return dindb::g_current_iface_version;
+}
