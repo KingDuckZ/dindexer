@@ -25,5 +25,7 @@ target_link_libraries(${PROJECT_NAME}
 #)
 
 add_subdirectory(postgresql)
+add_subdirectory(redis)
 
 add_dependencies(${PROJECT_NAME} ${bare_name}-backend-postgresql)
+add_dependencies(${PROJECT_NAME} ${bare_name}-backend-redis)

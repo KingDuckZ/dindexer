@@ -87,7 +87,6 @@ configure_file(
 
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}
-	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
 )
 
 target_compile_features(${PROJECT_NAME}
@@ -147,7 +146,6 @@ if (BUILD_TESTING)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
-	INTERFACE ${PostgreSQL_LIBRARIES}
 	INTERFACE ${Boost_LIBRARIES}
 	INTERFACE ${bare_name}-pq
 	INTERFACE ${bare_name}-inc

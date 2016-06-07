@@ -12,10 +12,12 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${libpqtypes_INCLUDE_DIRS}
+	PRIVATE ${PostgreSQL_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-if
 	PRIVATE pqtypes
+	PRIVATE ${PostgreSQL_LIBRARIES}
 )
 
 target_compile_features(${PROJECT_NAME}
