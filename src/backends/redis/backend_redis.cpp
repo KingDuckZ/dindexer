@@ -56,44 +56,44 @@ namespace YAML {
 } //namespace YAML
 
 namespace dindb {
-    BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, bool parConnect) :
+	BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, bool parConnect) :
 		m_redis(std::move(parAddress), parPort, parConnect)
 	{
-    }
+	}
 
-    BackendRedis::~BackendRedis() noexcept {
-    }
+	BackendRedis::~BackendRedis() noexcept {
+	}
 
-    void BackendRedis::connect() {
+	void BackendRedis::connect() {
 		m_redis.connect();
 	}
 
-    void BackendRedis::disconnect() {
-        m_redis.disconnect();
-    }
-
-    void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-    }
-
-    void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-    }
-
-    void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-    }
-
-    void BackendRedis::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+	void BackendRedis::disconnect() {
+		m_redis.disconnect();
 	}
 
-    void BackendRedis::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
+	void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 	}
 
-    void BackendRedis::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
+	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 	}
 
-    void BackendRedis::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+	void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 	}
 
-    void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
+	void BackendRedis::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+	}
+
+	void BackendRedis::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
+	}
+
+	void BackendRedis::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
+	}
+
+	void BackendRedis::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+	}
+
+	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		using boost::lexical_cast;
 
 		auto incr_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices set 1");
@@ -101,39 +101,39 @@ namespace dindb {
 		auto insert_set_reply = m_redis.run("HMSET %b name %b disk_label %b fs_uuid %b", set_key, parSetData.name, parSetData.disk_label, parSetData.fs_uuid);
 	}
 
-    bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
+	bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
 		return false;
 	}
 
-    std::vector<LocatedItem> BackendRedis::locate_in_db (const std::string& parSearch, const TagList& parTags) {
+	std::vector<LocatedItem> BackendRedis::locate_in_db (const std::string& parSearch, const TagList& parTags) {
 		return std::vector<LocatedItem>();
 	}
 
-    std::vector<LocatedItem> BackendRedis::locate_in_db (const mchlib::TigerHash& parSearch, const TagList& parTags) {
+	std::vector<LocatedItem> BackendRedis::locate_in_db (const mchlib::TigerHash& parSearch, const TagList& parTags) {
 		return std::vector<LocatedItem>();
 	}
 
-    std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {
+	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {
 		return std::vector<LocatedSet>();
 	}
 
-    std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
+	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
 		return std::vector<LocatedSet>();
 	}
 
-    std::vector<GroupIDType> BackendRedis::find_all_sets() {
+	std::vector<GroupIDType> BackendRedis::find_all_sets() {
 		return std::vector<GroupIDType>();
 	}
 
-    std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
+	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
 		return std::vector<dinhelp::MaxSizedArray<std::string, 4>>();
 	}
 
-    std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
 		return std::vector<dinhelp::MaxSizedArray<std::string, 1>>();
 	}
 
-    std::vector<std::string> BackendRedis::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
+	std::vector<std::string> BackendRedis::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
 		return std::vector<std::string>();
 	}
 } //namespace dindb

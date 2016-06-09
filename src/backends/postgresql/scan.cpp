@@ -104,8 +104,8 @@ namespace dindb {
 				boost::string_ref(&parSetData.type, 1),
 				parSignature,
 				boost::string_ref(&parSetData.content_type, 1),
-			    parSetData.fs_uuid,
-			    parSetData.disk_label
+				parSetData.fs_uuid,
+				parSetData.disk_label
 			);
 			assert(id_res.size() == 1);
 			assert(id_res[0].size() == 1);

@@ -27,7 +27,7 @@
 
 namespace redis {
 	namespace {
-        using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
+		using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
 
 		RedisReplyType make_redis_reply_type (redisReply* parReply) {
 			using boost::transform_iterator;
@@ -66,15 +66,15 @@ namespace redis {
 		m_address(std::move(parAddress)),
 		m_port(parPort)
 	{
-        if (parConnect)
-            this->connect();
+		if (parConnect)
+			this->connect();
 	}
 
 	Command::~Command() noexcept {
 	}
 
-    void Command::connect() {
-        if (not m_conn) {
+	void Command::connect() {
+		if (not m_conn) {
 			struct timeval timeout = {5, 500000}; //5.5 seconds?
 			RedisConnection conn(
 				redisConnectWithTimeout(m_address.c_str(), m_port, timeout),
@@ -93,7 +93,7 @@ namespace redis {
 			}
 			std::swap(conn, m_conn);
 		}
-    }
+	}
 
 	void Command::disconnect() {
 		m_conn.reset();
