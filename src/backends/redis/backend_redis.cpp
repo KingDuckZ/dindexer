@@ -19,8 +19,10 @@
 #include "dindexer-machinery/recorddata.hpp"
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
+#include "dindexerConfig.h"
 #include <utility>
 #include <yaml-cpp/yaml.h>
+#include <boost/lexical_cast.hpp>
 
 namespace dindb {
 	namespace {
@@ -92,7 +94,11 @@ namespace dindb {
 	}
 
     void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
-		//TODO: run command
+		using boost::lexical_cast;
+
+		auto incr_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices set 1");
+		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(incr_reply));
+		auto insert_set_reply = m_redis.run("HMSET %b name %b disk_label %b fs_uuid %b", set_key, parSetData.name, parSetData.disk_label, parSetData.fs_uuid);
 	}
 
     bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {

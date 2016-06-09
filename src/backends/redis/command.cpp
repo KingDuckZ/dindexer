@@ -22,11 +22,44 @@
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/variant/get.hpp>
 
 namespace redis {
 	namespace {
         using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
+
+		RedisReplyType make_redis_reply_type (redisReply* parReply) {
+			using boost::transform_iterator;
+			using PtrToReplyIterator = transform_iterator<RedisReplyType(*)(redisReply*), redisReply**>;
+
+			switch (parReply->type) {
+			case REDIS_REPLY_INTEGER:
+				return parReply->integer;
+			case REDIS_REPLY_STRING:
+				return std::string(parReply->str, parReply->len);
+			case REDIS_REPLY_ARRAY:
+				return std::vector<RedisReplyType>(
+					PtrToReplyIterator(parReply->element, &make_redis_reply_type),
+					PtrToReplyIterator(parReply->element + parReply->elements, &make_redis_reply_type)
+				);
+			default:
+				return RedisReplyType();
+			};
+		}
 	} //unnamed namespace
+
+	long long get_integer (const RedisReplyType& parReply) {
+		return boost::get<long long>(parReply);
+	}
+
+	std::string get_string (const RedisReplyType& parReply) {
+		return boost::get<std::string>(parReply);
+	}
+
+	std::vector<RedisReplyType> get_array (const RedisReplyType& parReply) {
+		return boost::get<std::vector<RedisReplyType>>(parReply);
+	}
 
 	Command::Command (std::string&& parAddress, uint16_t parPort, bool parConnect) :
 		m_conn(nullptr, &redisFree),
@@ -66,13 +99,18 @@ namespace redis {
 		m_conn.reset();
 	}
 
-	void Command::run (const char* parCommand, int parArgc, const char** parArgv, std::size_t* parLengths) {
+	RedisReplyType Command::run_pvt (const char* parCommand, int parArgc, const char** parArgv, std::size_t* parLengths) {
+		assert(parCommand);
+		assert(parArgv);
+		assert(parLengths); //This /could/ be null, but I don't see why it should
 		assert(is_connected());
 
 		RedisReply reply(
 			static_cast<redisReply*>(redisCommandArgv(m_conn.get(), parArgc, parArgv, parLengths)),
 			&freeReplyObject
 		);
+
+		return make_redis_reply_type(reply.get());
 
 		//std::string key;
 		//{
