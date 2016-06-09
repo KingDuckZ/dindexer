@@ -20,18 +20,10 @@
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
 #include <utility>
-#include <hiredis/hiredis.h>
-#include <ciso646>
-#include <stdexcept>
-#include <sstream>
-#include <algorithm>
-#include <cassert>
 #include <yaml-cpp/yaml.h>
 
 namespace dindb {
 	namespace {
-        using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
-
 		struct RedisConnectionSettings {
 			std::string address;
 			uint16_t port;
@@ -62,42 +54,20 @@ namespace YAML {
 } //namespace YAML
 
 namespace dindb {
-    BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort,
-                               bool parConnect) :
-            m_conn(nullptr, &redisFree),
-            m_address(std::move(parAddress)),
-            m_port(parPort) {
-        if (parConnect)
-            this->connect();
+    BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, bool parConnect) :
+		m_redis(std::move(parAddress), parPort, parConnect)
+	{
     }
 
     BackendRedis::~BackendRedis() noexcept {
     }
 
     void BackendRedis::connect() {
-        if (not m_conn) {
-			struct timeval timeout = {5, 500000}; //5.5 seconds?
-			RedisConnection conn(
-				redisConnectWithTimeout(m_address.c_str(), m_port, timeout),
-				&redisFree
-			);
-			if (not conn) {
-				std::ostringstream oss;
-				oss << "Unable to connect to Redis server at " << m_address << ':' << m_port;
-				throw std::runtime_error(oss.str());
-			}
-			if (conn->err) {
-				std::ostringstream oss;
-				oss << "Unable to connect to Redis server at " << m_address << ':' << m_port <<
-					": " << conn->errstr;
-				throw std::runtime_error(oss.str());
-			}
-			std::swap(conn, m_conn);
-		}
-    }
+		m_redis.connect();
+	}
 
     void BackendRedis::disconnect() {
-        m_conn.reset();
+        m_redis.disconnect();
     }
 
     void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
@@ -122,30 +92,7 @@ namespace dindb {
 	}
 
     void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
-		assert(is_connected());
-		std::string key;
-		{
-			std::ostringstream key_oss;
-			RedisReply incr_reply(static_cast<redisReply*>(redisCommand(m_conn.get(), "incr set_counter")), &freeReplyObject);
-			key_oss << "sets:" << incr_reply->integer;
-			key = key_oss.str();
-		}
-
-		RedisReply insert_reply(
-			static_cast<redisReply*>(redisCommand(
-				m_conn.get(),
-				"hmset %b name %b disk_label %b fs_uuid %b",
-				key.data(),
-				key.size(),
-				parSetData.name.data(),
-				parSetData.name.size(),
-				parSetData.disk_label.data(),
-				parSetData.disk_label.size(),
-				parSetData.fs_uuid.data(),
-				parSetData.fs_uuid.size()
-			)),
-			&freeReplyObject
-		);
+		//TODO: run command
 	}
 
     bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
@@ -182,10 +129,6 @@ namespace dindb {
 
     std::vector<std::string> BackendRedis::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
 		return std::vector<std::string>();
-	}
-
-	bool BackendRedis::is_connected() const {
-		return m_conn and not m_conn->err;
 	}
 } //namespace dindb
 

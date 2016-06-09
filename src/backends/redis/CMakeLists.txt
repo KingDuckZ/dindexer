@@ -4,6 +4,7 @@ find_package(hiredis 0.11.0 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
 	backend_redis.cpp
+	command.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

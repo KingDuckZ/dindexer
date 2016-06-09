@@ -19,11 +19,9 @@
 #define idB2F92EE07A004D5293FD0657EEE8F75B
 
 #include "backends/db_backend.hpp"
-#include <memory>
+#include "command.hpp"
 #include <string>
 #include <cstdint>
-
-struct redisContext;
 
 namespace dindb {
 	class BackendRedis : public Backend {
@@ -58,13 +56,7 @@ namespace dindb {
 		virtual std::vector<std::string> find_paths_starting_by ( GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath ) override;
 
 	private:
-		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;
-
-		bool is_connected ( void ) const;
-
-		RedisConnection m_conn;
-		std::string m_address;
-		uint16_t m_port;
+		redis::Command m_redis;
 	};
 } //namespace dindb
 
