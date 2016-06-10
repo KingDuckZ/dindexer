@@ -29,6 +29,7 @@ namespace dindb {
 		struct RedisConnectionSettings {
 			std::string address;
 			uint16_t port;
+			uint16_t database;
 		};
 	} //unnamed namespace
 } //namespace dindb
@@ -40,6 +41,7 @@ namespace YAML {
 			Node node;
 			node["address"] = parSettings.address;
 			node["port"] = parSettings.port;
+			node["database"] = parSettings.database;
 			return node;
 		}
 
@@ -50,22 +52,33 @@ namespace YAML {
 
 			parSettings.address = parNode["address"].as<std::string>();
 			parSettings.port = parNode["port"].as<uint16_t>();
+			if (parNode["database"])
+				parSettings.database = parNode["database"].as<uint16_t>();
 			return true;
 		}
 	};
 } //namespace YAML
 
 namespace dindb {
-	BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, bool parConnect) :
-		m_redis(std::move(parAddress), parPort, parConnect)
+	BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect) :
+		m_redis(std::move(parAddress), parPort),
+		m_database(parDatabase)
 	{
+		if (parConnect)
+			this->connect();
 	}
 
 	BackendRedis::~BackendRedis() noexcept {
 	}
 
 	void BackendRedis::connect() {
+		using boost::lexical_cast;
+
 		m_redis.connect();
+		if (m_redis.is_connected() and m_database > 0) {
+			const std::string command = "SELECT " + lexical_cast<std::string>(m_database);
+			m_redis.run(command.c_str());
+		}
 	}
 
 	void BackendRedis::disconnect() {
@@ -146,6 +159,7 @@ extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig)
 	return new dindb::BackendRedis(
 		std::move(config.address),
 		config.port,
+		config.database,
 		true
 	);
 }

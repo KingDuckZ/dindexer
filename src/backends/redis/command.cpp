@@ -61,13 +61,11 @@ namespace redis {
 		return boost::get<std::vector<RedisReplyType>>(parReply);
 	}
 
-	Command::Command (std::string&& parAddress, uint16_t parPort, bool parConnect) :
+	Command::Command (std::string&& parAddress, uint16_t parPort) :
 		m_conn(nullptr, &redisFree),
 		m_address(std::move(parAddress)),
 		m_port(parPort)
 	{
-		if (parConnect)
-			this->connect();
 	}
 
 	Command::~Command() noexcept {

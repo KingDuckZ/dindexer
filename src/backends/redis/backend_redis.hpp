@@ -27,7 +27,7 @@ namespace dindb {
 	class BackendRedis : public Backend {
 	public:
 		BackendRedis ( BackendRedis&& ) = default;
-		BackendRedis ( std::string&& parAddress, uint16_t parPort, bool parConnect );
+		BackendRedis ( std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect );
 		virtual ~BackendRedis ( void ) noexcept;
 
 		virtual void connect ( void ) override;
@@ -57,6 +57,7 @@ namespace dindb {
 
 	private:
 		redis::Command m_redis;
+		uint16_t m_database;
 	};
 } //namespace dindb
 

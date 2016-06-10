@@ -60,7 +60,7 @@ namespace redis {
 
 	class Command {
 	public:
-		Command ( std::string&& parAddress, uint16_t parPort, bool parConnect );
+		Command ( std::string&& parAddress, uint16_t parPort );
 		~Command ( void ) noexcept;
 
 		void connect ( void );
