@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/variant/get.hpp>
 
 namespace redis {
 	namespace {
@@ -48,18 +47,6 @@ namespace redis {
 			};
 		}
 	} //unnamed namespace
-
-	long long get_integer (const RedisReplyType& parReply) {
-		return boost::get<long long>(parReply);
-	}
-
-	std::string get_string (const RedisReplyType& parReply) {
-		return boost::get<std::string>(parReply);
-	}
-
-	std::vector<RedisReplyType> get_array (const RedisReplyType& parReply) {
-		return boost::get<std::vector<RedisReplyType>>(parReply);
-	}
 
 	Command::Command (std::string&& parAddress, uint16_t parPort) :
 		m_conn(nullptr, &redisFree),
@@ -137,5 +124,9 @@ namespace redis {
 
 	bool Command::is_connected() const {
 		return m_conn and not m_conn->err;
+	}
+
+	auto Command::scan() -> scan_range {
+		return scan_range(scan_iterator(this, false), scan_iterator(this, true));
 	}
 } //namespace redis

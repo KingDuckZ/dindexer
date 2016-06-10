@@ -89,6 +89,9 @@ namespace dindb {
 	}
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		for (const auto& file_path : m_redis.scan()) {
+			std::cout << file_path << '\n';
+		}
 	}
 
 	void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
