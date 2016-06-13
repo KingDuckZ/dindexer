@@ -31,6 +31,7 @@
 #include <utility>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/utility/string_ref.hpp>
+#include <stdexcept>
 
 struct redisContext;
 
@@ -88,6 +89,11 @@ namespace redis {
 			LengthArray{ arg_to_bin_safe_length(string_ref(parCommand)), arg_to_bin_safe_length(std::forward<Args>(parArgs))... }.data()
 		);
 	}
+
+	class RedisError : public std::runtime_error {
+	public:
+		RedisError ( const char* parMessage, std::size_t parLength );
+	};
 } //namespace redis
 
 #endif
