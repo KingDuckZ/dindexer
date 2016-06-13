@@ -71,6 +71,7 @@ namespace redis {
 		RedisReplyType forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, int>::type parDummy );
 		template <typename T>
 		RedisReplyType forward_scan_command ( typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type parDummy );
+		bool is_end ( void ) const;
 
 		void increment ( void );
 		bool equal ( const ScanIterator& parOther ) const;

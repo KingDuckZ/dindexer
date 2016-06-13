@@ -54,6 +54,8 @@ namespace YAML {
 			parSettings.port = parNode["port"].as<uint16_t>();
 			if (parNode["database"])
 				parSettings.database = parNode["database"].as<uint16_t>();
+			else
+				parSettings.database = 0;
 			return true;
 		}
 	};
@@ -90,7 +92,7 @@ namespace dindb {
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 		for (const auto& file_path : m_redis.scan()) {
-			std::cout << file_path << '\n';
+			//std::cout << file_path << '\n';
 		}
 	}
 

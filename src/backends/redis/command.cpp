@@ -84,8 +84,8 @@ namespace redis {
 		m_conn.reset();
 	}
 
-	RedisReplyType Command::run_pvt (const char* parCommand, int parArgc, const char** parArgv, std::size_t* parLengths) {
-		assert(parCommand);
+	RedisReplyType Command::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
+		assert(parArgc >= 1);
 		assert(parArgv);
 		assert(parLengths); //This /could/ be null, but I don't see why it should
 		assert(is_connected());

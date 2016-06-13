@@ -17,6 +17,7 @@
 
 #include "reply.hpp"
 #include <boost/variant/get.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace redis {
 	const long long& get_integer (const RedisReplyType& parReply) {
@@ -25,6 +26,21 @@ namespace redis {
 
 	const std::string& get_string (const RedisReplyType& parReply) {
 		return boost::get<std::string>(parReply);
+	}
+
+	long long get_integer_autoconv_if_str (const RedisReplyType &parReply) {
+		using boost::lexical_cast;
+
+		const auto type = parReply.which();
+		switch (type) {
+		case implem::RedisVariantType_Integer:
+			return get_integer(parReply);
+		case implem::RedisVariantType_String:
+			return lexical_cast<long long>(get_string(parReply));
+		default:
+			assert(false);
+			return 0;
+		}
 	}
 
 	const std::vector<RedisReplyType>& get_array (const RedisReplyType& parReply) {

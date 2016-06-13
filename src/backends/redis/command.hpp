@@ -56,7 +56,7 @@ namespace redis {
 	private:
 		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;
 
-		RedisReplyType run_pvt ( const char* parCommand, int parArgc, const char** parArgv, std::size_t* parLengths );
+		RedisReplyType run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
 
 		RedisConnection m_conn;
 		std::string m_address;
@@ -65,15 +65,17 @@ namespace redis {
 
 	template <typename... Args>
 	RedisReplyType Command::run (const char* parCommand, Args&&... parArgs) {
-		constexpr const std::size_t arg_count = sizeof...(Args);
+		constexpr const std::size_t arg_count = sizeof...(Args) + 1;
 		using CharPointerArray = std::array<const char*, arg_count>;
 		using LengthArray = std::array<std::size_t, arg_count>;
+		using implem::arg_to_bin_safe_char;
+		using implem::arg_to_bin_safe_length;
+		using boost::string_ref;
 
 		return this->run_pvt(
-			parCommand,
 			static_cast<int>(arg_count),
-			CharPointerArray{ implem::arg_to_bin_safe_char(std::forward<Args>(parArgs))... }.data(),
-			LengthArray{ implem::arg_to_bin_safe_length(std::forward<Args>(parArgs))... }.data()
+			CharPointerArray{ arg_to_bin_safe_char(string_ref(parCommand)), arg_to_bin_safe_char(std::forward<Args>(parArgs))... }.data(),
+			LengthArray{ arg_to_bin_safe_length(string_ref(parCommand)), arg_to_bin_safe_length(std::forward<Args>(parArgs))... }.data()
 		);
 	}
 } //namespace redis

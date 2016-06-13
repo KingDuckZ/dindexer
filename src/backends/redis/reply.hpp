@@ -50,6 +50,7 @@ namespace redis {
 	};
 
 	const long long& get_integer ( const RedisReplyType& parReply );
+	long long get_integer_autoconv_if_str ( const RedisReplyType& parReply );
 	const std::string& get_string ( const RedisReplyType& parReply );
 	const std::vector<RedisReplyType>& get_array ( const RedisReplyType& parReply );
 

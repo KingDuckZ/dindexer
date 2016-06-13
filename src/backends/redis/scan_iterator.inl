@@ -30,15 +30,32 @@ namespace redis {
 		m_scan_context(0),
 		m_curr_index(0)
 	{
-		if (not parEnd)
+		if (not parEnd) {
+			m_curr_index = 1; //Some arbitrary value so is_end()==false
+			assert(not is_end());
 			this->increment();
+		}
+		else {
+			assert(is_end());
+		}
+	}
+
+	template <typename V, typename ValueFetch>
+	bool ScanIterator<V, ValueFetch>::is_end() const {
+		return not m_curr_index and m_reply.empty() and not m_scan_context;
 	}
 
 	template <typename V, typename ValueFetch>
 	void ScanIterator<V, ValueFetch>::increment() {
+		assert(not is_end());
 		static_assert(ValueFetch::step > 0, "Can't have an increase step of 0");
+
 		if (m_curr_index + ValueFetch::step < m_reply.size()) {
 			m_curr_index += ValueFetch::step;
+		}
+		else if (m_curr_index + ValueFetch::step == m_reply.size() and not m_scan_context)	{
+			m_reply.clear();
+			m_curr_index = 0;
 		}
 		else {
 			std::vector<RedisReplyType> array_reply;
@@ -50,7 +67,7 @@ namespace redis {
 				array_reply = get_array(whole_reply);
 				assert(2 == array_reply.size());
 				assert(array_reply.size() % ValueFetch::step == 0);
-				new_context = get_integer(array_reply[0]);
+				new_context = get_integer_autoconv_if_str(array_reply[0]);
 			} while (new_context and array_reply.empty());
 
 			m_reply = get_array(array_reply[1]);
@@ -63,15 +80,18 @@ namespace redis {
 	bool ScanIterator<V, ValueFetch>::equal (const ScanIterator& parOther) const {
 		return
 			(&parOther == this) or
+			(is_end() and parOther.is_end()) or
 			(
+				not (is_end() or parOther.is_end()) and
 				implem::ScanIteratorBaseClass::is_equal(parOther) and
-				(m_scan_context == parOther.m_scan_context)
+				(m_scan_context == parOther.m_scan_context) and
+				(m_curr_index == parOther.m_curr_index) and
+				(m_reply.size() == parOther.m_reply.size())
 			);
 	}
 
 	template <typename V, typename ValueFetch>
 	const V& ScanIterator<V, ValueFetch>::dereference() const {
-		assert(m_scan_context);
 		assert(not m_reply.empty());
 		assert(m_curr_index < m_reply.size());
 
