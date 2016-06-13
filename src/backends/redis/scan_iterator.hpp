@@ -20,6 +20,7 @@
 
 #include "reply.hpp"
 #include "helpers/has_method.hpp"
+#include "enum.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>
 #include <vector>
@@ -51,6 +52,10 @@ namespace redis {
 			Command* m_command;
 		};
 	} //namespace implem
+
+	BETTER_ENUM(ScanCommands, char,
+		SCAN, SSCAN, ZSCAN, HSCAN
+	);
 
 	template <typename ValueFetch>
 	class ScanIterator : private implem::ScanIteratorBaseClass, public implem::ScanIteratorBaseIterator<ValueFetch>, private ValueFetch {
@@ -111,13 +116,14 @@ namespace redis {
 		boost::string_ref m_scan_target;
 	};
 
-	template <typename P, typename A=decltype(P().first), typename B=decltype(P().second)>
+	template <typename P, char Command, typename A=decltype(P().first), typename B=decltype(P().second)>
 	struct ScanPairs {
+		static_assert(Command == ScanCommands::HSCAN or Command == ScanCommands::ZSCAN, "Invalid scan command chosen");
 		typedef P value_type;
 
 		explicit ScanPairs ( boost::string_ref parScanTarget ) : m_scan_target(parScanTarget) {}
 
-		static constexpr const char* command ( void ) { return "HSCAN"; }
+		static constexpr const char* command ( void ) { return ScanCommands::_from_integral(Command)._to_string(); }
 		static constexpr const std::size_t step = 2;
 
 		static value_type make_value ( const RedisReplyType* parItem );

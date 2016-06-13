@@ -153,8 +153,8 @@ namespace redis {
 		return get<T>(*parItem);
 	}
 
-	template <typename P, typename A, typename B>
-	auto ScanPairs<P, A, B>::make_value (const RedisReplyType* parItem) -> value_type {
+	template <typename P, char Command, typename A, typename B>
+	auto ScanPairs<P, Command, A, B>::make_value (const RedisReplyType* parItem) -> value_type {
 		assert(parItem);
 		return value_type(get<A>(parItem[0]), get<B>(parItem[1]));
 	}

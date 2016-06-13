@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} SHARED
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PUBLIC ${Boost_INCLUDE_DIRS}
 	PRIVATE ${HIREDIS_INCLUDE_DIRS}
+	PRIVATE ${CMAKE_SOURCE_DIR}/lib/better-enums
 )
 
 target_link_libraries(${PROJECT_NAME}

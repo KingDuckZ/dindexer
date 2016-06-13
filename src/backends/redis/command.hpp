@@ -39,7 +39,7 @@ namespace redis {
 	public:
 		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
 		typedef boost::iterator_range<scan_iterator> scan_range;
-		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>>> hscan_iterator;
+		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::HSCAN>> hscan_iterator;
 		typedef boost::iterator_range<hscan_iterator> hscan_range;
 		typedef ScanIterator<ScanSingleValuesInKey<std::string>> sscan_iterator;
 		typedef boost::iterator_range<sscan_iterator> sscan_range;
