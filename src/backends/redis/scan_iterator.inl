@@ -24,8 +24,31 @@ namespace redis {
 	} //namespace implem
 
 	template <typename V, typename ValueFetch>
+	template <typename Dummy, typename>
 	ScanIterator<V, ValueFetch>::ScanIterator (Command* parCommand, bool parEnd) :
 		implem::ScanIteratorBaseClass(parCommand),
+		implem::ScanIteratorBaseIterator<V, ValueFetch>(),
+		ValueFetch(),
+		m_reply(),
+		m_scan_context(0),
+		m_curr_index(0)
+	{
+		if (not parEnd) {
+			m_curr_index = 1; //Some arbitrary value so is_end()==false
+			assert(not is_end());
+			this->increment();
+		}
+		else {
+			assert(is_end());
+		}
+	}
+
+	template <typename V, typename ValueFetch>
+	template <typename Dummy, typename>
+	ScanIterator<V, ValueFetch>::ScanIterator (Command* parCommand, boost::string_ref parKey, bool parEnd) :
+		implem::ScanIteratorBaseClass(parCommand),
+		implem::ScanIteratorBaseIterator<V, ValueFetch>(),
+		ValueFetch(parKey),
 		m_reply(),
 		m_scan_context(0),
 		m_curr_index(0)
@@ -50,10 +73,10 @@ namespace redis {
 		assert(not is_end());
 		static_assert(ValueFetch::step > 0, "Can't have an increase step of 0");
 
-		if (m_curr_index + ValueFetch::step < m_reply.size()) {
-			m_curr_index += ValueFetch::step;
+		if (m_curr_index + 1 < m_reply.size()) {
+			++m_curr_index;
 		}
-		else if (m_curr_index + ValueFetch::step == m_reply.size() and not m_scan_context)	{
+		else if (m_curr_index + 1 == m_reply.size() and not m_scan_context)	{
 			m_reply.clear();
 			m_curr_index = 0;
 		}
@@ -70,7 +93,15 @@ namespace redis {
 				new_context = get_integer_autoconv_if_str(array_reply[0]);
 			} while (new_context and array_reply.empty());
 
-			m_reply = get_array(array_reply[1]);
+			const auto variant_array = get_array(array_reply[1]);
+			assert(variant_array.size() % ValueFetch::step == 0);
+			const std::size_t expected_reply_count = variant_array.size() / ValueFetch::step;
+			m_reply.clear();
+			m_reply.reserve(expected_reply_count);
+			for (std::size_t z = 0; z < variant_array.size(); z += ValueFetch::step) {
+				m_reply.push_back(ValueFetch::make_value(variant_array.data() + z));
+			}
+			assert(expected_reply_count == m_reply.size());
 			m_scan_context = new_context;
 			m_curr_index = 0;
 		}
@@ -95,7 +126,7 @@ namespace redis {
 		assert(not m_reply.empty());
 		assert(m_curr_index < m_reply.size());
 
-		return ValueFetch::make_value(m_reply.data() + m_curr_index);
+		return m_reply[m_curr_index];
 	}
 
 	template <typename V, typename ValueFetch>
@@ -114,5 +145,16 @@ namespace redis {
 	const T& ScanSingleValues<T>::make_value (const RedisReplyType* parItem) {
 		assert(parItem);
 		return get<T>(*parItem);
+	}
+
+	template <typename P, typename A, typename B>
+	P ScanPairs<P, A, B>::make_value (const RedisReplyType* parItem) {
+		assert(parItem);
+		return PairType(get<A>(parItem[0]), get<B>(parItem[1]));
+	}
+
+	template <typename P, typename A, typename B>
+	boost::string_ref ScanPairs<P, A, B>::scan_target() {
+		return m_scan_target;
 	}
 } //namespace redis

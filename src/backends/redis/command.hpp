@@ -30,6 +30,7 @@
 #include <vector>
 #include <utility>
 #include <boost/range/iterator_range_core.hpp>
+#include <boost/utility/string_ref.hpp>
 
 struct redisContext;
 
@@ -38,6 +39,8 @@ namespace redis {
 	public:
 		typedef ScanIterator<std::string, ScanSingleValues<std::string>> scan_iterator;
 		typedef boost::iterator_range<scan_iterator> scan_range;
+		typedef ScanIterator<std::pair<std::string, std::string>, ScanPairs<std::pair<std::string, std::string>>> hscan_iterator;
+		typedef boost::iterator_range<hscan_iterator> hscan_range;
 
 		Command ( std::string&& parAddress, uint16_t parPort );
 		~Command ( void ) noexcept;
@@ -52,6 +55,7 @@ namespace redis {
 
 		//Single Redis command wrappers
 		scan_range scan ( void );
+		hscan_range hscan ( boost::string_ref parKey );
 
 	private:
 		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;

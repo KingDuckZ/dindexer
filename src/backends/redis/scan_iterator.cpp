@@ -39,7 +39,7 @@ namespace redis {
 			return m_command->run(parCommand, boost::lexical_cast<std::string>(parScanContext));
 		}
 
-		RedisReplyType ScanIteratorBaseClass::run (const char* parCommand, const std::string& parParameter, long long parScanContext) {
+		RedisReplyType ScanIteratorBaseClass::run (const char* parCommand, const boost::string_ref& parParameter, long long parScanContext) {
 			return m_command->run(parCommand, parParameter, boost::lexical_cast<std::string>(parScanContext));
 		}
 	} //namespace implem

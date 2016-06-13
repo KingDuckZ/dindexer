@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <vector>
 #include <cstddef>
+#include <boost/utility/string_ref.hpp>
 
 namespace redis {
 	template <typename V, typename ValueFetch>
@@ -42,7 +43,7 @@ namespace redis {
 
 			bool is_connected ( void ) const;
 			RedisReplyType run ( const char* parCommand, long long parScanContext );
-			RedisReplyType run ( const char* parCommand, const std::string& parParameter, long long parScanContext );
+			RedisReplyType run ( const char* parCommand, const boost::string_ref& parParameter, long long parScanContext );
 
 			bool is_equal ( const ScanIteratorBaseClass& parOther ) const { return m_command == parOther.m_command; }
 
@@ -52,9 +53,10 @@ namespace redis {
 	} //namespace implem
 
 	template <typename V, typename ValueFetch>
-	class ScanIterator : private implem::ScanIteratorBaseClass, public implem::ScanIteratorBaseIterator<V, ValueFetch> {
+	class ScanIterator : private implem::ScanIteratorBaseClass, public implem::ScanIteratorBaseIterator<V, ValueFetch>, private ValueFetch {
 		friend class boost::iterator_core_access;
 		typedef implem::ScanIteratorBaseIterator<V, ValueFetch> base_iterator;
+		define_has_method(scan_target, ScanTarget);
 	public:
 		typedef typename base_iterator::difference_type difference_type;
 		typedef typename base_iterator::value_type value_type;
@@ -62,11 +64,12 @@ namespace redis {
 		typedef typename base_iterator::reference reference;
 		typedef typename base_iterator::iterator_category iterator_category;
 
+		template <typename Dummy=ValueFetch, typename=typename std::enable_if<not HasScanTargetMethod<Dummy>::value>::type>
 		ScanIterator ( Command* parCommand, bool parEnd );
+		template <typename Dummy=ValueFetch, typename=typename std::enable_if<HasScanTargetMethod<Dummy>::value>::type>
+		ScanIterator ( Command* parCommand, boost::string_ref parKey, bool parEnd );
 
 	private:
-		define_has_method(scan_target, ScanTarget);
-
 		template <typename T>
 		RedisReplyType forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, int>::type parDummy );
 		template <typename T>
@@ -77,7 +80,7 @@ namespace redis {
 		bool equal ( const ScanIterator& parOther ) const;
 		const V& dereference ( void ) const;
 
-		std::vector<RedisReplyType> m_reply;
+		std::vector<value_type> m_reply;
 		long long m_scan_context;
 		std::size_t m_curr_index;
 	};
@@ -88,6 +91,22 @@ namespace redis {
 		static constexpr const std::size_t step = 1;
 
 		static const T& make_value ( const RedisReplyType* parItem );
+	};
+
+	template <typename P, typename A=decltype(P().first), typename B=decltype(P().second)>
+	struct ScanPairs {
+		typedef P PairType;
+
+		explicit ScanPairs ( boost::string_ref parScanTarget ) : m_scan_target(parScanTarget) {}
+
+		static constexpr const char* command ( void ) { return "HSCAN"; }
+		static constexpr const std::size_t step = 2;
+
+		static PairType make_value ( const RedisReplyType* parItem );
+		boost::string_ref scan_target ( void );
+
+	private:
+		boost::string_ref m_scan_target;
 	};
 } //namespace redis
 
