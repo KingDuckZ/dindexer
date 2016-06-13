@@ -19,8 +19,8 @@
 #define id93FA96E3071745D9A1E45D4D29B9F7D0
 
 #include <boost/variant/variant.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
 #include <string>
+#include <vector>
 
 namespace redis {
 	class Reply;
@@ -29,7 +29,7 @@ namespace redis {
 		using RedisVariantType = boost::variant<
 			long long,
 			std::string,
-			boost::recursive_wrapper<std::vector<Reply>>
+			std::vector<Reply>
 		>;
 		enum RedisVariantTypes {
 			RedisVariantType_Integer = 0,
