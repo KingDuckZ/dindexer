@@ -43,8 +43,8 @@ namespace redis {
 			~ScanIteratorBaseClass ( void ) noexcept = default;
 
 			bool is_connected ( void ) const;
-			RedisReplyType run ( const char* parCommand, long long parScanContext );
-			RedisReplyType run ( const char* parCommand, const boost::string_ref& parParameter, long long parScanContext );
+			Reply run ( const char* parCommand, long long parScanContext );
+			Reply run ( const char* parCommand, const boost::string_ref& parParameter, long long parScanContext );
 
 			bool is_equal ( const ScanIteratorBaseClass& parOther ) const { return m_command == parOther.m_command; }
 
@@ -76,9 +76,9 @@ namespace redis {
 
 	private:
 		template <typename T>
-		RedisReplyType forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, int>::type parDummy );
+		Reply forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, int>::type parDummy );
 		template <typename T>
-		RedisReplyType forward_scan_command ( typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type parDummy );
+		Reply forward_scan_command ( typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type parDummy );
 		bool is_end ( void ) const;
 
 		void increment ( void );
@@ -97,7 +97,7 @@ namespace redis {
 		static constexpr const char* command ( void ) { return "SCAN"; }
 		static constexpr const std::size_t step = 1;
 
-		static const T& make_value ( const RedisReplyType* parItem );
+		static const T& make_value ( const Reply* parItem );
 	};
 
 	template <typename T>
@@ -109,7 +109,7 @@ namespace redis {
 		static constexpr const char* command ( void ) { return "SSCAN"; }
 		static constexpr const std::size_t step = 1;
 
-		static const T& make_value ( const RedisReplyType* parItem );
+		static const T& make_value ( const Reply* parItem );
 		boost::string_ref scan_target ( void ) const { return m_scan_target; }
 
 	private:
@@ -126,7 +126,7 @@ namespace redis {
 		static constexpr const char* command ( void ) { return ScanCommands::_from_integral(Command)._to_string(); }
 		static constexpr const std::size_t step = 2;
 
-		static value_type make_value ( const RedisReplyType* parItem );
+		static value_type make_value ( const Reply* parItem );
 		boost::string_ref scan_target ( void ) const { return m_scan_target; }
 
 	private:

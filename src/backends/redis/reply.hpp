@@ -23,13 +23,13 @@
 #include <string>
 
 namespace redis {
-	class RedisReplyType;
+	class Reply;
 
 	namespace implem {
 		using RedisVariantType = boost::variant<
 			long long,
 			std::string,
-			boost::recursive_wrapper<std::vector<RedisReplyType>>
+			boost::recursive_wrapper<std::vector<Reply>>
 		>;
 		enum RedisVariantTypes {
 			RedisVariantType_Integer = 0,
@@ -39,23 +39,23 @@ namespace redis {
 		};
 	} //namespace implem
 
-	struct RedisReplyType : implem::RedisVariantType {
+	struct Reply : implem::RedisVariantType {
 		using base_class = implem::RedisVariantType;
 
-		RedisReplyType ( void ) = default;
-		RedisReplyType ( long long parVal ) : base_class(parVal) {}
-		RedisReplyType ( std::string&& parVal ) : base_class(std::move(parVal)) {}
-		RedisReplyType ( std::vector<RedisReplyType>&& parVal ) : base_class(std::move(parVal)) {}
-		~RedisReplyType ( void ) noexcept = default;
+		Reply ( void ) = default;
+		Reply ( long long parVal ) : base_class(parVal) {}
+		Reply ( std::string&& parVal ) : base_class(std::move(parVal)) {}
+		Reply ( std::vector<Reply>&& parVal ) : base_class(std::move(parVal)) {}
+		~Reply ( void ) noexcept = default;
 	};
 
-	const long long& get_integer ( const RedisReplyType& parReply );
-	long long get_integer_autoconv_if_str ( const RedisReplyType& parReply );
-	const std::string& get_string ( const RedisReplyType& parReply );
-	const std::vector<RedisReplyType>& get_array ( const RedisReplyType& parReply );
+	const long long& get_integer ( const Reply& parReply );
+	long long get_integer_autoconv_if_str ( const Reply& parReply );
+	const std::string& get_string ( const Reply& parReply );
+	const std::vector<Reply>& get_array ( const Reply& parReply );
 
 	template <typename T>
-	const T& get ( const RedisReplyType& parReply );
+	const T& get ( const Reply& parReply );
 } //namespace redis
 
 #endif

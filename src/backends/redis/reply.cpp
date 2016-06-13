@@ -20,15 +20,15 @@
 #include <boost/lexical_cast.hpp>
 
 namespace redis {
-	const long long& get_integer (const RedisReplyType& parReply) {
+	const long long& get_integer (const Reply& parReply) {
 		return boost::get<long long>(parReply);
 	}
 
-	const std::string& get_string (const RedisReplyType& parReply) {
+	const std::string& get_string (const Reply& parReply) {
 		return boost::get<std::string>(parReply);
 	}
 
-	long long get_integer_autoconv_if_str (const RedisReplyType &parReply) {
+	long long get_integer_autoconv_if_str (const Reply &parReply) {
 		using boost::lexical_cast;
 
 		const auto type = parReply.which();
@@ -43,26 +43,26 @@ namespace redis {
 		}
 	}
 
-	const std::vector<RedisReplyType>& get_array (const RedisReplyType& parReply) {
-		return boost::get<std::vector<RedisReplyType>>(parReply);
+	const std::vector<Reply>& get_array (const Reply& parReply) {
+		return boost::get<std::vector<Reply>>(parReply);
 	}
 
 	template <>
-	const std::string& get<std::string> (const RedisReplyType& parReply) {
+	const std::string& get<std::string> (const Reply& parReply) {
 		return get_string(parReply);
 	}
 
 	template <>
-	const std::vector<RedisReplyType>& get<std::vector<RedisReplyType>> (const RedisReplyType& parReply) {
+	const std::vector<Reply>& get<std::vector<Reply>> (const Reply& parReply) {
 		return get_array(parReply);
 	}
 
 	template <>
-	const long long& get<long long> (const RedisReplyType& parReply) {
+	const long long& get<long long> (const Reply& parReply) {
 		return get_integer(parReply);
 	}
 
-	template const std::string& get<std::string> ( const RedisReplyType& parReply );
-	template const std::vector<RedisReplyType>& get<std::vector<RedisReplyType>> ( const RedisReplyType& parReply );
-	template const long long& get<long long> ( const RedisReplyType& parReply );
+	template const std::string& get<std::string> ( const Reply& parReply );
+	template const std::vector<Reply>& get<std::vector<Reply>> ( const Reply& parReply );
+	template const long long& get<long long> ( const Reply& parReply );
 } //namespace redis

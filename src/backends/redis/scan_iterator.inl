@@ -81,7 +81,7 @@ namespace redis {
 			m_curr_index = 0;
 		}
 		else {
-			std::vector<RedisReplyType> array_reply;
+			std::vector<Reply> array_reply;
 			long long new_context;
 
 			do {
@@ -131,30 +131,30 @@ namespace redis {
 
 	template <typename ValueFetch>
 	template <typename T>
-	RedisReplyType ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
+	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
 		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), m_scan_context);
 	}
 
 	template <typename ValueFetch>
 	template <typename T>
-	RedisReplyType ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
+	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
 		return implem::ScanIteratorBaseClass::run(T::command(), m_scan_context);
 	}
 
 	template <typename T>
-	auto ScanSingleValues<T>::make_value (const RedisReplyType* parItem) -> const value_type& {
+	auto ScanSingleValues<T>::make_value (const Reply* parItem) -> const value_type& {
 		assert(parItem);
 		return get<T>(*parItem);
 	}
 
 	template <typename T>
-	auto ScanSingleValuesInKey<T>::make_value (const RedisReplyType* parItem) -> const value_type& {
+	auto ScanSingleValuesInKey<T>::make_value (const Reply* parItem) -> const value_type& {
 		assert(parItem);
 		return get<T>(*parItem);
 	}
 
 	template <typename P, char Command, typename A, typename B>
-	auto ScanPairs<P, Command, A, B>::make_value (const RedisReplyType* parItem) -> value_type {
+	auto ScanPairs<P, Command, A, B>::make_value (const Reply* parItem) -> value_type {
 		assert(parItem);
 		return value_type(get<A>(parItem[0]), get<B>(parItem[1]));
 	}

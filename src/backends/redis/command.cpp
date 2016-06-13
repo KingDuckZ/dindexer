@@ -28,9 +28,9 @@ namespace redis {
 	namespace {
 		using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
 
-		RedisReplyType make_redis_reply_type (redisReply* parReply) {
+		Reply make_redis_reply_type (redisReply* parReply) {
 			using boost::transform_iterator;
-			using PtrToReplyIterator = transform_iterator<RedisReplyType(*)(redisReply*), redisReply**>;
+			using PtrToReplyIterator = transform_iterator<Reply(*)(redisReply*), redisReply**>;
 
 			switch (parReply->type) {
 			case REDIS_REPLY_INTEGER:
@@ -38,12 +38,12 @@ namespace redis {
 			case REDIS_REPLY_STRING:
 				return std::string(parReply->str, parReply->len);
 			case REDIS_REPLY_ARRAY:
-				return std::vector<RedisReplyType>(
+				return std::vector<Reply>(
 					PtrToReplyIterator(parReply->element, &make_redis_reply_type),
 					PtrToReplyIterator(parReply->element + parReply->elements, &make_redis_reply_type)
 				);
 			default:
-				return RedisReplyType();
+				return Reply();
 			};
 		}
 	} //unnamed namespace
@@ -84,7 +84,7 @@ namespace redis {
 		m_conn.reset();
 	}
 
-	RedisReplyType Command::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
+	Reply Command::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
 		assert(parArgc >= 1);
 		assert(parArgv);
 		assert(parLengths); //This /could/ be null, but I don't see why it should

@@ -55,7 +55,7 @@ namespace redis {
 		bool is_connected ( void ) const;
 
 		template <typename... Args>
-		RedisReplyType run ( const char* parCommand, Args&&... parArgs );
+		Reply run ( const char* parCommand, Args&&... parArgs );
 
 		//Single Redis command wrappers
 		scan_range scan ( void );
@@ -66,7 +66,7 @@ namespace redis {
 	private:
 		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;
 
-		RedisReplyType run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
+		Reply run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
 
 		RedisConnection m_conn;
 		std::string m_address;
@@ -74,7 +74,7 @@ namespace redis {
 	};
 
 	template <typename... Args>
-	RedisReplyType Command::run (const char* parCommand, Args&&... parArgs) {
+	Reply Command::run (const char* parCommand, Args&&... parArgs) {
 		constexpr const std::size_t arg_count = sizeof...(Args) + 1;
 		using CharPointerArray = std::array<const char*, arg_count>;
 		using LengthArray = std::array<std::size_t, arg_count>;
