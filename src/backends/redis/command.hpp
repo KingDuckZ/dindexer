@@ -43,6 +43,8 @@ namespace redis {
 		typedef boost::iterator_range<hscan_iterator> hscan_range;
 		typedef ScanIterator<ScanSingleValuesInKey<std::string>> sscan_iterator;
 		typedef boost::iterator_range<sscan_iterator> sscan_range;
+		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::ZSCAN>> zscan_iterator;
+		typedef boost::iterator_range<zscan_iterator> zscan_range;
 
 		Command ( std::string&& parAddress, uint16_t parPort );
 		~Command ( void ) noexcept;
@@ -59,6 +61,7 @@ namespace redis {
 		scan_range scan ( void );
 		hscan_range hscan ( boost::string_ref parKey );
 		sscan_range sscan ( boost::string_ref parKey );
+		zscan_range zscan ( boost::string_ref parKey );
 
 	private:
 		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;

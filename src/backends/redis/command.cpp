@@ -137,4 +137,8 @@ namespace redis {
 	auto Command::sscan (boost::string_ref parKey) -> sscan_range {
 		return sscan_range(sscan_iterator(this, parKey, false), sscan_iterator(this, parKey, true));
 	}
+
+	auto Command::zscan (boost::string_ref parKey) -> zscan_range {
+		return zscan_range(zscan_iterator(this, parKey, false), zscan_iterator(this, parKey, true));
+	}
 } //namespace redis
