@@ -37,9 +37,9 @@ struct redisContext;
 namespace redis {
 	class Command {
 	public:
-		typedef ScanIterator<std::string, ScanSingleValues<std::string>> scan_iterator;
+		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
 		typedef boost::iterator_range<scan_iterator> scan_range;
-		typedef ScanIterator<std::pair<std::string, std::string>, ScanPairs<std::pair<std::string, std::string>>> hscan_iterator;
+		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>>> hscan_iterator;
 		typedef boost::iterator_range<hscan_iterator> hscan_range;
 
 		Command ( std::string&& parAddress, uint16_t parPort );

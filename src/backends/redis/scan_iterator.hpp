@@ -27,14 +27,14 @@
 #include <boost/utility/string_ref.hpp>
 
 namespace redis {
-	template <typename V, typename ValueFetch>
+	template <typename ValueFetch>
 	class ScanIterator;
 
 	class Command;
 
 	namespace implem {
-		template <typename V, typename ValueFetch>
-		using ScanIteratorBaseIterator = boost::iterator_facade<ScanIterator<V, ValueFetch>, const V, boost::forward_traversal_tag>;
+		template <typename ValueFetch>
+		using ScanIteratorBaseIterator = boost::iterator_facade<ScanIterator<ValueFetch>, const typename ValueFetch::value_type, boost::forward_traversal_tag>;
 
 		class ScanIteratorBaseClass {
 		protected:
@@ -52,10 +52,10 @@ namespace redis {
 		};
 	} //namespace implem
 
-	template <typename V, typename ValueFetch>
-	class ScanIterator : private implem::ScanIteratorBaseClass, public implem::ScanIteratorBaseIterator<V, ValueFetch>, private ValueFetch {
+	template <typename ValueFetch>
+	class ScanIterator : private implem::ScanIteratorBaseClass, public implem::ScanIteratorBaseIterator<ValueFetch>, private ValueFetch {
 		friend class boost::iterator_core_access;
-		typedef implem::ScanIteratorBaseIterator<V, ValueFetch> base_iterator;
+		typedef implem::ScanIteratorBaseIterator<ValueFetch> base_iterator;
 		define_has_method(scan_target, ScanTarget);
 	public:
 		typedef typename base_iterator::difference_type difference_type;
@@ -78,7 +78,7 @@ namespace redis {
 
 		void increment ( void );
 		bool equal ( const ScanIterator& parOther ) const;
-		const V& dereference ( void ) const;
+		const value_type& dereference ( void ) const;
 
 		std::vector<value_type> m_reply;
 		long long m_scan_context;
@@ -87,6 +87,8 @@ namespace redis {
 
 	template <typename T>
 	struct ScanSingleValues {
+		typedef T value_type;
+
 		static constexpr const char* command ( void ) { return "SCAN"; }
 		static constexpr const std::size_t step = 1;
 
@@ -95,14 +97,14 @@ namespace redis {
 
 	template <typename P, typename A=decltype(P().first), typename B=decltype(P().second)>
 	struct ScanPairs {
-		typedef P PairType;
+		typedef P value_type;
 
 		explicit ScanPairs ( boost::string_ref parScanTarget ) : m_scan_target(parScanTarget) {}
 
 		static constexpr const char* command ( void ) { return "HSCAN"; }
 		static constexpr const std::size_t step = 2;
 
-		static PairType make_value ( const RedisReplyType* parItem );
+		static value_type make_value ( const RedisReplyType* parItem );
 		boost::string_ref scan_target ( void );
 
 	private:

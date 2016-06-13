@@ -23,11 +23,11 @@ namespace redis {
 	namespace implem {
 	} //namespace implem
 
-	template <typename V, typename ValueFetch>
+	template <typename ValueFetch>
 	template <typename Dummy, typename>
-	ScanIterator<V, ValueFetch>::ScanIterator (Command* parCommand, bool parEnd) :
+	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, bool parEnd) :
 		implem::ScanIteratorBaseClass(parCommand),
-		implem::ScanIteratorBaseIterator<V, ValueFetch>(),
+		implem::ScanIteratorBaseIterator<ValueFetch>(),
 		ValueFetch(),
 		m_reply(),
 		m_scan_context(0),
@@ -43,11 +43,11 @@ namespace redis {
 		}
 	}
 
-	template <typename V, typename ValueFetch>
+	template <typename ValueFetch>
 	template <typename Dummy, typename>
-	ScanIterator<V, ValueFetch>::ScanIterator (Command* parCommand, boost::string_ref parKey, bool parEnd) :
+	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, boost::string_ref parKey, bool parEnd) :
 		implem::ScanIteratorBaseClass(parCommand),
-		implem::ScanIteratorBaseIterator<V, ValueFetch>(),
+		implem::ScanIteratorBaseIterator<ValueFetch>(),
 		ValueFetch(parKey),
 		m_reply(),
 		m_scan_context(0),
@@ -63,13 +63,13 @@ namespace redis {
 		}
 	}
 
-	template <typename V, typename ValueFetch>
-	bool ScanIterator<V, ValueFetch>::is_end() const {
+	template <typename ValueFetch>
+	bool ScanIterator<ValueFetch>::is_end() const {
 		return not m_curr_index and m_reply.empty() and not m_scan_context;
 	}
 
-	template <typename V, typename ValueFetch>
-	void ScanIterator<V, ValueFetch>::increment() {
+	template <typename ValueFetch>
+	void ScanIterator<ValueFetch>::increment() {
 		assert(not is_end());
 		static_assert(ValueFetch::step > 0, "Can't have an increase step of 0");
 
@@ -107,8 +107,8 @@ namespace redis {
 		}
 	}
 
-	template <typename V, typename ValueFetch>
-	bool ScanIterator<V, ValueFetch>::equal (const ScanIterator& parOther) const {
+	template <typename ValueFetch>
+	bool ScanIterator<ValueFetch>::equal (const ScanIterator& parOther) const {
 		return
 			(&parOther == this) or
 			(is_end() and parOther.is_end()) or
@@ -121,36 +121,36 @@ namespace redis {
 			);
 	}
 
-	template <typename V, typename ValueFetch>
-	const V& ScanIterator<V, ValueFetch>::dereference() const {
+	template <typename ValueFetch>
+	auto ScanIterator<ValueFetch>::dereference() const -> const value_type& {
 		assert(not m_reply.empty());
 		assert(m_curr_index < m_reply.size());
 
 		return m_reply[m_curr_index];
 	}
 
-	template <typename V, typename ValueFetch>
+	template <typename ValueFetch>
 	template <typename T>
-	RedisReplyType ScanIterator<V, ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
+	RedisReplyType ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
 		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), m_scan_context);
 	}
 
-	template <typename V, typename ValueFetch>
+	template <typename ValueFetch>
 	template <typename T>
-	RedisReplyType ScanIterator<V, ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
+	RedisReplyType ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
 		return implem::ScanIteratorBaseClass::run(T::command(), m_scan_context);
 	}
 
 	template <typename T>
-	const T& ScanSingleValues<T>::make_value (const RedisReplyType* parItem) {
+	auto ScanSingleValues<T>::make_value (const RedisReplyType* parItem) -> const value_type& {
 		assert(parItem);
 		return get<T>(*parItem);
 	}
 
 	template <typename P, typename A, typename B>
-	P ScanPairs<P, A, B>::make_value (const RedisReplyType* parItem) {
+	auto ScanPairs<P, A, B>::make_value (const RedisReplyType* parItem) -> value_type {
 		assert(parItem);
-		return PairType(get<A>(parItem[0]), get<B>(parItem[1]));
+		return value_type(get<A>(parItem[0]), get<B>(parItem[1]));
 	}
 
 	template <typename P, typename A, typename B>
