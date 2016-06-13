@@ -147,14 +147,15 @@ namespace redis {
 		return get<T>(*parItem);
 	}
 
+	template <typename T>
+	auto ScanSingleValuesInKey<T>::make_value (const RedisReplyType* parItem) -> const value_type& {
+		assert(parItem);
+		return get<T>(*parItem);
+	}
+
 	template <typename P, typename A, typename B>
 	auto ScanPairs<P, A, B>::make_value (const RedisReplyType* parItem) -> value_type {
 		assert(parItem);
 		return value_type(get<A>(parItem[0]), get<B>(parItem[1]));
-	}
-
-	template <typename P, typename A, typename B>
-	boost::string_ref ScanPairs<P, A, B>::scan_target() {
-		return m_scan_target;
 	}
 } //namespace redis

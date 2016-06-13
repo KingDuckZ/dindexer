@@ -95,6 +95,22 @@ namespace redis {
 		static const T& make_value ( const RedisReplyType* parItem );
 	};
 
+	template <typename T>
+	struct ScanSingleValuesInKey {
+		typedef T value_type;
+
+		explicit ScanSingleValuesInKey ( boost::string_ref parScanTarget ) : m_scan_target(parScanTarget) {}
+
+		static constexpr const char* command ( void ) { return "SSCAN"; }
+		static constexpr const std::size_t step = 1;
+
+		static const T& make_value ( const RedisReplyType* parItem );
+		boost::string_ref scan_target ( void ) const { return m_scan_target; }
+
+	private:
+		boost::string_ref m_scan_target;
+	};
+
 	template <typename P, typename A=decltype(P().first), typename B=decltype(P().second)>
 	struct ScanPairs {
 		typedef P value_type;
@@ -105,7 +121,7 @@ namespace redis {
 		static constexpr const std::size_t step = 2;
 
 		static value_type make_value ( const RedisReplyType* parItem );
-		boost::string_ref scan_target ( void );
+		boost::string_ref scan_target ( void ) const { return m_scan_target; }
 
 	private:
 		boost::string_ref m_scan_target;
