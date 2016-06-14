@@ -31,13 +31,13 @@ namespace redis {
 			std::string,
 			std::vector<Reply>
 		>;
-		enum RedisVariantTypes {
-			RedisVariantType_Integer = 0,
-			RedisVariantType_String,
-			RedisVariantType_Array,
-			RedisVariantType_Bool
-		};
 	} //namespace implem
+	enum RedisVariantTypes {
+		RedisVariantType_Integer = 0,
+		RedisVariantType_String,
+		RedisVariantType_Array,
+		RedisVariantType_Bool
+	};
 
 	struct Reply : implem::RedisVariantType {
 		using base_class = implem::RedisVariantType;

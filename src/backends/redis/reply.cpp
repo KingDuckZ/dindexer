@@ -21,10 +21,12 @@
 
 namespace redis {
 	const long long& get_integer (const Reply& parReply) {
+		assert(RedisVariantType_Integer == parReply.which());
 		return boost::get<long long>(parReply);
 	}
 
 	const std::string& get_string (const Reply& parReply) {
+		assert(RedisVariantType_String == parReply.which());
 		return boost::get<std::string>(parReply);
 	}
 
@@ -33,9 +35,9 @@ namespace redis {
 
 		const auto type = parReply.which();
 		switch (type) {
-		case implem::RedisVariantType_Integer:
+		case RedisVariantType_Integer:
 			return get_integer(parReply);
-		case implem::RedisVariantType_String:
+		case RedisVariantType_String:
 			return lexical_cast<long long>(get_string(parReply));
 		default:
 			assert(false);
@@ -44,6 +46,7 @@ namespace redis {
 	}
 
 	const std::vector<Reply>& get_array (const Reply& parReply) {
+		assert(RedisVariantType_Array == parReply.which());
 		return boost::get<std::vector<Reply>>(parReply);
 	}
 
