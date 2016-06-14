@@ -20,6 +20,7 @@
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
 #include "dindexerConfig.h"
+#include "helpers/stringize.h"
 #include <utility>
 #include <yaml-cpp/yaml.h>
 #include <boost/lexical_cast.hpp>
@@ -140,8 +141,8 @@ namespace dindb {
 
 		m_redis.connect();
 		if (m_redis.is_connected() and m_database > 0) {
-			const std::string command = "SELECT " + lexical_cast<std::string>(m_database);
-			m_redis.run(command.c_str());
+			m_redis.run("SELECT", lexical_cast<std::string>(m_database));
+			m_redis.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
 		}
 	}
 
