@@ -18,42 +18,38 @@ AC_PROG_CXX
 AC_PROG_CC
 
 CPPFLAGS="$CPPFLAGS -Isrc"
-if test "$CC" = "gcc" ; then
-	# always want reentrant funcs, not just thread-safe mode. -s
-	CFLAGS="$CFLAGS -O3 -Wall -Wpointer-arith -D_GNU_SOURCE -D_REENTRANT -fsigned-char"
+# always want reentrant funcs, not just thread-safe mode. -s
+CFLAGS="$CFLAGS -O3 -Wall -Wpointer-arith -D_GNU_SOURCE -D_REENTRANT -fsigned-char"
 
-	# gcc doesn't indicate an error for unknown options when they are
-	# not warning/feature options, -Wxxx or -fxxx.  We have to test manually.
-	cprog="int main(void){return 0;}"
-	gcctest="gcc -x c -c - -o /dev/null"
+# gcc doesn't indicate an error for unknown options when they are
+# not warning/feature options, -Wxxx or -fxxx.  We have to test manually.
+cprog="int main(void){return 0;}"
+gcctest="gcc -x c -c - -o /dev/null"
 
-	AC_MSG_CHECKING(CFLAGS for gcc -std=gnu99...)
-	result=`echo "$cprog" | $gcctest -std=gnu99 2>&1`
-	if test -z "$result" ; then
-		CFLAGS="$CFLAGS -std=gnu99"
-		AC_MSG_RESULT(-std=gnu99)
-	else
-		AC_MSG_RESULT([no, unknown])
-	fi
-
-	# turn on as many warnings as possible
-	AX_CFLAGS_GCC_OPTION([-Wclobbered])
-	AX_CFLAGS_GCC_OPTION([-Wempty-body])
-	AX_CFLAGS_GCC_OPTION([-Wignored-qualifiers])
-	#AX_CFLAGS_GCC_OPTION([-Wmissing-field-initializers]) # annoying
-	AX_CFLAGS_GCC_OPTION([-Wmissing-parameter-type])
-	AX_CFLAGS_GCC_OPTION([-Wold-style-declaration])
-	AX_CFLAGS_GCC_OPTION([-Woverride-init])
-	AX_CFLAGS_GCC_OPTION([-Wsign-compare])
-	AX_CFLAGS_GCC_OPTION([-Wtype-limits])
-	AX_CFLAGS_GCC_OPTION([-Wuninitialized])
-	AX_CFLAGS_GCC_OPTION([-fomit-frame-pointer])
-	AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
-	AX_CFLAGS_GCC_OPTION([-funroll-all-loops])
-	AX_CFLAGS_GCC_OPTION([-funit-at-a-time])
+AC_MSG_CHECKING(CFLAGS for gcc -std=gnu99...)
+result=`echo "$cprog" | $gcctest -std=gnu99 2>&1`
+if test -z "$result" ; then
+	CFLAGS="$CFLAGS -std=gnu99"
+	AC_MSG_RESULT(-std=gnu99)
 else
-	AC_MSG_ERROR([Using $CC instead of gcc, currently not supported])
+	AC_MSG_RESULT([no, unknown])
 fi
+
+# turn on as many warnings as possible
+AX_CFLAGS_GCC_OPTION([-Wclobbered])
+AX_CFLAGS_GCC_OPTION([-Wempty-body])
+AX_CFLAGS_GCC_OPTION([-Wignored-qualifiers])
+#AX_CFLAGS_GCC_OPTION([-Wmissing-field-initializers]) # annoying
+AX_CFLAGS_GCC_OPTION([-Wmissing-parameter-type])
+AX_CFLAGS_GCC_OPTION([-Wold-style-declaration])
+AX_CFLAGS_GCC_OPTION([-Woverride-init])
+AX_CFLAGS_GCC_OPTION([-Wsign-compare])
+AX_CFLAGS_GCC_OPTION([-Wtype-limits])
+AX_CFLAGS_GCC_OPTION([-Wuninitialized])
+AX_CFLAGS_GCC_OPTION([-fomit-frame-pointer])
+AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
+AX_CFLAGS_GCC_OPTION([-funroll-all-loops])
+AX_CFLAGS_GCC_OPTION([-funit-at-a-time])
 
 # Each case has an example of what target_os contains
 case ${target_os} in
