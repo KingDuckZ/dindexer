@@ -1,4 +1,3 @@
-[TOC]
 #		dindexer					#
 ##		Project info			##
 ###		Release build status		###
