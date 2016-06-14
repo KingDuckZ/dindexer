@@ -110,33 +110,50 @@ namespace dindb {
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		using boost::lexical_cast;
+		using boost::string_ref;
 
-		redis::Reply set_id_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices set 1");
+		redis::Reply set_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "set", "1");
 		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(set_id_reply));
 		redis::Reply insert_set_reply = m_redis.run(
-			"HMSET %b name %b disk_label %b fs_uuid %b type %b content_type %b",
+			"HMSET",
 			set_key,
+			"name",
 			parSetData.name,
+			"disk_label",
 			parSetData.disk_label,
+			"fs_uuid",
 			parSetData.fs_uuid,
+			"type",
 			parSetData.type,
+			"content_type",
 			parSetData.content_type
 		);
 
 		for (const auto& file_data : parData) {
-			redis::Reply file_id_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices files 1");
+			redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", "1");
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(redis::get_integer(file_id_reply));
 			redis::Reply insert_file_reply = m_redis.run(
-				"HMSET %b hash %b path %b size %b level %b mime_type %b mime_charset %b is_directory %b is_symlink %b is_unreadable %b hash_valid %b",
+				"HMSET",
 				file_key,
+				"hash",
 				tiger_to_string(file_data.hash),
+				"path",
+				file_data.path(),
+				"size",
 				lexical_cast<std::string>(file_data.size),
+				"level",
 				lexical_cast<std::string>(file_data.level),
+				"mime_type",
 				file_data.mime_type(),
+				"mime_charset",
 				file_data.mime_charset(),
+				"is_directory",
 				(file_data.is_directory ? '1' : '0'),
+				"is_symlink",
 				(file_data.is_symlink ? '1' : '0'),
+				"unreadable",
 				(file_data.unreadable ? '1' : '0'),
+				"hash_valid",
 				(file_data.hash_valid ? '1' : '0')
 			);
 		}
