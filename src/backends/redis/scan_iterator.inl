@@ -25,8 +25,8 @@ namespace redis {
 
 	template <typename ValueFetch>
 	template <typename Dummy, typename>
-	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, bool parEnd) :
-		implem::ScanIteratorBaseClass(parCommand),
+	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, bool parEnd, boost::string_ref parMatchPattern) :
+		implem::ScanIteratorBaseClass(parCommand, parMatchPattern),
 		implem::ScanIteratorBaseIterator<ValueFetch>(),
 		ValueFetch(),
 		m_reply(),
@@ -45,8 +45,8 @@ namespace redis {
 
 	template <typename ValueFetch>
 	template <typename Dummy, typename>
-	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, boost::string_ref parKey, bool parEnd) :
-		implem::ScanIteratorBaseClass(parCommand),
+	ScanIterator<ValueFetch>::ScanIterator (Command* parCommand, boost::string_ref parKey, bool parEnd, boost::string_ref parMatchPattern) :
+		implem::ScanIteratorBaseClass(parCommand, parMatchPattern),
 		implem::ScanIteratorBaseIterator<ValueFetch>(),
 		ValueFetch(parKey),
 		m_reply(),
@@ -132,13 +132,13 @@ namespace redis {
 	template <typename ValueFetch>
 	template <typename T>
 	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
-		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), m_scan_context);
+		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), m_scan_context, T::work_count);
 	}
 
 	template <typename ValueFetch>
 	template <typename T>
 	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
-		return implem::ScanIteratorBaseClass::run(T::command(), m_scan_context);
+		return implem::ScanIteratorBaseClass::run(T::command(), m_scan_context, T::work_count);
 	}
 
 	template <typename T>

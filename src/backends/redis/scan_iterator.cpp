@@ -25,7 +25,13 @@
 namespace redis {
 	namespace implem {
 		ScanIteratorBaseClass::ScanIteratorBaseClass (Command* parCommand) :
-			m_command(parCommand)
+			ScanIteratorBaseClass(parCommand, boost::string_ref())
+		{
+		}
+
+		ScanIteratorBaseClass::ScanIteratorBaseClass (Command* parCommand, boost::string_ref parMatchPattern) :
+			m_command(parCommand),
+			m_match_pattern(parMatchPattern)
 		{
 			assert(m_command);
 			assert(m_command->is_connected());
@@ -35,12 +41,22 @@ namespace redis {
 			return m_command and m_command->is_connected();
 		}
 
-		Reply ScanIteratorBaseClass::run (const char* parCommand, long long parScanContext) {
-			return m_command->run(parCommand, boost::lexical_cast<std::string>(parScanContext));
+		Reply ScanIteratorBaseClass::run (const char* parCommand, long long parScanContext, std::size_t parCount) {
+			const auto scan_context = boost::lexical_cast<std::string>(parScanContext);
+			const auto count_hint = boost::lexical_cast<std::string>(parCount);
+			if (m_match_pattern.empty())
+				return m_command->run(parCommand, scan_context, "COUNT", count_hint);
+			else
+				return m_command->run(parCommand, scan_context, "MATCH", m_match_pattern, "COUNT", count_hint);
 		}
 
-		Reply ScanIteratorBaseClass::run (const char* parCommand, const boost::string_ref& parParameter, long long parScanContext) {
-			return m_command->run(parCommand, parParameter, boost::lexical_cast<std::string>(parScanContext));
+		Reply ScanIteratorBaseClass::run (const char* parCommand, const boost::string_ref& parParameter, long long parScanContext, std::size_t parCount) {
+			const auto scan_context = boost::lexical_cast<std::string>(parScanContext);
+			const auto count_hint = boost::lexical_cast<std::string>(parCount);
+			if (m_match_pattern.empty())
+				return m_command->run(parCommand, parParameter, scan_context, "COUNT", count_hint);
+			else
+				return m_command->run(parCommand, parParameter, scan_context, "MATCH", m_match_pattern, "COUNT", count_hint);
 		}
 	} //namespace implem
 } //namespace redis
