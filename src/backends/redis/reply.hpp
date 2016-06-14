@@ -23,7 +23,7 @@
 #include <vector>
 
 namespace redis {
-	class Reply;
+	struct Reply;
 
 	namespace implem {
 		using RedisVariantType = boost::variant<

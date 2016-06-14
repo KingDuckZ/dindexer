@@ -55,6 +55,16 @@ namespace redis {
 			const std::size_t m_size;
 		};
 
+		template<>
+		struct MakeCharInfo<char> {
+			MakeCharInfo ( char parData ) : m_data(parData) {}
+			const char* data ( void ) const { return &m_data; }
+			std::size_t size ( void ) const { return 1; }
+
+		private:
+			const char m_data;
+		};
+
 		template <typename T>
 		inline const char* arg_to_bin_safe_char (const T& parArg) {
 			return MakeCharInfo<T>(parArg).data();

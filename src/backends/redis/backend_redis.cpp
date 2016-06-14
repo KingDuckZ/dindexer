@@ -91,9 +91,6 @@ namespace dindb {
 	}
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		for (const auto& file_path : m_redis.scan()) {
-			//std::cout << file_path << '\n';
-		}
 	}
 
 	void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
@@ -114,9 +111,35 @@ namespace dindb {
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		using boost::lexical_cast;
 
-		auto incr_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices set 1");
-		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(incr_reply));
-		auto insert_set_reply = m_redis.run("HMSET %b name %b disk_label %b fs_uuid %b", set_key, parSetData.name, parSetData.disk_label, parSetData.fs_uuid);
+		redis::Reply set_id_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices set 1");
+		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(set_id_reply));
+		redis::Reply insert_set_reply = m_redis.run(
+			"HMSET %b name %b disk_label %b fs_uuid %b type %b content_type %b",
+			set_key,
+			parSetData.name,
+			parSetData.disk_label,
+			parSetData.fs_uuid,
+			parSetData.type,
+			parSetData.content_type
+		);
+
+		for (const auto& file_data : parData) {
+			redis::Reply file_id_reply = m_redis.run("HINCRBY " PROGRAM_NAME ":indices files 1");
+			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(redis::get_integer(file_id_reply));
+			redis::Reply insert_file_reply = m_redis.run(
+				"HMSET %b hash %b path %b size %b level %b mime_type %b mime_charset %b is_directory %b is_symlink %b is_unreadable %b hash_valid %b",
+				file_key,
+				tiger_to_string(file_data.hash),
+				lexical_cast<std::string>(file_data.size),
+				lexical_cast<std::string>(file_data.level),
+				file_data.mime_type(),
+				file_data.mime_charset(),
+				(file_data.is_directory ? '1' : '0'),
+				(file_data.is_symlink ? '1' : '0'),
+				(file_data.unreadable ? '1' : '0'),
+				(file_data.hash_valid ? '1' : '0')
+			);
+		}
 	}
 
 	bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
