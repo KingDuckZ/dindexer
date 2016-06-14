@@ -65,6 +65,17 @@ namespace redis {
 			const char m_data;
 		};
 
+		template <std::size_t N>
+		struct MakeCharInfo<char[N]> {
+			static_assert(N > 0, "Given input should have at least one character as it's assumed to be a null-terminated string");
+			MakeCharInfo ( const char (&parData)[N] ) : m_data(parData, N - 1) {}
+			const char* data ( void ) const { return m_data.data(); }
+			std::size_t size ( void ) const { return m_data.size(); }
+
+		private:
+			boost::string_ref m_data;
+		};
+
 		template <typename T>
 		inline const char* arg_to_bin_safe_char (const T& parArg) {
 			return MakeCharInfo<T>(parArg).data();
