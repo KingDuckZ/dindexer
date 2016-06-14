@@ -64,7 +64,7 @@ namespace dindb {
 
 		{
 			auto resultset = parDB.query(
-				"SELECT \"desc\",\"type\",\"disk_number\",\"fs_uuid\",\"disk_label\" FROM sets WHERE \"id\"=$1;",
+				"SELECT \"desc\",\"type\",\"disk_number\",\"fs_uuid\",\"disk_label\",\"content_type\" FROM sets WHERE \"id\"=$1;",
 				group_id
 			);
 			if (resultset.empty()) {
@@ -79,6 +79,7 @@ namespace dindb {
 			parSet.disk_number = lexical_cast<uint32_t>(row["disk_number"]);
 			parSet.fs_uuid = row["fs_uuid"];
 			parSet.disk_label = row["disk_label"];
+			parSet.content_type = lexical_cast<char>(row["content_type"]);
 		}
 		return true;
 	}
