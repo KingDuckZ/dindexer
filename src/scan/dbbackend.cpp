@@ -65,7 +65,7 @@ namespace din {
 
 		{
 			auto resultset = conn.query(
-				"SELECT \"desc\",\"type\",\"disk_number\" FROM sets WHERE \"id\"=$1;",
+				"SELECT \"desc\",\"type\",\"disk_number\",\"content_type\" FROM sets WHERE \"id\"=$1;",
 				group_id
 			);
 			if (resultset.empty()) {
@@ -78,6 +78,7 @@ namespace din {
 			parSet.type = lexical_cast<char>(row["type"]);
 			parSet.name = row["desc"];
 			parSet.disk_number = lexical_cast<uint32_t>(row["disk_number"]);
+			parSet.content_type = lexical_cast<char>(row["content_type"]);
 		}
 		return true;
 	}
