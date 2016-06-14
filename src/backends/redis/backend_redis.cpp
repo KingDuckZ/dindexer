@@ -23,6 +23,8 @@
 #include <utility>
 #include <yaml-cpp/yaml.h>
 #include <boost/lexical_cast.hpp>
+#include <array>
+#include <cstdint>
 
 namespace dindb {
 	namespace {
@@ -31,6 +33,66 @@ namespace dindb {
 			uint16_t port;
 			uint16_t database;
 		};
+
+		std::pair<std::string, mchlib::FileRecordData> pair_list_to_file_record (const redis::Command::hscan_range& parRange, const mchlib::TigerHash& parHash) {
+			using boost::lexical_cast;
+
+			mchlib::FileRecordData retval;
+			retval.hash = parHash;
+			std::array<std::string, 2> mime;
+			std::string group_key;
+
+			for (const auto itm : parRange) {
+				if (itm.first == "path")
+					retval.abs_path = itm.second;
+				else if (itm.first == "hash")
+					assert(tiger_to_string(parHash) == itm.second);
+				else if (itm.first == "size")
+					retval.size = lexical_cast<decltype(retval.size)>(
+							itm.second);
+				else if (itm.first == "level")
+					retval.level = lexical_cast<decltype(retval.level)>(
+							itm.second);
+				else if (itm.first == "mime_type")
+					mime[0] = itm.second;
+				else if (itm.first == "mime_charset")
+					mime[1] = itm.second;
+				else if (itm.first == "is_directory")
+					retval.is_directory = (itm.second[0] == '0' ? false : true);
+				else if (itm.first == "is_symlink")
+					retval.is_symlink = (itm.second[0] == '0' ? false : true);
+				else if (itm.first == "unreadable")
+					retval.unreadable = (itm.second[0] == '0' ? false : true);
+				else if (itm.first == "hash_valid")
+					retval.hash_valid = (itm.second[0] == '0' ? false : true);
+				else if (itm.first == "group_id")
+					group_key = itm.second;
+			}
+			retval.mime_full = mime[0] + mime[1];
+			retval.mime_type_offset = 0;
+			retval.mime_type_length = retval.mime_charset_offset = static_cast<uint16_t>(mime[0].size());
+			retval.mime_charset_length = static_cast<uint16_t>(mime[1].size());
+			return std::make_pair(group_key, std::move(retval));
+		}
+
+		mchlib::SetRecordDataFull pair_list_to_set_record (const redis::Command::hscan_range& parRange) {
+			using boost::lexical_cast;
+
+			mchlib::SetRecordDataFull retval;
+			for (const auto& itm : parRange) {
+				if (itm.first == "name")
+					retval.name = itm.second;
+				else if (itm.first == "disk_label")
+					retval.disk_label = itm.second;
+				else if (itm.first == "fs_uuid")
+					retval.fs_uuid = itm.second;
+				else if (itm.first == "type")
+					retval.type = lexical_cast<char>(itm.second[0]);
+				else if (itm.first == "content_type")
+					retval.content_type = lexical_cast<char>(itm.second[0]);
+			}
+			return retval;
+		}
 	} //unnamed namespace
 } //namespace dindb
 
@@ -117,50 +179,56 @@ namespace dindb {
 		redis::Reply insert_set_reply = m_redis.run(
 			"HMSET",
 			set_key,
-			"name",
-			parSetData.name,
-			"disk_label",
-			parSetData.disk_label,
-			"fs_uuid",
-			parSetData.fs_uuid,
-			"type",
-			parSetData.type,
-			"content_type",
-			parSetData.content_type
+			"name", parSetData.name,
+			"disk_label", parSetData.disk_label,
+			"fs_uuid", parSetData.fs_uuid,
+			"type", parSetData.type,
+			"content_type", parSetData.content_type
 		);
 
 		for (const auto& file_data : parData) {
 			redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", "1");
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(redis::get_integer(file_id_reply));
+			const std::string hash = tiger_to_string(file_data.hash);
 			redis::Reply insert_file_reply = m_redis.run(
 				"HMSET",
 				file_key,
-				"hash",
-				tiger_to_string(file_data.hash),
-				"path",
-				file_data.path(),
-				"size",
-				lexical_cast<std::string>(file_data.size),
-				"level",
-				lexical_cast<std::string>(file_data.level),
-				"mime_type",
-				file_data.mime_type(),
-				"mime_charset",
-				file_data.mime_charset(),
-				"is_directory",
-				(file_data.is_directory ? '1' : '0'),
-				"is_symlink",
-				(file_data.is_symlink ? '1' : '0'),
-				"unreadable",
-				(file_data.unreadable ? '1' : '0'),
-				"hash_valid",
-				(file_data.hash_valid ? '1' : '0')
+				"hash", hash,
+				"path", file_data.path(),
+				"size", lexical_cast<std::string>(file_data.size),
+				"level", lexical_cast<std::string>(file_data.level),
+				"mime_type", file_data.mime_type(),
+				"mime_charset", file_data.mime_charset(),
+				"is_directory", (file_data.is_directory ? '1' : '0'),
+				"is_symlink", (file_data.is_symlink ? '1' : '0'),
+				"unreadable", (file_data.unreadable ? '1' : '0'),
+				"hash_valid", (file_data.hash_valid ? '1' : '0'),
+				"group_id", set_key
+			);
+
+			redis::Reply insert_hash_reply = m_redis.run(
+				"SADD",
+				"hash:" + hash,
+				file_key
 			);
 		}
 	}
 
 	bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
-		return false;
+		const std::string hash_key = "hash:" + tiger_to_string(parHash);
+		redis::Reply hash_reply = m_redis.run("SRANDMEMBER", hash_key);
+		if (redis::RedisVariantType_Integer == hash_reply.which() and not redis::get_integer(hash_reply)) {
+			return false;
+		}
+		else {
+			const auto result_id = redis::get_string(hash_reply);
+			auto set_key_and_file_item = pair_list_to_file_record(m_redis.hscan(result_id), parHash);
+			parItem = std::move(set_key_and_file_item.second);
+			const std::string group_key = std::move(set_key_and_file_item.first);
+
+			auto set_item = pair_list_to_set_record(m_redis.hscan(group_key));
+			return true;
+		}
 	}
 
 	std::vector<LocatedItem> BackendRedis::locate_in_db (const std::string& parSearch, const TagList& parTags) {

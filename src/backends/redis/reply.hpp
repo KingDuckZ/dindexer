@@ -35,8 +35,7 @@ namespace redis {
 	enum RedisVariantTypes {
 		RedisVariantType_Integer = 0,
 		RedisVariantType_String,
-		RedisVariantType_Array,
-		RedisVariantType_Bool
+		RedisVariantType_Array
 	};
 
 	struct Reply : implem::RedisVariantType {
