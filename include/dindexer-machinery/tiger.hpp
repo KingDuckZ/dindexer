@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <ciso646>
 
 namespace mchlib {
 	struct TigerHash {
@@ -35,6 +36,8 @@ namespace mchlib {
 			uint64_t data[3];
 			uint8_t byte_data[sizeof(uint64_t) * 3];
 		};
+
+		bool operator== (const TigerHash& parOther) const { return part_a == parOther.part_a and part_b == parOther.part_b and part_c == parOther.part_c; }
 	};
 
 	static_assert(sizeof(TigerHash) == 24, "Wrong struct size");
@@ -42,6 +45,7 @@ namespace mchlib {
 	void tiger_file ( const std::string& parPath, TigerHash& parHashFile, TigerHash& parHashDir, uint64_t& parSizeOut );
 	void tiger_init_hash ( TigerHash& parHash );
 	std::string tiger_to_string ( const TigerHash& parHash, bool parUpcase=false );
+	TigerHash string_to_tiger ( const std::string& parString );
 	void tiger_data ( const std::string& parData, TigerHash& parHash );
 	void tiger_data ( const std::vector<char>& parData, TigerHash& parHash );
 } //namespace mchlib
