@@ -19,11 +19,11 @@
 #include "dindexer-machinery/recorddata.hpp"
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
+#include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "helpers/stringize.h"
 #include <utility>
 #include <yaml-cpp/yaml.h>
-#include <boost/lexical_cast.hpp>
 #include <array>
 #include <cstdint>
 
@@ -36,7 +36,7 @@ namespace dindb {
 		};
 
 		std::pair<std::string, mchlib::FileRecordData> pair_list_to_file_record (const redis::Command::hscan_range& parRange, const mchlib::TigerHash& parHash) {
-			using boost::lexical_cast;
+			using dinhelp::lexical_cast;
 
 			mchlib::FileRecordData retval;
 			retval.hash = parHash;
@@ -77,7 +77,7 @@ namespace dindb {
 		}
 
 		mchlib::SetRecordDataFull pair_list_to_set_record (const redis::Command::hscan_range& parRange) {
-			using boost::lexical_cast;
+			using dinhelp::lexical_cast;
 
 			mchlib::SetRecordDataFull retval;
 			for (const auto& itm : parRange) {
@@ -88,9 +88,9 @@ namespace dindb {
 				else if (itm.first == "fs_uuid")
 					retval.fs_uuid = itm.second;
 				else if (itm.first == "type")
-					retval.type = lexical_cast<char>(itm.second[0]);
+					retval.type = itm.second[0];
 				else if (itm.first == "content_type")
-					retval.content_type = lexical_cast<char>(itm.second[0]);
+					retval.content_type = itm.second[0];
 			}
 			return retval;
 		}
@@ -137,7 +137,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::connect() {
-		using boost::lexical_cast;
+		using dinhelp::lexical_cast;
 
 		m_redis.connect();
 		if (m_redis.is_connected() and m_database > 0) {
@@ -172,7 +172,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
-		using boost::lexical_cast;
+		using dinhelp::lexical_cast;
 		using boost::string_ref;
 
 		redis::Reply set_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "set", "1");

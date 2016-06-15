@@ -16,10 +16,10 @@
  */
 
 #include "scan_iterator.hpp"
+#include "helpers/lexical_cast.hpp"
 #include "command.hpp"
 #include <cassert>
 #include <ciso646>
-#include <boost/lexical_cast.hpp>
 #include <string>
 
 namespace redis {
@@ -42,8 +42,8 @@ namespace redis {
 		}
 
 		Reply ScanIteratorBaseClass::run (const char* parCommand, long long parScanContext, std::size_t parCount) {
-			const auto scan_context = boost::lexical_cast<std::string>(parScanContext);
-			const auto count_hint = boost::lexical_cast<std::string>(parCount);
+			const auto scan_context = dinhelp::lexical_cast<std::string>(parScanContext);
+			const auto count_hint = dinhelp::lexical_cast<std::string>(parCount);
 			if (m_match_pattern.empty())
 				return m_command->run(parCommand, scan_context, "COUNT", count_hint);
 			else
@@ -51,8 +51,8 @@ namespace redis {
 		}
 
 		Reply ScanIteratorBaseClass::run (const char* parCommand, const boost::string_ref& parParameter, long long parScanContext, std::size_t parCount) {
-			const auto scan_context = boost::lexical_cast<std::string>(parScanContext);
-			const auto count_hint = boost::lexical_cast<std::string>(parCount);
+			const auto scan_context = dinhelp::lexical_cast<std::string>(parScanContext);
+			const auto count_hint = dinhelp::lexical_cast<std::string>(parCount);
 			if (m_match_pattern.empty())
 				return m_command->run(parCommand, parParameter, scan_context, "COUNT", count_hint);
 			else
