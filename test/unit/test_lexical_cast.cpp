@@ -25,6 +25,7 @@ TEST(helpers, lexical_cast) {
 	using dinhelp::lexical_cast;
 	using dinhelp::tags::hex;
 	using dinhelp::tags::dec;
+	using dinhelp::tags::bin;
 
 	{
 		const uint8_t value = 0x34;
@@ -32,6 +33,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("34", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("52", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("110100", bin_str);
 	}
 	{
 		const uint16_t value = 0xFFFF;
@@ -39,6 +42,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("FFFF", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("65535", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1111111111111111", bin_str);
 	}
 	{
 		const uint16_t value = 0xFF;
@@ -46,6 +51,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("FF", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("255", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("11111111", bin_str);
 	}
 	{
 		const uint16_t value = 0x100;
@@ -53,6 +60,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("100", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("256", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("100000000", bin_str);
 	}
 	{
 		const uint32_t value = 0x1ABC;
@@ -60,6 +69,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("1ABC", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("6844", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1101010111100", bin_str);
 	}
 	{
 		const uint32_t value = 0xffffffff;
@@ -67,6 +78,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("FFFFFFFF", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("4294967295", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("11111111111111111111111111111111", bin_str);
 	}
 	{
 		const uint32_t value = 1;
@@ -74,6 +87,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("1", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("1", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1", bin_str);
 	}
 	{
 		const uint32_t value = 0;
@@ -81,6 +96,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("0", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("0", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("0", bin_str);
 	}
 	{
 		const uint64_t value = 0x12abcd34;
@@ -88,6 +105,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("12ABCD34", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("313249076", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("10010101010111100110100110100", bin_str);
 	}
 	{
 		const int32_t value = 0x7800;
@@ -95,6 +114,8 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("7800", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("30720", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("111100000000000", bin_str);
 	}
 	{
 		const int32_t value = -1400;
@@ -102,5 +123,7 @@ TEST(helpers, lexical_cast) {
 		EXPECT_EQ("FFFFFA88", hex_str);
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("-1400", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("11111111111111111111101010001000", bin_str);
 	}
 }

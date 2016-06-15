@@ -24,7 +24,7 @@
 #include <type_traits>
 #include <utility>
 #include <limits>
-#include <math.h>
+#include <cmath>
 #include <cstdint>
 #include <algorithm>
 #include <string>
@@ -75,8 +75,8 @@ namespace dinhelp {
 		};
 
 		template <template <typename> class Tag, typename T, typename F>
-		inline auto int_to_string (const F parFrom) -> MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<F>::max())> {
-			using ArrayRetType = MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<F>::max())>;
+		inline auto int_to_string (const F parFrom) -> MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<typename std::make_unsigned<F>::type>::max())> {
+			using ArrayRetType = MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<typename std::make_unsigned<F>::type>::max())>;
 
 			ArrayRetType retval;
 			F div = 1;
@@ -116,7 +116,7 @@ namespace dinhelp {
 
 			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(::log10(parNum))) + 1 + (std::numeric_limits<T>::is_signed ? 1 : 0);
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)))) + 1 + (std::numeric_limits<T>::is_signed ? 1 : 0);
 			}
 		};
 
@@ -130,7 +130,21 @@ namespace dinhelp {
 			static std::size_t count_digits ( T parValue ) a_pure;
 			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(::log10(parNum) / ::log10(base))) + 1;
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)) / std::log10(static_cast<double>(base)))) + 1;
+			}
+		};
+
+		template <typename T>
+		struct bin {
+			enum {
+				base = 2,
+				sign_allowed = 0
+			};
+
+			static std::size_t count_digits ( T parValue ) a_pure;
+			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
+			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log2(static_cast<double>(parNum)))) + 1;
 			}
 		};
 
@@ -165,6 +179,16 @@ namespace dinhelp {
 
 		template <typename T>
 		typename std::make_unsigned<T>::type hex<T>::make_unsigned (T parValue) {
+			return static_cast<typename std::make_unsigned<T>::type>(parValue);
+		}
+
+		template <typename T>
+		std::size_t bin<T>::count_digits (T parValue) {
+			return std::max<std::size_t>((sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<typename std::make_unsigned<T>::type>(make_unsigned(parValue))), 1);
+		}
+
+		template <typename T>
+		typename std::make_unsigned<T>::type bin<T>::make_unsigned (T parValue) {
 			return static_cast<typename std::make_unsigned<T>::type>(parValue);
 		}
 	} //namespace tags
