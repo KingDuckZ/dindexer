@@ -16,7 +16,7 @@
  */
 
 #include "dindexer-machinery/tiger.hpp"
-#include "helpers/casts.hpp"
+#include "helpers/lexical_cast.hpp"
 #include <fstream>
 #include <cstdint>
 #include <memory>
