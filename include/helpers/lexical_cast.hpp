@@ -31,6 +31,7 @@
 #include <ciso646>
 #include <climits>
 #include <boost/range/adaptor/reversed.hpp>
+#include <cstddef>
 
 namespace dinhelp {
 	namespace customize {
@@ -42,10 +43,16 @@ namespace dinhelp {
 	} //namespace customize
 
 	namespace implem {
-		int count_leading_zeroes ( uint8_t parValue ) a_always_inline;
-		int count_leading_zeroes ( uint16_t parValue ) a_always_inline;
-		int count_leading_zeroes ( uint32_t parValue ) a_always_inline;
-		int count_leading_zeroes ( uint64_t parValue ) a_always_inline;
+		template <typename T>
+		typename std::make_unsigned<T>::type abs ( T parValue ) a_pure;
+
+		template <typename T> int count_leading_zeroes ( typename std::enable_if<std::numeric_limits<T>::is_signed, T>::type parValue ) a_always_inline;
+		template <typename T> int count_leading_zeroes ( typename std::enable_if<not std::numeric_limits<T>::is_signed, T>::type parValue ) a_always_inline;
+		int count_leading_zeroes_overload ( unsigned char parValue ) a_always_inline;
+		int count_leading_zeroes_overload ( unsigned short int parValue ) a_always_inline;
+		int count_leading_zeroes_overload ( unsigned int parValue ) a_always_inline;
+		int count_leading_zeroes_overload ( unsigned long parValue ) a_always_inline;
+		int count_leading_zeroes_overload ( unsigned long long parValue ) a_always_inline;
 
 		template <std::size_t Base, std::size_t Val>
 		struct power {
@@ -56,14 +63,26 @@ namespace dinhelp {
 			enum { value = 1 };
 		};
 
+		template <typename T, bool=std::numeric_limits<T>::is_signed>
+		struct is_negative;
+		template <typename T>
+		struct is_negative<T, true> {
+			static int check (T parValue) { return (parValue < 0 ? 1 : 0); }
+		};
+		template <typename T>
+		struct is_negative<T, false> {
+			static constexpr int check (T) { return 0; }
+		};
+
 		template <template <typename> class Tag, typename T, typename F>
-		inline auto int_to_string (const F& parFrom) -> MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<F>::max())> {
+		inline auto int_to_string (const F parFrom) -> MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<F>::max())> {
 			using ArrayRetType = MaxSizedArray<uint8_t, Tag<F>::count_digits_bt(std::numeric_limits<F>::max())>;
 
 			ArrayRetType retval;
 			F div = 1;
-			for (std::size_t z = 0; z < Tag<F>::count_digits(parFrom); ++z) {
-				retval.push_back(static_cast<uint8_t>((parFrom / div) % Tag<F>::base));
+			const auto sign_length = (is_negative<F>::check(parFrom) and Tag<F>::sign_allowed ? 1 : 0);
+			for (std::size_t z = 0; z < Tag<F>::count_digits(parFrom) - sign_length; ++z) {
+				retval.push_back(static_cast<uint8_t>((Tag<F>::make_unsigned(parFrom) / div) % Tag<F>::base));
 				div *= Tag<F>::base;
 			}
 			std::reverse(retval.begin(), retval.end());
@@ -78,30 +97,38 @@ namespace dinhelp {
 				retval += dinhelp::customize::char_to_int<decltype(chara), T>::make(chara) * mul;
 				mul *= Tag<T>::base;
 			}
-			return retval;
+			return retval * dinhelp::customize::char_to_int<typename F::value_type, T>::sgn(parFrom);
 		};
 	} //namespace implem
 
 	namespace tags {
 		template <typename T>
 		struct dec {
-			enum { base = 10 };
+			enum {
+				base = 10,
+				sign_allowed = 1
+			};
 
 			template <std::size_t... Powers, std::size_t... Digits>
 			static std::size_t count_digits_implem (T parValue, dinhelp::bt::index_seq<Powers...>, dinhelp::bt::index_seq<Digits...>) a_pure;
 
 			static std::size_t count_digits (T parValue) a_pure;
 
+			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(::log10(parNum))) + 1;
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(::log10(parNum))) + 1 + (std::numeric_limits<T>::is_signed ? 1 : 0);
 			}
 		};
 
 		template <typename T>
 		struct hex {
-			enum { base = 16 };
+			enum {
+				base = 16,
+				sign_allowed = 0
+			};
 
 			static std::size_t count_digits ( T parValue ) a_pure;
+			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
 				return (parNum == 0 ? 0 : static_cast<std::size_t>(::log10(parNum) / ::log10(base))) + 1;
 			}
@@ -113,8 +140,8 @@ namespace dinhelp {
 		std::size_t dec<T>::count_digits_implem (T parValue, dinhelp::bt::index_seq<Powers...>, dinhelp::bt::index_seq<Digits...>) {
 			static T powers[] = { 0, static_cast<T>(dinhelp::implem::power<10, Powers + 1>::value)... };
 			static std::size_t maxdigits[] = { count_digits_bt(static_cast<std::size_t>(::pow(2.0, Digits)))... };
-			const auto bits = sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes(parValue);
-			return (parValue < powers[maxdigits[bits] - 1] ? maxdigits[bits] - 1 : maxdigits[bits]);
+			const auto bits = sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<T>(parValue);
+			return (parValue < powers[maxdigits[bits] - 1] ? maxdigits[bits] - 1 : maxdigits[bits]) + dinhelp::implem::is_negative<T>::check(parValue);
 		}
 
 		template <typename T>
@@ -127,8 +154,18 @@ namespace dinhelp {
 		}
 
 		template <typename T>
+		typename std::make_unsigned<T>::type dec<T>::make_unsigned (T parValue) {
+			return dinhelp::implem::abs(parValue);
+		}
+
+		template <typename T>
 		std::size_t hex<T>::count_digits (T parValue) {
-			return std::max<std::size_t>(((sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes(parValue)) + (CHAR_BIT / 2 - 1)) / (CHAR_BIT / 2), 1);
+			return std::max<std::size_t>(((sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<typename std::make_unsigned<T>::type>(make_unsigned(parValue))) + (CHAR_BIT / 2 - 1)) / (CHAR_BIT / 2), 1);
+		}
+
+		template <typename T>
+		typename std::make_unsigned<T>::type hex<T>::make_unsigned (T parValue) {
+			return static_cast<typename std::make_unsigned<T>::type>(parValue);
 		}
 	} //namespace tags
 
@@ -138,7 +175,7 @@ namespace dinhelp {
 			template <typename T, typename F>
 			static T convert ( const typename std::enable_if<std::is_integral<F>::value, F>::type& parFrom ) {
 				const auto indices = int_to_string<Tag, T, F>(parFrom);
-				return dinhelp::customize::index_array_to_string<T>::make(indices);
+				return dinhelp::customize::index_array_to_string<T>::make(indices, is_negative<F>::check(parFrom) bitand Tag<F>::sign_allowed);
 			}
 
 			template <typename T, typename F>
@@ -147,20 +184,37 @@ namespace dinhelp {
 			}
 		};
 
-		inline int count_leading_zeroes (uint8_t parValue) {
-			return __builtin_clz(parValue) - (sizeof(unsigned int) * CHAR_BIT - sizeof(uint8_t) * CHAR_BIT);
+		template <typename T>
+		inline int count_leading_zeroes (typename std::enable_if<std::numeric_limits<T>::is_signed, T>::type parValue) {
+			return count_leading_zeroes<decltype(abs(parValue))>(abs(parValue));
 		}
 
-		inline int count_leading_zeroes (uint16_t parValue) {
-			return __builtin_clz(parValue) - (sizeof(unsigned int) * CHAR_BIT - sizeof(uint16_t) * CHAR_BIT);
+		template <typename T>
+		inline int count_leading_zeroes (typename std::enable_if<not std::numeric_limits<T>::is_signed, T>::type parValue) {
+			return count_leading_zeroes_overload(parValue) + sizeof(T) * CHAR_BIT;
 		}
 
-		inline int count_leading_zeroes (uint32_t parValue) {
-			return __builtin_clzl(parValue) - (sizeof(unsigned long) * CHAR_BIT - sizeof(uint32_t) * CHAR_BIT);
+		inline int count_leading_zeroes_overload (unsigned char parValue) {
+			return __builtin_clz(parValue) - sizeof(unsigned int) * CHAR_BIT;
+		}
+		inline int count_leading_zeroes_overload (unsigned short int parValue) {
+			return __builtin_clz(parValue) - sizeof(unsigned int) * CHAR_BIT;
+		}
+		inline int count_leading_zeroes_overload (unsigned int parValue) {
+			return __builtin_clz(parValue) - sizeof(unsigned int) * CHAR_BIT;
+		}
+		inline int count_leading_zeroes_overload (unsigned long parValue) {
+			return __builtin_clzl(parValue) - sizeof(unsigned long) * CHAR_BIT;
+		}
+		inline int count_leading_zeroes_overload (unsigned long long parValue) {
+			return __builtin_clzll(parValue) - sizeof(unsigned long long) * CHAR_BIT;
 		}
 
-		inline int count_leading_zeroes (uint64_t parValue) {
-			return __builtin_clzll(parValue) - (sizeof(unsigned long long) * CHAR_BIT - sizeof(uint64_t) * CHAR_BIT);
+		//See: http://stackoverflow.com/questions/16101062/why-does-stdabs-return-signed-types
+		template <typename T>
+		typename std::make_unsigned<T>::type abs (T parValue) {
+			//We need to cast before negating x to avoid the overflow.
+			return (parValue < 0 ? -static_cast<typename std::make_unsigned<T>::type>(parValue) : parValue);
 		}
 	} //namespace implem
 
@@ -173,13 +227,13 @@ namespace dinhelp {
 		template<>
 		struct index_array_to_string<std::string> {
 			template<std::size_t N>
-			static std::string make (const MaxSizedArray<uint8_t, N> &parIndices) {
+			static std::string make (const MaxSizedArray<uint8_t, N> &parIndices, int parNegative) {
 				static const char symbols[] = {'0', '1', '2', '3', '4', '5',
 											   '6', '7', '8', '9', 'A', 'B',
 											   'C', 'D', 'E', 'F'};
-				std::string retval(parIndices.size(), ' ');
-				for (std::size_t z = 0; z < parIndices.size(); ++z) {
-					retval[z] = symbols[parIndices[z]];
+				std::string retval(parIndices.size() + parNegative, '-');
+				for (auto z = parNegative; z < static_cast<int>(parIndices.size()) + parNegative; ++z) {
+					retval[z] = symbols[parIndices[z - parNegative]];
 				}
 				return retval;
 			}
@@ -194,7 +248,14 @@ namespace dinhelp {
 					return 10 + parChar - 'a';
 				else if (parChar >= 'A' and parChar <= 'F')
 					return 10 + parChar - 'A';
+				else if (parChar == '-')
+					return 0;
 				return 0;
+			}
+
+			template <typename Container>
+			static T sgn (const Container& parString) {
+				return static_cast<T>(std::numeric_limits<T>::is_signed and parString.begin() != parString.end() and *parString.begin() == '-' ? -1 : 1);
 			}
 		};
 	} //namespace customize

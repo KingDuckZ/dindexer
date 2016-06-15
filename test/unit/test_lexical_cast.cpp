@@ -89,4 +89,18 @@ TEST(helpers, lexical_cast) {
 		const auto dec_str = lexical_cast<std::string, dec>(value);
 		EXPECT_EQ("313249076", dec_str);
 	}
+	{
+		const int32_t value = 0x7800;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("7800", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("30720", dec_str);
+	}
+	{
+		const int32_t value = -1400;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("FFFFFA88", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("-1400", dec_str);
+	}
 }
