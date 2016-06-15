@@ -5,6 +5,7 @@ add_executable(${PROJECT_NAME}
 	test_guess_content_type.cpp
 	test_glob2regex.cpp
 	test_tiger_string_conv.cpp
+	test_lexical_cast.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

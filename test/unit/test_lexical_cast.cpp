@@ -1,0 +1,92 @@
+/* Copyright 2015, 2016, Michele Santullo
+ * This file is part of "dindexer".
+ *
+ * "dindexer" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * "dindexer" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "helpers/lexical_cast.hpp"
+#include <gtest/gtest.h>
+#include <cstdint>
+#include <string>
+#include <boost/utility/string_ref.hpp>
+
+TEST(helpers, lexical_cast) {
+	using dinhelp::lexical_cast;
+	using dinhelp::tags::hex;
+	using dinhelp::tags::dec;
+
+	{
+		const uint8_t value = 0x34;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("34", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("52", dec_str);
+	}
+	{
+		const uint16_t value = 0xFFFF;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("FFFF", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("65535", dec_str);
+	}
+	{
+		const uint16_t value = 0xFF;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("FF", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("255", dec_str);
+	}
+	{
+		const uint16_t value = 0x100;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("100", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("256", dec_str);
+	}
+	{
+		const uint32_t value = 0x1ABC;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("1ABC", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("6844", dec_str);
+	}
+	{
+		const uint32_t value = 0xffffffff;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("FFFFFFFF", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("4294967295", dec_str);
+	}
+	{
+		const uint32_t value = 1;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("1", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("1", dec_str);
+	}
+	{
+		const uint32_t value = 0;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("0", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("0", dec_str);
+	}
+	{
+		const uint64_t value = 0x12abcd34;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("12ABCD34", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("313249076", dec_str);
+	}
+}
