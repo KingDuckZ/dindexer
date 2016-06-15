@@ -18,12 +18,12 @@
 #ifndef id170B0E6C34D14EBA9B92A35977BDBFB3
 #define id170B0E6C34D14EBA9B92A35977BDBFB3
 
-#include "pq/implem/sequence_bt.hpp"
+#include "sequence_bt.hpp"
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
 
-namespace pq {
+namespace dinhelp {
 	namespace bt {
 		template <std::size_t S>
 		class string;
@@ -107,6 +107,6 @@ namespace pq {
 			return string<S>(parData);
 		}
 	} //namespace bt
-} //namespace pq
+} //namespace dinhelp
 
 #endif

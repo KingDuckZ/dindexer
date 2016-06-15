@@ -20,7 +20,7 @@
 
 #include <cstddef>
 
-namespace pq {
+namespace dinhelp {
 	namespace bt {
 		template <std::size_t... I>
 		struct index_seq {
@@ -43,6 +43,6 @@ namespace pq {
 		template <std::size_t MIN, std::size_t MAX>
 		using index_range = typename implem::range_builder<MIN, MAX>::type;
 	} //namespace bt
-} //namespace pq
+} //namespace dinhelp
 
 #endif
