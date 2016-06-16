@@ -1,19 +1,10 @@
-#		dindexer					#
-##		Project info			##
-###		Release build status		###
-[![Build Status](https://drone.io/bitbucket.org/King_DuckZ/dindexer/status.png)](https://drone.io/bitbucket.org/King_DuckZ/dindexer/latest)
+#		dindexer					 <a target="_blank" href="https://travis-ci.org/KingDuckZ/dindexer">![Travis status][badge.Travis]</a> <a target="_blank" href="https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fgithub.com%2FKingDuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software">![Flattr this project][badge.Flattr]</a>
 
-###		Latest release				##
+##		Project info			##
 Latest stable release is __0.1.5b__.
 
-###		Flattr						###
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=King_DuckZ&url=https%3A%2F%2Fbitbucket.org%2FKing_DuckZ%2Fdindexer&title=dindexer&language=en_GB&tags=bitbucket&category=software)
-
-Please support the development of this software if you like it!
-
-###		News						###
 [![dindexer on Diaspora*](http://i.imgur.com/DcBZykA.png)](https://mondiaspora.net/tags/dindexer)
-Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project!
+Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project.
 
 ##		What is dindexer?			##
 ###		Purpose						###
@@ -241,3 +232,7 @@ Or at least that's the idea behind the design of the code :)
 
 ##		Contact me					##
 The best way to get in touch is to find me on IRC freenode. You can find me as either King_DuckZ, or you can try Ccdc_DuckZ if you get any afk autoreply.
+
+<!-- Links -->
+[badge.Travis]: https://travis-ci.org/KingDuckZ/dindexer.svg?branch=master
+[badge.Flattr]: http://api.flattr.com/button/flattr-badge-large.png

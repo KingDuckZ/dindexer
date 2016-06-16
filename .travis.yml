@@ -1,0 +1,87 @@
+language: cpp
+script:
+  - mkdir build
+  - cd build
+  - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on ..
+  - cmake --build .
+  - ctest
+
+env:
+  matrix:
+    TRAVIS_EMPTY_WORKAROUND=1
+  global:
+    - CMAKE_PREFIX_PATH=${TRAVIS_BUILD_DIR}/deps/opt
+
+gcc_deps: &gcc_deps
+  packages:
+    - postgresql-server-dev-9.5
+    - libmagic-dev
+    - libreadline-dev
+    - g++-5
+    - gcc-5
+    - libpq-dev
+    - libpq5
+  sources:
+    - ubuntu-toolchain-r-test
+
+matrix:
+  fast_finish: true
+  exclude:
+    - env: TRAVIS_EMPTY_WORKAROUND=1
+
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          <<: *gcc_deps
+      env: CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5"
+
+    - compiler: gcc
+      addons:
+        apt:
+          <<: *gcc_deps
+      env: CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_C_COMPILER=gcc-5"
+
+#See: https://github.com/boostorg/hana/blob/master/.travis.yml
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - export PATH=${DEPS_DIR}/opt/bin:${PATH}
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-5"; export CC="gcc-5"; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8"; export CC="clang-3.8"; fi
+
+  - BOOST_VERSION=1.61.0
+
+  # Install cmake
+  - |
+    if [ ! -f "opt/bin/cmake" ]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C opt
+    fi
+
+  # Install boost
+  - if [[ "${BOOST_VERSION}" == "1.60.0" ]]; then BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.gz"; fi
+  - if [[ "${BOOST_VERSION}" == "1.61.0" ]]; then BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz"; fi
+  - |
+    if [[ "${BOOST_URL}" != "" ]] && [ ! -d opt/include/boost ]; then
+      echo "Downloading boost ${BOOST_VERSION}...";
+      mkdir boost && travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C boost;
+      (cd boost && ./bootstrap.sh && ./b2 install --ignore-site-config --with-filesystem --with-program_options --with-system --prefix=${DEPS_DIR}/opt) > /dev/null
+    fi
+
+  # Install yaml-cpp
+  - |
+    if [ ! -f opt/lib/libyaml-cpp.so ]; then
+      mkdir yaml-cpp && travis_retry wget --quiet -O - https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.5.3.tar.gz | tar --strip-components=1 -xz -C yaml-cpp
+      (cd yaml-cpp && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=${DEPS_DIR}/opt . && cmake --build . && make install)
+    fi
+
+  - cd ${TRAVIS_BUILD_DIR}
+
+cache:
+  directories:
+    - "${TRAVIS_BUILD_DIR}/deps/opt"
+
+sudo: false
+os: linux
+dist: trusty
