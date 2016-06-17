@@ -5,12 +5,13 @@ script:
   - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on ..
   - cmake --build .
   - ctest
+  - cpack
 
 env:
-  matrix:
-    TRAVIS_EMPTY_WORKAROUND=1
+  matrix: TRAVIS_EMPTY_WORKAROUND=1
   global:
     - CMAKE_PREFIX_PATH=${TRAVIS_BUILD_DIR}/deps/opt
+    - LATEST_RELEASE_VER="$(git describe --abbrev=0 --tags | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
 
 gcc_deps: &gcc_deps
   packages:
@@ -21,6 +22,7 @@ gcc_deps: &gcc_deps
     - gcc-5
     - libpq-dev
     - libpq5
+    - rpm
   sources:
     - ubuntu-toolchain-r-test
 
@@ -85,3 +87,15 @@ cache:
 sudo: false
 os: linux
 dist: trusty
+
+deploy:
+  provider: releases
+  api_key:
+    secure: F4MQJKc/7JBF6OUkWW9/XkEgmkVNMJLiv2lSzarSmEfmBIUYSy5rvq3HP5GY/Bo7l7dwb7t0IdQcUrfiPPbpDSlPcCRpNPnDUwxv25RYNUrtWTxUQ03BbwZTdWKYbRVP99JAd2KzWO+jC6JXPf8oe4vJdykNnydmqV80rIlPVbHefubrLtCm0LwHMW9n/ZsauKsZg1LSueNKtVB0vIbV0Ff2AZM1YCDnTS6EobM8QlbsefDlRmrv7FzC2akTJYzDIsCxyL27j8NLw0aFmtdCRdKwoHJitT8Y3AhymsjZZpqXAVdWPBHhev4APw1nnALkLG2wlYjGNjkYvIyJWw9MQXstDF3nrmhZoIrvFvBPd/VOKr4lxYyQPf7L2oNTpJ4n4jqMg+gD3tnhq9QuCKyqIgfTH5Ejwo5C5KaznkcDVUyhhsGfGZOPKH0MFWZHDokks3b3DVLgwK398bRGIJ/dyvhMikOA2pDHCXmhpKIO1A1SpvIKmx0S1rY5AgD7QCi9X934RHEPLci2VJsJrI5qi0ttTvBoMbUPM6oet1w7VdsXW+XJn00fis7bUdKOxK9YK8+7GYWmeb7lMS8i+VMiZwj92YBadwalxNaydgAi52ALBGld1nUwnIf7UzTmfHc6s43Bhzw8TiucJPEviHnGa71P5ESqpD2hBsUR4LTIIOk=
+  file:
+    - "$TRAVIS_BUILD_DIR/dindexer-${LATEST_RELEASE_VER}-Linux.deb"
+    - "$TRAVIS_BUILD_DIR/dindexer-${LATEST_RELEASE_VER}-Linux.rpm"
+    - "$TRAVIS_BUILD_DIR/dindexer-${LATEST_RELEASE_VER}-Linux.tar.gz"
+  on:
+    repo: KingDuckZ/dindexer
+    tags: true
