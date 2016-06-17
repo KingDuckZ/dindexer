@@ -36,7 +36,7 @@ endif()
 set(DINDEXER_COPYRIGHT_YEARS "2015,2016")
 set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
 string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
-set(DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
+set(DINDEXER_DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wno-missing-field-initializers -fno-omit-frame-pointer -O0")

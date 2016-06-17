@@ -36,7 +36,7 @@ SET search_path = public, pg_catalog;
 
 --
 -- TOC entry 185 (class 1255 OID 16386)
--- Name: str_begins_with(text, text); Type: FUNCTION; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: str_begins_with(text, text); Type: FUNCTION; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE FUNCTION str_begins_with(text, text) RETURNS boolean
@@ -46,11 +46,11 @@ CREATE FUNCTION str_begins_with(text, text) RETURNS boolean
 $_$;
 
 
-ALTER FUNCTION public.str_begins_with(text, text) OWNER TO @DB_OWNER_NAME@;
+ALTER FUNCTION public.str_begins_with(text, text) OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 186 (class 1255 OID 16387)
--- Name: str_match_partial(text, text, boolean); Type: FUNCTION; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: str_match_partial(text, text, boolean); Type: FUNCTION; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE FUNCTION str_match_partial(text, text, boolean) RETURNS boolean
@@ -63,11 +63,11 @@ END;
 $_$;
 
 
-ALTER FUNCTION public.str_match_partial(text, text, boolean) OWNER TO @DB_OWNER_NAME@;
+ALTER FUNCTION public.str_match_partial(text, text, boolean) OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 187 (class 1255 OID 16388)
--- Name: upcase_hash(); Type: FUNCTION; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: upcase_hash(); Type: FUNCTION; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE FUNCTION upcase_hash() RETURNS trigger
@@ -80,7 +80,7 @@ CREATE FUNCTION upcase_hash() RETURNS trigger
 $$;
 
 
-ALTER FUNCTION public.upcase_hash() OWNER TO @DB_OWNER_NAME@;
+ALTER FUNCTION public.upcase_hash() OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 SET default_tablespace = '';
 
@@ -88,7 +88,7 @@ SET default_with_oids = false;
 
 --
 -- TOC entry 181 (class 1259 OID 16389)
--- Name: files; Type: TABLE; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: files; Type: TABLE; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE TABLE files (
@@ -112,12 +112,12 @@ CREATE TABLE files (
 );
 
 
-ALTER TABLE files OWNER TO @DB_OWNER_NAME@;
+ALTER TABLE files OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 2153 (class 0 OID 0)
 -- Dependencies: 181
--- Name: CONSTRAINT chk_hash_0 ON files; Type: COMMENT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: CONSTRAINT chk_hash_0 ON files; Type: COMMENT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 COMMENT ON CONSTRAINT chk_hash_0 ON files IS 'Make sure hash is 0 if unreadable or not valid are set.';
@@ -125,7 +125,7 @@ COMMENT ON CONSTRAINT chk_hash_0 ON files IS 'Make sure hash is 0 if unreadable 
 
 --
 -- TOC entry 182 (class 1259 OID 16398)
--- Name: files_id_seq; Type: SEQUENCE; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: files_id_seq; Type: SEQUENCE; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE SEQUENCE files_id_seq
@@ -136,12 +136,12 @@ CREATE SEQUENCE files_id_seq
     CACHE 1;
 
 
-ALTER TABLE files_id_seq OWNER TO @DB_OWNER_NAME@;
+ALTER TABLE files_id_seq OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 2154 (class 0 OID 0)
 -- Dependencies: 182
--- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER SEQUENCE files_id_seq OWNED BY files.id;
@@ -149,7 +149,7 @@ ALTER SEQUENCE files_id_seq OWNED BY files.id;
 
 --
 -- TOC entry 183 (class 1259 OID 16400)
--- Name: sets; Type: TABLE; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: sets; Type: TABLE; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE TABLE sets (
@@ -164,12 +164,12 @@ CREATE TABLE sets (
 );
 
 
-ALTER TABLE sets OWNER TO @DB_OWNER_NAME@;
+ALTER TABLE sets OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 2155 (class 0 OID 0)
 -- Dependencies: 183
--- Name: COLUMN sets.type; Type: COMMENT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: COLUMN sets.type; Type: COMMENT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 COMMENT ON COLUMN sets.type IS 'D = directory
@@ -183,7 +183,7 @@ O = Other';
 
 --
 -- TOC entry 184 (class 1259 OID 16411)
--- Name: sets_id_seq; Type: SEQUENCE; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: sets_id_seq; Type: SEQUENCE; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE SEQUENCE sets_id_seq
@@ -194,12 +194,12 @@ CREATE SEQUENCE sets_id_seq
     CACHE 1;
 
 
-ALTER TABLE sets_id_seq OWNER TO @DB_OWNER_NAME@;
+ALTER TABLE sets_id_seq OWNER TO @DINDEXER_DB_OWNER_NAME@;
 
 --
 -- TOC entry 2156 (class 0 OID 0)
 -- Dependencies: 184
--- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER SEQUENCE sets_id_seq OWNED BY sets.id;
@@ -207,7 +207,7 @@ ALTER SEQUENCE sets_id_seq OWNED BY sets.id;
 
 --
 -- TOC entry 2009 (class 2604 OID 16413)
--- Name: id; Type: DEFAULT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: id; Type: DEFAULT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regclass);
@@ -215,7 +215,7 @@ ALTER TABLE ONLY files ALTER COLUMN id SET DEFAULT nextval('files_id_seq'::regcl
 
 --
 -- TOC entry 2017 (class 2604 OID 16414)
--- Name: id; Type: DEFAULT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: id; Type: DEFAULT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclass);
@@ -223,7 +223,7 @@ ALTER TABLE ONLY sets ALTER COLUMN id SET DEFAULT nextval('sets_id_seq'::regclas
 
 --
 -- TOC entry 2024 (class 2606 OID 16416)
--- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: pk_files_id; Type: CONSTRAINT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY files
@@ -232,7 +232,7 @@ ALTER TABLE ONLY files
 
 --
 -- TOC entry 2028 (class 2606 OID 16418)
--- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: pk_sets_id; Type: CONSTRAINT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY sets
@@ -241,7 +241,7 @@ ALTER TABLE ONLY sets
 
 --
 -- TOC entry 2026 (class 2606 OID 16420)
--- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: uniq_item; Type: CONSTRAINT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY files
@@ -250,7 +250,7 @@ ALTER TABLE ONLY files
 
 --
 -- TOC entry 2019 (class 1259 OID 16421)
--- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: fki_files_sets; Type: INDEX; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE INDEX fki_files_sets ON files USING btree (group_id);
@@ -258,7 +258,7 @@ CREATE INDEX fki_files_sets ON files USING btree (group_id);
 
 --
 -- TOC entry 2020 (class 1259 OID 16422)
--- Name: idx_mimetype; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: idx_mimetype; Type: INDEX; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE INDEX idx_mimetype ON files USING btree (mimetype, charset);
@@ -266,7 +266,7 @@ CREATE INDEX idx_mimetype ON files USING btree (mimetype, charset);
 
 --
 -- TOC entry 2021 (class 1259 OID 16423)
--- Name: idx_paths; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: idx_paths; Type: INDEX; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE INDEX idx_paths ON files USING btree (path);
@@ -274,7 +274,7 @@ CREATE INDEX idx_paths ON files USING btree (path);
 
 --
 -- TOC entry 2022 (class 1259 OID 16475)
--- Name: idx_tags; Type: INDEX; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: idx_tags; Type: INDEX; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE INDEX idx_tags ON files USING gin (tags);
@@ -282,7 +282,7 @@ CREATE INDEX idx_tags ON files USING gin (tags);
 
 --
 -- TOC entry 2030 (class 2620 OID 16424)
--- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: triggerupcasehash; Type: TRIGGER; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW EXECUTE PROCEDURE upcase_hash();
@@ -290,7 +290,7 @@ CREATE TRIGGER triggerupcasehash BEFORE INSERT OR UPDATE ON files FOR EACH ROW E
 
 --
 -- TOC entry 2029 (class 2606 OID 16425)
--- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @DB_OWNER_NAME@
+-- Name: fk_files_sets; Type: FK CONSTRAINT; Schema: public; Owner: @DINDEXER_DB_OWNER_NAME@
 --
 
 ALTER TABLE ONLY files

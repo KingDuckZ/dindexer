@@ -109,7 +109,7 @@ The following libraries must be available on your system:
 ###		Build options				###
 These are the options understood by cmake. At runtime you might be able to see what *most* of those options were set to using `dindexer --builtin`.
 
-* **DB_OWNER_NAME** Default user name for backends that require one
+* **DINDEXER_DB_OWNER_NAME** Default user name for backends that require one
 * **DINDEXER_ACTIONS_PATH** Search path for dindexer actions
 * **DINDEXER_CONFIG_FILE** Full path to the yaml configuration file
 * **DINDEXER_CXX11_ABI** Set this to off to force newer gcc (5+) to keep using the old ABI - useful on Gentoo if you built your system libraries with gcc 4 and you are trying to build dindexer with gcc 5
