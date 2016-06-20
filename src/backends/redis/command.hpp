@@ -18,9 +18,9 @@
 #ifndef idD83EEBFC927840C6B9F32D61A1D1E582
 #define idD83EEBFC927840C6B9F32D61A1D1E582
 
-#include "arg_to_bin_safe.hpp"
 #include "scan_iterator.hpp"
 #include "reply.hpp"
+#include "batch.hpp"
 #include <array>
 #include <memory>
 #include <string>
@@ -33,7 +33,7 @@
 #include <boost/utility/string_ref.hpp>
 #include <stdexcept>
 
-struct redisContext;
+struct redisAsyncContext;
 
 namespace redis {
 	class Command {
@@ -55,6 +55,8 @@ namespace redis {
 
 		bool is_connected ( void ) const;
 
+		Batch make_batch ( void );
+
 		template <typename... Args>
 		Reply run ( const char* parCommand, Args&&... parArgs );
 
@@ -65,9 +67,7 @@ namespace redis {
 		zscan_range zscan ( boost::string_ref parKey );
 
 	private:
-		using RedisConnection = std::unique_ptr<redisContext, void(*)(redisContext*)>;
-
-		Reply run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
+		using RedisConnection = std::unique_ptr<redisAsyncContext, void(*)(redisAsyncContext*)>;
 
 		RedisConnection m_conn;
 		std::string m_address;
@@ -76,19 +76,10 @@ namespace redis {
 
 	template <typename... Args>
 	Reply Command::run (const char* parCommand, Args&&... parArgs) {
-		constexpr const std::size_t arg_count = sizeof...(Args) + 1;
-		using CharPointerArray = std::array<const char*, arg_count>;
-		using LengthArray = std::array<std::size_t, arg_count>;
-		using implem::arg_to_bin_safe_char;
-		using implem::arg_to_bin_safe_length;
-		using implem::MakeCharInfo;
-		using boost::string_ref;
-
-		return this->run_pvt(
-			static_cast<int>(arg_count),
-			CharPointerArray{ (arg_to_bin_safe_char(string_ref(parCommand))), MakeCharInfo<typename std::remove_const<typename std::remove_reference<Args>::type>::type>(std::forward<Args>(parArgs)).data()... }.data(),
-			LengthArray{ arg_to_bin_safe_length(string_ref(parCommand)), arg_to_bin_safe_length(std::forward<Args>(parArgs))... }.data()
-		);
+		auto batch = make_batch();
+		batch.run(parCommand, std::forward<Args>(parArgs)...);
+		batch.throw_if_failed();
+		return batch.replies().front();
 	}
 } //namespace redis
 

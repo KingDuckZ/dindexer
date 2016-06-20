@@ -7,6 +7,7 @@ add_library(${PROJECT_NAME} SHARED
 	command.cpp
 	scan_iterator.cpp
 	reply.cpp
+	batch.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

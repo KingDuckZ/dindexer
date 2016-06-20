@@ -17,41 +17,19 @@
 
 #include "command.hpp"
 #include <hiredis/hiredis.h>
+#include <hiredis/async.h>
 #include <ciso646>
 #include <cassert>
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
-#include <boost/iterator/transform_iterator.hpp>
 
 namespace redis {
 	namespace {
-		using RedisReply = std::unique_ptr<redisReply, void(*)(void*)>;
-
-		Reply make_redis_reply_type (redisReply* parReply) {
-			using boost::transform_iterator;
-			using PtrToReplyIterator = transform_iterator<Reply(*)(redisReply*), redisReply**>;
-
-			switch (parReply->type) {
-			case REDIS_REPLY_INTEGER:
-				return parReply->integer;
-			case REDIS_REPLY_STRING:
-				return std::string(parReply->str, parReply->len);
-			case REDIS_REPLY_ARRAY:
-				return std::vector<Reply>(
-					PtrToReplyIterator(parReply->element, &make_redis_reply_type),
-					PtrToReplyIterator(parReply->element + parReply->elements, &make_redis_reply_type)
-				);
-			case REDIS_REPLY_ERROR:
-				return ErrorString(parReply->str, parReply->len);
-			default:
-				return Reply();
-			};
-		}
 	} //unnamed namespace
 
 	Command::Command (std::string&& parAddress, uint16_t parPort) :
-		m_conn(nullptr, &redisFree),
+		m_conn(nullptr, &redisAsyncDisconnect),
 		m_address(std::move(parAddress)),
 		m_port(parPort)
 	{
@@ -62,10 +40,9 @@ namespace redis {
 
 	void Command::connect() {
 		if (not m_conn) {
-			struct timeval timeout = {5, 500000}; //5.5 seconds?
 			RedisConnection conn(
-				redisConnectWithTimeout(m_address.c_str(), m_port, timeout),
-				&redisFree
+				redisAsyncConnect(m_address.c_str(), m_port),
+				&redisAsyncDisconnect
 			);
 			if (not conn) {
 				std::ostringstream oss;
@@ -86,44 +63,6 @@ namespace redis {
 		m_conn.reset();
 	}
 
-	Reply Command::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
-		assert(parArgc >= 1);
-		assert(parArgv);
-		assert(parLengths); //This /could/ be null, but I don't see why it should
-		assert(is_connected());
-
-		RedisReply reply(
-			static_cast<redisReply*>(redisCommandArgv(m_conn.get(), parArgc, parArgv, parLengths)),
-			&freeReplyObject
-		);
-
-		return make_redis_reply_type(reply.get());
-
-		//std::string key;
-		//{
-		//	std::ostringstream key_oss;
-		//	RedisReply incr_reply(static_cast<redisReply*>(redisCommand(m_conn.get(), "incr set_counter")), &freeReplyObject);
-		//	key_oss << "sets:" << incr_reply->integer;
-		//	key = key_oss.str();
-		//}
-
-		//RedisReply insert_reply(
-		//	static_cast<redisReply*>(redisCommand(
-		//		m_conn.get(),
-		//		"hmset %b name %b disk_label %b fs_uuid %b",
-		//		key.data(),
-		//		key.size(),
-		//		parSetData.name.data(),
-		//		parSetData.name.size(),
-		//		parSetData.disk_label.data(),
-		//		parSetData.disk_label.size(),
-		//		parSetData.fs_uuid.data(),
-		//		parSetData.fs_uuid.size()
-		//	)),
-		//	&freeReplyObject
-		//);
-	}
-
 	bool Command::is_connected() const {
 		return m_conn and not m_conn->err;
 	}
@@ -142,5 +81,10 @@ namespace redis {
 
 	auto Command::zscan (boost::string_ref parKey) -> zscan_range {
 		return zscan_range(zscan_iterator(this, parKey, false), zscan_iterator(this, parKey, true));
+	}
+
+	Batch Command::make_batch() {
+		assert(is_connected());
+		return Batch(m_conn.get());
 	}
 } //namespace redis
