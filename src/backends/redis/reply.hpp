@@ -25,17 +25,30 @@
 namespace redis {
 	struct Reply;
 
+	class ErrorString {
+	public:
+		ErrorString ( const char* parCStr, std::size_t parLen ) :
+			m_msg(parCStr, parLen)
+		{ }
+		const std::string& message ( void ) const noexcept { return m_msg; }
+
+	private:
+		std::string m_msg;
+	};
+
 	namespace implem {
 		using RedisVariantType = boost::variant<
 			long long,
 			std::string,
-			std::vector<Reply>
+			std::vector<Reply>,
+			ErrorString
 		>;
 	} //namespace implem
 	enum RedisVariantTypes {
 		RedisVariantType_Integer = 0,
 		RedisVariantType_String,
-		RedisVariantType_Array
+		RedisVariantType_Array,
+		RedisVariantType_Error
 	};
 
 	struct Reply : implem::RedisVariantType {
@@ -45,6 +58,7 @@ namespace redis {
 		Reply ( long long parVal ) : base_class(parVal) {}
 		Reply ( std::string&& parVal ) : base_class(std::move(parVal)) {}
 		Reply ( std::vector<Reply>&& parVal ) : base_class(std::move(parVal)) {}
+		Reply ( ErrorString&& parVal ) : base_class(std::move(parVal)) {}
 		~Reply ( void ) noexcept = default;
 	};
 

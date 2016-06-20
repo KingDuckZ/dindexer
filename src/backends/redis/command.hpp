@@ -90,11 +90,6 @@ namespace redis {
 			LengthArray{ arg_to_bin_safe_length(string_ref(parCommand)), arg_to_bin_safe_length(std::forward<Args>(parArgs))... }.data()
 		);
 	}
-
-	class RedisError : public std::runtime_error {
-	public:
-		RedisError ( const char* parMessage, std::size_t parLength );
-	};
 } //namespace redis
 
 #endif

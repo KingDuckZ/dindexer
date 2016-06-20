@@ -43,7 +43,7 @@ namespace redis {
 					PtrToReplyIterator(parReply->element + parReply->elements, &make_redis_reply_type)
 				);
 			case REDIS_REPLY_ERROR:
-				throw RedisError(parReply->str, parReply->len);
+				return ErrorString(parReply->str, parReply->len);
 			default:
 				return Reply();
 			};
@@ -142,10 +142,5 @@ namespace redis {
 
 	auto Command::zscan (boost::string_ref parKey) -> zscan_range {
 		return zscan_range(zscan_iterator(this, parKey, false), zscan_iterator(this, parKey, true));
-	}
-
-	RedisError::RedisError (const char* parMessage, std::size_t parLength) :
-		std::runtime_error(std::string(parMessage, parLength))
-	{
 	}
 } //namespace redis
