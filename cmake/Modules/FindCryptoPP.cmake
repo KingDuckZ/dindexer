@@ -1,20 +1,20 @@
 # Module for locating the Crypto++ encryption library.
 #
 # Customizable variables:
-#   CRYPTOPP_ROOT_DIR
+#   CryptoPP_ROOT_DIR
 #     This variable points to the CryptoPP root directory. On Windows the
 #     library location typically will have to be provided explicitly using the
 #     -D command-line option. The directory should include the include/cryptopp,
 #     lib and/or bin sub-directories.
 #
 # Read-only variables:
-#   CRYPTOPP_FOUND
+#   CryptoPP_FOUND
 #     Indicates whether the library has been found.
 #
-#   CRYPTOPP_INCLUDE_DIRS
+#   CryptoPP_INCLUDE_DIRS
 #     Points to the CryptoPP include directory.
 #
-#   CRYPTOPP_LIBRARIES
+#   CryptoPP_LIBRARIES
 #     Points to the CryptoPP libraries that should be passed to
 #     target_link_libararies.
 #
@@ -42,7 +42,7 @@
 INCLUDE (FindPackageHandleStandardArgs)
 
 FIND_PATH (
-	CRYPTOPP_ROOT_DIR
+	CryptoPP_ROOT_DIR
 	NAMES cryptopp/cryptlib.h include/cryptopp/cryptlib.h
 	PATHS ENV CRYPTOPPROOT
 	DOC "CryptoPP root directory"
@@ -52,7 +52,7 @@ FIND_PATH (
 FIND_PATH (
 	CRYPTOPP_INCLUDE_DIR
 	NAMES cryptopp/cryptlib.h
-	HINTS ${CRYPTOPP_ROOT_DIR}
+	HINTS ${CryptoPP_ROOT_DIR}
 	PATH_SUFFIXES include
 	DOC "CryptoPP include directory"
 )
@@ -60,7 +60,7 @@ FIND_PATH (
 FIND_LIBRARY (
 	CRYPTOPP_LIBRARY_DEBUG
 	NAMES cryptlibd cryptoppd
-	HINTS ${CRYPTOPP_ROOT_DIR}
+	HINTS ${CryptoPP_ROOT_DIR}
 	PATH_SUFFIXES lib
 	DOC "CryptoPP debug library"
 )
@@ -68,7 +68,7 @@ FIND_LIBRARY (
 FIND_LIBRARY (
 	CRYPTOPP_LIBRARY_RELEASE
 	NAMES cryptlib cryptopp
-	HINTS ${CRYPTOPP_ROOT_DIR}
+	HINTS ${CryptoPP_ROOT_DIR}
 	PATH_SUFFIXES lib
 	DOC "CryptoPP release library"
 )
@@ -122,8 +122,8 @@ IF (CRYPTOPP_INCLUDE_DIR)
 	ENDIF (EXISTS ${_CRYPTOPP_VERSION_HEADER})
 ENDIF (CRYPTOPP_INCLUDE_DIR)
 
-SET (CRYPTOPP_INCLUDE_DIRS ${CRYPTOPP_INCLUDE_DIR})
-SET (CRYPTOPP_LIBRARIES ${CRYPTOPP_LIBRARY})
+SET (CryptoPP_INCLUDE_DIRS ${CRYPTOPP_INCLUDE_DIR})
+SET (CryptoPP_LIBRARIES ${CRYPTOPP_LIBRARY})
 
 MARK_AS_ADVANCED (
 	CRYPTOPP_INCLUDE_DIR CRYPTOPP_LIBRARY CRYPTOPP_LIBRARY_DEBUG
@@ -131,6 +131,6 @@ MARK_AS_ADVANCED (
 )
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS (
-	CryptoPP REQUIRED_VARS CRYPTOPP_ROOT_DIR
+	CryptoPP REQUIRED_VARS CryptoPP_ROOT_DIR
 	CRYPTOPP_INCLUDE_DIR CRYPTOPP_LIBRARY VERSION_VAR CRYPTOPP_VERSION
 )
