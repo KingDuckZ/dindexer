@@ -18,7 +18,7 @@
 #ifndef id4A9E94ACFA43498097637025A5BA69E5
 #define id4A9E94ACFA43498097637025A5BA69E5
 
-#include "dindexer-common/cmake_on_off.h"
+#include "helpers/cmake_on_off.h"
 
 #if CMAKE_@DINDEXER_WITH_BUILD_DATE@
 #	define DINDEXER_BUILD_DATE "@DINDEXER_BUILD_DATE@"

@@ -18,7 +18,7 @@
 #ifndef id32A00B72E29D463795CBF66517387E8D
 #define id32A00B72E29D463795CBF66517387E8D
 
-#include "dindexer-common/cmake_on_off.h"
+#include "helpers/cmake_on_off.h"
 
 #if CMAKE_@DINDEXER_WITH_NICE_MEDIA_TYPES@
 #	define WITH_NICE_MEDIA_TYPES
