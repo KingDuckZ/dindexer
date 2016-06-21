@@ -44,6 +44,8 @@ struct redisAsyncContext;
 
 namespace redis {
 	class Command {
+		friend void on_connect ( const redisAsyncContext*, int );
+		friend void on_disconnect ( const redisAsyncContext*, int );
 	public:
 		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
 		typedef boost::iterator_range<scan_iterator> scan_range;
@@ -91,6 +93,8 @@ namespace redis {
 #endif
 		std::string m_address;
 		uint16_t m_port;
+		bool m_connected;
+		bool m_connection_lost;
 	};
 
 	template <typename... Args>

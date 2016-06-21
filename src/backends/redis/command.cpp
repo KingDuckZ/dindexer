@@ -43,17 +43,34 @@ namespace redis {
 #endif
 	} //unnamed namespace
 
+	void on_connect (const redisAsyncContext* parContext, int parStatus) {
+		assert(parContext and parContext->data);
+		Command& self = *static_cast<Command*>(parContext->data);
+
+		self.m_connection_lost = false;
+		self.m_connected = (parStatus == REDIS_OK);
+	}
+
+	void on_disconnect (const redisAsyncContext* parContext, int parStatus) {
+		assert(parContext and parContext->data);
+		Command& self = *static_cast<Command*>(parContext->data);
+		assert(self.m_connected);
+
+		self.m_connection_lost = (REDIS_ERR == parStatus);
+		self.m_connected = false;
+	};
+
 	Command::Command (std::string&& parAddress, uint16_t parPort) :
 		m_conn(nullptr, &redisAsyncDisconnect),
 		m_address(std::move(parAddress)),
-		m_port(parPort)
+		m_port(parPort),
+		m_connected(false),
+		m_connection_lost(false)
 	{
 	}
 
 	Command::Command (std::string&& parSocket) :
-		m_conn(nullptr, &redisAsyncDisconnect),
-		m_address(std::move(parSocket),
-		m_port(0)
+		Command(std::move(parSocket), 0)
 	{
 	}
 
@@ -75,12 +92,19 @@ namespace redis {
 				oss << "Unable to connect to Redis server at " << m_address << ':' << m_port;
 				throw std::runtime_error(oss.str());
 			}
+			else {
+				conn->data = this;
+			}
 			if (conn->err) {
 				std::ostringstream oss;
 				oss << "Unable to connect to Redis server at " << m_address << ':' << m_port <<
 					": " << conn->errstr;
 				throw std::runtime_error(oss.str());
 			}
+			if (REDIS_OK != redisAsyncSetConnectCallback(conn.get(), &on_connect))
+				throw std::runtime_error("Unable to set \"on_connect()\" callback");
+			if (REDIS_OK != redisAsyncSetDisconnectCallback(conn.get(), &on_disconnect))
+				throw std::runtime_error("Unable to set \"on_disconnect()\" callback");
 			std::swap(conn, m_conn);
 		}
 	}
@@ -90,7 +114,9 @@ namespace redis {
 	}
 
 	bool Command::is_connected() const {
-		return m_conn and not m_conn->err;
+		const bool connected = m_conn and not m_conn->err and m_connected;
+		assert(not m_connection_lost or connected);
+		return connected;
 	}
 
 	auto Command::scan() -> scan_range {
