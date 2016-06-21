@@ -55,6 +55,7 @@ namespace redis {
 		typedef boost::iterator_range<zscan_iterator> zscan_range;
 
 		Command ( std::string&& parAddress, uint16_t parPort );
+		explicit Command ( std::string&& parSocket );
 		~Command ( void ) noexcept;
 
 		void connect ( void );
@@ -80,6 +81,7 @@ namespace redis {
 		using Sha1Array = std::array<char, 20>;
 
 		boost::string_ref add_lua_script_ifn ( const std::string& parScript );
+		bool is_socket_connection ( void ) const;
 
 		RedisConnection m_conn;
 #if defined(WITH_CRYPTOPP)

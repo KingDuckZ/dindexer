@@ -50,13 +50,24 @@ namespace redis {
 	{
 	}
 
+	Command::Command (std::string&& parSocket) :
+		m_conn(nullptr, &redisAsyncDisconnect),
+		m_address(std::move(parSocket),
+		m_port(0)
+	{
+	}
+
 	Command::~Command() noexcept {
 	}
 
 	void Command::connect() {
 		if (not m_conn) {
 			RedisConnection conn(
-				redisAsyncConnect(m_address.c_str(), m_port),
+				(is_socket_connection() ?
+					redisAsyncConnectUnix(m_address.c_str())
+				:
+					redisAsyncConnect(m_address.c_str(), m_port)
+				),
 				&redisAsyncDisconnect
 			);
 			if (not conn) {
@@ -155,4 +166,8 @@ namespace redis {
 		return boost::string_ref(it_inserted->second.data(), it_inserted->second.size());
 	}
 #endif
+
+	bool Command::is_socket_connection() const {
+		return not (m_port or m_address.empty());
+	}
 } //namespace redis
