@@ -16,6 +16,7 @@
  */
 
 #include "command.hpp"
+#include "helpers/lexical_cast.hpp"
 #include <hiredis/hiredis.h>
 #include <hiredis/async.h>
 #include <ciso646>
@@ -23,9 +24,23 @@
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
+#if defined(WITH_CRYPTOPP)
+#	include <crypto++/sha.h>
+#endif
 
 namespace redis {
 	namespace {
+#if defined(WITH_CRYPTOPP)
+		struct LuaScriptHash {
+			union {
+				struct {
+					uint64_t part_a, part_b;
+					uint32_t part_c;
+				};
+				uint8_t raw_bytes[20];
+			};
+		};
+#endif
 	} //unnamed namespace
 
 	Command::Command (std::string&& parAddress, uint16_t parPort) :
@@ -87,4 +102,57 @@ namespace redis {
 		assert(is_connected());
 		return Batch(m_conn.get());
 	}
+
+#if defined(WITH_CRYPTOPP)
+	boost::string_ref Command::add_lua_script_ifn (const std::string& parScript) {
+		if (parScript.empty())
+			return boost::string_ref();
+
+		using dinhelp::lexical_cast;
+
+		static_assert(20 == CryptoPP::SHA1::DIGESTSIZE, "Unexpected SHA1 digest size");
+		static_assert(sizeof(LuaScriptHash) >= CryptoPP::SHA1::DIGESTSIZE, "Wrong SHA1 struct size");
+		static_assert(Sha1Array().size() == CryptoPP::SHA1::DIGESTSIZE, "Wrong array size");
+
+		LuaScriptHash digest;
+		CryptoPP::SHA1().CalculateDigest(digest.raw_bytes, reinterpret_cast<const uint8_t*>(parScript.data()), parScript.size());
+		//TODO: change when lexical_cast will support arrays
+		const std::string sha1_str = lexical_cast<std::string>(digest.part_a) + lexical_cast<std::string>(digest.part_b) + lexical_cast<std::string>(digest.part_c);
+		Sha1Array sha1_array;
+		std::copy(sha1_str.begin(), sha1_str.end(), sha1_array.begin());
+
+		auto it_found = m_known_hashes.find(sha1_array);
+		const bool was_present = (m_known_hashes.end() != it_found);
+		if (was_present) {
+			return boost::string_ref(it_found->data(), it_found->size());
+		}
+
+		auto reply = this->run("SCRIPT", "LOAD", parScript);
+		assert(not was_present);
+
+		assert(get_string(reply) == sha1_str);
+		const auto it_inserted = m_known_hashes.insert(it_found, sha1_array);
+		(void)reply;
+
+		return boost::string_ref(it_inserted->data(), it_inserted->size());
+	}
+#else
+	boost::string_ref Command::add_lua_script_ifn (const std::string& parScript) {
+		auto it_found = m_known_hashes.find(parScript);
+		const bool was_present = (m_known_hashes.end() != it_found);
+		if (was_present) {
+			return boost::string_ref(it_found->second.data(), it_found->second.size());
+		}
+
+		auto reply = this->run("SCRIPT", "LOAD", parScript);
+		assert(not was_present);
+
+		const auto sha1_str = get_string(reply);
+		Sha1Array sha1_array;
+		std::copy(sha1_str.begin(), sha1_str.end(), sha1_array.begin());
+		auto it_inserted = m_known_hashes.insert(it_found, std::make_pair(parScript, sha1_array));
+
+		return boost::string_ref(it_inserted->second.data(), it_inserted->second.size());
+	}
+#endif
 } //namespace redis

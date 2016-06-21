@@ -21,6 +21,7 @@
 #include "scan_iterator.hpp"
 #include "reply.hpp"
 #include "batch.hpp"
+#include "redisConfig.h"
 #include <array>
 #include <memory>
 #include <string>
@@ -32,6 +33,12 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <stdexcept>
+#if defined(WITH_CRYPTOPP)
+#	include <set>
+#else
+#	include <map>
+#endif
+#include <boost/utility/string_ref.hpp>
 
 struct redisAsyncContext;
 
@@ -66,10 +73,20 @@ namespace redis {
 		sscan_range sscan ( boost::string_ref parKey );
 		zscan_range zscan ( boost::string_ref parKey );
 
+		void submit_lua_script ( const std::string& parScript );
+
 	private:
 		using RedisConnection = std::unique_ptr<redisAsyncContext, void(*)(redisAsyncContext*)>;
+		using Sha1Array = std::array<char, 20>;
+
+		boost::string_ref add_lua_script_ifn ( const std::string& parScript );
 
 		RedisConnection m_conn;
+#if defined(WITH_CRYPTOPP)
+		std::set<Sha1Array> m_known_hashes;
+#else
+		std::map<std::string, Sha1Array> m_known_scripts;
+#endif
 		std::string m_address;
 		uint16_t m_port;
 	};

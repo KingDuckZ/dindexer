@@ -65,6 +65,7 @@ namespace redis {
 			};
 		}
 
+		extern "C"
 		void hiredis_run_callback (redisAsyncContext*, void* parReply, void* parPrivData) {
 			assert(parPrivData);
 			auto* data = static_cast<HiredisCallbackData*>(parPrivData);
