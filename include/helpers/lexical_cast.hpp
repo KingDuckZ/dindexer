@@ -80,9 +80,10 @@ namespace dinhelp {
 
 			ArrayRetType retval;
 			F div = 1;
+			constexpr const std::size_t charset_offs = (Tag<F>::lower_case ? Tag<F>::base : 0);
 			const auto sign_length = (is_negative<F>::check(parFrom) and Tag<F>::sign_allowed ? 1 : 0);
 			for (std::size_t z = 0; z < Tag<F>::count_digits(parFrom) - sign_length; ++z) {
-				retval.push_back(static_cast<uint8_t>((Tag<F>::make_unsigned(parFrom) / div) % Tag<F>::base));
+				retval.push_back(static_cast<uint8_t>(((Tag<F>::make_unsigned(parFrom) / div) % Tag<F>::base) + charset_offs));
 				div *= Tag<F>::base;
 			}
 			std::reverse(retval.begin(), retval.end());
@@ -99,6 +100,21 @@ namespace dinhelp {
 			}
 			return retval * dinhelp::customize::char_to_int<typename F::value_type, T>::sgn(parFrom);
 		};
+
+		template <typename T, bool LowerCase>
+		struct hex {
+			enum {
+				base = 16,
+				sign_allowed = 0,
+				lower_case = (LowerCase ? 1 : 0)
+			};
+
+			static std::size_t count_digits ( T parValue ) a_pure;
+			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
+			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)) / std::log10(static_cast<double>(base)))) + 1;
+			}
+		};
 	} //namespace implem
 
 	namespace tags {
@@ -106,7 +122,8 @@ namespace dinhelp {
 		struct dec {
 			enum {
 				base = 10,
-				sign_allowed = 1
+				sign_allowed = 1,
+				lower_case = 0
 			};
 
 			template <std::size_t... Powers, std::size_t... Digits>
@@ -121,24 +138,16 @@ namespace dinhelp {
 		};
 
 		template <typename T>
-		struct hex {
-			enum {
-				base = 16,
-				sign_allowed = 0
-			};
-
-			static std::size_t count_digits ( T parValue ) a_pure;
-			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
-			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)) / std::log10(static_cast<double>(base)))) + 1;
-			}
-		};
+		using hex = dinhelp::implem::hex<T, false>;
+		template <typename T>
+		using hexl = dinhelp::implem::hex<T, true>;
 
 		template <typename T>
 		struct bin {
 			enum {
 				base = 2,
-				sign_allowed = 0
+				sign_allowed = 0,
+				lower_case = 0
 			};
 
 			static std::size_t count_digits ( T parValue ) a_pure;
@@ -170,16 +179,6 @@ namespace dinhelp {
 		template <typename T>
 		typename std::make_unsigned<T>::type dec<T>::make_unsigned (T parValue) {
 			return dinhelp::implem::abs(parValue);
-		}
-
-		template <typename T>
-		std::size_t hex<T>::count_digits (T parValue) {
-			return std::max<std::size_t>(((sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<typename std::make_unsigned<T>::type>(make_unsigned(parValue))) + (CHAR_BIT / 2 - 1)) / (CHAR_BIT / 2), 1);
-		}
-
-		template <typename T>
-		typename std::make_unsigned<T>::type hex<T>::make_unsigned (T parValue) {
-			return static_cast<typename std::make_unsigned<T>::type>(parValue);
 		}
 
 		template <typename T>
@@ -240,6 +239,16 @@ namespace dinhelp {
 			//We need to cast before negating x to avoid the overflow.
 			return (parValue < 0 ? -static_cast<typename std::make_unsigned<T>::type>(parValue) : parValue);
 		}
+
+		template <typename T, bool LowerCase>
+		std::size_t hex<T, LowerCase>::count_digits (T parValue) {
+			return std::max<std::size_t>(((sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<typename std::make_unsigned<T>::type>(make_unsigned(parValue))) + (CHAR_BIT / 2 - 1)) / (CHAR_BIT / 2), 1);
+		}
+
+		template <typename T, bool LowerCase>
+		typename std::make_unsigned<T>::type hex<T, LowerCase>::make_unsigned (T parValue) {
+			return static_cast<typename std::make_unsigned<T>::type>(parValue);
+		}
 	} //namespace implem
 
 	template <typename T, template <typename> class Tag=tags::dec, typename F=void>
@@ -254,7 +263,11 @@ namespace dinhelp {
 			static std::string make (const MaxSizedArray<uint8_t, N> &parIndices, int parNegative) {
 				static const char symbols[] = {'0', '1', '2', '3', '4', '5',
 											   '6', '7', '8', '9', 'A', 'B',
-											   'C', 'D', 'E', 'F'};
+											   'C', 'D', 'E', 'F',
+											   '0', '1', '2', '3', '4', '5',
+											   '6', '7', '8', '9', 'a', 'b',
+											   'c', 'd', 'e', 'f'
+				};
 				std::string retval(parIndices.size() + parNegative, '-');
 				for (auto z = parNegative; z < static_cast<int>(parIndices.size()) + parNegative; ++z) {
 					retval[z] = symbols[parIndices[z - parNegative]];
