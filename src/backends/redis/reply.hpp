@@ -35,20 +35,33 @@ namespace redis {
 	private:
 		std::string m_msg;
 	};
+	class StatusString {
+	public:
+		StatusString ( const char* parCStr, std::size_t parLen ) :
+			m_msg(parCStr, parLen)
+		{ }
+		const std::string& message ( void ) const noexcept { return m_msg; }
+		bool is_ok ( void ) const { return "OK" == m_msg; }
+
+	private:
+		std::string m_msg;
+	};
 
 	namespace implem {
 		using RedisVariantType = boost::variant<
 			long long,
 			std::string,
 			std::vector<Reply>,
-			ErrorString
+			ErrorString,
+			StatusString
 		>;
 	} //namespace implem
 	enum RedisVariantTypes {
 		RedisVariantType_Integer = 0,
 		RedisVariantType_String,
 		RedisVariantType_Array,
-		RedisVariantType_Error
+		RedisVariantType_Error,
+		RedisVariantType_Status
 	};
 
 	struct Reply : implem::RedisVariantType {
@@ -59,6 +72,7 @@ namespace redis {
 		Reply ( std::string&& parVal ) : base_class(std::move(parVal)) {}
 		Reply ( std::vector<Reply>&& parVal ) : base_class(std::move(parVal)) {}
 		Reply ( ErrorString&& parVal ) : base_class(std::move(parVal)) {}
+		Reply ( StatusString&& parVal ) : base_class(std::move(parVal)) {}
 		~Reply ( void ) noexcept = default;
 	};
 
@@ -66,6 +80,7 @@ namespace redis {
 	long long get_integer_autoconv_if_str ( const Reply& parReply );
 	const std::string& get_string ( const Reply& parReply );
 	const std::vector<Reply>& get_array ( const Reply& parReply );
+	const ErrorString& get_error_string ( const Reply& parReply );
 
 	template <typename T>
 	const T& get ( const Reply& parReply );

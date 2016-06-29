@@ -50,6 +50,11 @@ namespace redis {
 		return boost::get<std::vector<Reply>>(parReply);
 	}
 
+	const ErrorString& get_error_string (const Reply& parReply) {
+		assert(RedisVariantType_Error == parReply.which());
+		return boost::get<ErrorString>(parReply);
+	}
+
 	template <>
 	const std::string& get<std::string> (const Reply& parReply) {
 		return get_string(parReply);
@@ -65,7 +70,13 @@ namespace redis {
 		return get_integer(parReply);
 	}
 
+	template <>
+	const ErrorString& get<ErrorString> (const Reply& parReply) {
+		return get_error_string(parReply);
+	}
+
 	template const std::string& get<std::string> ( const Reply& parReply );
 	template const std::vector<Reply>& get<std::vector<Reply>> ( const Reply& parReply );
 	template const long long& get<long long> ( const Reply& parReply );
+	template const ErrorString& get<ErrorString> ( const Reply& parReply );
 } //namespace redis
