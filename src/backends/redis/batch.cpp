@@ -16,6 +16,7 @@
  */
 
 #include "batch.hpp"
+#include "command.hpp"
 #include <hiredis/hiredis.h>
 #include <hiredis/async.h>
 #include <cassert>
@@ -26,6 +27,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
+#include <sstream>
 
 namespace redis {
 	namespace {
@@ -60,12 +62,14 @@ namespace redis {
 				);
 			case REDIS_REPLY_ERROR:
 				return ErrorString(parReply->str, parReply->len);
+			case REDIS_REPLY_STATUS:
+				return StatusString(parReply->str, parReply->len);
 			default:
+				assert(false); //not reached
 				return Reply();
 			};
 		}
 
-		extern "C"
 		void hiredis_run_callback (redisAsyncContext*, void* parReply, void* parPrivData) {
 			assert(parPrivData);
 			auto* data = static_cast<HiredisCallbackData*>(parPrivData);
@@ -77,6 +81,9 @@ namespace redis {
 			if (parReply) {
 				auto reply = make_redis_reply_type(static_cast<redisReply*>(parReply));
 				data->promise.set_value(std::move(reply));
+			}
+			else {
+				assert(false); //Should this case also be managed?
 			}
 
 			delete data;
@@ -98,12 +105,14 @@ namespace redis {
 
 	Batch::Batch (Batch&&) = default;
 
-	Batch::Batch (redisAsyncContext* parContext) :
+	Batch::Batch (redisAsyncContext* parContext, Command* parCommand) :
 		m_futures(),
 		m_replies(),
 		m_local_data(new LocalData),
+		m_command(parCommand),
 		m_context(parContext)
 	{
+		assert(m_command);
 		assert(m_context);
 	}
 
@@ -125,11 +134,16 @@ namespace redis {
 			std::unique_lock<std::mutex> u_lock(m_local_data->futures_mutex);
 			m_local_data->free_cmd_slot.wait(u_lock, [this]() { return m_local_data->pending_futures < g_max_redis_unanswered_commands; });
 		}
-		std::cout << "command sent to hiredis" << std::endl;
+		std::cout << " emplace_back(future)... ";
 
-		m_futures.push_back(data->promise.get_future());
+		m_futures.emplace_back(data->promise.get_future());
+		m_command->lock();
 		const int command_added = redisAsyncCommandArgv(m_context, &hiredis_run_callback, data, parArgc, parArgv, parLengths);
+		m_command->unlock();
 		assert(REDIS_OK == command_added); // REDIS_ERR if error
+
+		std::cout << "command sent to hiredis" << std::endl;
+		m_command->wakeup_thread();
 	}
 
 	bool Batch::replies_requested() const {
@@ -140,7 +154,7 @@ namespace redis {
 		if (not replies_requested()) {
 			m_replies.reserve(m_futures.size());
 			for (auto& fut : m_futures) {
-				m_replies.push_back(fut.get());
+				m_replies.emplace_back(fut.get());
 			}
 
 			auto empty_vec = std::move(m_futures);
@@ -149,8 +163,22 @@ namespace redis {
 	}
 
 	void Batch::throw_if_failed() {
-		const auto& rep = replies();
-		assert(false); //not implemented
+		std::ostringstream oss;
+		int err_count = 0;
+		const int max_reported_errors = 3;
+
+		oss << "Error in reply: ";
+		for (const auto& rep : replies()) {
+			if (rep.which() == RedisVariantType_Error) {
+				++err_count;
+				if (err_count <= max_reported_errors)
+					oss << '"' << get_error_string(rep).message() << "\" ";
+			}
+		}
+		if (err_count) {
+			oss << " (showing " << err_count << '/' << max_reported_errors << " errors on " << replies().size() << " total replies)";
+			throw std::runtime_error(oss.str());
+		}
 	}
 
 	RedisError::RedisError (const char* parMessage, std::size_t parLength) :

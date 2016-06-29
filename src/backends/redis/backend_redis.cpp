@@ -35,11 +35,10 @@ namespace dindb {
 			uint16_t database;
 		};
 
-		std::pair<std::string, mchlib::FileRecordData> pair_list_to_file_record (const redis::Command::hscan_range& parRange, const mchlib::TigerHash& parHash) {
+		std::pair<std::string, mchlib::FileRecordData> pair_list_to_file_record (const redis::Command::hscan_range& parRange) {
 			using dinhelp::lexical_cast;
 
 			mchlib::FileRecordData retval;
-			retval.hash = parHash;
 			std::array<std::string, 2> mime;
 			std::string group_key;
 
@@ -47,7 +46,7 @@ namespace dindb {
 				if (itm.first == "path")
 					retval.abs_path = itm.second;
 				else if (itm.first == "hash")
-					assert(tiger_to_string(parHash) == itm.second);
+					retval.hash = mchlib::string_to_tiger(itm.second);
 				else if (itm.first == "size")
 					retval.size = lexical_cast<decltype(retval.size)>(
 							itm.second);
@@ -124,6 +123,19 @@ namespace YAML {
 	};
 } //namespace YAML
 
+//namespace redis {
+//	template <>
+//	struct RedisStructAdapt<mchlib::FileRecordData> {
+//		static bool decode (const Command::hscan_range& parFrom, mchlib::FileRecordData& parOut) {
+//			return true;
+//		}
+//
+//		static void encode (const Command::hscan_range& parFrom, mchlib::FileRecordData& parOut) {
+//			return true;
+//		}
+//	};
+//}
+
 namespace dindb {
 	BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect) :
 		m_redis(std::move(parAddress), parPort),
@@ -140,9 +152,18 @@ namespace dindb {
 		using dinhelp::lexical_cast;
 
 		m_redis.connect();
-		if (m_redis.is_connected() and m_database > 0) {
-			m_redis.run("SELECT", lexical_cast<std::string>(m_database));
-			m_redis.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
+		m_redis.wait_for_connect();
+		if (m_redis.is_connected()) {
+			auto batch = m_redis.make_batch();
+			batch.run("SELECT", lexical_cast<std::string>(m_database));
+			batch.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
+			batch.throw_if_failed();
+			m_redis.submit_lua_script("return 42;");
+		}
+		else {
+			std::ostringstream oss;
+			oss << "Error connecting to Redis: " << m_redis.connection_error();
+			throw std::runtime_error(oss.str());
 		}
 	}
 
@@ -186,6 +207,7 @@ namespace dindb {
 			"type", parSetData.type,
 			"content_type", parSetData.content_type
 		);
+		//m_redis.hmset(parSetData);
 
 		for (const auto& file_data : parData) {
 			redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", "1");
@@ -223,7 +245,7 @@ namespace dindb {
 		}
 		else {
 			const auto result_id = redis::get_string(hash_reply);
-			auto set_key_and_file_item = pair_list_to_file_record(m_redis.hscan(result_id), parHash);
+			auto set_key_and_file_item = pair_list_to_file_record(m_redis.hscan(result_id));
 			parItem = std::move(set_key_and_file_item.second);
 			const std::string group_key = std::move(set_key_and_file_item.first);
 

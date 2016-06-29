@@ -33,14 +33,9 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <stdexcept>
-#if defined(WITH_CRYPTOPP)
-#	include <set>
-#else
-#	include <map>
-#endif
-#include <boost/utility/string_ref.hpp>
 
 struct redisAsyncContext;
+struct ev_loop;
 
 namespace redis {
 	class Command {
@@ -61,9 +56,12 @@ namespace redis {
 		~Command ( void ) noexcept;
 
 		void connect ( void );
+		void wait_for_connect ( void );
 		void disconnect ( void );
+		void wait_for_disconnect ( void );
 
 		bool is_connected ( void ) const;
+		boost::string_ref connection_error ( void ) const;
 
 		Batch make_batch ( void );
 
@@ -77,24 +75,26 @@ namespace redis {
 		zscan_range zscan ( boost::string_ref parKey );
 
 		void submit_lua_script ( const std::string& parScript );
+		void wakeup_thread();
+		void lock();
+		void unlock();
 
 	private:
 		using RedisConnection = std::unique_ptr<redisAsyncContext, void(*)(redisAsyncContext*)>;
-		using Sha1Array = std::array<char, 20>;
+		using LibevLoop = std::unique_ptr<ev_loop, void(*)(ev_loop*)>;
 
-		boost::string_ref add_lua_script_ifn ( const std::string& parScript );
 		bool is_socket_connection ( void ) const;
+		void on_connect_successful ( void );
+
+		struct LocalData;
 
 		RedisConnection m_conn;
-#if defined(WITH_CRYPTOPP)
-		std::set<Sha1Array> m_known_hashes;
-#else
-		std::map<std::string, Sha1Array> m_known_scripts;
-#endif
+		LibevLoop m_libev_loop_thread;
 		std::string m_address;
+		std::unique_ptr<LocalData> m_local_data;
 		uint16_t m_port;
-		bool m_connected;
-		bool m_connection_lost;
+		volatile bool m_connected;
+		volatile bool m_connection_lost;
 	};
 
 	template <typename... Args>

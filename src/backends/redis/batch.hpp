@@ -53,12 +53,13 @@ namespace redis {
 	private:
 		struct LocalData;
 
-		explicit Batch ( redisAsyncContext* parContext );
+		Batch ( redisAsyncContext* parContext, Command* parCommand );
 		void run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
 
 		std::vector<std::future<Reply>> m_futures;
 		std::vector<Reply> m_replies;
 		std::unique_ptr<LocalData> m_local_data;
+		Command* m_command;
 		redisAsyncContext* m_context;
 	};
 
