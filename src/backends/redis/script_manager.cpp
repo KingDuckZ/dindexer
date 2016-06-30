@@ -19,13 +19,13 @@
 #include "helpers/lexical_cast.hpp"
 #include "command.hpp"
 #include <cassert>
-#if defined(WITH_CRYPTOPP)
+#if defined(MAKE_SHA1_WITH_CRYPTOPP)
 #	include <crypto++/sha.h>
 #endif
 
 namespace redis {
 	namespace {
-#if defined(WITH_CRYPTOPP)
+#if defined(MAKE_SHA1_WITH_CRYPTOPP)
 		struct LuaScriptHash {
 			union {
 				struct {
@@ -44,7 +44,7 @@ namespace redis {
 		assert(m_command);
 	}
 
-#if defined(WITH_CRYPTOPP)
+#if defined(MAKE_SHA1_WITH_CRYPTOPP)
 	boost::string_ref ScriptManager::add_lua_script_ifn (const std::string& parScript) {
 		assert(m_command->is_connected());
 

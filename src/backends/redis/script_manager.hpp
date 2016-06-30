@@ -19,8 +19,11 @@
 #define id8E124FF76DF449CDB8FBA806F8EF4E78
 
 #include "redisConfig.h"
-#include <boost/utility/string_ref.hpp>
 #if defined(WITH_CRYPTOPP)
+#	define MAKE_SHA1_WITH_CRYPTOPP
+#endif
+#include <boost/utility/string_ref.hpp>
+#if defined(MAKE_SHA1_WITH_CRYPTOPP)
 #	include <set>
 #else
 #	include <map>
@@ -44,7 +47,7 @@ namespace redis {
 		boost::string_ref add_lua_script_ifn ( const std::string& parScript );
 
 		Command* m_command;
-#if defined(WITH_CRYPTOPP)
+#if defined(MAKE_SHA1_WITH_CRYPTOPP)
 		std::set<Sha1Array> m_known_hashes;
 #else
 		std::map<std::string, Sha1Array> m_known_scripts;
