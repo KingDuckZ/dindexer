@@ -46,7 +46,7 @@ namespace dinhelp {
 	template <typename T, size_t S, typename A>
 	T* AutomemRawBase_heap<T, S, A>::AllocMemory() {
 #if !defined(NDEBUG)
-		Assert(nullptr == m_localMem);
+		assert(nullptr == m_localMem);
 #endif
 		m_localMem = A().allocate(S);
 #if defined(ASSERTIONSENABLED)
@@ -65,7 +65,7 @@ namespace dinhelp {
 	template <typename T, size_t S, typename A>
 	void AutomemRawBase_heap<T, S, A>::FreeMemory() noexcept {
 #if !defined(NDEBUG)
-		Assert(nullptr != m_localMem);
+		assert(nullptr != m_localMem);
 #endif
 		A().deallocate(m_localMem, S);
 #if !defined(NDEBUG)
