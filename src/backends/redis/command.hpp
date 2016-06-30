@@ -23,7 +23,6 @@
 #include "batch.hpp"
 #include "redisConfig.h"
 #include <array>
-#include <memory>
 #include <string>
 #include <cstdint>
 #include <cstddef>
@@ -34,13 +33,8 @@
 #include <boost/utility/string_ref.hpp>
 #include <stdexcept>
 
-struct redisAsyncContext;
-struct ev_loop;
-
 namespace redis {
 	class Command {
-		friend void on_connect ( const redisAsyncContext*, int );
-		friend void on_disconnect ( const redisAsyncContext*, int );
 	public:
 		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
 		typedef boost::iterator_range<scan_iterator> scan_range;
@@ -75,26 +69,11 @@ namespace redis {
 		zscan_range zscan ( boost::string_ref parKey );
 
 		void submit_lua_script ( const std::string& parScript );
-		void wakeup_thread();
-		void lock();
-		void unlock();
 
 	private:
-		using RedisConnection = std::unique_ptr<redisAsyncContext, void(*)(redisAsyncContext*)>;
-		using LibevLoop = std::unique_ptr<ev_loop, void(*)(ev_loop*)>;
-
-		bool is_socket_connection ( void ) const;
-		void on_connect_successful ( void );
-
 		struct LocalData;
 
-		RedisConnection m_conn;
-		LibevLoop m_libev_loop_thread;
-		std::string m_address;
 		std::unique_ptr<LocalData> m_local_data;
-		uint16_t m_port;
-		volatile bool m_connected;
-		volatile bool m_connection_lost;
 	};
 
 	template <typename... Args>

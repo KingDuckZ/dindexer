@@ -23,8 +23,6 @@
 #include <vector>
 #include <memory>
 
-struct redisAsyncContext;
-
 namespace std {
 	template <class R> class future;
 	template <class T> struct atomic;
@@ -32,6 +30,7 @@ namespace std {
 
 namespace redis {
 	class Command;
+	class AsyncConnection;
 
 	class Batch {
 		friend class Command;
@@ -53,14 +52,13 @@ namespace redis {
 	private:
 		struct LocalData;
 
-		Batch ( redisAsyncContext* parContext, Command* parCommand );
+		explicit Batch ( AsyncConnection* parConn );
 		void run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
 
 		std::vector<std::future<Reply>> m_futures;
 		std::vector<Reply> m_replies;
 		std::unique_ptr<LocalData> m_local_data;
-		Command* m_command;
-		redisAsyncContext* m_context;
+		AsyncConnection* m_async_conn;
 	};
 
 	class RedisError : public std::runtime_error {

@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} SHARED
 	batch.cpp
 	script.cpp
 	script_manager.cpp
+	async_connection.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

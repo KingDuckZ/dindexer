@@ -16,7 +16,7 @@
  */
 
 #include "batch.hpp"
-#include "command.hpp"
+#include "async_connection.hpp"
 #include <hiredis/hiredis.h>
 #include <hiredis/async.h>
 #include <cassert>
@@ -105,15 +105,14 @@ namespace redis {
 
 	Batch::Batch (Batch&&) = default;
 
-	Batch::Batch (redisAsyncContext* parContext, Command* parCommand) :
+	Batch::Batch (AsyncConnection* parConn) :
 		m_futures(),
 		m_replies(),
 		m_local_data(new LocalData),
-		m_command(parCommand),
-		m_context(parContext)
+		m_async_conn(parConn)
 	{
-		assert(m_command);
-		assert(m_context);
+		assert(m_async_conn);
+		assert(m_async_conn->connection());
 	}
 
 	Batch::~Batch() noexcept {
@@ -137,13 +136,15 @@ namespace redis {
 		std::cout << " emplace_back(future)... ";
 
 		m_futures.emplace_back(data->promise.get_future());
-		m_command->lock();
-		const int command_added = redisAsyncCommandArgv(m_context, &hiredis_run_callback, data, parArgc, parArgv, parLengths);
-		m_command->unlock();
-		assert(REDIS_OK == command_added); // REDIS_ERR if error
+		{
+			std::lock_guard<std::mutex> lock(m_async_conn->event_mutex());
+			const int command_added = redisAsyncCommandArgv(m_async_conn->connection(), &hiredis_run_callback, data, parArgc, parArgv, parLengths);
+			assert(REDIS_OK == command_added); // REDIS_ERR if error
+			static_cast<void>(command_added);
+		}
 
 		std::cout << "command sent to hiredis" << std::endl;
-		m_command->wakeup_thread();
+		m_async_conn->wakeup_event_thread();
 	}
 
 	bool Batch::replies_requested() const {
