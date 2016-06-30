@@ -91,8 +91,8 @@ namespace redis {
 	boost::string_ref ScriptManager::add_lua_script_ifn (const std::string& parScript) {
 		assert(m_command->is_connected());
 
-		auto it_found = m_known_hashes.find(parScript);
-		const bool was_present = (m_known_hashes.end() != it_found);
+		auto it_found = m_known_scripts.find(parScript);
+		const bool was_present = (m_known_scripts.end() != it_found);
 		if (was_present) {
 			return boost::string_ref(it_found->second.data(), it_found->second.size());
 		}
@@ -103,7 +103,7 @@ namespace redis {
 		const auto sha1_str = get_string(reply);
 		Sha1Array sha1_array;
 		std::copy(sha1_str.begin(), sha1_str.end(), sha1_array.begin());
-		auto it_inserted = m_known_hashes.insert(it_found, std::make_pair(parScript, sha1_array));
+		auto it_inserted = m_known_scripts.insert(it_found, std::make_pair(parScript, sha1_array));
 
 		return boost::string_ref(it_inserted->second.data(), it_inserted->second.size());
 	}
