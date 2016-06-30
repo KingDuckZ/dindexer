@@ -27,6 +27,7 @@
 #endif
 #include <string>
 #include <array>
+#include <boost/utility/string_ref.hpp>
 
 namespace redis {
 	class Command;
@@ -35,7 +36,7 @@ namespace redis {
 	public:
 		explicit ScriptManager ( Command* parCommand );
 
-		void submit_lua_script ( const std::string& parScript );
+		boost::string_ref submit_lua_script ( const std::string& parScript );
 
 	private:
 		using Sha1Array = std::array<char, 40>;
@@ -49,6 +50,10 @@ namespace redis {
 		std::map<std::string, Sha1Array> m_known_scripts;
 #endif
 	};
+
+	inline boost::string_ref ScriptManager::submit_lua_script (const std::string& parScript) {
+		return add_lua_script_ifn(parScript);
+	}
 } //namespace redis
 
 #endif

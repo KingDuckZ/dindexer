@@ -22,6 +22,7 @@
 #include "reply.hpp"
 #include "batch.hpp"
 #include "redisConfig.h"
+#include "script.hpp"
 #include <array>
 #include <string>
 #include <cstdint>
@@ -58,6 +59,7 @@ namespace redis {
 		boost::string_ref connection_error ( void ) const;
 
 		Batch make_batch ( void );
+		Script make_script ( const std::string& parScript );
 
 		template <typename... Args>
 		Reply run ( const char* parCommand, Args&&... parArgs );
@@ -67,8 +69,6 @@ namespace redis {
 		hscan_range hscan ( boost::string_ref parKey );
 		sscan_range sscan ( boost::string_ref parKey );
 		zscan_range zscan ( boost::string_ref parKey );
-
-		void submit_lua_script ( const std::string& parScript );
 
 	private:
 		struct LocalData;

@@ -158,7 +158,6 @@ namespace dindb {
 			batch.run("SELECT", lexical_cast<std::string>(m_database));
 			batch.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
 			batch.throw_if_failed();
-			m_redis.submit_lua_script("return 42;");
 		}
 		else {
 			std::ostringstream oss;

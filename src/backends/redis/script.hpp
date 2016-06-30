@@ -18,11 +18,58 @@
 #ifndef id5B30CDA57F894CD6888093B64F9433DA
 #define id5B30CDA57F894CD6888093B64F9433DA
 
-#include "script_manager.hpp"
+#include "batch.hpp"
+#include "helpers/lexical_cast.hpp"
+#include "helpers/sequence_bt.hpp"
+#include <boost/utility/string_ref.hpp>
+#include <tuple>
 
 namespace redis {
+	class ScriptManager;
+
 	class Script {
+	public:
+		Script ( Script&& ) = default;
+		Script ( boost::string_ref parSha1, ScriptManager& parManager );
+		~Script ( void ) noexcept = default;
+
+		template <typename... Keys, typename... Values>
+		void run ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues );
+
+	private:
+		template <typename... Keys, typename... Values, std::size_t... KeyIndices, std::size_t... ValueIndices>
+		void run_with_indices ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...> );
+
+		boost::string_ref m_sha1;
+		ScriptManager& m_manager;
 	};
+
+	template <typename... Keys, typename... Values>
+	void Script::run (Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues) {
+		this->run_with_indices(
+			parBatch,
+			parKeys,
+			parValues,
+			::dinhelp::bt::index_range<0, sizeof...(Keys)>(),
+			::dinhelp::bt::index_range<0, sizeof...(Values)>()
+		);
+	}
+
+	template <typename... Keys, typename... Values, std::size_t... KeyIndices, std::size_t... ValueIndices>
+	void Script::run_with_indices (Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...>) {
+		static_assert(sizeof...(Keys) == sizeof...(KeyIndices), "Wrong index count");
+		static_assert(sizeof...(Values) == sizeof...(ValueIndices), "Wrong value count");
+		static_assert(sizeof...(Keys) == std::tuple_size<decltype(parKeys)>::value, "Wrong key count");
+		static_assert(sizeof...(Values) == std::tuple_size<decltype(parValues)>::value, "Wrong value count");
+
+		parBatch.run(
+			"EVALSHA",
+			m_sha1,
+			dinhelp::lexical_cast<std::string>(sizeof...(Keys)),
+			std::get<KeyIndices>(parKeys)...,
+			std::get<ValueIndices>(parValues)...
+		);
+	}
 } //namespace redis
 
 #endif

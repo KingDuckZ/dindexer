@@ -108,8 +108,4 @@ namespace redis {
 		return boost::string_ref(it_inserted->second.data(), it_inserted->second.size());
 	}
 #endif
-
-	void ScriptManager::submit_lua_script (const std::string& parScript) {
-		add_lua_script_ifn(parScript);
-	}
 } //namespace redis
