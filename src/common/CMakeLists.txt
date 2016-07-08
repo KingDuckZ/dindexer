@@ -24,6 +24,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${YAMLCPP_LIBRARY}
 	PRIVATE ${Readline_LIBRARY}
 	${bare_name}-backend
+	${bare_name}-core
 )
 
 #install(TARGETS ${PROJECT_NAME}

@@ -17,6 +17,7 @@
 
 #include "dindexer-common/settings.hpp"
 #include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/searchpaths.hpp"
 #include "dindexerConfig.h"
 #include <yaml-cpp/yaml.h>
 #include <ciso646>
@@ -29,7 +30,7 @@
 namespace dinlib {
 	namespace {
 		std::string expand ( const char* parString );
-		std::string find_plugin_by_name ( const std::vector<boost::string_ref>& parSearchPaths, const std::string& parName );
+		std::string find_plugin_by_name ( std::vector<boost::string_ref>&& parSearchPaths, const std::string& parName );
 		void throw_if_plugin_failed ( const dindb::BackendPlugin& parPlugin, const std::string& parPluginPath, const std::string& parIntendedName );
 	} //unnamed namespace
 
@@ -68,24 +69,14 @@ namespace dinlib {
 			return oss.str();
 		}
 
-		std::string find_plugin_by_name (const std::vector<boost::string_ref>& parSearchPaths, const std::string& parName) {
-			using boost::filesystem::path;
-			using boost::filesystem::is_directory;
-			using boost::filesystem::directory_iterator;
-			using boost::filesystem::directory_entry;
-			using boost::make_iterator_range;
-
-			for (auto search_path : parSearchPaths) {
-				const std::string search_path_cpy(search_path.begin(), search_path.end());
-				path curr_path(search_path_cpy);
-				auto listing = make_iterator_range(directory_iterator(curr_path), directory_iterator());
-				for (const directory_entry& entry : listing) {
-					auto current_full_path = entry.path().string();
-					if (not is_directory(entry) and dindb::backend_name(current_full_path) == parName)
-						return current_full_path;
-				}
-			}
-			return std::string();
+		std::string find_plugin_by_name (std::vector<boost::string_ref>&& parSearchPaths, const std::string& parName) {
+			dincore::ShallowSearchPaths search_paths(std::move(parSearchPaths));
+			return search_paths.first_hit(
+				[&parName](boost::string_ref, const std::string& parPath) {
+					return dindb::backend_name(parPath) == parName;
+				},
+				dincore::SearchPaths::File
+			);
 		}
 
 		void throw_if_plugin_failed (const dindb::BackendPlugin& parPlugin, const std::string& parPluginPath, const std::string& parIntendedName) {
