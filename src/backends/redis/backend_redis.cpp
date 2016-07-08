@@ -27,6 +27,7 @@
 #include <array>
 #include <cstdint>
 #include <fstream>
+#include <boost/range/empty.hpp>
 
 namespace dindb {
 	namespace {
@@ -218,8 +219,16 @@ namespace dindb {
 		using boost::string_ref;
 
 		redis::Reply set_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "set", "1");
+		redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", lexical_cast<std::string>(parData.size()));
+
 		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(set_id_reply));
-		redis::Reply insert_set_reply = m_redis.run(
+		const auto casted_data_size = static_cast<decltype(redis::get_integer(file_id_reply))>(parData.size());
+		assert(redis::get_integer(file_id_reply) >= casted_data_size);
+		const auto base_file_id = redis::get_integer(file_id_reply) - casted_data_size + 1;
+
+		auto batch = m_redis.make_batch();
+
+		batch.run(
 			"HMSET",
 			set_key,
 			"name", parSetData.name,
@@ -228,13 +237,12 @@ namespace dindb {
 			"type", parSetData.type,
 			"content_type", parSetData.content_type
 		);
-		//m_redis.hmset(parSetData);
 
-		for (const auto& file_data : parData) {
-			redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", "1");
-			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(redis::get_integer(file_id_reply));
+		for (auto z = base_file_id; z < casted_data_size; ++z) {
+			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
+			const auto& file_data = parData[z - base_file_id];
 			const std::string hash = tiger_to_string(file_data.hash);
-			redis::Reply insert_file_reply = m_redis.run(
+			batch.run(
 				"HMSET",
 				file_key,
 				"hash", hash,
@@ -250,15 +258,19 @@ namespace dindb {
 				"group_id", set_key
 			);
 
-			redis::Reply insert_hash_reply = m_redis.run(
+			batch.run(
 				"SADD",
-				"hash:" + hash,
+				PROGRAM_NAME ":hash:" + hash,
 				file_key
 			);
 		}
+
+		batch.throw_if_failed();
 	}
 
 	bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
+		using boost::empty;
+
 		const std::string hash_key = "hash:" + tiger_to_string(parHash);
 		redis::Reply hash_reply = m_redis.run("SRANDMEMBER", hash_key);
 		if (redis::RedisVariantType_Integer == hash_reply.which() and not redis::get_integer(hash_reply)) {
@@ -270,8 +282,14 @@ namespace dindb {
 			parItem = std::move(set_key_and_file_item.second);
 			const std::string group_key = std::move(set_key_and_file_item.first);
 
-			auto set_item = pair_list_to_set_record(m_redis.hscan(group_key));
-			return true;
+			auto scan_range = m_redis.hscan(group_key);
+			if (empty(scan_range)) {
+				return false;
+			}
+			else {
+				parSet = pair_list_to_set_record(m_redis.hscan(group_key));
+				return true;
+			}
 		}
 	}
 
