@@ -137,8 +137,9 @@ namespace YAML {
 //}
 
 namespace dindb {
-	BackendRedis::BackendRedis(std::string &&parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect) :
+	BackendRedis::BackendRedis(std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths) :
 		m_redis(std::move(parAddress), parPort),
+		m_lua_script_paths(std::move(parLuaPaths)),
 		m_database(parDatabase)
 	{
 		if (parConnect)
@@ -290,12 +291,19 @@ extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig)
 	if (not parConfig)
 		return nullptr;
 
-	auto config = parConfig->as<dindb::RedisConnectionSettings>();
+	auto& config_node = *parConfig;
+	auto config = config_node["connection"].as<dindb::RedisConnectionSettings>();
+
+	auto vec = (config_node["script_paths"] ? config_node["script_paths"].as<std::vector<std::string>>() : std::vector<std::string>());
+	dincore::SearchPaths lua_paths(std::move(vec));
+	lua_paths.add_path(REDIS_SCRIPTS_PATH);
+
 	return new dindb::BackendRedis(
 		std::move(config.address),
 		config.port,
 		config.database,
-		true
+		true,
+		std::move(lua_paths)
 	);
 }
 

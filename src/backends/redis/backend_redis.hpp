@@ -20,6 +20,7 @@
 
 #include "backends/db_backend.hpp"
 #include "command.hpp"
+#include "dindexer-core/searchpaths.hpp"
 #include <string>
 #include <cstdint>
 
@@ -27,7 +28,7 @@ namespace dindb {
 	class BackendRedis : public Backend {
 	public:
 		BackendRedis ( BackendRedis&& ) = default;
-		BackendRedis ( std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect );
+		BackendRedis ( std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths );
 		virtual ~BackendRedis ( void ) noexcept;
 
 		virtual void connect ( void ) override;
@@ -57,6 +58,7 @@ namespace dindb {
 
 	private:
 		redis::Command m_redis;
+		dincore::SearchPaths m_lua_script_paths;
 		uint16_t m_database;
 	};
 } //namespace dindb
