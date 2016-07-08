@@ -1,6 +1,6 @@
 project(${bare_name}-core CXX)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
 	searchpaths.cpp
 )
 
