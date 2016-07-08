@@ -64,6 +64,8 @@ namespace redis {
 				return ErrorString(parReply->str, parReply->len);
 			case REDIS_REPLY_STATUS:
 				return StatusString(parReply->str, parReply->len);
+			case REDIS_REPLY_NIL:
+				return nullptr;
 			default:
 				assert(false); //not reached
 				return Reply();

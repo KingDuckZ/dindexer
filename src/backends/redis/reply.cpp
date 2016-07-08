@@ -26,6 +26,10 @@ namespace redis {
 	}
 
 	const std::string& get_string (const Reply& parReply) {
+		static const std::string empty_str;
+		if (RedisVariantType_Nil == parReply.which())
+			return empty_str;
+
 		assert(RedisVariantType_String == parReply.which());
 		return boost::get<std::string>(parReply);
 	}

@@ -53,7 +53,8 @@ namespace redis {
 			std::string,
 			std::vector<Reply>,
 			ErrorString,
-			StatusString
+			StatusString,
+			std::nullptr_t
 		>;
 	} //namespace implem
 	enum RedisVariantTypes {
@@ -61,7 +62,8 @@ namespace redis {
 		RedisVariantType_String,
 		RedisVariantType_Array,
 		RedisVariantType_Error,
-		RedisVariantType_Status
+		RedisVariantType_Status,
+		RedisVariantType_Nil
 	};
 
 	struct Reply : implem::RedisVariantType {
@@ -73,6 +75,7 @@ namespace redis {
 		Reply ( std::vector<Reply>&& parVal ) : base_class(std::move(parVal)) {}
 		Reply ( ErrorString&& parVal ) : base_class(std::move(parVal)) {}
 		Reply ( StatusString&& parVal ) : base_class(std::move(parVal)) {}
+		Reply ( std::nullptr_t parVal ) : base_class(parVal) {}
 		~Reply ( void ) noexcept = default;
 	};
 
