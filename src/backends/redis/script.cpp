@@ -18,15 +18,9 @@
 #include "script.hpp"
 
 namespace redis {
-	Script::Script() :
-		m_sha1(),
-		m_manager(nullptr)
-	{
-	}
-
 	Script::Script (boost::string_ref parSha1, ScriptManager& parManager) :
 		m_sha1(parSha1),
-		m_manager(&parManager)
+		m_manager(parManager)
 	{
 	}
 } //namespace redis

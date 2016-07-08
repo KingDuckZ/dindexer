@@ -26,7 +26,6 @@
 #include <yaml-cpp/yaml.h>
 #include <array>
 #include <cstdint>
-#include <fstream>
 #include <boost/range/empty.hpp>
 
 namespace dindb {
@@ -93,23 +92,6 @@ namespace dindb {
 				else if (itm.first == "content_type")
 					retval.content_type = itm.second[0];
 			}
-			return retval;
-		}
-
-		std::string read_script (const dincore::SearchPaths& parSearch, const char* parName) {
-			const auto full_path = parSearch.first_hit(boost::string_ref(parName));
-			if (full_path.empty()) {
-				const std::string msg = std::string("Unable to locate and load Lua script \"") + parName + "\" from any of the given search paths";
-				throw std::runtime_error(msg);
-			}
-
-			std::ifstream script(full_path);
-			std::string retval;
-			script.seekg(0, std::ios::end);
-			retval.reserve(script.tellg());
-			script.seekg(0, std::ios::beg);
-			retval.assign(std::istreambuf_iterator<char>(script), std::istreambuf_iterator<char>());
-
 			return retval;
 		}
 	} //unnamed namespace
@@ -184,9 +166,6 @@ namespace dindb {
 			oss << "Error connecting to Redis: " << m_redis.connection_error();
 			throw std::runtime_error(oss.str());
 		}
-
-		m_script_save = m_redis.make_script(read_script(m_lua_script_paths, "save.lua"));
-		m_script_delete = m_redis.make_script(read_script(m_lua_script_paths, "delete.lua"));
 	}
 
 	void BackendRedis::disconnect() {

@@ -20,7 +20,6 @@
 
 #include "backends/db_backend.hpp"
 #include "command.hpp"
-#include "script.hpp"
 #include "dindexer-core/searchpaths.hpp"
 #include <string>
 #include <cstdint>
@@ -59,8 +58,6 @@ namespace dindb {
 
 	private:
 		redis::Command m_redis;
-		redis::Script m_script_save;
-		redis::Script m_script_delete;
 		dincore::SearchPaths m_lua_script_paths;
 		uint16_t m_database;
 	};
