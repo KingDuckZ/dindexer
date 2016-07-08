@@ -271,9 +271,9 @@ namespace dindb {
 	bool BackendRedis::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
 		using boost::empty;
 
-		const std::string hash_key = "hash:" + tiger_to_string(parHash);
+		const std::string hash_key = PROGRAM_NAME ":hash:" + tiger_to_string(parHash);
 		redis::Reply hash_reply = m_redis.run("SRANDMEMBER", hash_key);
-		if (redis::RedisVariantType_Integer == hash_reply.which() and not redis::get_integer(hash_reply)) {
+		if (redis::RedisVariantType_Nil == hash_reply.which() or (redis::RedisVariantType_Integer == hash_reply.which() and not redis::get_integer(hash_reply))) {
 			return false;
 		}
 		else {
