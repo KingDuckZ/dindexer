@@ -8,4 +8,14 @@ postgresql_settings:
         dbname: dindexer
         port: 5432
         address: 200.100.200.100
+
+redis_settings:
+    connection:
+        address: 200.100.200.100
+        port: 6379
+
+    script_paths:
+    - /home/duckz/dev/build/dindexer/Debug/src/backends/redis/lua
+    - /home/duckz/dev/build/dindexer/Release/src/backends/redis/lua
+
 backend_paths: path to your build_dir/src/backend
