@@ -23,12 +23,15 @@
 #include "helpers/sequence_bt.hpp"
 #include <boost/utility/string_ref.hpp>
 #include <tuple>
+#include <cassert>
+#include <ciso646>
 
 namespace redis {
 	class ScriptManager;
 
 	class Script {
 	public:
+		Script ( void );
 		Script ( Script&& ) = default;
 		Script ( boost::string_ref parSha1, ScriptManager& parManager );
 		~Script ( void ) noexcept = default;
@@ -36,12 +39,14 @@ namespace redis {
 		template <typename... Keys, typename... Values>
 		void run ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues );
 
+		Script& operator= ( Script&& ) = default;
+
 	private:
 		template <typename... Keys, typename... Values, std::size_t... KeyIndices, std::size_t... ValueIndices>
 		void run_with_indices ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...> );
 
 		boost::string_ref m_sha1;
-		ScriptManager& m_manager;
+		ScriptManager* m_manager;
 	};
 
 	template <typename... Keys, typename... Values>
@@ -61,6 +66,9 @@ namespace redis {
 		static_assert(sizeof...(Values) == sizeof...(ValueIndices), "Wrong value count");
 		static_assert(sizeof...(Keys) == std::tuple_size<decltype(parKeys)>::value, "Wrong key count");
 		static_assert(sizeof...(Values) == std::tuple_size<decltype(parValues)>::value, "Wrong value count");
+
+		assert(not m_sha1.empty());
+		assert(m_manager);
 
 		parBatch.run(
 			"EVALSHA",
