@@ -167,7 +167,8 @@ extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig)
 	if (not parConfig)
 		return nullptr;
 
-	auto config = parConfig->as<dindb::PostgreConnectionSettings>();
+	auto& config_node = *parConfig;
+	auto config = config_node["connection"].as<dindb::PostgreConnectionSettings>();
 	return new dindb::BackendPostgreSql(
 		std::move(config.username),
 		std::move(config.password),

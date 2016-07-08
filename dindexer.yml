@@ -2,9 +2,10 @@
 ---
 backend_name: postgresql
 postgresql_settings:
-    username: your_username
-    password: your_password
-    dbname: dindexer
-    port: 5432
-    address: 200.100.200.100
+    connection:
+        username: your_username
+        password: your_password
+        dbname: dindexer
+        port: 5432
+        address: 200.100.200.100
 backend_paths: path to your build_dir/src/backend
