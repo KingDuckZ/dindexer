@@ -128,6 +128,7 @@ add_subdirectory(src/machinery)
 add_subdirectory(lib/pbl)
 add_subdirectory(lib/glob2regex)
 add_subdirectory(src/backends)
+add_subdirectory(src/core)
 
 #Actions
 add_subdirectory(src/main)
