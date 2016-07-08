@@ -1,4 +1,4 @@
-project(${bare_name}-common CXX C)
+project(${bare_name}-common CXX)
 
 find_package(Readline 6.3 REQUIRED)
 
@@ -32,7 +32,7 @@ target_link_libraries(${PROJECT_NAME}
 #	ARCHIVE DESTINATION lib/static
 #)
 
-#Allow to link with .so
+#Allow linking with .so
 #see https://cmake.org/pipermail/cmake/2007-May/014350.html
 #and http://stackoverflow.com/questions/6093547/what-do-r-x86-64-32s-and-r-x86-64-64-relocation-mean/6093910#6093910
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

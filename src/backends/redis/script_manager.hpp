@@ -46,7 +46,7 @@ namespace redis {
 
 		boost::string_ref add_lua_script_ifn ( const std::string& parScript );
 
-		Command* m_command;
+		Command* const m_command;
 #if defined(MAKE_SHA1_WITH_CRYPTOPP)
 		std::set<Sha1Array> m_known_hashes;
 #else
