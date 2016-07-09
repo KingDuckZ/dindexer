@@ -64,8 +64,8 @@ namespace redis {
 	void Script::run_with_indices (Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...>) {
 		static_assert(sizeof...(Keys) == sizeof...(KeyIndices), "Wrong index count");
 		static_assert(sizeof...(Values) == sizeof...(ValueIndices), "Wrong value count");
-		static_assert(sizeof...(Keys) == std::tuple_size<decltype(parKeys)>::value, "Wrong key count");
-		static_assert(sizeof...(Values) == std::tuple_size<decltype(parValues)>::value, "Wrong value count");
+		static_assert(sizeof...(Keys) == std::tuple_size<std::tuple<Keys...>>::value, "Wrong key count");
+		static_assert(sizeof...(Values) == std::tuple_size<std::tuple<Values...>>::value, "Wrong value count");
 
 		assert(not m_sha1.empty());
 		assert(m_manager);
