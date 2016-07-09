@@ -27,6 +27,8 @@
 #include <array>
 #include <cstdint>
 #include <boost/range/empty.hpp>
+#include <fstream>
+#include <sstream>
 
 namespace dindb {
 	namespace {
@@ -94,6 +96,23 @@ namespace dindb {
 			}
 			return retval;
 		}
+
+		std::string read_script (const dincore::SearchPaths& parSearch, const char* parName) {
+			const auto full_path = parSearch.first_hit(boost::string_ref(parName));
+			if (full_path.empty()) {
+				const std::string msg = std::string("Unable to locate and load Lua script \"") + parName + "\" from any of the given search paths";
+				throw std::runtime_error(msg);
+			}
+
+			std::ifstream script(full_path);
+			std::string retval;
+			script.seekg(0, std::ios::end);
+			retval.reserve(script.tellg());
+			script.seekg(0, std::ios::beg);
+			retval.assign(std::istreambuf_iterator<char>(script), std::istreambuf_iterator<char>());
+
+			return retval;
+		}
 	} //unnamed namespace
 } //namespace dindb
 
@@ -140,6 +159,7 @@ namespace YAML {
 namespace dindb {
 	BackendRedis::BackendRedis(std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths) :
 		m_redis(std::move(parAddress), parPort),
+		m_tag_if_in_set(),
 		m_lua_script_paths(std::move(parLuaPaths)),
 		m_database(parDatabase)
 	{
@@ -166,6 +186,8 @@ namespace dindb {
 			oss << "Error connecting to Redis: " << m_redis.connection_error();
 			throw std::runtime_error(oss.str());
 		}
+
+		m_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "tag_if_in_set.lua"));
 	}
 
 	void BackendRedis::disconnect() {
@@ -173,6 +195,21 @@ namespace dindb {
 	}
 
 	void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		using dinhelp::lexical_cast;
+
+		auto batch = m_redis.make_batch();
+		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
+		for (const auto file_id : parFiles) {
+			for (const auto &tag : parTags) {
+				std::ostringstream oss;
+				oss << PROGRAM_NAME ":tag:" << tag;
+				const std::string tag_key = oss.str();
+				const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(file_id);
+				m_tag_if_in_set.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
+			}
+		}
+
+		batch.throw_if_failed();
 	}
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {

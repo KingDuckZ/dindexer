@@ -51,8 +51,7 @@ configure_file(
 	${CMAKE_CURRENT_BINARY_DIR}/redisConfig.h
 )
 set(LUA_SCRIPTS
-	"${CMAKE_SOURCE_DIR}/lib/ohm-scripts/save.lua"
-	"${CMAKE_SOURCE_DIR}/lib/ohm-scripts/delete.lua"
+	tag_if_in_set.lua
 )
 
 install(TARGETS ${PROJECT_NAME}
