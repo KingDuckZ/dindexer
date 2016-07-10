@@ -25,6 +25,18 @@
 
 namespace dindb {
 	namespace {
+		std::vector<std::regex> compile_regexes (const std::vector<std::string>& parRegexes) {
+			std::vector<std::regex> retval;
+			retval.reserve(parRegexes.size());
+			for (const auto& str : parRegexes) {
+				retval.emplace_back(std::regex(
+					str,
+					std::regex_constants::optimize | std::regex_constants::nosubs | std::regex_constants::ECMAScript
+				));
+			}
+			assert(retval.size() == parRegexes.size());
+			return retval;
+		}
 	} //unnamed namespace
 
 	void tag_files (redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
@@ -46,6 +58,26 @@ namespace dindb {
 	}
 
 	void tag_files (redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		using dinhelp::lexical_cast;
+
+		auto batch = parRedis.make_batch();
+		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
+		const auto regexes = compile_regexes(parRegexes);
+		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
+			const auto& file_key = itm;
+			const auto path = redis::get_string(parRedis.run("HGET", file_key, "path"));
+			for (const auto& regex : regexes) {
+				if (not std::regex_search(path, regex))
+					continue;
+
+				for (const auto &tag : parTags) {
+					std::ostringstream oss;
+					oss << PROGRAM_NAME ":tag:" << tag;
+					const std::string tag_key = oss.str();
+					parTagIfInSet.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
+				}
+			}
+		}
 	}
 
 	void delete_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
