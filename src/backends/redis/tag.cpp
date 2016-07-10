@@ -60,12 +60,13 @@ namespace dindb {
 	void tag_files (redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 		using dinhelp::lexical_cast;
 
-		auto batch = parRedis.make_batch();
 		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
 		const auto regexes = compile_regexes(parRegexes);
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 			const auto& file_key = itm;
 			const auto path = redis::get_string(parRedis.run("HGET", file_key, "path"));
+
+			auto batch = parRedis.make_batch();
 			for (const auto& regex : regexes) {
 				if (not std::regex_search(path, regex))
 					continue;
@@ -77,6 +78,7 @@ namespace dindb {
 					parTagIfInSet.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
 				}
 			}
+			batch.throw_if_failed();
 		}
 	}
 
