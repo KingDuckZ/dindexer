@@ -67,10 +67,10 @@ namespace redis {
 		Reply run ( const char* parCommand, Args&&... parArgs );
 
 		//Single Redis command wrappers
-		scan_range scan ( void );
-		hscan_range hscan ( boost::string_ref parKey );
-		sscan_range sscan ( boost::string_ref parKey );
-		zscan_range zscan ( boost::string_ref parKey );
+		scan_range scan ( boost::string_ref parPattern=boost::string_ref() );
+		hscan_range hscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
+		sscan_range sscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
+		zscan_range zscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
 
 	private:
 		struct LocalData;

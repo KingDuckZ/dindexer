@@ -77,20 +77,20 @@ namespace redis {
 		return m_local_data->async_connection.connection_error();
 	}
 
-	auto Command::scan() -> scan_range {
-		return scan_range(scan_iterator(this, false), scan_iterator(this, true));
+	auto Command::scan (boost::string_ref parPattern) -> scan_range {
+		return scan_range(scan_iterator(this, false, parPattern), scan_iterator(this, true));
 	}
 
-	auto Command::hscan (boost::string_ref parKey) -> hscan_range {
-		return hscan_range(hscan_iterator(this, parKey, false), hscan_iterator(this, parKey, true));
+	auto Command::hscan (boost::string_ref parKey, boost::string_ref parPattern) -> hscan_range {
+		return hscan_range(hscan_iterator(this, parKey, false, parPattern), hscan_iterator(this, parKey, true));
 	}
 
-	auto Command::sscan (boost::string_ref parKey) -> sscan_range {
-		return sscan_range(sscan_iterator(this, parKey, false), sscan_iterator(this, parKey, true));
+	auto Command::sscan (boost::string_ref parKey, boost::string_ref parPattern) -> sscan_range {
+		return sscan_range(sscan_iterator(this, parKey, false, parPattern), sscan_iterator(this, parKey, true));
 	}
 
-	auto Command::zscan (boost::string_ref parKey) -> zscan_range {
-		return zscan_range(zscan_iterator(this, parKey, false), zscan_iterator(this, parKey, true));
+	auto Command::zscan (boost::string_ref parKey, boost::string_ref parPattern) -> zscan_range {
+		return zscan_range(zscan_iterator(this, parKey, false, parPattern), zscan_iterator(this, parKey, true));
 	}
 
 	Batch Command::make_batch() {
