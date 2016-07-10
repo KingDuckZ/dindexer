@@ -22,6 +22,7 @@
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "helpers/stringize.h"
+#include "record_data_adapt.hpp"
 #include <utility>
 #include <yaml-cpp/yaml.h>
 #include <array>
@@ -37,65 +38,6 @@ namespace dindb {
 			uint16_t port;
 			uint16_t database;
 		};
-
-		std::pair<std::string, mchlib::FileRecordData> pair_list_to_file_record (const redis::Command::hscan_range& parRange) {
-			using dinhelp::lexical_cast;
-
-			mchlib::FileRecordData retval;
-			std::array<std::string, 2> mime;
-			std::string group_key;
-
-			for (const auto itm : parRange) {
-				if (itm.first == "path")
-					retval.abs_path = itm.second;
-				else if (itm.first == "hash")
-					retval.hash = mchlib::string_to_tiger(itm.second);
-				else if (itm.first == "size")
-					retval.size = lexical_cast<decltype(retval.size)>(
-							itm.second);
-				else if (itm.first == "level")
-					retval.level = lexical_cast<decltype(retval.level)>(
-							itm.second);
-				else if (itm.first == "mime_type")
-					mime[0] = itm.second;
-				else if (itm.first == "mime_charset")
-					mime[1] = itm.second;
-				else if (itm.first == "is_directory")
-					retval.is_directory = (itm.second[0] == '0' ? false : true);
-				else if (itm.first == "is_symlink")
-					retval.is_symlink = (itm.second[0] == '0' ? false : true);
-				else if (itm.first == "unreadable")
-					retval.unreadable = (itm.second[0] == '0' ? false : true);
-				else if (itm.first == "hash_valid")
-					retval.hash_valid = (itm.second[0] == '0' ? false : true);
-				else if (itm.first == "group_id")
-					group_key = itm.second;
-			}
-			retval.mime_full = mime[0] + mime[1];
-			retval.mime_type_offset = 0;
-			retval.mime_type_length = retval.mime_charset_offset = static_cast<uint16_t>(mime[0].size());
-			retval.mime_charset_length = static_cast<uint16_t>(mime[1].size());
-			return std::make_pair(group_key, std::move(retval));
-		}
-
-		mchlib::SetRecordDataFull pair_list_to_set_record (const redis::Command::hscan_range& parRange) {
-			using dinhelp::lexical_cast;
-
-			mchlib::SetRecordDataFull retval;
-			for (const auto& itm : parRange) {
-				if (itm.first == "name")
-					retval.name = itm.second;
-				else if (itm.first == "disk_label")
-					retval.disk_label = itm.second;
-				else if (itm.first == "fs_uuid")
-					retval.fs_uuid = itm.second;
-				else if (itm.first == "type")
-					retval.type = itm.second[0];
-				else if (itm.first == "content_type")
-					retval.content_type = itm.second[0];
-			}
-			return retval;
-		}
 
 		std::string read_script (const dincore::SearchPaths& parSearch, const char* parName) {
 			const auto full_path = parSearch.first_hit(boost::string_ref(parName));
@@ -142,19 +84,6 @@ namespace YAML {
 		}
 	};
 } //namespace YAML
-
-//namespace redis {
-//	template <>
-//	struct RedisStructAdapt<mchlib::FileRecordData> {
-//		static bool decode (const Command::hscan_range& parFrom, mchlib::FileRecordData& parOut) {
-//			return true;
-//		}
-//
-//		static void encode (const Command::hscan_range& parFrom, mchlib::FileRecordData& parOut) {
-//			return true;
-//		}
-//	};
-//}
 
 namespace dindb {
 	BackendRedis::BackendRedis(std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths) :
@@ -294,7 +223,7 @@ namespace dindb {
 		}
 		else {
 			const auto result_id = redis::get_string(hash_reply);
-			auto set_key_and_file_item = pair_list_to_file_record(m_redis.hscan(result_id));
+			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.hscan(result_id));
 			parItem = std::move(set_key_and_file_item.second);
 			const std::string group_key = std::move(set_key_and_file_item.first);
 
@@ -303,7 +232,7 @@ namespace dindb {
 				return false;
 			}
 			else {
-				parSet = pair_list_to_set_record(m_redis.hscan(group_key));
+				parSet = redis::range_as<mchlib::SetRecordDataFull>(m_redis.hscan(group_key));
 				return true;
 			}
 		}

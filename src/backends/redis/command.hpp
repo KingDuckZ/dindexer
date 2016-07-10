@@ -31,7 +31,9 @@
 #include <vector>
 #include <utility>
 #include <boost/range/iterator_range_core.hpp>
+#include <boost/range/empty.hpp>
 #include <boost/utility/string_ref.hpp>
+#include <ciso646>
 #include <stdexcept>
 
 namespace redis {
@@ -83,6 +85,22 @@ namespace redis {
 		batch.throw_if_failed();
 		return batch.replies().front();
 	}
+
+	template <typename T>
+	struct StructAdapt;
+
+	template <typename AS, typename I>
+	AS range_conv ( const boost::iterator_range<I>& parRange );
+
+	template <typename AS, typename I>
+	inline AS range_as (const boost::iterator_range<I>& parRange) {
+		assert(not boost::empty(parRange));
+		AS retval;
+		const auto success = StructAdapt<AS>::decode(parRange, retval);
+		if (not success)
+			throw std::runtime_error("Error decoding range");
+		return retval;
+	};
 } //namespace redis
 
 #endif
