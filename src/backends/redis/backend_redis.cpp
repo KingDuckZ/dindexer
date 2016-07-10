@@ -117,6 +117,7 @@ namespace dindb {
 		}
 
 		m_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "tag_if_in_set.lua"));
+		m_dele_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "dele_tag_if_in_set.lua"));
 	}
 
 	void BackendRedis::disconnect() {
@@ -132,15 +133,19 @@ namespace dindb {
 	}
 
 	void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::delete_tags(m_redis, m_dele_tag_if_in_set, parFiles, parTags, parSet);
 	}
 
 	void BackendRedis::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		dindb::delete_tags(m_redis, m_dele_tag_if_in_set, parRegexes, parTags, parSet);
 	}
 
 	void BackendRedis::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
+		dindb::delete_all_tags(m_redis, m_dele_tag_if_in_set, parFiles, parSet);
 	}
 
 	void BackendRedis::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
+		dindb::delete_all_tags(m_redis, m_dele_tag_if_in_set, parRegexes, parSet);
 	}
 
 	void BackendRedis::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {

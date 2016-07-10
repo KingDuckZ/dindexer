@@ -53,6 +53,7 @@ configure_file(
 )
 set(LUA_SCRIPTS
 	tag_if_in_set.lua
+	dele_tag_if_in_set.lua
 )
 
 install(TARGETS ${PROJECT_NAME}
