@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME} SHARED
 	script.cpp
 	script_manager.cpp
 	async_connection.cpp
+	tag.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

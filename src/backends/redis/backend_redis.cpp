@@ -22,6 +22,7 @@
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "helpers/stringize.h"
+#include "tag.hpp"
 #include "record_data_adapt.hpp"
 #include <utility>
 #include <yaml-cpp/yaml.h>
@@ -29,7 +30,6 @@
 #include <cstdint>
 #include <boost/range/empty.hpp>
 #include <fstream>
-#include <sstream>
 
 namespace dindb {
 	namespace {
@@ -124,21 +124,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		using dinhelp::lexical_cast;
-
-		auto batch = m_redis.make_batch();
-		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
-		for (const auto file_id : parFiles) {
-			for (const auto &tag : parTags) {
-				std::ostringstream oss;
-				oss << PROGRAM_NAME ":tag:" << tag;
-				const std::string tag_key = oss.str();
-				const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(file_id);
-				m_tag_if_in_set.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
-			}
-		}
-
-		batch.throw_if_failed();
+		dindb::tag_files(m_redis, m_tag_if_in_set, parFiles, parTags, parSet);
 	}
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
