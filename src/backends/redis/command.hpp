@@ -90,9 +90,6 @@ namespace redis {
 	struct StructAdapt;
 
 	template <typename AS, typename I>
-	AS range_conv ( const boost::iterator_range<I>& parRange );
-
-	template <typename AS, typename I>
 	inline AS range_as (const boost::iterator_range<I>& parRange) {
 		assert(not boost::empty(parRange));
 		AS retval;
