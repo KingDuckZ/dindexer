@@ -63,6 +63,6 @@ end
 
 local retval = redis.call("SREM", tag_key, file_key)
 if redis.call("SCARD", tag_key) == 0 then
-	redis.call("SREM", tag_key)
+	redis.call("DEL", tag_key)
 end
 return retval
