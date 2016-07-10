@@ -18,10 +18,10 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 
 TEST(cli_main, split_tags) {
-	using dinlib::split_tags;
+	using dincore::split_tags;
 
 	{
 		const std::string test_tags = "tag1,tag2";

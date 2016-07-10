@@ -18,7 +18,7 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include "glob2regex/glob2regex.hpp"
 #include "enum.h"
 #include <iostream>
@@ -62,7 +62,7 @@ namespace {
 		switch (parMode) {
 		case TaggingMode::ID:
 		{
-			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			auto ids_string = dincore::split_tags(parVM["ids"].as<std::string>());
 			std::vector<uint64_t> ids;
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
@@ -92,7 +92,7 @@ namespace {
 		switch (parMode) {
 		case TaggingMode::ID:
 		{
-			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			auto ids_string = dincore::split_tags(parVM["ids"].as<std::string>());
 			std::vector<uint64_t> ids;
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
@@ -157,7 +157,7 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	const auto master_tags_string = vm["tags"].as<std::string>();
-	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
+	const std::vector<boost::string_ref> tags = dincore::split_tags(master_tags_string);
 	const auto mode = (glob_mode ? TaggingMode::Glob : TaggingMode::ID);
 
 	if (not vm.count("delete"))

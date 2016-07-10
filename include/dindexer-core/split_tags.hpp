@@ -23,9 +23,9 @@
 #include <boost/utility/string_ref.hpp>
 #include "helpers/compatibility.h"
 
-namespace dinlib {
+namespace dincore {
 	std::vector<boost::string_ref> split_and_trim ( const std::string& parList, char parSeparator ) a_pure;
 	std::vector<boost::string_ref> split_tags ( const std::string& parCommaSeparatedList ) a_pure;
-} //namespace dinlib
+} //namespace dincore
 
 #endif

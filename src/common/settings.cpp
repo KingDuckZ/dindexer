@@ -16,7 +16,7 @@
  */
 
 #include "dindexer-common/settings.hpp"
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include "dindexer-core/searchpaths.hpp"
 #include "dindexerConfig.h"
 #include <yaml-cpp/yaml.h>
@@ -35,6 +35,8 @@ namespace dinlib {
 	} //unnamed namespace
 
 	void load_settings (const std::string& parPath, dinlib::Settings& parOut, bool parExpand) {
+		using dincore::split_and_trim;
+
 		const std::string path = (parExpand ? expand(parPath.c_str()) : parPath);
 		std::string search_paths;
 

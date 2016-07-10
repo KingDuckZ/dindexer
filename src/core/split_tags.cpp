@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -24,7 +24,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <ciso646>
 
-namespace dinlib {
+namespace dincore {
 	std::vector<boost::string_ref> split_tags (const std::string& parCommaSeparatedList) {
 		return split_and_trim(parCommaSeparatedList, ',');
 	}
@@ -52,4 +52,4 @@ namespace dinlib {
 				filtered([](const string_ref& r){return not r.empty();})
 		);
 	}
-} //namespace dinlib
+} //namespace dincore

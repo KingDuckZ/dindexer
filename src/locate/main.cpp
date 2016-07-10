@@ -17,7 +17,7 @@
 
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include "dindexerConfig.h"
 #include "hash.hpp"
 #include "glob2regex/glob2regex.hpp"
@@ -47,7 +47,7 @@ namespace {
 		if (not parVM.count("tags"))
 			return std::vector<boost::string_ref>();
 		else
-			return dinlib::split_tags(parVM["tags"].as<std::string>());
+			return dincore::split_tags(parVM["tags"].as<std::string>());
 	}
 } //unnamed namespace
 
