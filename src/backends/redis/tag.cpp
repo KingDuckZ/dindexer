@@ -146,7 +146,7 @@ namespace dindb {
 
 		const auto regexes = compile_regexes(parRegexes);
 
-		std::set<std::string> dele_tags;
+		std::unordered_set<std::string> dele_tags;
 		std::vector<FileIDType> ids;
 
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {

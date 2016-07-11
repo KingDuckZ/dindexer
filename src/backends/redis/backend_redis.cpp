@@ -176,7 +176,7 @@ namespace dindb {
 			"content_type", parSetData.content_type
 		);
 
-		for (auto z = base_file_id; z < casted_data_size; ++z) {
+		for (auto z = base_file_id; z < casted_data_size + 1; ++z) {
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
 			const auto& file_data = parData[z - base_file_id];
 			const std::string hash = tiger_to_string(file_data.hash);
