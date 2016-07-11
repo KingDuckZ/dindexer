@@ -90,6 +90,21 @@ namespace redis {
 
 			delete data;
 		}
+
+		int array_throw_if_failed (int parErrCount, int parMaxReportedErrors, const std::vector<Reply>& parReplies, std::ostream& parStream) {
+			int err_count = 0;
+			for (const auto& rep : parReplies) {
+				if (rep.which() == RedisVariantType_Error) {
+					++err_count;
+					if (err_count + parErrCount <= parMaxReportedErrors)
+						parStream << '"' << get_error_string(rep).message() << "\" ";
+				}
+				else if (rep.which() == RedisVariantType_Array) {
+					err_count += array_throw_if_failed(err_count + parErrCount, parMaxReportedErrors, get_array(rep), parStream);
+				}
+			}
+			return err_count;
+		}
 	} //unnamed namespace
 
 	struct Batch::LocalData {
@@ -167,17 +182,10 @@ namespace redis {
 
 	void Batch::throw_if_failed() {
 		std::ostringstream oss;
-		int err_count = 0;
 		const int max_reported_errors = 3;
 
 		oss << "Error in reply: ";
-		for (const auto& rep : replies()) {
-			if (rep.which() == RedisVariantType_Error) {
-				++err_count;
-				if (err_count <= max_reported_errors)
-					oss << '"' << get_error_string(rep).message() << "\" ";
-			}
-		}
+		const int err_count = array_throw_if_failed(0, max_reported_errors, replies(), oss);
 		if (err_count) {
 			oss << " (showing " << err_count << '/' << max_reported_errors << " errors on " << replies().size() << " total replies)";
 			throw std::runtime_error(oss.str());
