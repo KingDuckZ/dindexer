@@ -16,7 +16,7 @@
 
 local tag_key = KEYS[1]
 local file_key = KEYS[2]
-local group_key = ARGV[1]
+local group_id = ARGV[1]
 
 local function split_string(inputstr, sep)
 	if sep == nil then
@@ -45,9 +45,9 @@ local function dele_tag_from_list(tag_list, dele_tag)
 	return table.concat(tag_list, ",")
 end
 
-if group_key ~= "" then
-	local found_group_key = redis.call("HGET", file_key, "group_id")
-	if found_group_key ~= group_key then
+if group_id ~= 0 then
+	local found_group_id = redis.call("HGET", file_key, "group_id")
+	if found_group_id ~= group_id then
 		return nil
 	end
 end

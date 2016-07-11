@@ -158,7 +158,8 @@ namespace dindb {
 		redis::Reply set_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "set", "1");
 		redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", lexical_cast<std::string>(parData.size()));
 
-		const std::string set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(redis::get_integer(set_id_reply));
+		const auto group_id = lexical_cast<std::string>(redis::get_integer(set_id_reply));
+		const std::string set_key = PROGRAM_NAME ":set:" + group_id;
 		const auto casted_data_size = static_cast<decltype(redis::get_integer(file_id_reply))>(parData.size());
 		assert(redis::get_integer(file_id_reply) >= casted_data_size);
 		const auto base_file_id = redis::get_integer(file_id_reply) - casted_data_size + 1;
@@ -192,13 +193,13 @@ namespace dindb {
 				"is_symlink", (file_data.is_symlink ? '1' : '0'),
 				"unreadable", (file_data.unreadable ? '1' : '0'),
 				"hash_valid", (file_data.hash_valid ? '1' : '0'),
-				"group_id", set_key
+				"group_id", group_id
 			);
 
 			batch.run(
 				"SADD",
 				PROGRAM_NAME ":hash:" + hash,
-				file_key
+				lexical_cast<std::string>(z)
 			);
 		}
 

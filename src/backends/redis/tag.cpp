@@ -58,14 +58,14 @@ namespace dindb {
 			using dinhelp::lexical_cast;
 
 			auto batch = parRedis.make_batch();
-			const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
+			const std::string set_id = lexical_cast<std::string>(parSet);
 			for (const auto file_id : parFiles) {
 				for (const auto &tag : parTags) {
 					std::ostringstream oss;
 					oss << PROGRAM_NAME ":tag:" << tag;
 					const std::string tag_key = oss.str();
 					const std::string file_key = make_file_key(file_id);
-					parScript.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
+					parScript.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_id));
 				}
 			}
 
@@ -75,7 +75,7 @@ namespace dindb {
 		void run_regex_based_script(redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 			using dinhelp::lexical_cast;
 
-			const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
+			const std::string set_id = lexical_cast<std::string>(parSet);
 			const auto regexes = compile_regexes(parRegexes);
 			for (const auto &itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 				const auto &file_key = itm;
@@ -90,7 +90,7 @@ namespace dindb {
 						std::ostringstream oss;
 						oss << PROGRAM_NAME ":tag:" << tag;
 						const std::string tag_key = oss.str();
-						parTagIfInSet.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
+						parTagIfInSet.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_id));
 					}
 					break;
 				}
@@ -144,7 +144,6 @@ namespace dindb {
 	void delete_all_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<std::string>& parRegexes, GroupIDType parSet) {
 		using dinhelp::lexical_cast;
 
-		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
 		const auto regexes = compile_regexes(parRegexes);
 
 		std::set<std::string> dele_tags;
@@ -155,7 +154,7 @@ namespace dindb {
 			auto file_reply = parRedis.run("HMGET", file_key, "path", "tags", "group_id");
 			auto& file_replies = redis::get_array(file_reply);
 			assert(file_replies.size() == 3);
-			const auto group_id = id_from_redis_key<GroupIDType>(redis::get_string(file_replies[2]));
+			const auto group_id = lexical_cast<GroupIDType>(redis::get_string(file_replies[2]));
 			if (parSet != InvalidGroupID and parSet != group_id)
 				continue;
 
