@@ -29,7 +29,7 @@
 
 namespace dindb {
 	namespace {
-		IDDescMap fetch_existing_ids (pq::Connection& parConn, const std::vector<uint32_t>& parIDs) {
+		IDDescMap fetch_existing_ids (pq::Connection& parConn, const std::vector<GroupIDType>& parIDs) {
 			using boost::lexical_cast;
 
 			IDDescMap retmap;
@@ -39,7 +39,7 @@ namespace dindb {
 
 			std::ostringstream oss;
 			oss << "SELECT \"id\",\"desc\" FROM \"sets\" WHERE \"id\"=";
-			boost::copy(parIDs, infix_ostream_iterator<uint32_t>(oss, " OR \"id\"="));
+			boost::copy(parIDs, infix_ostream_iterator<GroupIDType>(oss, " OR \"id\"="));
 			oss << ';';
 
 			auto resultset = parConn.query(oss.str());
@@ -50,7 +50,7 @@ namespace dindb {
 		}
 	} //unnamed namespace
 
-	void delete_group_from_db (pq::Connection& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+	void delete_group_from_db (pq::Connection& parDB, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
 		assert(parDB.is_connected());
 
 		const auto dele_ids = fetch_existing_ids(parDB, parIDs);
@@ -65,9 +65,9 @@ namespace dindb {
 		ids.reserve(dele_ids.size());
 		std::ostringstream oss;
 		oss << "BEGIN;\nDELETE FROM \"files\" WHERE \"group_id\"=";
-		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<uint32_t>(oss, " OR \"group_id\"="));
+		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<GroupIDType>(oss, " OR \"group_id\"="));
 		oss << ";\nDELETE FROM \"sets\" WHERE \"id\"=";
-		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<uint32_t>(oss, " OR \"id\"="));
+		boost::copy(dele_ids | boost::adaptors::map_keys, infix_ostream_iterator<GroupIDType>(oss, " OR \"id\"="));
 		oss << ";\nCOMMIT;";
 
 		parDB.query(oss.str());

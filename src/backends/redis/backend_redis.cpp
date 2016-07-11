@@ -148,7 +148,7 @@ namespace dindb {
 		dindb::delete_all_tags(m_redis, m_dele_tag_if_in_set, parRegexes, parSet);
 	}
 
-	void BackendRedis::delete_group (const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf) {
+	void BackendRedis::delete_group (const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
 	}
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {

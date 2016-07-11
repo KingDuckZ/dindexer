@@ -21,7 +21,6 @@
 #include "backends/db_backend.hpp"
 #include <vector>
 #include <boost/utility/string_ref.hpp>
-#include <cstdint>
 
 namespace redis {
 	class Command;
@@ -32,7 +31,7 @@ namespace dindb {
 	void tag_files (
 		redis::Command& parRedis,
 		redis::Script& parTagIfInSet,
-		const std::vector<uint64_t>& parFiles,
+		const std::vector<FileIDType>& parFiles,
 		const std::vector<boost::string_ref>& parTags,
 		GroupIDType parSet
 	);
@@ -47,7 +46,7 @@ namespace dindb {
 	void delete_tags (
 		redis::Command& parRedis,
 		redis::Script& parDeleIfInSet,
-		const std::vector<uint64_t>& parFiles,
+		const std::vector<FileIDType>& parFiles,
 		const std::vector<boost::string_ref>& parTags,
 		GroupIDType parSet
 	);
@@ -61,7 +60,7 @@ namespace dindb {
 	void delete_all_tags (
 		redis::Command& parRedis,
 		redis::Script& parDeleIfInSet,
-		const std::vector<uint64_t>& parFiles,
+		const std::vector<FileIDType>& parFiles,
 		GroupIDType parSet
 	);
 	void delete_all_tags (

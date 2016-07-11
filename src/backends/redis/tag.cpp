@@ -37,7 +37,7 @@ namespace std {
 
 namespace dindb {
 	namespace {
-		std::string make_file_key (uint64_t parID) {
+		std::string make_file_key (FileIDType parID) {
 			return PROGRAM_NAME ":file:" + dinhelp::lexical_cast<std::string>(parID);
 		}
 
@@ -54,7 +54,7 @@ namespace dindb {
 			return retval;
 		}
 
-		void run_id_based_script (redis::Command& parRedis, redis::Script& parScript, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+		void run_id_based_script (redis::Command& parRedis, redis::Script& parScript, const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 			using dinhelp::lexical_cast;
 
 			auto batch = parRedis.make_batch();
@@ -105,7 +105,7 @@ namespace dindb {
 		}
 	} //unnamed namespace
 
-	void tag_files (redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+	void tag_files (redis::Command& parRedis, redis::Script& parTagIfInSet, const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 		run_id_based_script(parRedis, parTagIfInSet, parFiles, parTags, parSet);
 	}
 
@@ -113,7 +113,7 @@ namespace dindb {
 		run_regex_based_script(parRedis, parTagIfInSet, parRegexes, parTags, parSet);
 	}
 
-	void delete_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<uint64_t>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
+	void delete_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
 		run_id_based_script(parRedis, parDeleIfInSet, parFiles, parTags, parSet);
 	}
 
@@ -121,7 +121,7 @@ namespace dindb {
 		run_regex_based_script(parRedis, parDeleIfInSet, parRegexes, parTags, parSet);
 	}
 
-	void delete_all_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<uint64_t>& parFiles, GroupIDType parSet) {
+	void delete_all_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
 		auto batch = parRedis.make_batch();
 		for (const auto file_id : parFiles) {
 			const auto file_key = make_file_key(file_id);
@@ -147,7 +147,7 @@ namespace dindb {
 		const auto regexes = compile_regexes(parRegexes);
 
 		std::set<std::string> dele_tags;
-		std::vector<uint64_t> ids;
+		std::vector<FileIDType> ids;
 
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 			const auto& file_key = itm;

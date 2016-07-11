@@ -42,7 +42,7 @@ namespace dindb {
 		virtual void delete_all_tags ( const std::vector<FileIDType>& parFiles, GroupIDType parSet ) override;
 		virtual void delete_all_tags ( const std::vector<std::string>& parRegexes, GroupIDType parSet ) override;
 
-		virtual void delete_group ( const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf ) override;
+		virtual void delete_group ( const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf ) override;
 
 		virtual void write_files ( const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature ) override;
 		virtual bool search_file_by_hash ( mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash ) override;

@@ -22,7 +22,6 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <cstdint>
 #include <map>
 
 namespace pq {
@@ -30,10 +29,10 @@ namespace pq {
 } //namespace pq
 
 namespace dindb {
-	using IDDescMap = std::map<uint32_t, std::string>;
+	using IDDescMap = std::map<GroupIDType, std::string>;
 	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
 
-	void delete_group_from_db ( pq::Connection& parDB, const std::vector<uint32_t>& parIDs, ConfirmDeleCallback parConf );
+	void delete_group_from_db ( pq::Connection& parDB, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf );
 } //namespace dindb
 
 #endif
