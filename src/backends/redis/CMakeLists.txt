@@ -18,6 +18,7 @@ add_library(${PROJECT_NAME} SHARED
 	async_connection.cpp
 	tag.cpp
 	delete.cpp
+	find.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

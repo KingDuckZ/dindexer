@@ -24,6 +24,7 @@
 #include "helpers/stringize.h"
 #include "tag.hpp"
 #include "delete.hpp"
+#include "find.hpp"
 #include "record_data_adapt.hpp"
 #include <utility>
 #include <yaml-cpp/yaml.h>
@@ -254,7 +255,7 @@ namespace dindb {
 	}
 
 	std::vector<GroupIDType> BackendRedis::find_all_sets() {
-		return std::vector<GroupIDType>();
+		return dindb::find_all_sets(m_redis);
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
