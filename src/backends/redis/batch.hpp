@@ -49,6 +49,8 @@ namespace redis {
 		template <typename... Args>
 		Batch& operator() ( const char* parCommand, Args&&... parArgs );
 
+		void reset ( void ) noexcept;
+
 	private:
 		struct LocalData;
 

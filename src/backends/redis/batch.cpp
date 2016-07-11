@@ -133,6 +133,7 @@ namespace redis {
 	}
 
 	Batch::~Batch() noexcept {
+		this->reset();
 	}
 
 	void Batch::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
@@ -190,6 +191,19 @@ namespace redis {
 			oss << " (showing " << err_count << '/' << max_reported_errors << " errors on " << replies().size() << " total replies)";
 			throw std::runtime_error(oss.str());
 		}
+	}
+
+	void Batch::reset() noexcept {
+		try {
+			this->replies(); //force waiting for any pending jobs
+		}
+		catch (...) {
+			assert(false);
+		}
+
+		assert(0 == m_local_data->pending_futures);
+		m_futures.clear();
+		m_replies.clear();
 	}
 
 	RedisError::RedisError (const char* parMessage, std::size_t parLength) :
