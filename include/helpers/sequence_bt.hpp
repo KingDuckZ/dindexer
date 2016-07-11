@@ -22,26 +22,32 @@
 
 namespace dinhelp {
 	namespace bt {
-		template <std::size_t... I>
-		struct index_seq {
+		template <typename T, T... I>
+		struct number_seq {
 		};
 
+		template <std::size_t... I>
+		using index_seq = number_seq<std::size_t, I...>;
+
 		namespace implem {
-			template <std::size_t MIN, std::size_t MAX, std::size_t... I>
+			template <typename T, T MIN, T MAX, T... I>
 			struct range_builder;
 
-			template <std::size_t MIN, std::size_t... I>
-			struct range_builder<MIN, MIN, I...> {
-				typedef index_seq<I...> type;
+			template <typename T, T MIN, T... I>
+			struct range_builder<T, MIN, MIN, I...> {
+				typedef number_seq<T, I...> type;
 			};
 
-			template <std::size_t MIN, std::size_t N, std::size_t... I>
-			struct range_builder : public range_builder<MIN, N - 1, N - 1, I...> {
+			template <typename T, T MIN, T N, T... I>
+			struct range_builder : public range_builder<T, MIN, N - 1, N - 1, I...> {
 			};
 		} //namespace implem
 
+		template <typename T, T MIN, T MAX>
+		using number_range = typename implem::range_builder<T, MIN, MAX>::type;
+
 		template <std::size_t MIN, std::size_t MAX>
-		using index_range = typename implem::range_builder<MIN, MAX>::type;
+		using index_range = number_range<std::size_t, MIN, MAX>;
 	} //namespace bt
 } //namespace dinhelp
 
