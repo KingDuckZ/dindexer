@@ -5,6 +5,7 @@ set(DINDEXER_REDIS_SCRIPTS_PATH "${CMAKE_INSTALL_PREFIX}/${bare_name}/redis" CAC
 find_package(hiredis 0.11.0 REQUIRED)
 find_package(CryptoPP 5.6)
 find_package(libev 4.0 REQUIRED)
+find_package(Boost 1.53.0 REQUIRED COMPONENTS regex)
 
 add_library(${PROJECT_NAME} SHARED
 	backend_redis.cpp
@@ -23,6 +24,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ${HIREDIS_INCLUDE_DIRS}
 	PRIVATE ${CMAKE_SOURCE_DIR}/lib/better-enums
 	PRIVATE ${LIBEV_INCLUDE_DIRS}
+	PRIVATE ${Boost_INCLUDE_DIRS}
 )
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
@@ -33,6 +35,7 @@ target_link_libraries(${PROJECT_NAME}
 	PUBLIC ${bare_name}-core
 	PRIVATE ${HIREDIS_LIBRARIES}
 	PRIVATE ${LIBEV_LIBRARIES}
+	PRIVATE ${Boost_LIBRARIES}
 )
 
 target_compile_definitions(${PROJECT_NAME}

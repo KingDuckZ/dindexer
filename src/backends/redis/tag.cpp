@@ -22,7 +22,7 @@
 #include "dindexer-core/split_tags.hpp"
 #include <sstream>
 #include <tuple>
-#include <regex>
+#include <boost/regex.hpp>
 #include <unordered_set>
 #include <boost/functional/hash.hpp>
 
@@ -41,13 +41,13 @@ namespace dindb {
 			return PROGRAM_NAME ":file:" + dinhelp::lexical_cast<std::string>(parID);
 		}
 
-		std::vector<std::regex> compile_regexes (const std::vector<std::string>& parRegexes) {
-			std::vector<std::regex> retval;
+		std::vector<boost::regex> compile_regexes (const std::vector<std::string>& parRegexes) {
+			std::vector<boost::regex> retval;
 			retval.reserve(parRegexes.size());
 			for (const auto& str : parRegexes) {
-				retval.emplace_back(std::regex(
+				retval.emplace_back(boost::regex(
 					str,
-					std::regex_constants::optimize | std::regex_constants::nosubs | std::regex_constants::ECMAScript
+					boost::regex_constants::optimize | boost::regex_constants::nosubs | boost::regex_constants::perl
 				));
 			}
 			assert(retval.size() == parRegexes.size());
@@ -83,7 +83,7 @@ namespace dindb {
 
 				auto batch = parRedis.make_batch();
 				for (const auto &regex : regexes) {
-					if (not std::regex_search(path, regex))
+					if (not boost::regex_search(path, regex))
 						continue;
 
 					for (const auto &tag : parTags) {
@@ -92,9 +92,16 @@ namespace dindb {
 						const std::string tag_key = oss.str();
 						parTagIfInSet.run(batch, std::make_tuple(tag_key, file_key), std::make_tuple(set_key));
 					}
+					break;
 				}
 				batch.throw_if_failed();
 			}
+		}
+
+		template <typename T>
+		T id_from_redis_key (const std::string& parKey) {
+			assert(not parKey.empty());
+			return dinhelp::lexical_cast<T>(dincore::split_and_trim(parKey, ':').back());
 		}
 	} //unnamed namespace
 
@@ -135,6 +142,51 @@ namespace dindb {
 	}
 
 	void delete_all_tags (redis::Command& parRedis, redis::Script& parDeleIfInSet, const std::vector<std::string>& parRegexes, GroupIDType parSet) {
+		using dinhelp::lexical_cast;
+
+		const std::string set_key = (parSet != InvalidGroupID ? PROGRAM_NAME ":set:" + lexical_cast<std::string>(parSet) : "");
+		const auto regexes = compile_regexes(parRegexes);
+
+		std::set<std::string> dele_tags;
+		std::vector<uint64_t> ids;
+
+		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
+			const auto& file_key = itm;
+			auto file_reply = parRedis.run("HMGET", file_key, "path", "tags", "group_id");
+			auto& file_replies = redis::get_array(file_reply);
+			assert(file_replies.size() == 3);
+			const auto group_id = id_from_redis_key<GroupIDType>(redis::get_string(file_replies[2]));
+			if (parSet != InvalidGroupID and parSet != group_id)
+				continue;
+
+			const auto path = redis::get_string(file_replies[0]);
+			const auto tags_str = (file_replies[1].which() == redis::RedisVariantType_Nil ? std::string() : redis::get_string(file_replies[1]));
+			const auto tags = dincore::split_tags(tags_str);
+			const auto file_id = id_from_redis_key<FileIDType>(file_key);
+
+			for (const auto &regex : regexes) {
+				if (not boost::regex_search(path, regex))
+					continue;
+
+				ids.push_back(file_id);
+
+				for (const auto &tag : tags) {
+					dele_tags.insert(std::string(tag.data(), tag.size()));
+				}
+				break;
+			}
+		}
+
+		std::vector<boost::string_ref> dele_tags_vec;
+		dele_tags_vec.reserve(dele_tags.size());
+		std::transform(
+			dele_tags.begin(),
+			dele_tags.end(),
+			std::back_inserter(dele_tags_vec),
+			[](const std::string& parS) { return boost::string_ref(parS); }
+		);
+
+		delete_tags(parRedis, parDeleIfInSet, ids, dele_tags_vec, parSet);
 	}
 } //namespace dindb
 
