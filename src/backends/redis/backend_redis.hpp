@@ -61,6 +61,7 @@ namespace dindb {
 		redis::Command m_redis;
 		redis::Script m_tag_if_in_set;
 		redis::Script m_dele_tag_if_in_set;
+		redis::Script m_dele_hash;
 		dincore::SearchPaths m_lua_script_paths;
 		uint16_t m_database;
 	};

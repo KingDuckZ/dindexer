@@ -23,6 +23,7 @@
 #include "dindexerConfig.h"
 #include "helpers/stringize.h"
 #include "tag.hpp"
+#include "delete.hpp"
 #include "record_data_adapt.hpp"
 #include <utility>
 #include <yaml-cpp/yaml.h>
@@ -108,6 +109,7 @@ namespace dindb {
 			auto batch = m_redis.make_batch();
 			batch.run("SELECT", lexical_cast<std::string>(m_database));
 			batch.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
+			batch.run("SCRIPT", "FLUSH");
 			batch.throw_if_failed();
 		}
 		else {
@@ -118,6 +120,7 @@ namespace dindb {
 
 		m_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "tag_if_in_set.lua"));
 		m_dele_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "dele_tag_if_in_set.lua"));
+		m_dele_hash = m_redis.make_script(read_script(m_lua_script_paths, "dele_hash.lua"));
 	}
 
 	void BackendRedis::disconnect() {
@@ -149,6 +152,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::delete_group (const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
+		delete_group_from_db(m_redis, m_dele_tag_if_in_set, m_dele_hash, parIDs, parConf);
 	}
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
@@ -173,7 +177,9 @@ namespace dindb {
 			"disk_label", parSetData.disk_label,
 			"fs_uuid", parSetData.fs_uuid,
 			"type", parSetData.type,
-			"content_type", parSetData.content_type
+			"content_type", parSetData.content_type,
+			"base_file_id", lexical_cast<std::string>(base_file_id),
+			"file_count", lexical_cast<std::string>(parData.size())
 		);
 
 		for (auto z = base_file_id; z < casted_data_size + 1; ++z) {

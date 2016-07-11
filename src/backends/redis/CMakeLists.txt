@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
 	script_manager.cpp
 	async_connection.cpp
 	tag.cpp
+	delete.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
@@ -57,6 +58,7 @@ configure_file(
 set(LUA_SCRIPTS
 	tag_if_in_set.lua
 	dele_tag_if_in_set.lua
+	dele_hash.lua
 )
 
 install(TARGETS ${PROJECT_NAME}
