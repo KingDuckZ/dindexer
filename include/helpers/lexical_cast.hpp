@@ -161,17 +161,19 @@ namespace dinhelp {
 		template <typename T>
 		template <std::size_t... Powers, std::size_t... Digits>
 		std::size_t dec<T>::count_digits_implem (T parValue, dinhelp::bt::index_seq<Powers...>, dinhelp::bt::index_seq<Digits...>) {
-			static T powers[] = { 0, static_cast<T>(dinhelp::implem::power<10, Powers + 1>::value)... };
-			static std::size_t maxdigits[] = { count_digits_bt(static_cast<std::size_t>(::pow(2.0, Digits)))... };
-			const auto bits = sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<T>(parValue);
-			return (parValue < powers[maxdigits[bits] - 1] ? maxdigits[bits] - 1 : maxdigits[bits]) + dinhelp::implem::is_negative<T>::check(parValue);
+			typedef typename std::make_unsigned<T>::type UT;
+			static constexpr UT powers[] = { 0, static_cast<UT>(dinhelp::implem::power<10, Powers + 1>::value)... };
+			static constexpr std::size_t maxdigits[] = { count_digits_bt(static_cast<std::size_t>(::pow(2.0, Digits))) - (std::numeric_limits<T>::is_signed ? 1 : 0)... };
+			const auto bits = sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<T>(dinhelp::implem::abs(parValue));
+			static_assert(std::is_same<UT, decltype(dinhelp::implem::abs(parValue))>::value, "Unexpected type");
+			return (dinhelp::implem::abs(parValue) < powers[maxdigits[bits] - 1] ? maxdigits[bits] - 1 : maxdigits[bits]) + dinhelp::implem::is_negative<T>::check(parValue);
 		}
 
 		template <typename T>
 		std::size_t dec<T>::count_digits (T parValue) {
 			return count_digits_implem(
 				parValue,
-				dinhelp::bt::index_range<0, count_digits_bt(std::numeric_limits<T>::max()) + 1>(),
+				dinhelp::bt::index_range<0, count_digits_bt(std::numeric_limits<T>::max()) - (std::numeric_limits<T>::is_signed ? 1 : 0) - 1>(),
 				dinhelp::bt::index_range<0, CHAR_BIT * sizeof(T) + 1>()
 			);
 		}
@@ -209,7 +211,7 @@ namespace dinhelp {
 
 		template <typename T>
 		inline int count_leading_zeroes (typename std::enable_if<std::numeric_limits<T>::is_signed, T>::type parValue) {
-			return count_leading_zeroes<decltype(abs(parValue))>(abs(parValue));
+			return count_leading_zeroes<decltype(dinhelp::implem::abs(parValue))>(dinhelp::implem::abs(parValue));
 		}
 
 		template <typename T>

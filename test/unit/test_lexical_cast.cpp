@@ -126,4 +126,40 @@ TEST(helpers, lexical_cast) {
 		const auto bin_str = lexical_cast<std::string, bin>(value);
 		EXPECT_EQ("11111111111111111111101010001000", bin_str);
 	}
+	{
+		const int32_t value = 515;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("203", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("515", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1000000011", bin_str);
+	}
+	{
+		const int64_t value = 515;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("203", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("515", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1000000011", bin_str);
+	}
+	{
+		const uint32_t value = 515;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("203", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("515", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1000000011", bin_str);
+	}
+	{
+		const uint64_t value = 515;
+		const auto hex_str = lexical_cast<std::string, hex>(value);
+		EXPECT_EQ("203", hex_str);
+		const auto dec_str = lexical_cast<std::string, dec>(value);
+		EXPECT_EQ("515", dec_str);
+		const auto bin_str = lexical_cast<std::string, bin>(value);
+		EXPECT_EQ("1000000011", bin_str);
+	}
 }
