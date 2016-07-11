@@ -20,8 +20,30 @@
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "dindexer-core/split_tags.hpp"
+#include <boost/regex.hpp>
 
 namespace dindb {
+	namespace {
+		void store_matching_paths (redis::Batch& parBatch, std::vector<LocatedItem>& parOut, std::vector<FileIDType>& parIDs, const boost::regex& parSearch) {
+			using dinhelp::lexical_cast;
+			assert(parIDs.size() == parBatch.replies().size());
+
+			parBatch.throw_if_failed();
+			std::size_t id_index = 0;
+			for (const auto& itm : parBatch.replies()) {
+				const auto reply = redis::get_array(itm);
+				const auto& path = redis::get_string(reply[0]);
+
+				if (boost::regex_search(path, parSearch)) {
+					const auto group_id = lexical_cast<GroupIDType>(redis::get_string(reply[1]));
+					parOut.push_back(LocatedItem{path, parIDs[id_index], group_id});
+				}
+				assert(id_index < parIDs.size());
+				++id_index;
+			}
+		}
+	} //unnamed namespace
+
 	std::vector<GroupIDType> find_all_sets (redis::Command& parRedis) {
 		using dincore::split_and_trim;
 		using dinhelp::lexical_cast;
@@ -30,6 +52,36 @@ namespace dindb {
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":set:*")) {
 			retval.push_back(lexical_cast<GroupIDType>(split_and_trim(itm, ':').back()));
 		}
+		return retval;
+	}
+
+	std::vector<LocatedItem> locate_in_db (redis::Command& parRedis, const std::string& parSearch, const TagList& parTags) {
+		using dincore::split_and_trim;
+		using dinhelp::lexical_cast;
+
+		const boost::regex search(parSearch, boost::regex_constants::optimize | boost::regex_constants::nosubs | boost::regex_constants::perl);
+		const int prefetch_count = 500;
+
+		std::vector<LocatedItem> retval;
+		std::vector<FileIDType> ids;
+		ids.reserve(prefetch_count);
+
+		int curr_count = 0;
+		auto batch = parRedis.make_batch();
+		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
+			++curr_count;
+			batch.run("HMGET", itm, "path", "group_id");
+			ids.push_back(lexical_cast<FileIDType>(split_and_trim(itm, ':').back()));
+
+			if (curr_count == prefetch_count) {
+				store_matching_paths(batch, retval, ids, search);
+				batch.reset();
+				curr_count = 0;
+				ids.clear();
+			}
+		}
+		if (curr_count)
+			store_matching_paths(batch, retval, ids, search);
 		return retval;
 	}
 } //namespace dindb
