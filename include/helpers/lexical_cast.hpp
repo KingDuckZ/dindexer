@@ -21,10 +21,12 @@
 #include "compatibility.h"
 #include "helpers/sequence_bt.hpp"
 #include "helpers/MaxSizedArray.hpp"
+#include "sprout/math/log10.hpp"
+#include "sprout/math/log2.hpp"
+#include "sprout/math/pow.hpp"
 #include <type_traits>
 #include <utility>
 #include <limits>
-#include <cmath>
 #include <cstdint>
 #include <algorithm>
 #include <string>
@@ -112,7 +114,7 @@ namespace dinhelp {
 			static std::size_t count_digits ( T parValue ) a_pure;
 			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)) / std::log10(static_cast<double>(base)))) + 1;
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(sprout::log10(static_cast<double>(parNum)) / sprout::log10(static_cast<double>(base)))) + 1;
 			}
 		};
 	} //namespace implem
@@ -133,7 +135,7 @@ namespace dinhelp {
 
 			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log10(static_cast<double>(parNum)))) + 1 + (std::numeric_limits<T>::is_signed ? 1 : 0);
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(sprout::log10(static_cast<double>(parNum)))) + 1 + (std::numeric_limits<T>::is_signed ? 1 : 0);
 			}
 		};
 
@@ -153,7 +155,7 @@ namespace dinhelp {
 			static std::size_t count_digits ( T parValue ) a_pure;
 			static typename std::make_unsigned<T>::type make_unsigned ( T parValue ) a_pure;
 			static constexpr std::size_t count_digits_bt (std::size_t parNum) {
-				return (parNum == 0 ? 0 : static_cast<std::size_t>(std::log2(static_cast<double>(parNum)))) + 1;
+				return (parNum == 0 ? 0 : static_cast<std::size_t>(sprout::log2(static_cast<double>(parNum)))) + 1;
 			}
 		};
 
@@ -163,7 +165,7 @@ namespace dinhelp {
 		std::size_t dec<T>::count_digits_implem (T parValue, dinhelp::bt::index_seq<Powers...>, dinhelp::bt::index_seq<Digits...>) {
 			typedef typename std::make_unsigned<T>::type UT;
 			static constexpr UT powers[] = { 0, static_cast<UT>(dinhelp::implem::power<10, Powers + 1>::value)... };
-			static constexpr std::size_t maxdigits[] = { count_digits_bt(static_cast<std::size_t>(::pow(2.0, Digits))) - (std::numeric_limits<T>::is_signed ? 1 : 0)... };
+			static constexpr std::size_t maxdigits[] = { count_digits_bt(static_cast<std::size_t>(sprout::pow(2.0, Digits))) - (std::numeric_limits<T>::is_signed ? 1 : 0)... };
 			const auto bits = sizeof(parValue) * CHAR_BIT - dinhelp::implem::count_leading_zeroes<T>(dinhelp::implem::abs(parValue));
 			static_assert(std::is_same<UT, decltype(dinhelp::implem::abs(parValue))>::value, "Unexpected type");
 			return (dinhelp::implem::abs(parValue) < powers[maxdigits[bits] - 1] ? maxdigits[bits] - 1 : maxdigits[bits]) + dinhelp::implem::is_negative<T>::check(parValue);

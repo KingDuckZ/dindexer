@@ -36,13 +36,18 @@ namespace redis {
 			ev_break(parLoop, EVBREAK_ALL);
 		}
 
-		void lock_mutex_libev (ev_loop* parLoop) {
+		void lock_mutex_libev (ev_loop* parLoop) noexcept {
 			std::mutex* mtx = static_cast<std::mutex*>(ev_userdata(parLoop));
 			assert(mtx);
-			mtx->lock();
+			try {
+				mtx->lock();
+			}
+			catch (const std::system_error&) {
+				assert(false);
+			}
 		}
 
-		void unlock_mutex_libev (ev_loop* parLoop) {
+		void unlock_mutex_libev (ev_loop* parLoop) noexcept {
 			std::mutex* mtx = static_cast<std::mutex*>(ev_userdata(parLoop));
 			assert(mtx);
 			mtx->unlock();

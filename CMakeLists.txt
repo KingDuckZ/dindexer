@@ -106,6 +106,7 @@ target_compile_features(${PROJECT_NAME}
 target_include_directories(${bare_name}-inc
 	INTERFACE ${PROJECT_BINARY_DIR}
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
+	INTERFACE ${CMAKE_SOURCE_DIR}/lib/sprout
 )
 
 
