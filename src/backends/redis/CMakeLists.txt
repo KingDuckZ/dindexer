@@ -19,6 +19,7 @@ add_library(${PROJECT_NAME} SHARED
 	tag.cpp
 	delete.cpp
 	find.cpp
+	incredis.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

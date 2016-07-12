@@ -107,7 +107,7 @@ namespace dindb {
 		m_redis.connect();
 		m_redis.wait_for_connect();
 		if (m_redis.is_connected()) {
-			auto batch = m_redis.make_batch();
+			auto batch = m_redis.command().make_batch();
 			batch.run("SELECT", lexical_cast<std::string>(m_database));
 			batch.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
 			batch.run("SCRIPT", "FLUSH");
@@ -115,13 +115,13 @@ namespace dindb {
 		}
 		else {
 			std::ostringstream oss;
-			oss << "Error connecting to Redis: " << m_redis.connection_error();
+			oss << "Error connecting to Redis: " << m_redis.command().connection_error();
 			throw std::runtime_error(oss.str());
 		}
 
-		m_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "tag_if_in_set.lua"));
-		m_dele_tag_if_in_set = m_redis.make_script(read_script(m_lua_script_paths, "dele_tag_if_in_set.lua"));
-		m_dele_hash = m_redis.make_script(read_script(m_lua_script_paths, "dele_hash.lua"));
+		m_tag_if_in_set = m_redis.command().make_script(read_script(m_lua_script_paths, "tag_if_in_set.lua"));
+		m_dele_tag_if_in_set = m_redis.command().make_script(read_script(m_lua_script_paths, "dele_tag_if_in_set.lua"));
+		m_dele_hash = m_redis.command().make_script(read_script(m_lua_script_paths, "dele_hash.lua"));
 	}
 
 	void BackendRedis::disconnect() {
@@ -129,47 +129,47 @@ namespace dindb {
 	}
 
 	void BackendRedis::tag_files (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		dindb::tag_files(m_redis, m_tag_if_in_set, parFiles, parTags, parSet);
+		dindb::tag_files(m_redis.command(), m_tag_if_in_set, parFiles, parTags, parSet);
 	}
 
 	void BackendRedis::tag_files (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		dindb::tag_files(m_redis, m_tag_if_in_set, parRegexes, parTags, parSet);
+		dindb::tag_files(m_redis.command(), m_tag_if_in_set, parRegexes, parTags, parSet);
 	}
 
 	void BackendRedis::delete_tags (const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		dindb::delete_tags(m_redis, m_dele_tag_if_in_set, parFiles, parTags, parSet);
+		dindb::delete_tags(m_redis.command(), m_dele_tag_if_in_set, parFiles, parTags, parSet);
 	}
 
 	void BackendRedis::delete_tags (const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-		dindb::delete_tags(m_redis, m_dele_tag_if_in_set, parRegexes, parTags, parSet);
+		dindb::delete_tags(m_redis.command(), m_dele_tag_if_in_set, parRegexes, parTags, parSet);
 	}
 
 	void BackendRedis::delete_all_tags (const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
-		dindb::delete_all_tags(m_redis, m_dele_tag_if_in_set, parFiles, parSet);
+		dindb::delete_all_tags(m_redis.command(), m_dele_tag_if_in_set, parFiles, parSet);
 	}
 
 	void BackendRedis::delete_all_tags (const std::vector<std::string>& parRegexes, GroupIDType parSet) {
-		dindb::delete_all_tags(m_redis, m_dele_tag_if_in_set, parRegexes, parSet);
+		dindb::delete_all_tags(m_redis.command(), m_dele_tag_if_in_set, parRegexes, parSet);
 	}
 
 	void BackendRedis::delete_group (const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
-		delete_group_from_db(m_redis, m_dele_tag_if_in_set, m_dele_hash, parIDs, parConf);
+		delete_group_from_db(m_redis.command(), m_dele_tag_if_in_set, m_dele_hash, parIDs, parConf);
 	}
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
 		using dinhelp::lexical_cast;
 		using boost::string_ref;
 
-		redis::Reply set_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "set", "1");
-		redis::Reply file_id_reply = m_redis.run("HINCRBY", PROGRAM_NAME ":indices", "files", lexical_cast<std::string>(parData.size()));
+		const auto data_size = static_cast<int>(parData.size());
+		const auto group_id_int = m_redis.hincrby(PROGRAM_NAME ":indices", "set", 1);
+		const auto file_id_int = m_redis.hincrby(PROGRAM_NAME ":indices", "files", data_size);
 
-		const auto group_id = lexical_cast<std::string>(redis::get_integer(set_id_reply));
+		const auto group_id = lexical_cast<std::string>(group_id_int);
 		const std::string set_key = PROGRAM_NAME ":set:" + group_id;
-		const auto casted_data_size = static_cast<decltype(redis::get_integer(file_id_reply))>(parData.size());
-		assert(redis::get_integer(file_id_reply) >= casted_data_size);
-		const auto base_file_id = redis::get_integer(file_id_reply) - casted_data_size + 1;
+		assert(file_id_int >= data_size);
+		const auto base_file_id = file_id_int - data_size + 1;
 
-		auto batch = m_redis.make_batch();
+		auto batch = m_redis.command().make_batch();
 
 		batch.run(
 			"HMSET",
@@ -183,7 +183,7 @@ namespace dindb {
 			"file_count", lexical_cast<std::string>(parData.size())
 		);
 
-		for (auto z = base_file_id; z < casted_data_size + 1; ++z) {
+		for (auto z = base_file_id; z < data_size + 1; ++z) {
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
 			const auto& file_data = parData[z - base_file_id];
 			const std::string hash = tiger_to_string(file_data.hash);
@@ -217,29 +217,29 @@ namespace dindb {
 		using boost::empty;
 
 		const std::string hash_key = PROGRAM_NAME ":hash:" + tiger_to_string(parHash);
-		redis::Reply hash_reply = m_redis.run("SRANDMEMBER", hash_key);
-		if (redis::RedisVariantType_Nil == hash_reply.which() or (redis::RedisVariantType_Integer == hash_reply.which() and not redis::get_integer(hash_reply))) {
+		auto hash_reply = m_redis.srandmember(hash_key);
+		if (not hash_reply) {
 			return false;
 		}
 		else {
-			const auto result_id = redis::get_string(hash_reply);
-			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.hscan(result_id));
+			const auto result_id = std::move(*hash_reply);
+			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.command().hscan(result_id));
 			parItem = std::move(set_key_and_file_item.second);
 			const std::string group_key = std::move(set_key_and_file_item.first);
 
-			auto scan_range = m_redis.hscan(group_key);
+			auto scan_range = m_redis.command().hscan(group_key);
 			if (empty(scan_range)) {
 				return false;
 			}
 			else {
-				parSet = redis::range_as<mchlib::SetRecordDataFull>(m_redis.hscan(group_key));
+				parSet = redis::range_as<mchlib::SetRecordDataFull>(m_redis.command().hscan(group_key));
 				return true;
 			}
 		}
 	}
 
 	std::vector<LocatedItem> BackendRedis::locate_in_db (const std::string& parSearch, const TagList& parTags) {
-		return dindb::locate_in_db(m_redis, parSearch, parTags);
+		return dindb::locate_in_db(m_redis.command(), parSearch, parTags);
 	}
 
 	std::vector<LocatedItem> BackendRedis::locate_in_db (const mchlib::TigerHash& parSearch, const TagList& parTags) {
@@ -255,7 +255,7 @@ namespace dindb {
 	}
 
 	std::vector<GroupIDType> BackendRedis::find_all_sets() {
-		return dindb::find_all_sets(m_redis);
+		return dindb::find_all_sets(m_redis.command());
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {

@@ -19,7 +19,7 @@
 #define idB2F92EE07A004D5293FD0657EEE8F75B
 
 #include "backends/db_backend.hpp"
-#include "command.hpp"
+#include "incredis.hpp"
 #include "script.hpp"
 #include "dindexer-core/searchpaths.hpp"
 #include <string>
@@ -58,7 +58,7 @@ namespace dindb {
 		virtual std::vector<std::string> find_paths_starting_by ( GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath ) override;
 
 	private:
-		redis::Command m_redis;
+		redis::IncRedis m_redis;
 		redis::Script m_tag_if_in_set;
 		redis::Script m_dele_tag_if_in_set;
 		redis::Script m_dele_hash;
