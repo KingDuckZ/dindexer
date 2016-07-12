@@ -42,7 +42,7 @@ namespace dindb {
 		const SetDetailsMap g_set_details_map {
 			{SetDetail_Desc, "desc"},
 			{SetDetail_Type, "type"},
-			{SetDetail_CreeationDate, "creation"},
+			{SetDetail_CreationDate, "creation"},
 			{SetDetail_AppName, "app_name"},
 			{SetDetail_ID, "id"},
 			{SetDetail_DiskLabel, "disk_label"},

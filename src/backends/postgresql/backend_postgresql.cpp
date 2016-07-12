@@ -149,7 +149,7 @@ namespace dindb {
 		return dindb::find_set_details<
 			dindb::SetDetail_ID,
 			dindb::SetDetail_Desc,
-			dindb::SetDetail_CreeationDate,
+			dindb::SetDetail_CreationDate,
 			dindb::SetDetail_DiskLabel
 		>(*m_conn, parSets);
 	}
