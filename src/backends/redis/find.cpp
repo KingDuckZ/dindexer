@@ -16,7 +16,7 @@
  */
 
 #include "find.hpp"
-#include "command.hpp"
+#include "incredis.hpp"
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "dindexer-core/split_tags.hpp"
@@ -64,7 +64,7 @@ namespace dindb {
 		}
 	} //unnamed namespace
 
-	std::vector<GroupIDType> find_all_sets (redis::Command& parRedis) {
+	std::vector<GroupIDType> find_all_sets (redis::IncRedis& parRedis) {
 		using dincore::split_and_trim;
 		using dinhelp::lexical_cast;
 
@@ -75,7 +75,7 @@ namespace dindb {
 		return retval;
 	}
 
-	std::vector<LocatedItem> locate_in_db (redis::Command& parRedis, const std::string& parSearch, const TagList& parTags) {
+	std::vector<LocatedItem> locate_in_db (redis::IncRedis& parRedis, const std::string& parSearch, const TagList& parTags) {
 		using dincore::split_and_trim;
 		using dinhelp::lexical_cast;
 
@@ -87,7 +87,7 @@ namespace dindb {
 		ids.reserve(prefetch_count);
 
 		int curr_count = 0;
-		auto batch = parRedis.make_batch();
+		auto batch = parRedis.command().make_batch();
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 			++curr_count;
 			batch.run("HMGET", itm, "path", "group_id", "tags");

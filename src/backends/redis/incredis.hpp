@@ -19,14 +19,26 @@
 #define id7D338900114548A890B1EECE0C4D3C4C
 
 #include "command.hpp"
+#include "scan_iterator.hpp"
 #include <boost/optional.hpp>
 #include <string>
 #include <boost/utility/string_ref.hpp>
 #include <vector>
+#include <boost/range/iterator_range_core.hpp>
+#include <boost/range/empty.hpp>
 
 namespace redis {
 	class IncRedis {
 	public:
+		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
+		typedef boost::iterator_range<scan_iterator> scan_range;
+		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::HSCAN>> hscan_iterator;
+		typedef boost::iterator_range<hscan_iterator> hscan_range;
+		typedef ScanIterator<ScanSingleValuesInKey<std::string>> sscan_iterator;
+		typedef boost::iterator_range<sscan_iterator> sscan_range;
+		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::ZSCAN>> zscan_iterator;
+		typedef boost::iterator_range<zscan_iterator> zscan_range;
+
 		typedef boost::optional<std::string> opt_string;
 		typedef boost::optional<std::vector<opt_string>> opt_string_list;
 
@@ -42,6 +54,12 @@ namespace redis {
 
 		Command& command ( void ) { return m_command; }
 		const Command& command ( void ) const { return m_command; }
+
+		//Scan
+		scan_range scan ( boost::string_ref parPattern=boost::string_ref() );
+		hscan_range hscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
+		sscan_range sscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
+		zscan_range zscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
 
 		//Hash
 		opt_string hget ( boost::string_ref parKey, boost::string_ref parField );

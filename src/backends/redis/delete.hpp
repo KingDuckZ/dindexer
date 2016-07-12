@@ -25,7 +25,7 @@
 #include <map>
 
 namespace redis {
-	class Command;
+	class IncRedis;
 	class Script;
 } //namespace redis
 
@@ -34,7 +34,7 @@ namespace dindb {
 	using ConfirmDeleCallback = std::function<bool(const IDDescMap&)>;
 
 	void delete_group_from_db (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parDeleTagIfInSet,
 		redis::Script& parDeleHash,
 		const std::vector<GroupIDType>& parIDs,

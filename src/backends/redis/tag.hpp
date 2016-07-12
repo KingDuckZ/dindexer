@@ -23,20 +23,20 @@
 #include <boost/utility/string_ref.hpp>
 
 namespace redis {
-	class Command;
+	class IncRedis;
 	class Script;
 } //namespace redis
 
 namespace dindb {
 	void tag_files (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parTagIfInSet,
 		const std::vector<FileIDType>& parFiles,
 		const std::vector<boost::string_ref>& parTags,
 		GroupIDType parSet
 	);
 	void tag_files (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parTagIfInSet,
 		const std::vector<std::string>& parRegexes,
 		const std::vector<boost::string_ref>& parTags,
@@ -44,27 +44,27 @@ namespace dindb {
 	);
 
 	void delete_tags (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parDeleIfInSet,
 		const std::vector<FileIDType>& parFiles,
 		const std::vector<boost::string_ref>& parTags,
 		GroupIDType parSet
 	);
 	void delete_tags (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parDeleIfInSet,
 		const std::vector<std::string>& parRegexes,
 		const std::vector<boost::string_ref>& parTags,
 		GroupIDType parSet
 	);
 	void delete_all_tags (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parDeleIfInSet,
 		const std::vector<FileIDType>& parFiles,
 		GroupIDType parSet
 	);
 	void delete_all_tags (
-		redis::Command& parRedis,
+		redis::IncRedis& parRedis,
 		redis::Script& parDeleIfInSet,
 		const std::vector<std::string>& parRegexes,
 		GroupIDType parSet

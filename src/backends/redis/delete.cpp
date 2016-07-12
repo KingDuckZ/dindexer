@@ -17,7 +17,7 @@
 
 #include "delete.hpp"
 #include "tag.hpp"
-#include "command.hpp"
+#include "incredis.hpp"
 #include "helpers/lexical_cast.hpp"
 #include "helpers/sequence_bt.hpp"
 #include "dindexerConfig.h"
@@ -76,11 +76,11 @@ namespace dindb {
 		};
 	} //unnamed namespace
 
-	void delete_group_from_db (redis::Command& parRedis, redis::Script& parDeleTagIfInSet, redis::Script& parDeleHash, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
+	void delete_group_from_db (redis::IncRedis& parRedis, redis::Script& parDeleTagIfInSet, redis::Script& parDeleHash, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
 		using dinhelp::lexical_cast;
 		using IDRange = std::tuple<GroupIDType, FileIDType, FileIDType>;
 
-		auto set_batch = parRedis.make_batch();
+		auto set_batch = parRedis.command().make_batch();
 
 		auto dele_pair = confirm_dele(set_batch, parIDs, parConf);
 		assert(set_batch.replies_requested());
@@ -121,13 +121,13 @@ namespace dindb {
 			delete_all_tags(parRedis, parDeleTagIfInSet, ids, set_id);
 		}
 
-		auto dele_batch = parRedis.make_batch();
+		auto dele_batch = parRedis.command().make_batch();
 		for (const auto& dele_tuple : ranges) {
 			const auto set_id = std::get<0>(dele_tuple);
 			const auto file_base_index = std::get<1>(dele_tuple);
 			const auto file_count = std::get<2>(dele_tuple);
 
-			auto hash_query_batch = parRedis.make_batch();
+			auto hash_query_batch = parRedis.command().make_batch();
 			for (FileIDType i = file_base_index; i < file_base_index + file_count; ++i) {
 				const auto file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(i);
 				hash_query_batch.run("HGET", file_key, "hash");

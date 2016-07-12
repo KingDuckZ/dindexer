@@ -77,6 +77,22 @@ namespace redis {
 		m_command.wait_for_disconnect();
 	}
 
+	auto IncRedis::scan (boost::string_ref parPattern) -> scan_range {
+		return scan_range(scan_iterator(&m_command, false, parPattern), scan_iterator(&m_command, true));
+	}
+
+	auto IncRedis::hscan (boost::string_ref parKey, boost::string_ref parPattern) -> hscan_range {
+		return hscan_range(hscan_iterator(&m_command, parKey, false, parPattern), hscan_iterator(&m_command, parKey, true));
+	}
+
+	auto IncRedis::sscan (boost::string_ref parKey, boost::string_ref parPattern) -> sscan_range {
+		return sscan_range(sscan_iterator(&m_command, parKey, false, parPattern), sscan_iterator(&m_command, parKey, true));
+	}
+
+	auto IncRedis::zscan (boost::string_ref parKey, boost::string_ref parPattern) -> zscan_range {
+		return zscan_range(zscan_iterator(&m_command, parKey, false, parPattern), zscan_iterator(&m_command, parKey, true));
+	}
+
 	auto IncRedis::hget (boost::string_ref parKey, boost::string_ref parField) -> opt_string {
 		return optional_string(m_command.run("HGET", parKey, parField));
 	}

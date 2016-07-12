@@ -18,7 +18,6 @@
 #ifndef idD83EEBFC927840C6B9F32D61A1D1E582
 #define idD83EEBFC927840C6B9F32D61A1D1E582
 
-#include "scan_iterator.hpp"
 #include "reply.hpp"
 #include "batch.hpp"
 #include "redisConfig.h"
@@ -30,8 +29,6 @@
 #include <cassert>
 #include <vector>
 #include <utility>
-#include <boost/range/iterator_range_core.hpp>
-#include <boost/range/empty.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <ciso646>
 #include <stdexcept>
@@ -39,15 +36,6 @@
 namespace redis {
 	class Command {
 	public:
-		typedef ScanIterator<ScanSingleValues<std::string>> scan_iterator;
-		typedef boost::iterator_range<scan_iterator> scan_range;
-		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::HSCAN>> hscan_iterator;
-		typedef boost::iterator_range<hscan_iterator> hscan_range;
-		typedef ScanIterator<ScanSingleValuesInKey<std::string>> sscan_iterator;
-		typedef boost::iterator_range<sscan_iterator> sscan_range;
-		typedef ScanIterator<ScanPairs<std::pair<std::string, std::string>, ScanCommands::ZSCAN>> zscan_iterator;
-		typedef boost::iterator_range<zscan_iterator> zscan_range;
-
 		Command ( std::string&& parAddress, uint16_t parPort );
 		explicit Command ( std::string&& parSocket );
 		~Command ( void ) noexcept;
@@ -65,12 +53,6 @@ namespace redis {
 
 		template <typename... Args>
 		Reply run ( const char* parCommand, Args&&... parArgs );
-
-		//Single Redis command wrappers
-		scan_range scan ( boost::string_ref parPattern=boost::string_ref() );
-		hscan_range hscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
-		sscan_range sscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
-		zscan_range zscan ( boost::string_ref parKey, boost::string_ref parPattern=boost::string_ref() );
 
 	private:
 		struct LocalData;
