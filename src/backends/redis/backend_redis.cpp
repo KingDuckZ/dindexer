@@ -179,7 +179,8 @@ namespace dindb {
 			"type", parSetData.type,
 			"content_type", parSetData.content_type,
 			"base_file_id", lexical_cast<std::string>(base_file_id),
-			"file_count", lexical_cast<std::string>(parData.size())
+			"item_count", lexical_cast<std::string>(parData.size()),
+			"dir_count", lexical_cast<std::string>(std::count_if(parData.begin(), parData.end(), [](const mchlib::FileRecordData& r){return r.is_directory;}))
 		);
 
 #if !defined(NDEBUG)
@@ -254,7 +255,7 @@ namespace dindb {
 	}
 
 	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {
-		return std::vector<LocatedSet>();
+		return dindb::locate_sets_in_db(m_redis, parSearch, parCaseInsensitive);
 	}
 
 	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {

@@ -37,7 +37,7 @@ namespace dindb {
 
 			for (auto id : parIDs) {
 				const auto set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(id);
-				parBatch.hmget(set_key, "base_file_id", "file_count", "name");
+				parBatch.hmget(set_key, "base_file_id", "item_count", "name");
 			}
 
 			std::map<GroupIDType, std::string> set_dele_list;
