@@ -84,7 +84,6 @@ namespace dindb {
 			using boost::adaptors::transformed;
 			using boost::tuple;
 			using boost::make_tuple;
-			using redis::get_string;
 			using redis::Reply;
 			using std::vector;
 			using dinhelp::lexical_cast;
@@ -259,6 +258,35 @@ namespace dindb {
 			filter = filter_case_sens;
 
 		return locate_in_bursts<LocatedSet>(parRedis, PROGRAM_NAME ":set:*", filter, "desc", "item_count", "dir_count");
-
 	}
+
+	std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details (redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets) {
+		using dinhelp::lexical_cast;
+		using MArr = dinhelp::MaxSizedArray<std::string, 4>;
+
+		auto batch = parRedis.make_batch();
+		for (auto set_id : parSets) {
+			const auto set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(set_id);
+			batch.hmget(set_key, "creation", "name", "disk_label");
+		}
+		batch.throw_if_failed();
+
+		std::vector<MArr> retval;
+		auto curr_set = parSets.begin();
+		for (const auto& reply : batch.replies()) {
+			const auto& reply_list = get_array(reply);
+			if (redis::RedisVariantType_Nil != reply_list[0].which() and
+				redis::RedisVariantType_Nil != reply_list[1].which() and
+				redis::RedisVariantType_Nil != reply_list[2].which())
+			{
+				retval.resize(retval.size() + 1);
+				retval.back().push_back(lexical_cast<std::string>(*curr_set));
+				retval.back().push_back(get_string(reply_list[1]));
+				retval.back().push_back(get_string(reply_list[0]));
+				retval.back().push_back(get_string(reply_list[2]));
+			}
+			++curr_set;
+		}
+		return retval;
+	};
 } //namespace dindb

@@ -78,9 +78,9 @@ namespace redis {
 
 	private:
 		template <typename T>
-		Reply forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, int>::type parDummy );
+		Reply forward_scan_command ( typename std::enable_if<HasScanTargetMethod<T>::value, long long>::type parContext );
 		template <typename T>
-		Reply forward_scan_command ( typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type parDummy );
+		Reply forward_scan_command ( typename std::enable_if<not HasScanTargetMethod<T>::value, long long>::type parContext );
 		bool is_end ( void ) const;
 
 		void increment ( void );

@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <boost/range/empty.hpp>
 #include <fstream>
+#include <ctime>
 
 namespace dindb {
 	namespace {
@@ -180,7 +181,8 @@ namespace dindb {
 			"content_type", parSetData.content_type,
 			"base_file_id", lexical_cast<std::string>(base_file_id),
 			"item_count", lexical_cast<std::string>(parData.size()),
-			"dir_count", lexical_cast<std::string>(std::count_if(parData.begin(), parData.end(), [](const mchlib::FileRecordData& r){return r.is_directory;}))
+			"dir_count", lexical_cast<std::string>(std::count_if(parData.begin(), parData.end(), [](const mchlib::FileRecordData& r){return r.is_directory;})),
+			"creation", lexical_cast<std::string>(std::time(nullptr))
 		);
 
 #if !defined(NDEBUG)
@@ -204,7 +206,9 @@ namespace dindb {
 				"is_symlink", (file_data.is_symlink ? '1' : '0'),
 				"unreadable", (file_data.unreadable ? '1' : '0'),
 				"hash_valid", (file_data.hash_valid ? '1' : '0'),
-				"group_id", group_id
+				"group_id", group_id,
+				"atime", lexical_cast<std::string>(file_data.atime),
+				"mtime", lexical_cast<std::string>(file_data.mtime)
 			);
 
 			batch.sadd(
@@ -267,7 +271,7 @@ namespace dindb {
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
-		return std::vector<dinhelp::MaxSizedArray<std::string, 4>>();
+		return dindb::find_set_details(m_redis, parSets);
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {

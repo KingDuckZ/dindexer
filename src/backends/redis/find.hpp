@@ -19,6 +19,7 @@
 #define idB4972996B4494E66A03B6AE205B1FA36
 
 #include "backends/db_backend.hpp"
+#include "helpers/MaxSizedArray.hpp"
 #include <vector>
 
 namespace redis {
@@ -31,6 +32,7 @@ namespace dindb {
 	std::vector<LocatedItem> locate_in_db ( redis::IncRedis& parRedis, const mchlib::TigerHash& parSearch, const TagList& parTags );
 	std::vector<LocatedSet> locate_sets_in_db ( redis::IncRedis& parRedis, const std::string& parSubstr, bool parCaseInsensitive );
 	std::vector<LocatedSet> locate_sets_in_db ( redis::IncRedis& parRedis, const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive );
+	std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details ( redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets );
 } //namespace dindb
 
 #endif
