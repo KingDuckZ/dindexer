@@ -133,7 +133,8 @@ namespace redis {
 	}
 
 	Batch::~Batch() noexcept {
-		this->reset();
+		if (m_local_data)
+			this->reset();
 	}
 
 	void Batch::run_pvt (int parArgc, const char** parArgv, std::size_t* parLengths) {
@@ -201,6 +202,7 @@ namespace redis {
 			assert(false);
 		}
 
+		assert(m_local_data);
 		assert(0 == m_local_data->pending_futures);
 		m_futures.clear();
 		m_replies.clear();
