@@ -77,6 +77,10 @@ namespace redis {
 		m_command.wait_for_disconnect();
 	}
 
+	IncRedisBatch IncRedis::make_batch() {
+		return m_command.make_batch();
+	}
+
 	auto IncRedis::scan (boost::string_ref parPattern) -> scan_range {
 		return scan_range(scan_iterator(&m_command, false, parPattern), scan_iterator(&m_command, true));
 	}

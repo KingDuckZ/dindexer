@@ -19,6 +19,7 @@
 #define id7D338900114548A890B1EECE0C4D3C4C
 
 #include "command.hpp"
+#include "incredis_batch.hpp"
 #include "scan_iterator.hpp"
 #include <boost/optional.hpp>
 #include <string>
@@ -52,6 +53,8 @@ namespace redis {
 		void disconnect ( void );
 		void wait_for_disconnect ( void );
 		bool is_connected ( void ) const { return m_command.is_connected(); }
+
+		IncRedisBatch make_batch ( void );
 
 		Command& command ( void ) { return m_command; }
 		const Command& command ( void ) const { return m_command; }

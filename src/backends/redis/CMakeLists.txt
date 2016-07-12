@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME} SHARED
 	delete.cpp
 	find.cpp
 	incredis.cpp
+	incredis_batch.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM

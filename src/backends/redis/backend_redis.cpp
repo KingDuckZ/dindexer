@@ -107,10 +107,10 @@ namespace dindb {
 		m_redis.connect();
 		m_redis.wait_for_connect();
 		if (m_redis.is_connected()) {
-			auto batch = m_redis.command().make_batch();
-			batch.run("SELECT", lexical_cast<std::string>(m_database));
-			batch.run("CLIENT", "SETNAME", PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
-			batch.run("SCRIPT", "FLUSH");
+			auto batch = m_redis.make_batch();
+			batch.select(m_database);
+			batch.client_setname(PROGRAM_NAME "_v" STRINGIZE(VERSION_MAJOR) "." STRINGIZE(VERSION_MINOR) "." STRINGIZE(VERSION_PATCH));
+			batch.script_flush();
 			batch.throw_if_failed();
 		}
 		else {
