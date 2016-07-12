@@ -151,15 +151,17 @@ namespace dindb {
 
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 			const auto& file_key = itm;
-			auto file_reply = parRedis.command().run("HMGET", file_key, "path", "tags", "group_id");
-			auto& file_replies = redis::get_array(file_reply);
-			assert(file_replies.size() == 3);
-			const auto group_id = lexical_cast<GroupIDType>(redis::get_string(file_replies[2]));
+			auto opt_file_replies = parRedis.hmget(file_key, "path", "tags", "group_id");
+			assert(opt_file_replies and opt_file_replies->size() == 3);
+			if (not opt_file_replies)
+				continue;
+			const auto& file_replies = *opt_file_replies;
+			const auto group_id = lexical_cast<GroupIDType>(*file_replies[2]);
 			if (parSet != InvalidGroupID and parSet != group_id)
 				continue;
 
-			const auto path = redis::get_string(file_replies[0]);
-			const auto tags_str = (file_replies[1].which() == redis::RedisVariantType_Nil ? std::string() : redis::get_string(file_replies[1]));
+			const auto& path = *file_replies[0];
+			const auto tags_str = (file_replies[1] ? std::string() : *file_replies[1]);
 			const auto tags = dincore::split_tags(tags_str);
 			const auto file_id = id_from_redis_key<FileIDType>(file_key);
 

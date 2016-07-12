@@ -26,6 +26,7 @@
 #include <vector>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/range/empty.hpp>
+#include <utility>
 
 namespace redis {
 	class IncRedis {
@@ -63,6 +64,8 @@ namespace redis {
 
 		//Hash
 		opt_string hget ( boost::string_ref parKey, boost::string_ref parField );
+		template <typename... Args>
+		opt_string_list hmget ( boost::string_ref parKey, Args&&... parArgs );
 		int hincrby ( boost::string_ref parKey, boost::string_ref parField, int parInc );
 
 		//Set
@@ -70,8 +73,15 @@ namespace redis {
 		opt_string srandmember ( boost::string_ref parKey );
 
 	private:
+		static opt_string_list reply_to_string_list ( const Reply& parReply );
+
 		Command m_command;
 	};
+
+	template <typename... Args>
+	auto IncRedis::hmget (boost::string_ref parKey, Args&&... parArgs) -> opt_string_list {
+		return reply_to_string_list(m_command.run("HMGET", parKey, std::forward<Args>(parArgs)...));
+	}
 } //namespace redis
 
 #endif

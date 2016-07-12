@@ -18,7 +18,6 @@
 #include "incredis.hpp"
 #include "helpers/compatibility.h"
 #include "helpers/lexical_cast.hpp"
-#include <utility>
 #include <cassert>
 #include <ciso646>
 
@@ -50,7 +49,8 @@ namespace redis {
 				return IncRedis::opt_string_list(std::move(retval));
 			}
 		}
-	}
+	} //unnamed namespace
+
 	IncRedis::IncRedis (std::string &&parAddress, uint16_t parPort) :
 		m_command(std::move(parAddress), parPort)
 	{
@@ -109,5 +109,9 @@ namespace redis {
 
 	auto IncRedis::srandmember (boost::string_ref parKey) -> opt_string {
 		return optional_string(m_command.run("SRANDMEMBER", parKey));
+	}
+
+	auto IncRedis::reply_to_string_list (const Reply& parReply) -> opt_string_list {
+		return optional_string_list(parReply);
 	}
 } //namespace redis
