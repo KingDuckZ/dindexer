@@ -24,7 +24,7 @@
 namespace redis {
 	namespace {
 		inline IncRedis::opt_string optional_string ( const Reply& parReply ) a_always_inline;
-		inline IncRedis::opt_string_list optional_string_list ( const Reply& parReply ) a_always_inline;
+		IncRedis::opt_string_list optional_string_list ( const Reply& parReply );
 
 		IncRedis::opt_string optional_string (const Reply& parReply) {
 			assert(parReply.which() == RedisVariantType_Nil or parReply.which() == RedisVariantType_String);
@@ -113,6 +113,10 @@ namespace redis {
 
 	auto IncRedis::srandmember (boost::string_ref parKey) -> opt_string {
 		return optional_string(m_command.run("SRANDMEMBER", parKey));
+	}
+
+	auto IncRedis::smembers (boost::string_ref parKey) -> opt_string_list {
+		return optional_string_list(m_command.run("SMEMBERS", parKey));
 	}
 
 	bool IncRedis::script_flush() {

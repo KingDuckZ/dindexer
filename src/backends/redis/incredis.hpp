@@ -74,6 +74,7 @@ namespace redis {
 		//Set
 		opt_string_list srandmember ( boost::string_ref parKey, int parCount );
 		opt_string srandmember ( boost::string_ref parKey );
+		opt_string_list smembers ( boost::string_ref parKey );
 
 		//Script
 		bool script_flush ( void );

@@ -250,7 +250,7 @@ namespace dindb {
 	}
 
 	std::vector<LocatedItem> BackendRedis::locate_in_db (const mchlib::TigerHash& parSearch, const TagList& parTags) {
-		return std::vector<LocatedItem>();
+		return dindb::locate_in_db(m_redis, parSearch, parTags);
 	}
 
 	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {

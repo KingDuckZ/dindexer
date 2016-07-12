@@ -20,9 +20,13 @@
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "dindexer-core/split_tags.hpp"
+#include "dindexer-machinery/tiger.hpp"
 #include <boost/regex.hpp>
 #include <ciso646>
 #include <algorithm>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/iterator/zip_iterator.hpp>
 
 namespace dindb {
 	namespace {
@@ -61,6 +65,20 @@ namespace dindb {
 				assert(id_index < parIDs.size());
 				++id_index;
 			}
+		}
+
+		//See: http://stackoverflow.com/questions/12552277/whats-the-best-way-to-iterate-over-two-or-more-containers-simultaneously/12553437#12553437
+		//(referenced from http://stackoverflow.com/questions/16982190/c-use-boost-range-transformed-adaptor-with-binary-function)
+		//What became of this? http://marc.info/?l=boost-users&m=129619765731342
+		template <typename... Conts>
+		auto zip_range (Conts&... parConts) -> decltype(boost::make_iterator_range(
+			boost::make_zip_iterator(boost::make_tuple(parConts.begin()...)),
+		    boost::make_zip_iterator(boost::make_tuple(parConts.end()...)))
+		) {
+			return {
+				boost::make_zip_iterator(boost::make_tuple(parConts.begin()...)),
+				boost::make_zip_iterator(boost::make_tuple(parConts.end()...))
+			};
 		}
 	} //unnamed namespace
 
@@ -103,5 +121,50 @@ namespace dindb {
 		if (curr_count)
 			store_matching_paths(batch, retval, ids, search, parTags);
 		return retval;
+	}
+
+	std::vector<LocatedItem> locate_in_db (redis::IncRedis& parRedis, const mchlib::TigerHash& parSearch, const TagList& parTags) {
+		using boost::adaptors::filtered;
+		using boost::adaptors::transformed;
+		using boost::tuple;
+		using boost::make_tuple;
+		using redis::get_string;
+		using redis::Reply;
+		using std::vector;
+		using dinhelp::lexical_cast;
+
+		const auto hash_key = PROGRAM_NAME ":hash:" + mchlib::tiger_to_string(parSearch, false);
+		const auto file_ids = parRedis.smembers(hash_key);
+
+		vector<std::string> ids;
+		if (file_ids) {
+			auto batch = parRedis.make_batch();
+			for (auto&& file_id : *file_ids) {
+				if (not file_id)
+					continue;
+
+				const auto file_key = PROGRAM_NAME ":file:" + *file_id;
+				ids.emplace_back(std::move(*file_id));
+				batch.hmget(file_key, "path", "group_id", "tags");
+			}
+			batch.throw_if_failed();
+
+			assert(batch.replies().size() == ids.size());
+			return boost::copy_range<vector<LocatedItem>>(
+				zip_range(batch.replies(), ids) |
+				transformed([](const tuple<Reply, std::string>& r)
+				            { return make_tuple(redis::get_array(r.get<0>()), r.get<1>()); }
+				) |
+				filtered([&parTags](const tuple<vector<Reply>, std::string>& t)
+				         { return parTags.empty() or all_tags_match(parTags, get_string(t.get<0>()[2])); }
+				) |
+				transformed([&ids](const tuple<vector<Reply>, std::string>& t)
+				            { return LocatedItem{ get_string(t.get<0>()[0]), lexical_cast<FileIDType>(t.get<1>()), lexical_cast<GroupIDType>(get_string(t.get<0>()[1])) }; }
+				)
+			);
+		}
+		else {
+			return std::vector<LocatedItem>();
+		}
 	}
 } //namespace dindb

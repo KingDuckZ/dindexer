@@ -28,6 +28,7 @@ namespace redis {
 namespace dindb {
 	std::vector<GroupIDType> find_all_sets ( redis::IncRedis& parRedis );
 	std::vector<LocatedItem> locate_in_db ( redis::IncRedis& parRedis, const std::string& parSearch, const TagList& parTags );
+	std::vector<LocatedItem> locate_in_db ( redis::IncRedis& parRedis, const mchlib::TigerHash& parSearch, const TagList& parTags );
 } //namespace dindb
 
 #endif
