@@ -87,9 +87,21 @@ namespace mchlib {
 		bool operator== ( const FileRecordData& parOther ) const;
 #endif
 
-		boost::string_ref path ( void ) const { return boost::string_ref(abs_path).substr(path_offset); }
-		boost::string_ref mime_type ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_type_offset, mime_type_length); }
-		boost::string_ref mime_charset ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_charset_offset, mime_charset_length); }
+		boost::string_ref path ( void ) const {
+			assert(abs_path.data());
+			return boost::string_ref(abs_path).substr(path_offset);
+		}
+
+		boost::string_ref mime_type ( void ) const {
+			assert(mime_full.get().data());
+			return boost::string_ref(mime_full.get()).substr(mime_type_offset, mime_type_length);
+		}
+
+		boost::string_ref mime_charset ( void ) const {
+			assert(mime_full.get().data());
+			return boost::string_ref(mime_full.get()).substr(mime_charset_offset, mime_charset_length);
+		}
+
 		void set_mime_parts ( boost::string_ref parType, boost::string_ref parCharset ) {
 			const auto& mime = mime_full.get();
 			{

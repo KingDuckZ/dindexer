@@ -142,6 +142,7 @@ namespace redis {
 		assert(parArgc >= 1);
 		assert(parArgv);
 		assert(parLengths); //This /could/ be null, but I don't see why it should
+		assert(m_local_data);
 
 		const auto pending_futures = m_local_data->pending_futures.fetch_add(1);
 		auto* data = new HiredisCallbackData(m_local_data->pending_futures, m_local_data->free_cmd_slot);

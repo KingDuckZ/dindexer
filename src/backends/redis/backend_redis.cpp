@@ -182,8 +182,13 @@ namespace dindb {
 			"file_count", lexical_cast<std::string>(parData.size())
 		);
 
-		for (auto z = base_file_id; z < data_size + 1; ++z) {
+#if !defined(NDEBUG)
+		std::size_t inserted_count = 0;
+#endif
+		for (auto z = base_file_id; z < base_file_id + data_size; ++z) {
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
+			assert(z >= base_file_id);
+			assert(static_cast<std::size_t>(z - base_file_id) < parData.size());
 			const auto& file_data = parData[z - base_file_id];
 			const std::string hash = tiger_to_string(file_data.hash);
 			batch.hmset(
@@ -205,7 +210,11 @@ namespace dindb {
 				PROGRAM_NAME ":hash:" + hash,
 				lexical_cast<std::string>(z)
 			);
+#if !defined(NDEBUG)
+			++inserted_count;
+#endif
 		}
+		assert(inserted_count == parData.size());
 
 		batch.throw_if_failed();
 	}
@@ -219,10 +228,11 @@ namespace dindb {
 			return false;
 		}
 		else {
-			const auto result_id = std::move(*hash_reply);
-			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.hscan(result_id));
+			const auto file_key = PROGRAM_NAME ":file:" + *hash_reply;
+			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.hscan(file_key));
 			parItem = std::move(set_key_and_file_item.second);
-			const std::string group_key = std::move(set_key_and_file_item.first);
+			assert(parItem.hash == parHash);
+			const std::string group_key = PROGRAM_NAME ":set:" + set_key_and_file_item.first;
 
 			auto scan_range = m_redis.hscan(group_key);
 			if (empty(scan_range)) {
