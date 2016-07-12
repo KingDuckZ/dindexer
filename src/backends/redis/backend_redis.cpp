@@ -254,12 +254,12 @@ namespace dindb {
 		return dindb::locate_in_db(m_redis, parSearch, parTags);
 	}
 
-	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, bool parCaseInsensitive) {
-		return dindb::locate_sets_in_db(m_redis, parSearch, parCaseInsensitive);
+	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSubstr, bool parCaseInsensitive) {
+		return dindb::locate_sets_in_db(m_redis, parSubstr, parCaseInsensitive);
 	}
 
-	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
-		return std::vector<LocatedSet>();
+	std::vector<LocatedSet> BackendRedis::locate_sets_in_db (const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
+		return dindb::locate_sets_in_db(m_redis, parSubstr, parSets, parCaseInsensitive);
 	}
 
 	std::vector<GroupIDType> BackendRedis::find_all_sets() {

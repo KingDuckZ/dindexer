@@ -49,8 +49,8 @@ namespace dindb {
 
 		virtual std::vector<LocatedItem> locate_in_db ( const std::string& parSearch, const TagList& parTags ) override;
 		virtual std::vector<LocatedItem> locate_in_db ( const mchlib::TigerHash& parSearch, const TagList& parTags ) override;
-		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, bool parCaseInsensitive ) override;
-		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSearch, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive ) override;
+		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSubstr, bool parCaseInsensitive ) override;
+		virtual std::vector<LocatedSet> locate_sets_in_db ( const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive ) override;
 
 		virtual std::vector<GroupIDType> find_all_sets ( void ) override;
 		virtual std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details ( const std::vector<GroupIDType>& parSets ) override;

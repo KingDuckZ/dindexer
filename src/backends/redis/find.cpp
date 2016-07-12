@@ -226,18 +226,31 @@ namespace dindb {
 	}
 
 	std::vector<LocatedSet> locate_sets_in_db (redis::IncRedis& parRedis, const std::string& parSubstr, bool parCaseInsensitive) {
-		auto filter_case_ins = [&parSubstr](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
+		return locate_sets_in_db(parRedis, parSubstr, std::vector<GroupIDType>(), parCaseInsensitive);
+	}
+
+	std::vector<LocatedSet> locate_sets_in_db (redis::IncRedis& parRedis, const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
+		using dinhelp::lexical_cast;
+
+		auto filter_case_ins = [&parSubstr, &parSets](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
 			const auto& s = redis::get_string(t.get<0>()[0]);
 			return s.end() != std::search(
 				s.begin(),
 				s.end(),
 				parSubstr.begin(),
 				parSubstr.end(),
-		        [](char c1, char c2) {return std::toupper(c1) == std::toupper(c2);}
-			);
+				[](char c1, char c2) {return std::toupper(c1) == std::toupper(c2);}) and
+				(
+					parSets.empty() or
+					std::find(parSets.begin(), parSets.end(), lexical_cast<GroupIDType>(t.get<1>())) != parSets.end()
+				);
 		};
-		auto filter_case_sens = [&parSubstr](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
-			return redis::get_string(t.get<0>()[0]).find(parSubstr) != std::string::npos;
+		auto filter_case_sens = [&parSubstr, &parSets](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
+			return redis::get_string(t.get<0>()[0]).find(parSubstr) != std::string::npos and
+				(
+					parSets.empty() or
+					std::find(parSets.begin(), parSets.end(), lexical_cast<GroupIDType>(t.get<1>())) != parSets.end()
+				);
 		};
 		std::function<bool(const boost::tuple<std::vector<redis::Reply>, std::string>&)> filter;
 		if (parCaseInsensitive)
@@ -246,5 +259,6 @@ namespace dindb {
 			filter = filter_case_sens;
 
 		return locate_in_bursts<LocatedSet>(parRedis, PROGRAM_NAME ":set:*", filter, "desc", "item_count", "dir_count");
+
 	}
 } //namespace dindb
