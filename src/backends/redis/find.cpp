@@ -34,11 +34,15 @@
 
 namespace dindb {
 	namespace {
-		const int g_prefetch_count = 500;
-
 		inline std::string to_std_string ( boost::string_ref parStr ) a_always_inline;
 		template <typename T>
 		inline void concatenate ( std::vector<T>&& parAppend, std::vector<T>& parOut ) a_always_inline;
+		template <typename T>
+		inline T construct ( const std::vector<redis::Reply>& parData, const std::string& parID ) a_always_inline;
+		template <>
+		inline LocatedItem construct ( const std::vector<redis::Reply>& parData, const std::string& parID ) a_always_inline;
+		template <>
+		inline LocatedSet construct ( const std::vector<redis::Reply>& parData, const std::string& parID ) a_always_inline;
 
 		bool all_tags_match (const TagList& parTags, const std::string& parTaglist) {
 			const auto tags = dincore::split_tags(parTaglist);
@@ -70,7 +74,8 @@ namespace dindb {
 			};
 		}
 
-		std::vector<LocatedItem> store_filtered_items (
+		template <typename T>
+		std::vector<T> store_filtered_items (
 			const std::vector<redis::Reply>& parReplies,
 			const std::vector<std::string>& parIDs,
 			std::function<bool(const boost::tuple<std::vector<redis::Reply>, std::string>&)> parFilter
@@ -84,59 +89,16 @@ namespace dindb {
 			using std::vector;
 			using dinhelp::lexical_cast;
 
-			//Reply is expected to contain: "path", "group_id", "tags"
-
 			assert(parReplies.size() == parIDs.size());
-			return boost::copy_range<vector<LocatedItem>>(
-					zip_range(parReplies, parIDs) |
-							transformed([](const tuple<Reply, std::string>& r) {
-								return make_tuple(redis::get_array(r.get<0>()), r.get<1>());
-							}) |
-							filtered(parFilter) |
-							transformed([](const tuple<vector<Reply>, std::string>& t) {
-								return LocatedItem{
-									get_string(t.get<0>()[0]),
-									lexical_cast<FileIDType>(t.get<1>()),
-									lexical_cast<GroupIDType>(get_string(t.get<0>()[1]))
-								};
-							})
-			);
-		}
-
-		std::vector<LocatedSet> store_filtered_sets (
-			const std::vector<redis::Reply>& parReplies,
-		    const std::vector<std::string>& parIDs,
-		    std::function<bool(const boost::tuple<std::vector<redis::Reply>, std::string>&)> parFilter
-		) {
-			using boost::adaptors::filtered;
-			using boost::adaptors::transformed;
-			using boost::tuple;
-			using boost::make_tuple;
-			using redis::get_string;
-			using redis::Reply;
-			using std::vector;
-			using dinhelp::lexical_cast;
-
-			//Reply is expected to contain: "desc", "item_count", "dir_count"
-
-			assert(parReplies.size() == parIDs.size());
-			return boost::copy_range<vector<LocatedSet>>(
-					zip_range(parReplies, parIDs) |
-							transformed([](const tuple<Reply, std::string>& r) {
-								return make_tuple(redis::get_array(r.get<0>()), r.get<1>());
-							}) |
-							filtered(parFilter) |
-							transformed([](const tuple<vector<Reply>, std::string>& t) {
-								const auto itm_count = lexical_cast<uint32_t>(get_string(t.get<0>()[1]));
-								const auto dir_count = lexical_cast<uint32_t>(get_string(t.get<0>()[2]));
-								assert(dir_count <= itm_count);
-								return LocatedSet{
-										get_string(t.get<0>()[0]),
-										lexical_cast<GroupIDType>(t.get<1>()),
-								        itm_count - dir_count,
-								        dir_count
-								};
-							})
+			return boost::copy_range<vector<T>>(
+				zip_range(parReplies, parIDs) |
+				transformed([](const tuple<Reply, std::string>& r) {
+					return make_tuple(redis::get_array(r.get<0>()), r.get<1>());
+				}) |
+				filtered(parFilter) |
+				transformed([](const tuple<vector<Reply>, std::string>& t) {
+					return construct<T>(t.get<0>(), t.get<1>());
+				})
 			);
 		}
 
@@ -147,6 +109,67 @@ namespace dindb {
 		template <typename T>
 		void concatenate (std::vector<T>&& parAppend, std::vector<T>& parOut) {
 			parOut.insert(parOut.end(), std::make_move_iterator(parAppend.begin()), std::make_move_iterator(parAppend.end()));
+		}
+
+		template <>
+		LocatedItem construct (const std::vector<redis::Reply>& parData, const std::string& parID) {
+			using dinhelp::lexical_cast;
+
+			//parData is expected to contain: "path", "group_id", "tags"
+
+			assert(parData.size() == 3);
+			return LocatedItem{
+				redis::get_string(parData[0]),
+				lexical_cast<FileIDType>(parID),
+				lexical_cast<GroupIDType>(redis::get_string(parData[1]))
+			};
+		}
+
+		template <>
+		LocatedSet construct (const std::vector<redis::Reply>& parData, const std::string& parID) {
+			using dinhelp::lexical_cast;
+
+			//parData is expected to contain: "desc", "item_count", "dir_count"
+
+			assert(parData.size() == 3);
+			const auto itm_count = lexical_cast<uint32_t>(redis::get_string(parData[1]));
+			const auto dir_count = lexical_cast<uint32_t>(redis::get_string(parData[2]));
+			assert(dir_count <= itm_count);
+
+			return LocatedSet{
+				redis::get_string(parData[0]),
+				lexical_cast<GroupIDType>(parID),
+				itm_count - dir_count,
+				dir_count
+			};
+		}
+
+		template <typename T, typename F, typename... FIELDS>
+		std::vector<T> locate_in_bursts (redis::IncRedis& parRedis, const char* parScanKeyFilter, F parFilter, FIELDS&&... parFields) {
+			using dincore::split_and_trim;
+
+			const int prefetch_count = 500;
+			std::vector<T> retval;
+			std::vector<std::string> ids;
+			ids.reserve(prefetch_count);
+
+			int curr_count = 0;
+			auto batch = parRedis.make_batch();
+			for (const auto& itm : parRedis.scan(parScanKeyFilter)) {
+				++curr_count;
+				batch.hmget(itm, std::forward<FIELDS>(parFields)...);
+				ids.push_back(to_std_string(split_and_trim(itm, ':').back()));
+
+				if (curr_count == prefetch_count) {
+					concatenate(store_filtered_items<T>(batch.replies(), ids, parFilter), retval);
+					batch.reset();
+					curr_count = 0;
+					ids.clear();
+				}
+			}
+			if (curr_count)
+				concatenate(store_filtered_items<T>(batch.replies(), ids, parFilter), retval);
+			return retval;
 		}
 	} //unnamed namespace
 
@@ -162,38 +185,14 @@ namespace dindb {
 	}
 
 	std::vector<LocatedItem> locate_in_db (redis::IncRedis& parRedis, const std::string& parRegex, const TagList& parTags) {
-		using dincore::split_and_trim;
-
 		const boost::regex search(parRegex, boost::regex_constants::optimize | boost::regex_constants::nosubs | boost::regex_constants::perl);
-		const int prefetch_count = g_prefetch_count;
-
-		std::vector<LocatedItem> retval;
-		std::vector<std::string> ids;
-		ids.reserve(prefetch_count);
 
 		auto filter = [&parTags, &search](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
 			return (parTags.empty() or all_tags_match(parTags, redis::get_string(t.get<0>()[2]))) and
 				boost::regex_search(redis::get_string(t.get<0>()[0]), search);
 		};
 
-		int curr_count = 0;
-		auto batch = parRedis.make_batch();
-		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
-			++curr_count;
-			batch.hmget(itm, "path", "group_id", "tags");
-			ids.push_back(to_std_string(split_and_trim(itm, ':').back()));
-
-			if (curr_count == prefetch_count) {
-				concatenate(store_filtered_items(batch.replies(), ids, filter), retval);
-				batch.reset();
-				curr_count = 0;
-				ids.clear();
-			}
-		}
-		if (curr_count)
-			concatenate(store_filtered_items(batch.replies(), ids, filter), retval);
-
-		return retval;
+		return locate_in_bursts<LocatedItem>(parRedis, PROGRAM_NAME ":file:*", filter, "path", "group_id", "tags");
 	}
 
 	std::vector<LocatedItem> locate_in_db (redis::IncRedis& parRedis, const mchlib::TigerHash& parSearch, const TagList& parTags) {
@@ -213,7 +212,7 @@ namespace dindb {
 			}
 			batch.throw_if_failed();
 
-			return store_filtered_items(
+			return store_filtered_items<LocatedItem>(
 				batch.replies(),
 				ids,
 				[&parTags](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
@@ -227,13 +226,6 @@ namespace dindb {
 	}
 
 	std::vector<LocatedSet> locate_sets_in_db (redis::IncRedis& parRedis, const std::string& parSubstr, bool parCaseInsensitive) {
-		using dincore::split_and_trim;
-
-		const int prefetch_count = g_prefetch_count;
-		std::vector<LocatedSet> retval;
-		std::vector<std::string> set_ids;
-		set_ids.reserve(prefetch_count);
-
 		auto filter_case_ins = [&parSubstr](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
 			const auto& s = redis::get_string(t.get<0>()[0]);
 			return s.end() != std::search(
@@ -253,23 +245,6 @@ namespace dindb {
 		else
 			filter = filter_case_sens;
 
-		int curr_count = 0;
-		auto batch = parRedis.make_batch();
-		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":set:*")) {
-			++curr_count;
-			batch.hmget(itm, "desc", "item_count", "dir_count");
-			set_ids.push_back(to_std_string(split_and_trim(itm, ':').back()));
-
-			if (curr_count == prefetch_count) {
-				concatenate(store_filtered_sets(batch.replies(), set_ids, filter), retval);
-				batch.reset();
-				curr_count = 0;
-				set_ids.clear();
-			}
-		}
-		if (curr_count)
-			concatenate(store_filtered_sets(batch.replies(), set_ids, filter), retval);
-
-		return retval;
+		return locate_in_bursts<LocatedSet>(parRedis, PROGRAM_NAME ":set:*", filter, "desc", "item_count", "dir_count");
 	}
 } //namespace dindb
