@@ -52,6 +52,16 @@ namespace redis {
 		return *this;
 	}
 
+	IncRedisBatch& IncRedisBatch::srandmember (boost::string_ref parKey, int parCount) {
+		m_batch.run("SRANDMEMBER", parKey, dinhelp::lexical_cast<std::string>(parCount));
+		return *this;
+	}
+
+	IncRedisBatch& IncRedisBatch::srandmember (boost::string_ref parKey) {
+		m_batch.run("SRANDMEMBER", parKey);
+		return *this;
+	}
+
 	IncRedisBatch& IncRedisBatch::script_flush() {
 		m_batch.run("SCRIPT", "FLUSH");
 		return *this;

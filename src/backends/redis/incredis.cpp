@@ -115,6 +115,11 @@ namespace redis {
 		return optional_string(m_command.run("SRANDMEMBER", parKey));
 	}
 
+	bool IncRedis::script_flush() {
+		const auto ret = get<StatusString>(m_command.run("SCRIPT", "FLUSH"));
+		return ret.is_ok();
+	}
+
 	auto IncRedis::reply_to_string_list (const Reply& parReply) -> opt_string_list {
 		return optional_string_list(parReply);
 	}

@@ -75,6 +75,9 @@ namespace redis {
 		opt_string_list srandmember ( boost::string_ref parKey, int parCount );
 		opt_string srandmember ( boost::string_ref parKey );
 
+		//Script
+		bool script_flush ( void );
+
 	private:
 		static opt_string_list reply_to_string_list ( const Reply& parReply );
 
@@ -83,6 +86,7 @@ namespace redis {
 
 	template <typename... Args>
 	auto IncRedis::hmget (boost::string_ref parKey, Args&&... parArgs) -> opt_string_list {
+		static_assert(sizeof...(Args) > 0, "No fields specified");
 		return reply_to_string_list(m_command.run("HMGET", parKey, std::forward<Args>(parArgs)...));
 	}
 } //namespace redis
