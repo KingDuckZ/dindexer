@@ -82,16 +82,16 @@ namespace redis {
 		}
 		else {
 			std::vector<Reply> array_reply;
-			long long new_context;
+			long long new_context = m_scan_context;
 
 			do {
-				auto whole_reply = this->forward_scan_command<ValueFetch>(0);
+				auto whole_reply = this->forward_scan_command<ValueFetch>(new_context);
 
 				array_reply = get_array(whole_reply);
 				assert(2 == array_reply.size());
 				assert(array_reply.size() % ValueFetch::step == 0);
 				new_context = get_integer_autoconv_if_str(array_reply[0]);
-			} while (new_context and array_reply.empty());
+			} while (new_context and get_array(array_reply[1]).empty());
 
 			const auto variant_array = get_array(array_reply[1]);
 			assert(variant_array.size() % ValueFetch::step == 0);
@@ -131,14 +131,14 @@ namespace redis {
 
 	template <typename ValueFetch>
 	template <typename T>
-	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, int>::type) {
-		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), m_scan_context, T::work_count);
+	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<HasScanTargetMethod<T>::value, long long>::type parContext) {
+		return implem::ScanIteratorBaseClass::run(T::command(), T::scan_target(), parContext, T::work_count);
 	}
 
 	template <typename ValueFetch>
 	template <typename T>
-	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, int>::type) {
-		return implem::ScanIteratorBaseClass::run(T::command(), m_scan_context, T::work_count);
+	Reply ScanIterator<ValueFetch>::forward_scan_command (typename std::enable_if<not HasScanTargetMethod<T>::value, long long>::type parContext) {
+		return implem::ScanIteratorBaseClass::run(T::command(), parContext, T::work_count);
 	}
 
 	template <typename T>

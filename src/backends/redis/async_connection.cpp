@@ -172,6 +172,8 @@ namespace redis {
 	}
 
 	void AsyncConnection::disconnect() {
+		if (not m_local_data->connect_processed)
+			return;
 		assert(m_local_data->redis_poll_thread.joinable());
 		m_local_data->connect_processed = false;
 		{
