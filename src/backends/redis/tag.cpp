@@ -122,10 +122,10 @@ namespace dindb {
 	}
 
 	void delete_all_tags (redis::IncRedis& parRedis, redis::Script& parDeleIfInSet, const std::vector<FileIDType>& parFiles, GroupIDType parSet) {
-		auto batch = parRedis.command().make_batch();
+		auto batch = parRedis.make_batch();
 		for (const auto file_id : parFiles) {
 			const auto file_key = make_file_key(file_id);
-			batch.run("HGET", file_key, "tags");
+			batch.hget(file_key, "tags");
 		}
 
 		batch.throw_if_failed();

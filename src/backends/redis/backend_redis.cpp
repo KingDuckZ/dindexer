@@ -169,10 +169,9 @@ namespace dindb {
 		assert(file_id_int >= data_size);
 		const auto base_file_id = file_id_int - data_size + 1;
 
-		auto batch = m_redis.command().make_batch();
+		auto batch = m_redis.make_batch();
 
-		batch.run(
-			"HMSET",
+		batch.hmset(
 			set_key,
 			"name", parSetData.name,
 			"disk_label", parSetData.disk_label,
@@ -187,8 +186,7 @@ namespace dindb {
 			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
 			const auto& file_data = parData[z - base_file_id];
 			const std::string hash = tiger_to_string(file_data.hash);
-			batch.run(
-				"HMSET",
+			batch.hmset(
 				file_key,
 				"hash", hash,
 				"path", file_data.path(),
@@ -203,8 +201,7 @@ namespace dindb {
 				"group_id", group_id
 			);
 
-			batch.run(
-				"SADD",
+			batch.sadd(
 				PROGRAM_NAME ":hash:" + hash,
 				lexical_cast<std::string>(z)
 			);

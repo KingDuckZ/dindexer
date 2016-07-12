@@ -42,7 +42,7 @@ namespace dindb {
 			return true;
 		}
 
-		void store_matching_paths (redis::Batch& parBatch, std::vector<LocatedItem>& parOut, std::vector<FileIDType>& parIDs, const boost::regex& parSearch, const TagList& parTags) {
+		void store_matching_paths (redis::IncRedisBatch& parBatch, std::vector<LocatedItem>& parOut, std::vector<FileIDType>& parIDs, const boost::regex& parSearch, const TagList& parTags) {
 			using dinhelp::lexical_cast;
 			assert(parIDs.size() == parBatch.replies().size());
 
@@ -87,10 +87,10 @@ namespace dindb {
 		ids.reserve(prefetch_count);
 
 		int curr_count = 0;
-		auto batch = parRedis.command().make_batch();
+		auto batch = parRedis.make_batch();
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":file:*")) {
 			++curr_count;
-			batch.run("HMGET", itm, "path", "group_id", "tags");
+			batch.hmget(itm, "path", "group_id", "tags");
 			ids.push_back(lexical_cast<FileIDType>(split_and_trim(itm, ':').back()));
 
 			if (curr_count == prefetch_count) {

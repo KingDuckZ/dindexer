@@ -29,7 +29,7 @@
 
 namespace dindb {
 	namespace {
-		std::pair<bool, std::size_t> confirm_dele (redis::Batch& parBatch, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
+		std::pair<bool, std::size_t> confirm_dele (redis::IncRedisBatch& parBatch, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
 			using dinhelp::lexical_cast;
 
 			if (parIDs.empty())
@@ -37,7 +37,7 @@ namespace dindb {
 
 			for (auto id : parIDs) {
 				const auto set_key = PROGRAM_NAME ":set:" + lexical_cast<std::string>(id);
-				parBatch.run("HMGET", set_key, "base_file_id", "file_count", "name");
+				parBatch.hmget(set_key, "base_file_id", "file_count", "name");
 			}
 
 			std::map<GroupIDType, std::string> set_dele_list;
@@ -80,10 +80,10 @@ namespace dindb {
 		using dinhelp::lexical_cast;
 		using IDRange = std::tuple<GroupIDType, FileIDType, FileIDType>;
 
-		auto set_batch = parRedis.command().make_batch();
+		auto set_batch = parRedis.make_batch();
 
 		auto dele_pair = confirm_dele(set_batch, parIDs, parConf);
-		assert(set_batch.replies_requested());
+		assert(set_batch.batch().replies_requested());
 		if (not dele_pair.first)
 			return;
 
@@ -121,30 +121,30 @@ namespace dindb {
 			delete_all_tags(parRedis, parDeleTagIfInSet, ids, set_id);
 		}
 
-		auto dele_batch = parRedis.command().make_batch();
+		auto dele_batch = parRedis.make_batch();
 		for (const auto& dele_tuple : ranges) {
 			const auto set_id = std::get<0>(dele_tuple);
 			const auto file_base_index = std::get<1>(dele_tuple);
 			const auto file_count = std::get<2>(dele_tuple);
 
-			auto hash_query_batch = parRedis.command().make_batch();
+			auto hash_query_batch = parRedis.make_batch();
 			for (FileIDType i = file_base_index; i < file_base_index + file_count; ++i) {
 				const auto file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(i);
-				hash_query_batch.run("HGET", file_key, "hash");
+				hash_query_batch.hget(file_key, "hash");
 			}
 			hash_query_batch.throw_if_failed();
 
 			for (const auto& rep : hash_query_batch.replies()) {
 				const auto hash_key = PROGRAM_NAME ":hash:" + redis::get_string(rep);
 				parDeleHash.run(
-					dele_batch,
+					dele_batch.batch(),
 					std::make_tuple(hash_key),
 					std::make_tuple(lexical_cast<std::string>(file_base_index), lexical_cast<std::string>(file_count))
 				);
 			}
 
-			dele_batch.run("DEL", PROGRAM_NAME ":set:" + lexical_cast<std::string>(set_id));
-			chunked_run<FileIDType, 8>(dele_batch, +"DEL", file_base_index, file_count, [](FileIDType id){return PROGRAM_NAME ":file:" + lexical_cast<std::string>(id);});
+			dele_batch.del(PROGRAM_NAME ":set:" + lexical_cast<std::string>(set_id));
+			chunked_run<FileIDType, 8>(dele_batch.batch(), +"DEL", file_base_index, file_count, [](FileIDType id){return PROGRAM_NAME ":file:" + lexical_cast<std::string>(id);});
 		}
 
 		dele_batch.throw_if_failed();
