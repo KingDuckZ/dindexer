@@ -21,6 +21,9 @@
 #include "backends/db_backend.hpp"
 #include "helpers/MaxSizedArray.hpp"
 #include <vector>
+#include <string>
+#include <boost/utility/string_ref.hpp>
+#include <cstdint>
 
 namespace redis {
 	class IncRedis;
@@ -34,6 +37,7 @@ namespace dindb {
 	std::vector<LocatedSet> locate_sets_in_db ( redis::IncRedis& parRedis, const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive );
 	std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details ( redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets );
 	std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details ( redis::IncRedis& parRedis, GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir );
+	std::vector<std::string> find_paths_starting_by ( redis::IncRedis& parRedis, GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath );
 } //namespace dindb
 
 #endif

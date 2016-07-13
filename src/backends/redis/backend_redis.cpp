@@ -183,7 +183,8 @@ namespace dindb {
 			"base_file_id", lexical_cast<std::string>(base_file_id),
 			"item_count", lexical_cast<std::string>(parData.size()),
 			"dir_count", lexical_cast<std::string>(std::count_if(parData.begin(), parData.end(), [](const mchlib::FileRecordData& r){return r.is_directory;})),
-			"creation", lexical_cast<std::string>(std::time(nullptr))
+			"creation", lexical_cast<std::string>(std::time(nullptr)),
+			"app_name", parSignature
 		);
 
 #if !defined(NDEBUG)
@@ -282,7 +283,7 @@ namespace dindb {
 	}
 
 	std::vector<std::string> BackendRedis::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
-		return std::vector<std::string>();
+		return dindb::find_paths_starting_by(m_redis, parGroupID, parLevel, parPath);
 	}
 } //namespace dindb
 

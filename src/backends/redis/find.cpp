@@ -317,4 +317,15 @@ namespace dindb {
 		}
 		return retval;
 	};
+
+	std::vector<std::string> find_paths_starting_by (redis::IncRedis& parRedis, GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
+		using boost::adaptors::transformed;
+		using dinhelp::MaxSizedArray;
+
+		auto file_details = find_file_details(parRedis, parGroupID, parLevel, parPath);
+		return boost::copy_range<std::vector<std::string>>(
+			file_details |
+			transformed([](MaxSizedArray<std::string, 1>& a){return std::move(a.front());})
+		);
+	}
 } //namespace dindb
