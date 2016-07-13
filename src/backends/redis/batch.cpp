@@ -26,8 +26,13 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
-#include <iostream>
 #include <sstream>
+
+//#define VERBOSE_HIREDIS_COMM
+
+#if defined(VERBOSE_HIREDIS_COMM)
+#   include <iostream>
+#endif
 
 namespace redis {
 	namespace {
@@ -147,13 +152,19 @@ namespace redis {
 		const auto pending_futures = m_local_data->pending_futures.fetch_add(1);
 		auto* data = new HiredisCallbackData(m_local_data->pending_futures, m_local_data->free_cmd_slot);
 
+#if defined(VERBOSE_HIREDIS_COMM)
 		std::cout << "run_pvt(), " << pending_futures << " items pending... ";
+#endif
 		if (pending_futures >= g_max_redis_unanswered_commands) {
+#if defined(VERBOSE_HIREDIS_COMM)
 			std::cout << " waiting... ";
+#endif
 			std::unique_lock<std::mutex> u_lock(m_local_data->futures_mutex);
 			m_local_data->free_cmd_slot.wait(u_lock, [this]() { return m_local_data->pending_futures < g_max_redis_unanswered_commands; });
 		}
+#if defined(VERBOSE_HIREDIS_COMM)
 		std::cout << " emplace_back(future)... ";
+#endif
 
 		m_futures.emplace_back(data->promise.get_future());
 		{
@@ -163,7 +174,9 @@ namespace redis {
 			static_cast<void>(command_added);
 		}
 
+#if defined(VERBOSE_HIREDIS_COMM)
 		std::cout << "command sent to hiredis" << std::endl;
+#endif
 		m_async_conn->wakeup_event_thread();
 	}
 
