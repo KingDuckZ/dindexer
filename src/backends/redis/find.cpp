@@ -174,11 +174,10 @@ namespace dindb {
 
 	std::vector<GroupIDType> find_all_sets (redis::IncRedis& parRedis) {
 		using dincore::split_and_trim;
-		using dinhelp::lexical_cast;
 
 		std::vector<GroupIDType> retval;
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":set:*")) {
-			retval.push_back(lexical_cast<GroupIDType>(split_and_trim(itm, ':').back()));
+			retval.push_back(dinhelp::lexical_cast<GroupIDType>(split_and_trim(itm, ':').back()));
 		}
 		return retval;
 	}
