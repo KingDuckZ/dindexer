@@ -17,9 +17,21 @@
 
 #include "incredis_batch.hpp"
 #include "helpers/lexical_cast.hpp"
+#include <sstream>
 #include <utility>
+#include <ciso646>
 
 namespace redis {
+	namespace {
+		std::string make_boundary (double parValue, bool parExclude) {
+			std::ostringstream oss;
+			if (parExclude)
+				oss << '(';
+			oss << parValue;
+			return oss.str();
+		}
+	} //unnamed namespace
+
 	IncRedisBatch::IncRedisBatch (Batch&& parBatch) :
 		m_batch(std::move(parBatch))
 	{
@@ -59,6 +71,17 @@ namespace redis {
 
 	IncRedisBatch& IncRedisBatch::srandmember (boost::string_ref parKey) {
 		m_batch.run("SRANDMEMBER", parKey);
+		return *this;
+	}
+
+	IncRedisBatch& IncRedisBatch::zrangebyscore (boost::string_ref parKey, double parMin, bool parMinIncl, double parMax, bool parMaxIncl, bool parWithScores) {
+		auto lower_bound = make_boundary(parMin, not parMinIncl);
+		auto upper_bound = make_boundary(parMax, not parMaxIncl);
+
+		if (parWithScores)
+			m_batch.run("ZRANGEBYSCORE", parKey, lower_bound, upper_bound, "WITHSCORES");
+		else
+			m_batch.run("ZRANGEBYSCORE", parKey, lower_bound, upper_bound);
 		return *this;
 	}
 

@@ -119,6 +119,13 @@ namespace redis {
 		return optional_string_list(m_command.run("SMEMBERS", parKey));
 	}
 
+	auto IncRedis::zrangebyscore (boost::string_ref parKey, double parMin, bool parMinIncl, double parMax, bool parMaxIncl, bool parWithScores) -> opt_string_list {
+		auto batch = make_batch();
+		batch.zrangebyscore(parKey, parMin, parMinIncl, parMax, parMaxIncl, parWithScores);
+		assert(batch.replies().size() == 1);
+		return optional_string_list(batch.replies().front());
+	}
+
 	bool IncRedis::script_flush() {
 		const auto ret = get<StatusString>(m_command.run("SCRIPT", "FLUSH"));
 		return ret.is_ok();

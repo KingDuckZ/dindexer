@@ -76,6 +76,9 @@ namespace redis {
 		opt_string srandmember ( boost::string_ref parKey );
 		opt_string_list smembers ( boost::string_ref parKey );
 
+		//Sorted set
+		opt_string_list zrangebyscore ( boost::string_ref parKey, double parMin, bool parMinIncl, double parMax, bool parMaxIncl, bool parWithScores );
+
 		//Script
 		bool script_flush ( void );
 

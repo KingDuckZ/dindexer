@@ -67,6 +67,7 @@ namespace redis {
 		//Sorted set
 		template <typename... Args>
 		IncRedisBatch& zadd ( boost::string_ref parKey, ZADD_Mode parMode, bool parChange, Args&&... parArgs );
+		IncRedisBatch& zrangebyscore ( boost::string_ref parKey, double parMin, bool parMinIncl, double parMax, bool parMaxIncl, bool parWithScores );
 
 		//Script
 		IncRedisBatch& script_flush ( void );
