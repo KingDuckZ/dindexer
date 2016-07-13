@@ -23,6 +23,7 @@
 #include <cassert>
 #include <algorithm>
 #include <stdexcept>
+#include <atomic>
 
 //See docs directory for info about hiredis/libev with multithreading
 
@@ -33,12 +34,14 @@ namespace redis {
 	struct Command::LocalData {
 		explicit LocalData (Command* parCommand, std::string&& parAddress, uint16_t parPort) :
 			async_connection(std::move(parAddress), parPort),
-			lua_scripts(parCommand)
+			lua_scripts(parCommand),
+			pending_futures(0)
 		{
 		}
 
 		AsyncConnection async_connection;
 		ScriptManager lua_scripts;
+		std::atomic_size_t pending_futures;
 	};
 
 	Command::Command (std::string&& parAddress, uint16_t parPort) :
@@ -79,7 +82,7 @@ namespace redis {
 
 	Batch Command::make_batch() {
 		assert(is_connected());
-		return Batch(&m_local_data->async_connection);
+		return Batch(&m_local_data->async_connection, m_local_data->pending_futures);
 	}
 
 	Script Command::make_script (const std::string &parScript) {

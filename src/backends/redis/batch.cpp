@@ -113,24 +113,24 @@ namespace redis {
 	} //unnamed namespace
 
 	struct Batch::LocalData {
-		LocalData ( void ) :
+		explicit LocalData ( std::atomic_size_t& parPendingFutures ) :
 			free_cmd_slot(),
 			futures_mutex(),
-			pending_futures(0)
+			pending_futures(parPendingFutures)
 		{
 		}
 
 		std::condition_variable free_cmd_slot;
 		std::mutex futures_mutex;
-		std::atomic_size_t pending_futures;
+		std::atomic_size_t& pending_futures;
 	};
 
 	Batch::Batch (Batch&&) = default;
 
-	Batch::Batch (AsyncConnection* parConn) :
+	Batch::Batch (AsyncConnection* parConn, std::atomic_size_t& parPendingFutures) :
 		m_futures(),
 		m_replies(),
-		m_local_data(new LocalData),
+		m_local_data(new LocalData(parPendingFutures)),
 		m_async_conn(parConn)
 	{
 		assert(m_async_conn);

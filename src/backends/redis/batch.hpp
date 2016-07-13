@@ -54,7 +54,7 @@ namespace redis {
 	private:
 		struct LocalData;
 
-		explicit Batch ( AsyncConnection* parConn );
+		explicit Batch ( AsyncConnection* parConn, std::atomic<std::size_t>& parPendingFutures );
 		void run_pvt ( int parArgc, const char** parArgv, std::size_t* parLengths );
 
 		std::vector<std::future<Reply>> m_futures;
