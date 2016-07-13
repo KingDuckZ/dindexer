@@ -167,6 +167,7 @@ namespace dindb {
 
 		const auto group_id = lexical_cast<std::string>(group_id_int);
 		const std::string set_key = PROGRAM_NAME ":set:" + group_id;
+		const std::string level_key = PROGRAM_NAME ":levels:" + group_id;
 		assert(file_id_int >= data_size);
 		const auto base_file_id = file_id_int - data_size + 1;
 
@@ -215,6 +216,8 @@ namespace dindb {
 				PROGRAM_NAME ":hash:" + hash,
 				lexical_cast<std::string>(z)
 			);
+
+			batch.zadd(level_key, redis::IncRedisBatch::ZADD_None, false, static_cast<double>(file_data.level), file_key);
 #if !defined(NDEBUG)
 			++inserted_count;
 #endif
@@ -275,7 +278,7 @@ namespace dindb {
 	}
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
-		return std::vector<dinhelp::MaxSizedArray<std::string, 1>>();
+		return dindb::find_file_details(m_redis, parSetID, parLevel, parDir);
 	}
 
 	std::vector<std::string> BackendRedis::find_paths_starting_by (GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {

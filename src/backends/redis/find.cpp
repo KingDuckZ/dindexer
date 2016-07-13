@@ -31,6 +31,7 @@
 #include <functional>
 #include <iterator>
 #include <cstdint>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace dindb {
 	namespace {
@@ -261,7 +262,6 @@ namespace dindb {
 
 	std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details (redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets) {
 		using dinhelp::lexical_cast;
-		using MArr = dinhelp::MaxSizedArray<std::string, 4>;
 
 		auto batch = parRedis.make_batch();
 		for (auto set_id : parSets) {
@@ -270,7 +270,7 @@ namespace dindb {
 		}
 		batch.throw_if_failed();
 
-		std::vector<MArr> retval;
+		std::vector<dinhelp::MaxSizedArray<std::string, 4>> retval;
 		auto curr_set = parSets.begin();
 		for (const auto& reply : batch.replies()) {
 			const auto& reply_list = get_array(reply);
@@ -285,6 +285,35 @@ namespace dindb {
 				retval.back().push_back(get_string(reply_list[2]));
 			}
 			++curr_set;
+		}
+		return retval;
+	};
+
+	std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details (redis::IncRedis& parRedis, GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+		using dinhelp::lexical_cast;
+		using RetListType = std::vector<dinhelp::MaxSizedArray<std::string, 1>>;
+
+		const double level = static_cast<float>(parLevel);
+		auto lst = parRedis.zrangebyscore(PROGRAM_NAME ":levels:" + lexical_cast<std::string>(parSetID), level, true, level, true, false);
+		if (not lst)
+			return RetListType();
+
+		auto batch = parRedis.make_batch();
+		for (const auto& itm : *lst) {
+			if (itm)
+				batch.hget(*itm, "path");
+		}
+		batch.throw_if_failed();
+
+		std::vector<dinhelp::MaxSizedArray<std::string, 1>> retval;
+		for (auto& reply : batch.replies()) {
+			if (redis::RedisVariantType_Nil != reply.which()) {
+				auto curr_path = get_string(reply);
+				if (boost::starts_with(curr_path, parDir)) {
+					retval.resize(retval.size() + 1);
+					retval.back().push_back(std::move(curr_path));
+				}
+			}
 		}
 		return retval;
 	};

@@ -144,6 +144,7 @@ namespace dindb {
 			}
 
 			dele_batch.del(PROGRAM_NAME ":set:" + lexical_cast<std::string>(set_id));
+			dele_batch.del(PROGRAM_NAME ":levels:" + lexical_cast<std::string>(set_id));
 			chunked_run<FileIDType, 8>(dele_batch.batch(), +"DEL", file_base_index, file_count, [](FileIDType id){return PROGRAM_NAME ":file:" + lexical_cast<std::string>(id);});
 		}
 
