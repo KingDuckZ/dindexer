@@ -15,9 +15,13 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idB3E2F339E3B64378B66342550C4D2089
-#define idB3E2F339E3B64378B66342550C4D2089
+#ifndef id2F97AF7626CE45F08742867A2A737482
+#define id2F97AF7626CE45F08742867A2A737482
 
-#define REDIS_SCRIPTS_PATH "@DINDEXER_REDIS_SCRIPTS_PATH@"
+#include "helpers/cmake_on_off.h"
+
+#if CMAKE_@has_cryptopp_lib@
+#	define WITH_CRYPTOPP
+#endif
 
 #endif

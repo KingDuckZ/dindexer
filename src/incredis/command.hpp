@@ -20,7 +20,6 @@
 
 #include "reply.hpp"
 #include "batch.hpp"
-#include "redisConfig.h"
 #include "script.hpp"
 #include <array>
 #include <string>

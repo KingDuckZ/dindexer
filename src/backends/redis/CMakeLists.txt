@@ -2,57 +2,29 @@ project(${bare_name}-backend-redis CXX)
 
 set(DINDEXER_REDIS_SCRIPTS_PATH "${CMAKE_INSTALL_PREFIX}/${bare_name}/redis" CACHE STRING "Path where Lua scripts for Redis are stored")
 
-find_package(hiredis 0.11.0 REQUIRED)
-find_package(CryptoPP 5.6)
-find_package(libev 4.0 REQUIRED)
 find_package(Boost 1.53.0 REQUIRED COMPONENTS regex)
 
 add_library(${PROJECT_NAME} SHARED
 	backend_redis.cpp
-	command.cpp
-	scan_iterator.cpp
-	reply.cpp
-	batch.cpp
-	script.cpp
-	script_manager.cpp
-	async_connection.cpp
 	tag.cpp
 	delete.cpp
 	find.cpp
-	incredis.cpp
-	incredis_batch.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PUBLIC ${Boost_INCLUDE_DIRS}
-	PRIVATE ${HIREDIS_INCLUDE_DIRS}
-	PRIVATE ${CMAKE_SOURCE_DIR}/lib/better-enums
-	PRIVATE ${LIBEV_INCLUDE_DIRS}
-	PRIVATE ${Boost_INCLUDE_DIRS}
 )
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+	PUBLIC ${CMAKE_SOURCE_DIR}/src/incredis
 )
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-inc
 	PUBLIC ${bare_name}-core
-	PRIVATE ${HIREDIS_LIBRARIES}
-	PRIVATE ${LIBEV_LIBRARIES}
 	PRIVATE ${Boost_LIBRARIES}
+	PRIVATE incredis
 )
-
-target_compile_definitions(${PROJECT_NAME}
-	PRIVATE EV_COMPAT3=0
-)
-
-if (CryptoPP_FOUND)
-	target_link_libraries(${PROJECT_NAME} PRIVATE ${CryptoPP_LIBRARIES})
-	target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CryptoPP_INCLUDE_DIRS})
-	set (has_cryptopp_lib ON)
-else()
-	set (has_cryptopp_lib OFF)
-endif()
 
 configure_file(
 	redisConfig.h.in

@@ -21,6 +21,7 @@
 #include "backends/backend_version.hpp"
 #include "helpers/lexical_cast.hpp"
 #include "dindexerConfig.h"
+#include "redisConfig.h"
 #include "helpers/stringize.h"
 #include "tag.hpp"
 #include "delete.hpp"

@@ -18,7 +18,7 @@
 #ifndef id8E124FF76DF449CDB8FBA806F8EF4E78
 #define id8E124FF76DF449CDB8FBA806F8EF4E78
 
-#include "redisConfig.h"
+#include "incredisConfig.h"
 #if defined(WITH_CRYPTOPP)
 #	define MAKE_SHA1_WITH_CRYPTOPP
 #endif
