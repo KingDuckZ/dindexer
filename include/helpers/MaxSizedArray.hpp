@@ -78,8 +78,9 @@ namespace dinhelp {
 		iterator erase ( const iterator& parDele );
 		iterator erase ( const iterator& parFrom, const iterator& parToExcl );
 		void clear ( void );
-		mov_reference operator[] ( size_type parIndex );
-		const_reference operator[] ( size_type parIndex ) const;
+		reference operator[] ( size_type parIndex ) &;
+		mov_reference operator[] ( size_type parIndex ) &&;
+		const_reference operator[] ( size_type parIndex ) const &;
 		MaxSizedArray& operator= ( const MaxSizedArray& parOther );
 		bool operator== ( const MaxSizedArray& parOther ) const;
 		bool operator!= ( const MaxSizedArray& parOther ) const;
@@ -95,10 +96,12 @@ namespace dinhelp {
 		const_reverse_iterator rbegin ( void ) const;
 		reverse_iterator rend ( void );
 		const_reverse_iterator rend ( void ) const;
-		reference front ( void ) { return (*this)[0]; }
-		reference back ( void ) { return (*this)[size() - 1]; }
-		const_reference front ( void ) const { return (*this)[0]; }
-		const_reference back ( void ) const { return (*this)[size() - 1]; }
+		reference front ( void ) & { return (*this)[0]; }
+		reference back ( void ) & { return (*this)[size() - 1]; }
+		mov_reference front ( void ) && { return (*this)[0]; }
+		mov_reference back ( void ) && { return (*this)[size() - 1]; }
+		const_reference front ( void ) const & { return (*this)[0]; }
+		const_reference back ( void ) const & { return (*this)[size() - 1]; }
 
 	private:
 		pointer GetPointer_NoAssert ( void ) { return m_localMem; }

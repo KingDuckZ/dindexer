@@ -104,7 +104,15 @@ namespace dinhelp {
 	///-------------------------------------------------------------------------
 	///-------------------------------------------------------------------------
 	template <typename T, size_t S, typename A>
-	typename MaxSizedArray<T, S, A>::mov_reference MaxSizedArray<T, S, A>::operator[] (size_type parIndex) {
+	typename MaxSizedArray<T, S, A>::reference MaxSizedArray<T, S, A>::operator[] (size_type parIndex) & {
+		assert(parIndex < size());
+		return m_localMem[parIndex];
+	}
+
+	///-------------------------------------------------------------------------
+	///-------------------------------------------------------------------------
+	template <typename T, size_t S, typename A>
+	typename MaxSizedArray<T, S, A>::mov_reference MaxSizedArray<T, S, A>::operator[] (size_type parIndex) && {
 		assert(parIndex < size());
 		return std::move(m_localMem[parIndex]);
 	}
@@ -112,7 +120,7 @@ namespace dinhelp {
 	///-------------------------------------------------------------------------
 	///-------------------------------------------------------------------------
 	template <typename T, size_t S, typename A>
-	typename MaxSizedArray<T, S, A>::const_reference MaxSizedArray<T, S, A>::operator[] (size_type parIndex) const {
+	typename MaxSizedArray<T, S, A>::const_reference MaxSizedArray<T, S, A>::operator[] (size_type parIndex) const & {
 		assert(parIndex < size());
 		return m_localMem[parIndex];
 	}
