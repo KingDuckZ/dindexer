@@ -107,7 +107,6 @@ target_compile_features(${PROJECT_NAME}
 target_include_directories(${bare_name}-inc
 	INTERFACE ${PROJECT_BINARY_DIR}
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
-	INTERFACE ${CMAKE_SOURCE_DIR}/lib/sprout
 )
 
 
@@ -132,6 +131,7 @@ add_subdirectory(lib/glob2regex)
 add_subdirectory(src/backends)
 add_subdirectory(src/core)
 add_shared_git_project(lib/duckhandy)
+add_shared_git_project(lib/incredis EXCLUDE_FROM_ALL)
 
 #Actions
 add_subdirectory(src/main)
