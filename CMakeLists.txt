@@ -21,6 +21,7 @@ include(gccversion)
 include(CPack)
 include(CTest)
 include(timestamp)
+include(shared_git_project)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
@@ -143,7 +144,7 @@ add_subdirectory(src/tag)
 
 #Tests
 if (BUILD_TESTING)
-	add_subdirectory(test/gtest)
+	add_shared_git_project(test/gtest)
 	add_subdirectory(test/unit)
 	add_subdirectory(test/unit_cli)
 endif()
