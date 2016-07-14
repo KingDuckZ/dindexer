@@ -19,8 +19,8 @@
 #define idB2F92EE07A004D5293FD0657EEE8F75B
 
 #include "backends/db_backend.hpp"
-#include "incredis.hpp"
-#include "script.hpp"
+#include "incredis/incredis.hpp"
+#include "incredis/script.hpp"
 #include "dindexer-core/searchpaths.hpp"
 #include <string>
 #include <cstdint>

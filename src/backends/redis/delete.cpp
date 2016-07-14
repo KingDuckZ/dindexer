@@ -17,7 +17,7 @@
 
 #include "delete.hpp"
 #include "tag.hpp"
-#include "incredis.hpp"
+#include "incredis/incredis.hpp"
 #include "duckhandy/lexical_cast.hpp"
 #include "duckhandy/sequence_bt.hpp"
 #include "dindexerConfig.h"

@@ -16,7 +16,7 @@
  */
 
 #include "find.hpp"
-#include "incredis.hpp"
+#include "incredis/incredis.hpp"
 #include "duckhandy/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "dindexer-core/split_tags.hpp"
