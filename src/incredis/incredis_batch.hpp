@@ -19,7 +19,7 @@
 #define id3C772A92AB0E440DA84DAFD807BC962D
 
 #include "batch.hpp"
-#include "helpers/sequence_bt.hpp"
+#include "duckhandy/sequence_bt.hpp"
 #include <boost/utility/string_ref.hpp>
 #include <boost/lexical_cast.hpp>
 #include <type_traits>

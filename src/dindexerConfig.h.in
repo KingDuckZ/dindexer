@@ -18,7 +18,7 @@
 #ifndef id48D6E1D45238460F99C2BCBFDE920791
 #define id48D6E1D45238460F99C2BCBFDE920791
 
-#include "helpers/cmake_on_off.h"
+#include "duckhandy/cmake_on_off.h"
 
 #define PROGRAM_NAME "@bare_name@"
 #define VERSION_MAJOR @PROJECT_VERSION_MAJOR@

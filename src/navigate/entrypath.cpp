@@ -16,7 +16,7 @@
  */
 
 #include "entrypath.hpp"
-#include "helpers/infix_iterator.hpp"
+#include "duckhandy/infix_iterator.hpp"
 #include <boost/spirit/include/qi_core.hpp>
 #include <boost/spirit/include/qi_parse.hpp>
 #include <boost/spirit/include/qi_lit.hpp>

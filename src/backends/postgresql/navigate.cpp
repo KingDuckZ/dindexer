@@ -17,7 +17,7 @@
 
 #include "navigate.hpp"
 #include "pq/connection.hpp"
-#include "helpers/infix_iterator.hpp"
+#include "duckhandy/infix_iterator.hpp"
 #include "query_count_limit.hpp"
 #include <ciso646>
 #include <utility>

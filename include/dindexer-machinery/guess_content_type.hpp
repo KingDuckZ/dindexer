@@ -20,7 +20,7 @@
 
 #include "dindexer-machinery/mediatypes.hpp"
 #include "dindexer-machinery/recorddata.hpp"
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #include <vector>
 
 namespace mchlib {

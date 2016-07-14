@@ -18,7 +18,7 @@
 #include "listdircontent.hpp"
 #include "entrypath.hpp"
 #include "backends/db_backend.hpp"
-#include "helpers/infix_iterator.hpp"
+#include "duckhandy/infix_iterator.hpp"
 #include <cassert>
 #include <utility>
 #include <boost/range/algorithm/copy.hpp>

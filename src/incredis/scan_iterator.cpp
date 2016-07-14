@@ -16,7 +16,7 @@
  */
 
 #include "scan_iterator.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include "command.hpp"
 #include <cassert>
 #include <ciso646>

@@ -17,7 +17,7 @@
 
 #include "delete.hpp"
 #include "pq/connection.hpp"
-#include "helpers/infix_iterator.hpp"
+#include "duckhandy/infix_iterator.hpp"
 #include <sstream>
 #include <utility>
 #include <iterator>

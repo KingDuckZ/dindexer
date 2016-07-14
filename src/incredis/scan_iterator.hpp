@@ -19,7 +19,7 @@
 #define id774125B851514A26BD7C2AD1D804D732
 
 #include "reply.hpp"
-#include "helpers/has_method.hpp"
+#include "duckhandy/has_method.hpp"
 #include "enum.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>

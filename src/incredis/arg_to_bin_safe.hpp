@@ -18,7 +18,7 @@
 #ifndef id9348909738B047B7B6912D73CB519039
 #define id9348909738B047B7B6912D73CB519039
 
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #include <cstddef>
 #include <boost/utility/string_ref.hpp>
 #include <string>

@@ -16,7 +16,7 @@
  */
 
 #include "script_manager.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include "command.hpp"
 #include <cassert>
 #if defined(MAKE_SHA1_WITH_CRYPTOPP)

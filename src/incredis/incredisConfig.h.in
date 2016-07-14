@@ -18,7 +18,7 @@
 #ifndef id2F97AF7626CE45F08742867A2A737482
 #define id2F97AF7626CE45F08742867A2A737482
 
-#include "helpers/cmake_on_off.h"
+#include "duckhandy/cmake_on_off.h"
 
 #if CMAKE_@has_cryptopp_lib@
 #	define WITH_CRYPTOPP

@@ -16,7 +16,7 @@
  */
 
 #include "reply.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include <boost/variant/get.hpp>
 
 namespace redis {

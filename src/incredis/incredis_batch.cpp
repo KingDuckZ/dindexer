@@ -16,7 +16,7 @@
  */
 
 #include "incredis_batch.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include <sstream>
 #include <utility>
 #include <ciso646>

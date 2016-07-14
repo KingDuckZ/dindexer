@@ -132,8 +132,6 @@ and the following libraries:
 * **machinery** the bulk of dindexer, such as the indexing functionality
 * **pq** a c++ wrapper for libpq (PostgreSql)
 
-Additionally inside include/helpers/ you will find header-only implementations of very generic helper tools.
-
 Currently, actions are just the command line frontend to access the functionalities in the libraries. This way writing a new CLI or GUI should be relatively easy.
 This structure might change in the future.
 

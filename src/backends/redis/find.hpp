@@ -19,7 +19,7 @@
 #define idB4972996B4494E66A03B6AE205B1FA36
 
 #include "backends/db_backend.hpp"
-#include "helpers/MaxSizedArray.hpp"
+#include "duckhandy/MaxSizedArray.hpp"
 #include <vector>
 #include <string>
 #include <boost/utility/string_ref.hpp>

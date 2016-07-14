@@ -17,7 +17,7 @@
 
 #include "dindexer-machinery/set_listing.hpp"
 #include "dindexer-machinery/set_listing_helpers.hpp"
-#include "helpers/lengthof.h"
+#include "duckhandy/lengthof.h"
 #include <gtest/gtest.h>
 #include <vector>
 #include <utility>

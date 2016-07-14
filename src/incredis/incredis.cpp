@@ -16,8 +16,8 @@
  */
 
 #include "incredis.hpp"
-#include "helpers/compatibility.h"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/compatibility.h"
+#include "duckhandy/lexical_cast.hpp"
 #include <cassert>
 #include <ciso646>
 

@@ -20,7 +20,7 @@
 
 #include "dindexer-machinery/recorddata.hpp"
 #include "flatinsertin2dlist.hpp"
-#include "helpers/MaxSizedArray.hpp"
+#include "duckhandy/MaxSizedArray.hpp"
 #include "backends/db_backend.hpp"
 #include <memory>
 #include <cstdint>

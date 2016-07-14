@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 #include <boost/utility/string_ref.hpp>
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 
 namespace dincore {
 	std::vector<boost::string_ref> split_and_trim ( const std::string& parList, char parSeparator ) a_pure;

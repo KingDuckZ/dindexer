@@ -18,7 +18,7 @@
 #ifndef id88738025C6B24BDEB604A5AE3C36EE8D
 #define id88738025C6B24BDEB604A5AE3C36EE8D
 
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #if defined(__cplusplus)
 #	include <cstddef>
 #else

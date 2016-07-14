@@ -17,7 +17,7 @@
 
 #include "discinfo.hpp"
 #include "pathname.hpp"
-#include "helpers/lengthof.h"
+#include "duckhandy/lengthof.h"
 #include <map>
 #include <fstream>
 #include <boost/tokenizer.hpp>

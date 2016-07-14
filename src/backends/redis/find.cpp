@@ -17,11 +17,11 @@
 
 #include "find.hpp"
 #include "incredis.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include "dindexerConfig.h"
 #include "dindexer-core/split_tags.hpp"
 #include "dindexer-machinery/tiger.hpp"
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #include <boost/regex.hpp>
 #include <ciso646>
 #include <algorithm>

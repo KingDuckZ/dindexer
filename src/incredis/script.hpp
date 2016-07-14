@@ -19,8 +19,8 @@
 #define id5B30CDA57F894CD6888093B64F9433DA
 
 #include "batch.hpp"
-#include "helpers/lexical_cast.hpp"
-#include "helpers/sequence_bt.hpp"
+#include "duckhandy/lexical_cast.hpp"
+#include "duckhandy/sequence_bt.hpp"
 #include <boost/utility/string_ref.hpp>
 #include <tuple>
 #include <cassert>

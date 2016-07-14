@@ -15,13 +15,13 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include <gtest/gtest.h>
 #include <cstdint>
 #include <string>
 #include <boost/utility/string_ref.hpp>
 
-TEST(helpers, lexical_cast) {
+TEST(duckhandy, lexical_cast) {
 	using dinhelp::lexical_cast;
 	using dinhelp::tags::hex;
 	using dinhelp::tags::dec;

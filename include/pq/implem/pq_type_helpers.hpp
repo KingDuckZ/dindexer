@@ -18,7 +18,7 @@
 #ifndef idEC73C3E4D64D44ABA0DB7D41FA8A7EB7
 #define idEC73C3E4D64D44ABA0DB7D41FA8A7EB7
 
-#include "helpers/string_bt.hpp"
+#include "duckhandy/string_bt.hpp"
 #include <chrono>
 #include <type_traits>
 #include <boost/utility/string_ref.hpp>

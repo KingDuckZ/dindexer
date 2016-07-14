@@ -19,7 +19,7 @@
 #define id2949D72CC2F246D4A289FFB820CC3A8F
 
 #include "dindexer-machinery/recorddata.hpp"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include <array>
 #include <string>
 #include <cstdint>

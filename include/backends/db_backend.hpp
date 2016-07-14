@@ -19,7 +19,7 @@
 #define id7506CA9825454B80856154ACFE8A9DE2
 
 #include "backends/backend_loader.hpp"
-#include "helpers/MaxSizedArray.hpp"
+#include "duckhandy/MaxSizedArray.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>

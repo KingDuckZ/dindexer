@@ -18,7 +18,7 @@
 #include "tag.hpp"
 #include "incredis.hpp"
 #include "dindexerConfig.h"
-#include "helpers/lexical_cast.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include "dindexer-core/split_tags.hpp"
 #include <sstream>
 #include <tuple>

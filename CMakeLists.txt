@@ -132,6 +132,7 @@ add_subdirectory(lib/glob2regex)
 add_subdirectory(src/backends)
 add_subdirectory(src/core)
 add_subdirectory(src/incredis)
+add_shared_git_project(lib/duckhandy)
 
 #Actions
 add_subdirectory(src/main)
@@ -153,6 +154,7 @@ target_link_libraries(${PROJECT_NAME}
 	INTERFACE ${Boost_LIBRARIES}
 	INTERFACE ${bare_name}-pq
 	INTERFACE ${bare_name}-inc
+	INTERFACE duckhandy
 )
 
 target_compile_definitions(${PROJECT_NAME}
