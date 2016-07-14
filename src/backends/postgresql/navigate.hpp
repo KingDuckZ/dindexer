@@ -37,7 +37,7 @@ namespace pq {
 } //namespace pq
 
 namespace dindb {
-	using dinhelp::MaxSizedArray;
+	using dhandy::MaxSizedArray;
 
 	enum SetDetails {
 		SetDetail_Desc = 0x01,
@@ -109,7 +109,7 @@ namespace dindb {
 	template <SetDetails... D>
 	inline
 	auto find_set_details (pq::Connection& parDB, const std::vector<GroupIDType>& parIDs) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
-		using dinhelp::FlatInsertIn2DList;
+		using dhandy::FlatInsertIn2DList;
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
 		typedef void(FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 
@@ -125,7 +125,7 @@ namespace dindb {
 	template <FileDetails... D>
 	inline
 	auto find_file_details (pq::Connection& parDB, GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) -> std::vector<MaxSizedArray<std::string, sizeof...(D)>> {
-		using dinhelp::FlatInsertIn2DList;
+		using dhandy::FlatInsertIn2DList;
 		typedef std::vector<MaxSizedArray<std::string, sizeof...(D)>> ReturnType;
 		typedef void(FlatInsertIn2DList<ReturnType>::*FlatPushBackFunc)(std::string&&);
 

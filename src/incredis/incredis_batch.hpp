@@ -78,7 +78,7 @@ namespace redis {
 
 	namespace implem {
 		template <std::size_t... I, typename... Args>
-		void run_conv_floats_to_strings ( Batch& parBatch, dinhelp::bt::index_seq<I...>, Args&&... parArgs );
+		void run_conv_floats_to_strings ( Batch& parBatch, dhandy::bt::index_seq<I...>, Args&&... parArgs );
 	} //namespace implem
 
 	template <typename... Args>
@@ -115,7 +115,7 @@ namespace redis {
 		static_assert(sizeof...(Args) >= 1, "No score/value pairs specified");
 		static_assert(sizeof...(Args) % 2 == 0, "Uneven number of parameters received");
 
-		using dinhelp::bt::index_range;
+		using dhandy::bt::index_range;
 
 		if (parChange) {
 			if (ZADD_None == parMode)
@@ -155,17 +155,17 @@ namespace redis {
 		}
 
 		template <std::size_t PreArgsCount, std::size_t... I, typename... Args>
-		void run_conv_floats_to_strings_impl (Batch& parBatch, dinhelp::bt::index_seq<I...>, Args&&... parArgs) {
+		void run_conv_floats_to_strings_impl (Batch& parBatch, dhandy::bt::index_seq<I...>, Args&&... parArgs) {
 			static_assert(sizeof...(I) == sizeof...(Args), "Wrong number of indices");
 			static_assert(PreArgsCount <= sizeof...(I), "Can't ignore more arguments than those that were received");
 			parBatch.run(stringize_or_forward<PreArgsCount, I>(std::forward<Args>(parArgs))...);
 		}
 
 		template <std::size_t... I, typename... Args>
-		void run_conv_floats_to_strings (Batch& parBatch, dinhelp::bt::index_seq<I...>, Args&&... parArgs) {
+		void run_conv_floats_to_strings (Batch& parBatch, dhandy::bt::index_seq<I...>, Args&&... parArgs) {
 			static_assert(sizeof...(Args) >= sizeof...(I), "Unexpected count, there should be at least as many argument as there are indices");
 			constexpr const auto pre_args_count = sizeof...(Args) - sizeof...(I);
-			run_conv_floats_to_strings_impl<pre_args_count>(parBatch, dinhelp::bt::index_range<0, sizeof...(Args)>(), std::forward<Args>(parArgs)...);
+			run_conv_floats_to_strings_impl<pre_args_count>(parBatch, dhandy::bt::index_range<0, sizeof...(Args)>(), std::forward<Args>(parArgs)...);
 		};
 	} //namespace implem
 } //namespace redis

@@ -51,7 +51,7 @@ namespace redis {
 		if (parScript.empty())
 			return boost::string_ref();
 
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 
 		static_assert(20 == CryptoPP::SHA1::DIGESTSIZE, "Unexpected SHA1 digest size");
 		static_assert(sizeof(LuaScriptHash) >= CryptoPP::SHA1::DIGESTSIZE, "Wrong SHA1 struct size");
@@ -60,9 +60,9 @@ namespace redis {
 		LuaScriptHash digest;
 		CryptoPP::SHA1().CalculateDigest(digest.raw_bytes, reinterpret_cast<const uint8_t*>(parScript.data()), parScript.size());
 		//TODO: change when lexical_cast will support arrays
-		auto sha1_str_parta = lexical_cast<std::string, dinhelp::tags::hexl>(__builtin_bswap64(digest.part_a));
-		auto sha1_str_partb = lexical_cast<std::string, dinhelp::tags::hexl>(__builtin_bswap64(digest.part_b));
-		auto sha1_str_partc = lexical_cast<std::string, dinhelp::tags::hexl>(__builtin_bswap32(digest.part_c));
+		auto sha1_str_parta = lexical_cast<std::string, dhandy::tags::hexl>(__builtin_bswap64(digest.part_a));
+		auto sha1_str_partb = lexical_cast<std::string, dhandy::tags::hexl>(__builtin_bswap64(digest.part_b));
+		auto sha1_str_partc = lexical_cast<std::string, dhandy::tags::hexl>(__builtin_bswap32(digest.part_c));
 		const std::string sha1_str =
 			std::string(sizeof(digest.part_a) * 2 - sha1_str_parta.size(), '0') + sha1_str_parta +
 			std::string(sizeof(digest.part_b) * 2 - sha1_str_partb.size(), '0') + sha1_str_partb +

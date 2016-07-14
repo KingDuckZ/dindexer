@@ -163,9 +163,9 @@ namespace mchlib {
 
 		TigerHash retval;
 		const string_ref inp(parString);
-		retval.part_a = swap_long(dinhelp::lexical_cast<TigerPartType, dinhelp::tags::hex>(inp.substr(0, sizeof(TigerPartType) * 2)));
-		retval.part_b = swap_long(dinhelp::lexical_cast<TigerPartType, dinhelp::tags::hex>(inp.substr(sizeof(TigerPartType) * 2, sizeof(TigerPartType) * 2)));
-		retval.part_c = swap_long(dinhelp::lexical_cast<TigerPartType, dinhelp::tags::hex>(inp.substr(sizeof(TigerPartType) * 4, sizeof(TigerPartType) * 2)));
+		retval.part_a = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(0, sizeof(TigerPartType) * 2)));
+		retval.part_b = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(sizeof(TigerPartType) * 2, sizeof(TigerPartType) * 2)));
+		retval.part_c = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(sizeof(TigerPartType) * 4, sizeof(TigerPartType) * 2)));
 		return retval;
 	}
 

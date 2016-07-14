@@ -43,7 +43,7 @@ namespace redis {
 
 	private:
 		template <typename... Keys, typename... Values, std::size_t... KeyIndices, std::size_t... ValueIndices>
-		void run_with_indices ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...> );
+		void run_with_indices ( Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dhandy::bt::index_seq<KeyIndices...>, dhandy::bt::index_seq<ValueIndices...> );
 
 		boost::string_ref m_sha1;
 		ScriptManager* m_manager;
@@ -55,13 +55,13 @@ namespace redis {
 			parBatch,
 			parKeys,
 			parValues,
-			::dinhelp::bt::index_range<0, sizeof...(Keys)>(),
-			::dinhelp::bt::index_range<0, sizeof...(Values)>()
+			::dhandy::bt::index_range<0, sizeof...(Keys)>(),
+			::dhandy::bt::index_range<0, sizeof...(Values)>()
 		);
 	}
 
 	template <typename... Keys, typename... Values, std::size_t... KeyIndices, std::size_t... ValueIndices>
-	void Script::run_with_indices (Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dinhelp::bt::index_seq<KeyIndices...>, dinhelp::bt::index_seq<ValueIndices...>) {
+	void Script::run_with_indices (Batch& parBatch, const std::tuple<Keys...>& parKeys, const std::tuple<Values...>& parValues, dhandy::bt::index_seq<KeyIndices...>, dhandy::bt::index_seq<ValueIndices...>) {
 		static_assert(sizeof...(Keys) == sizeof...(KeyIndices), "Wrong index count");
 		static_assert(sizeof...(Values) == sizeof...(ValueIndices), "Wrong value count");
 		static_assert(sizeof...(Keys) == std::tuple_size<std::tuple<Keys...>>::value, "Wrong key count");
@@ -73,7 +73,7 @@ namespace redis {
 		parBatch.run(
 			"EVALSHA",
 			m_sha1,
-			dinhelp::lexical_cast<std::string>(sizeof...(Keys)),
+			dhandy::lexical_cast<std::string>(sizeof...(Keys)),
 			std::get<KeyIndices>(parKeys)...,
 			std::get<ValueIndices>(parValues)...
 		);

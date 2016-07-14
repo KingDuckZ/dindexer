@@ -32,7 +32,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace dinhelp {
+namespace dhandy {
 	template <typename OuterList, typename InnerList=typename OuterList::value_type, typename InnerVal=typename InnerList::value_type>
 	class FlatInsertIn2DList {
 	public:
@@ -52,7 +52,7 @@ namespace dinhelp {
 		const std::size_t m_inner_count;
 		const std::size_t m_outer_count;
 	};
-} //namespace dinhelp
+} //namespace dhandy
 
 #include "flatinsertin2dlist.inl"
 

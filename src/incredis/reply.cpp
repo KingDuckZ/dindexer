@@ -35,7 +35,7 @@ namespace redis {
 	}
 
 	long long get_integer_autoconv_if_str (const Reply &parReply) {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 
 		const auto type = parReply.which();
 		switch (type) {

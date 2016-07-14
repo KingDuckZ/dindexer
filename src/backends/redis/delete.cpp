@@ -30,7 +30,7 @@
 namespace dindb {
 	namespace {
 		std::pair<bool, std::size_t> confirm_dele (redis::IncRedisBatch& parBatch, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			if (parIDs.empty())
 				return std::make_pair(false, parIDs.size());
@@ -60,7 +60,7 @@ namespace dindb {
 		}
 
 		template <typename IT, IT CHUNK, typename F, IT... SVALS>
-		void chunked_run_pvt (redis::Batch& parBatch, const char* parCommand, IT parFrom, IT parCount, F parMakeKey, dinhelp::bt::number_seq<IT, SVALS...>) {
+		void chunked_run_pvt (redis::Batch& parBatch, const char* parCommand, IT parFrom, IT parCount, F parMakeKey, dhandy::bt::number_seq<IT, SVALS...>) {
 			for (IT i = 0; i < parCount / CHUNK; ++i) {
 				parBatch.run(parCommand, parMakeKey(i * CHUNK + parFrom + SVALS)...);
 			}
@@ -72,12 +72,12 @@ namespace dindb {
 
 		template <typename IT, IT CHUNK, typename F>
 		void chunked_run (redis::Batch& parBatch, const char* parCommand, IT parFrom, IT parCount, F parMakeKey) {
-			chunked_run_pvt<IT, CHUNK, F>(parBatch, parCommand, parFrom, parCount, parMakeKey, dinhelp::bt::number_range<IT, 0, CHUNK>());
+			chunked_run_pvt<IT, CHUNK, F>(parBatch, parCommand, parFrom, parCount, parMakeKey, dhandy::bt::number_range<IT, 0, CHUNK>());
 		};
 	} //unnamed namespace
 
 	void delete_group_from_db (redis::IncRedis& parRedis, redis::Script& parDeleTagIfInSet, redis::Script& parDeleHash, const std::vector<GroupIDType>& parIDs, ConfirmDeleCallback parConf) {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 		using IDRange = std::tuple<GroupIDType, FileIDType, FileIDType>;
 
 		auto set_batch = parRedis.make_batch();

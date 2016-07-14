@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace dinhelp {
+namespace dhandy {
 	template <typename OuterList, typename InnerList, typename InnerVal>
 	FlatInsertIn2DList<OuterList, InnerList, InnerVal>::FlatInsertIn2DList (list_type* parList, std::size_t parInnerCount, std::size_t parOuterCount) :
 		m_list(parList),
@@ -70,4 +70,4 @@ namespace dinhelp {
 			return (m_list->size() - 1) * m_inner_count + m_list[m_list->size() - 1].size();
 		}
 	}
-} //namespace dinhelp
+} //namespace dhandy

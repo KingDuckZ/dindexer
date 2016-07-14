@@ -87,7 +87,7 @@ namespace dindb {
 			using boost::make_tuple;
 			using redis::Reply;
 			using std::vector;
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			assert(parReplies.size() == parIDs.size());
 			return boost::copy_range<vector<T>>(
@@ -113,7 +113,7 @@ namespace dindb {
 
 		template <>
 		LocatedItem construct (const std::vector<redis::Reply>& parData, const std::string& parID) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			//parData is expected to contain: "path", "group_id", "tags"
 
@@ -127,7 +127,7 @@ namespace dindb {
 
 		template <>
 		LocatedSet construct (const std::vector<redis::Reply>& parData, const std::string& parID) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			//parData is expected to contain: "desc", "item_count", "dir_count"
 
@@ -178,7 +178,7 @@ namespace dindb {
 
 		std::vector<GroupIDType> retval;
 		for (const auto& itm : parRedis.scan(PROGRAM_NAME ":set:*")) {
-			retval.push_back(dinhelp::lexical_cast<GroupIDType>(split_and_trim(itm, ':').back()));
+			retval.push_back(dhandy::lexical_cast<GroupIDType>(split_and_trim(itm, ':').back()));
 		}
 		return retval;
 	}
@@ -229,7 +229,7 @@ namespace dindb {
 	}
 
 	std::vector<LocatedSet> locate_sets_in_db (redis::IncRedis& parRedis, const std::string& parSubstr, const std::vector<GroupIDType>& parSets, bool parCaseInsensitive) {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 
 		auto filter_case_ins = [&parSubstr, &parSets](const boost::tuple<std::vector<redis::Reply>, std::string>& t) {
 			const auto& s = redis::get_string(t.get<0>()[0]);
@@ -260,8 +260,8 @@ namespace dindb {
 		return locate_in_bursts<LocatedSet>(parRedis, PROGRAM_NAME ":set:*", filter, "desc", "item_count", "dir_count");
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 4>> find_set_details (redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets) {
-		using dinhelp::lexical_cast;
+	std::vector<dhandy::MaxSizedArray<std::string, 4>> find_set_details (redis::IncRedis& parRedis, const std::vector<GroupIDType>& parSets) {
+		using dhandy::lexical_cast;
 
 		auto batch = parRedis.make_batch();
 		for (auto set_id : parSets) {
@@ -270,7 +270,7 @@ namespace dindb {
 		}
 		batch.throw_if_failed();
 
-		std::vector<dinhelp::MaxSizedArray<std::string, 4>> retval;
+		std::vector<dhandy::MaxSizedArray<std::string, 4>> retval;
 		auto curr_set = parSets.begin();
 		for (const auto& reply : batch.replies()) {
 			const auto& reply_list = get_array(reply);
@@ -289,9 +289,9 @@ namespace dindb {
 		return retval;
 	};
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 1>> find_file_details (redis::IncRedis& parRedis, GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
-		using dinhelp::lexical_cast;
-		using RetListType = std::vector<dinhelp::MaxSizedArray<std::string, 1>>;
+	std::vector<dhandy::MaxSizedArray<std::string, 1>> find_file_details (redis::IncRedis& parRedis, GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+		using dhandy::lexical_cast;
+		using RetListType = std::vector<dhandy::MaxSizedArray<std::string, 1>>;
 
 		const double level = static_cast<float>(parLevel);
 		auto lst = parRedis.zrangebyscore(PROGRAM_NAME ":levels:" + lexical_cast<std::string>(parSetID), level, true, level, true, false);
@@ -305,7 +305,7 @@ namespace dindb {
 		}
 		batch.throw_if_failed();
 
-		std::vector<dinhelp::MaxSizedArray<std::string, 1>> retval;
+		std::vector<dhandy::MaxSizedArray<std::string, 1>> retval;
 		for (auto& reply : batch.replies()) {
 			if (redis::RedisVariantType_Nil != reply.which()) {
 				auto curr_path = get_string(reply);
@@ -320,7 +320,7 @@ namespace dindb {
 
 	std::vector<std::string> find_paths_starting_by (redis::IncRedis& parRedis, GroupIDType parGroupID, uint16_t parLevel, boost::string_ref parPath) {
 		using boost::adaptors::transformed;
-		using dinhelp::MaxSizedArray;
+		using dhandy::MaxSizedArray;
 
 		auto file_details = find_file_details(parRedis, parGroupID, parLevel, parPath);
 		return boost::copy_range<std::vector<std::string>>(

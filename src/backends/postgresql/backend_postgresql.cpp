@@ -145,7 +145,7 @@ namespace dindb {
 		return dindb::find_all_sets(*m_conn);
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendPostgreSql::find_set_details (const std::vector<GroupIDType>& parSets) {
+	std::vector<dhandy::MaxSizedArray<std::string, 4>> BackendPostgreSql::find_set_details (const std::vector<GroupIDType>& parSets) {
 		return dindb::find_set_details<
 			dindb::SetDetail_ID,
 			dindb::SetDetail_Desc,
@@ -154,7 +154,7 @@ namespace dindb {
 		>(*m_conn, parSets);
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendPostgreSql::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+	std::vector<dhandy::MaxSizedArray<std::string, 1>> BackendPostgreSql::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
 		return dindb::find_file_details<dindb::FileDetail_Path>(*m_conn, parSetID, parLevel, parDir);
 	}
 

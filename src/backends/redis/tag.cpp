@@ -38,7 +38,7 @@ namespace std {
 namespace dindb {
 	namespace {
 		std::string make_file_key (FileIDType parID) {
-			return PROGRAM_NAME ":file:" + dinhelp::lexical_cast<std::string>(parID);
+			return PROGRAM_NAME ":file:" + dhandy::lexical_cast<std::string>(parID);
 		}
 
 		std::vector<boost::regex> compile_regexes (const std::vector<std::string>& parRegexes) {
@@ -55,7 +55,7 @@ namespace dindb {
 		}
 
 		void run_id_based_script (redis::IncRedis& parRedis, redis::Script& parScript, const std::vector<FileIDType>& parFiles, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			auto batch = parRedis.command().make_batch();
 			const std::string set_id = lexical_cast<std::string>(parSet);
@@ -73,7 +73,7 @@ namespace dindb {
 		}
 
 		void run_regex_based_script(redis::IncRedis& parRedis, redis::Script& parTagIfInSet, const std::vector<std::string>& parRegexes, const std::vector<boost::string_ref>& parTags, GroupIDType parSet) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			const std::string set_id = lexical_cast<std::string>(parSet);
 			const auto regexes = compile_regexes(parRegexes);
@@ -101,7 +101,7 @@ namespace dindb {
 		template <typename T>
 		T id_from_redis_key (const std::string& parKey) {
 			assert(not parKey.empty());
-			return dinhelp::lexical_cast<T>(dincore::split_and_trim(parKey, ':').back());
+			return dhandy::lexical_cast<T>(dincore::split_and_trim(parKey, ':').back());
 		}
 	} //unnamed namespace
 
@@ -142,7 +142,7 @@ namespace dindb {
 	}
 
 	void delete_all_tags (redis::IncRedis& parRedis, redis::Script& parDeleIfInSet, const std::vector<std::string>& parRegexes, GroupIDType parSet) {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 
 		const auto regexes = compile_regexes(parRegexes);
 

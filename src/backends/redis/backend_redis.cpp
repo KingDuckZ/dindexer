@@ -104,7 +104,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::connect() {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 
 		m_redis.connect();
 		m_redis.wait_for_connect();
@@ -159,7 +159,7 @@ namespace dindb {
 	}
 
 	void BackendRedis::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
-		using dinhelp::lexical_cast;
+		using dhandy::lexical_cast;
 		using boost::string_ref;
 
 		const auto data_size = static_cast<int>(parData.size());
@@ -275,11 +275,11 @@ namespace dindb {
 		return dindb::find_all_sets(m_redis);
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
+	std::vector<dhandy::MaxSizedArray<std::string, 4>> BackendRedis::find_set_details (const std::vector<GroupIDType>& parSets) {
 		return dindb::find_set_details(m_redis, parSets);
 	}
 
-	std::vector<dinhelp::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
+	std::vector<dhandy::MaxSizedArray<std::string, 1>> BackendRedis::find_file_details (GroupIDType parSetID, uint16_t parLevel, boost::string_ref parDir) {
 		return dindb::find_file_details(m_redis, parSetID, parLevel, parDir);
 	}
 

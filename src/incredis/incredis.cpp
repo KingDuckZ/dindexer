@@ -102,13 +102,13 @@ namespace redis {
 	}
 
 	int IncRedis::hincrby (boost::string_ref parKey, boost::string_ref parField, int parInc) {
-		const auto inc = dinhelp::lexical_cast<std::string>(parInc);
+		const auto inc = dhandy::lexical_cast<std::string>(parInc);
 		auto reply = m_command.run("HINCRBY", parKey, parField, inc);
 		return get_integer(reply);
 	}
 
 	auto IncRedis::srandmember (boost::string_ref parKey, int parCount) -> opt_string_list {
-		return optional_string_list(m_command.run("SRANDMEMBER", parKey, dinhelp::lexical_cast<std::string>(parCount)));
+		return optional_string_list(m_command.run("SRANDMEMBER", parKey, dhandy::lexical_cast<std::string>(parCount)));
 	}
 
 	auto IncRedis::srandmember (boost::string_ref parKey) -> opt_string {

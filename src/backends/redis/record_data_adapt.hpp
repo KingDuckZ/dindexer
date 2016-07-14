@@ -34,7 +34,7 @@ namespace redis {
 	struct StructAdapt<dindb::FileRecordDataWithGroup> {
 		template <typename R>
 		static bool decode (const R& parRange, dindb::FileRecordDataWithGroup& parOut) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			std::array<std::string, 2> mime;
 			std::string group_key;
@@ -75,7 +75,7 @@ namespace redis {
 	struct StructAdapt<mchlib::SetRecordDataFull> {
 		template <typename R>
 		static bool decode (const R& parRange, mchlib::SetRecordDataFull& parOut) {
-			using dinhelp::lexical_cast;
+			using dhandy::lexical_cast;
 
 			for (const auto& itm : parRange) {
 				if (itm.first == "name")

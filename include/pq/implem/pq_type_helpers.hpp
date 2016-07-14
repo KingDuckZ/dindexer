@@ -30,7 +30,7 @@ struct pg_param;
 typedef pg_param PGparam;
 
 namespace pq {
-	namespace bt = dinhelp::bt;
+	namespace bt = dhandy::bt;
 
 	class Connection;
 

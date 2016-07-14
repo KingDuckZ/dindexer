@@ -45,7 +45,7 @@ namespace redis {
 	}
 
 	IncRedisBatch& IncRedisBatch::select (int parIndex) {
-		m_batch.run("SELECT", dinhelp::lexical_cast<std::string>(parIndex));
+		m_batch.run("SELECT", dhandy::lexical_cast<std::string>(parIndex));
 		return *this;
 	}
 
@@ -60,12 +60,12 @@ namespace redis {
 	}
 
 	IncRedisBatch& IncRedisBatch::hincrby (boost::string_ref parKey, boost::string_ref parField, int parInc) {
-		m_batch.run("HINCRBY", parKey, parField, dinhelp::lexical_cast<std::string>(parInc));
+		m_batch.run("HINCRBY", parKey, parField, dhandy::lexical_cast<std::string>(parInc));
 		return *this;
 	}
 
 	IncRedisBatch& IncRedisBatch::srandmember (boost::string_ref parKey, int parCount) {
-		m_batch.run("SRANDMEMBER", parKey, dinhelp::lexical_cast<std::string>(parCount));
+		m_batch.run("SRANDMEMBER", parKey, dhandy::lexical_cast<std::string>(parCount));
 		return *this;
 	}
 

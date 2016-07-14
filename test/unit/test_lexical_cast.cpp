@@ -22,10 +22,10 @@
 #include <boost/utility/string_ref.hpp>
 
 TEST(duckhandy, lexical_cast) {
-	using dinhelp::lexical_cast;
-	using dinhelp::tags::hex;
-	using dinhelp::tags::dec;
-	using dinhelp::tags::bin;
+	using dhandy::lexical_cast;
+	using dhandy::tags::hex;
+	using dhandy::tags::dec;
+	using dhandy::tags::bin;
 
 	{
 		const uint8_t value = 0x34;
