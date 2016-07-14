@@ -16,8 +16,8 @@
  */
 
 #include "reply.hpp"
+#include "helpers/lexical_cast.hpp"
 #include <boost/variant/get.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace redis {
 	const long long& get_integer (const Reply& parReply) {
@@ -35,7 +35,7 @@ namespace redis {
 	}
 
 	long long get_integer_autoconv_if_str (const Reply &parReply) {
-		using boost::lexical_cast;
+		using dinhelp::lexical_cast;
 
 		const auto type = parReply.which();
 		switch (type) {
