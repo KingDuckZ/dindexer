@@ -54,6 +54,6 @@ namespace dinhelp {
 	};
 } //namespace dinhelp
 
-#include "implem/flatinsertin2dlist.inl"
+#include "flatinsertin2dlist.inl"
 
 #endif
