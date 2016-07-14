@@ -7,9 +7,6 @@
 [submodule "lib/better-enums"]
 	path = lib/better-enums
 	url = https://github.com/aantron/better-enums
-[submodule "lib/sprout"]
-	path = lib/sprout
-	url = https://github.com/bolero-MURAKAMI/Sprout.git
 [submodule "lib/duckhandy"]
 	path = lib/duckhandy
 	url = https://github.com/KingDuckZ/duckhandy.git
