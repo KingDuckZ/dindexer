@@ -29,15 +29,14 @@ namespace mchlib {
 		MediaType::MediaType (SetTaskType parSet, char parDefault, bool parForce, std::string parSearchPath) :
 			m_set_task(parSet),
 			m_default(char_to_media_type(parDefault))
-#if defined(WITH_MEDIA_AUTODETECT)
 			, m_search_path(std::move(parSearchPath))
+#if defined(WITH_MEDIA_AUTODETECT)
 			, m_force(parForce)
 #endif
 		{
 			assert(m_set_task);
 #if !defined(WITH_MEDIA_AUTODETECT)
 			static_cast<void>(parForce);
-			static_cast<void>(parSearchPath);
 #endif
 		}
 

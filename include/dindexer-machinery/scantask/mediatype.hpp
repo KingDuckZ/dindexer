@@ -41,8 +41,8 @@ namespace mchlib {
 
 			SetTaskType m_set_task;
 			MediaTypes m_default;
-#if defined(WITH_MEDIA_AUTODETECT)
 			std::string m_search_path;
+#if defined(WITH_MEDIA_AUTODETECT)
 			bool m_force;
 #endif
 		};
