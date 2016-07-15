@@ -17,7 +17,7 @@
 
 #include "dindexer-machinery/machinery_info.hpp"
 #include "dindexerConfig.h"
-#include "helpers/stringize.h"
+#include "duckhandy/stringize.h"
 
 namespace mchlib {
 	boost::string_ref lib_signature() {

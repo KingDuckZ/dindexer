@@ -17,7 +17,7 @@
 
 #include "dindexer-common/common_info.hpp"
 #include "dindexerConfig.h"
-#include "helpers/stringize.h"
+#include "duckhandy/stringize.h"
 
 namespace dinlib {
 	namespace {

@@ -19,22 +19,16 @@
 #define idDC29E3C667BD4793BA0644AE7DC5BD3F
 
 #include <string>
-#include <cstdint>
+#include "backends/backend_loader.hpp"
+#include "backends/db_backend.hpp"
 
 namespace dinlib {
-	struct SettingsDB {
-		std::string address;
-		std::string username;
-		std::string password;
-		std::string dbname;
-		uint16_t port;
-	};
-
 	struct Settings {
-		SettingsDB db;
+		std::string backend_name;
+		dindb::BackendPlugin backend_plugin;
 	};
 
-	bool load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );
+	void load_settings ( const std::string& parPath, Settings& parOut, bool parExpand=true );
 } //namespace dinlib
 
 #endif

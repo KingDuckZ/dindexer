@@ -18,7 +18,6 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "postgre_delete.hpp"
 #include <iostream>
 #include <ciso646>
 #include <ios>
@@ -26,7 +25,7 @@
 #include <cstdint>
 
 namespace {
-	bool confirm_delete (const din::IDDescMap& parMap) {
+	bool confirm_delete (const dindb::IDDescMap& parMap) {
 		for (const auto& itm : parMap) {
 			std::cout << "ID " << itm.first << '\t' << itm.second << '\n';
 		}
@@ -38,7 +37,7 @@ namespace {
 		return (answer.empty() or "y" == answer or "Y" == answer);
 	}
 
-	bool always_delete (const din::IDDescMap&) {
+	bool always_delete (const dindb::IDDescMap&) {
 		return true;
 	}
 } //unnamed namespace
@@ -62,12 +61,13 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
 	if (not vm.count("groupid")) {
@@ -77,7 +77,7 @@ int main (int parArgc, char* parArgv[]) {
 
 	const auto ids = vm["groupid"].as<std::vector<uint32_t>>();
 	auto confirm_func = (vm.count("confirm") ? &always_delete : &confirm_delete);
-	din::delete_group_from_db(settings.db, ids, confirm_func);
+	settings.backend_plugin.backend().delete_group(ids, confirm_func);
 	return 0;
 }
 

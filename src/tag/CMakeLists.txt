@@ -3,7 +3,6 @@ project(${bare_name}-tag CXX)
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
-	tag_postgres.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

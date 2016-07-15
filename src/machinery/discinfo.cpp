@@ -17,7 +17,7 @@
 
 #include "discinfo.hpp"
 #include "pathname.hpp"
-#include "helpers/lengthof.h"
+#include "duckhandy/lengthof.h"
 #include <map>
 #include <fstream>
 #include <boost/tokenizer.hpp>
@@ -35,6 +35,10 @@
 #	include <iostream>
 #endif
 #include <cstdint>
+#include <boost/filesystem.hpp>
+#include <boost/range/iterator_range_core.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mchlib {
 	namespace {
@@ -167,6 +171,41 @@ namespace mchlib {
 			return static_cast<LinuxDeviceTypes>(retval);
 		}
 #endif
+
+		std::string find_with_same_inode (const std::string& parWhat, const char* parWhere) {
+			using boost::make_iterator_range;
+
+			struct stat st;
+			if (stat(parWhat.c_str(), &st))
+				return std::string();
+
+			const auto& inode = st.st_ino;
+
+			fs::path p(parWhere);
+			if (not fs::exists(p) or not fs::is_directory(p)) {
+				throw std::runtime_error(
+					std::string("Search path \"") + p.string() +
+					"\" doesn't exist");
+			}
+
+			for (const fs::directory_entry& itm : make_iterator_range(fs::directory_iterator(p), fs::directory_iterator())) {
+				struct stat curr_st;
+				if (not stat(itm.path().c_str(), &curr_st) and inode == curr_st.st_ino)
+					return fs::basename(itm);
+			}
+
+			return std::string();
+		}
+
+		//Get disc label by doing the equivalent of:
+		//find -L /dev/disk/by-label -inum $(stat -c %i /dev/sda1) -print
+		std::string retrieve_label (const std::string& parDev) {
+			return find_with_same_inode(parDev, "/dev/disk/by-label");
+		}
+
+		std::string retrieve_uuid (const std::string& parDev) {
+			return find_with_same_inode(parDev, "/dev/disk/by-uuid");
+		}
 	} //unnamed namespace
 
 	DiscInfo::DiscInfo (std::string&& parPath) :
@@ -187,6 +226,11 @@ namespace mchlib {
 			}
 			input_path.pop_right();
 		} while(input_path.atom_count() > 0);
+
+		if (mountpoint_found()) {
+			m_label = retrieve_label(m_device);
+			m_uuid = retrieve_uuid(m_device);
+		}
 	}
 
 	bool DiscInfo::mountpoint_found() const {
@@ -329,4 +373,12 @@ namespace mchlib {
 		};
 	}
 #endif
+
+	const std::string& DiscInfo::label() const {
+		return m_label;
+	}
+
+	const std::string& DiscInfo::filesystem_uuid() const {
+		return m_uuid;
+	}
 } //namespace mchlib

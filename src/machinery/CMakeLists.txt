@@ -26,9 +26,8 @@ add_library(${PROJECT_NAME} SHARED
 	scantask/setbasic.cpp
 )
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ${MAGIC_INCLUDE_DIR}
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -37,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME}
+	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 	PUBLIC ${CMAKE_SOURCE_DIR}/lib/better-enums
 )

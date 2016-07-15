@@ -16,9 +16,8 @@
  */
 
 #include "commandline.hpp"
-#include "postgre_locate.hpp"
 #include "dindexer-common/settings.hpp"
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include "dindexerConfig.h"
 #include "hash.hpp"
 #include "glob2regex/glob2regex.hpp"
@@ -27,7 +26,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace din {
+namespace dindb {
 	std::ostream& operator<< (std::ostream& parStream, const LocatedItem& parItem) {
 		parStream << parItem.group_id << '\t' << parItem.id << '\t' << parItem.path;
 		return parStream;
@@ -41,14 +40,14 @@ namespace din {
 			'\t' << parItem.files_count << '\t' << dircount;
 		return parStream;
 	}
-} //namespace din
+} //namespace dindb
 
 namespace {
 	std::vector<boost::string_ref> extract_tags (const boost::program_options::variables_map& parVM) {
 		if (not parVM.count("tags"))
 			return std::vector<boost::string_ref>();
 		else
-			return dinlib::split_tags(parVM["tags"].as<std::string>());
+			return dincore::split_tags(parVM["tags"].as<std::string>());
 	}
 } //unnamed namespace
 
@@ -72,31 +71,33 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
+	auto& db = settings.backend_plugin.backend();
 	if (vm.count("set")) {
-		const auto results = din::locate_sets_in_db(settings.db, vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
-		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedSet>(std::cout, "\n"));
+		const auto results = db.locate_sets_in_db(vm["substring"].as<std::string>(), not not vm.count("case-insensitive"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedSet>(std::cout, "\n"));
 	}
 	else {
-		std::vector<din::LocatedItem> results;
+		std::vector<dindb::LocatedItem> results;
 		const std::vector<boost::string_ref> tags = extract_tags(vm);
 
 		if (vm.count("byhash")) {
 			const auto hash = din::hash(vm["substring"].as<std::string>());
-			results = din::locate_in_db(settings.db, hash, tags);
+			results = db.locate_in_db(hash, tags);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));
-			results = din::locate_in_db(settings.db, search_regex, tags);
+			results = db.locate_in_db(search_regex, tags);
 		}
-		std::copy(results.begin(), results.end(), std::ostream_iterator<din::LocatedItem>(std::cout, "\n"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedItem>(std::cout, "\n"));
 	}
 	return 0;
 }

@@ -21,6 +21,7 @@ include(gccversion)
 include(CPack)
 include(CTest)
 include(timestamp)
+include(shared_git_project)
 
 option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
@@ -57,7 +58,7 @@ if ("${DINDEXER_CONFIG_FILE}" STREQUAL "")
 endif()
 message(STATUS "Config file set to \"${DINDEXER_CONFIG_FILE}\"")
 
-find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system)
 find_package(PostgreSQL 8.3 REQUIRED)
 find_package(YamlCpp 0.5.1 REQUIRED)
 import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}" "-O3 ${march_flag}")
@@ -87,7 +88,6 @@ configure_file(
 
 target_include_directories(${PROJECT_NAME} SYSTEM
 	INTERFACE ${Boost_INCLUDE_DIRS}
-	INTERFACE ${PostgreSQL_INCLUDE_DIRS}
 )
 
 target_compile_features(${PROJECT_NAME}
@@ -128,28 +128,34 @@ add_subdirectory(src/common)
 add_subdirectory(src/machinery)
 add_subdirectory(lib/pbl)
 add_subdirectory(lib/glob2regex)
+add_subdirectory(src/backends)
+add_subdirectory(src/core)
+add_shared_git_project(lib/duckhandy)
+add_shared_git_project(lib/incredis EXCLUDE_FROM_ALL)
 
 #Actions
 add_subdirectory(src/main)
 add_subdirectory(src/scan)
 add_subdirectory(src/delete)
-add_subdirectory(src/query)
+#add_subdirectory(src/query)
 add_subdirectory(src/locate)
 add_subdirectory(src/navigate)
 add_subdirectory(src/tag)
 
 #Tests
 if (BUILD_TESTING)
-	add_subdirectory(test/gtest)
+	add_shared_git_project(test/gtest)
 	add_subdirectory(test/unit)
 	add_subdirectory(test/unit_cli)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
-	INTERFACE ${PostgreSQL_LIBRARIES}
 	INTERFACE ${Boost_LIBRARIES}
 	INTERFACE ${bare_name}-pq
 	INTERFACE ${bare_name}-inc
+)
+target_link_libraries(${bare_name}-inc
+	INTERFACE duckhandy
 )
 
 target_compile_definitions(${PROJECT_NAME}

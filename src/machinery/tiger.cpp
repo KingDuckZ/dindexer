@@ -16,6 +16,7 @@
  */
 
 #include "dindexer-machinery/tiger.hpp"
+#include "duckhandy/lexical_cast.hpp"
 #include <fstream>
 #include <cstdint>
 #include <memory>
@@ -24,6 +25,7 @@
 #include <utility>
 #include <sstream>
 #include <iomanip>
+#include <boost/utility/string_ref.hpp>
 
 extern "C" void tiger ( const char* parStr, uint64_t parLength, uint64_t parHash[3], char parPadding );
 
@@ -151,6 +153,20 @@ namespace mchlib {
 			<< swap_long(parHash.part_c)
 		;
 		return oss.str();
+	}
+
+	TigerHash string_to_tiger (const std::string& parString) {
+		using boost::string_ref;
+		using TigerPartType = decltype(TigerHash::part_a);
+
+		assert(parString.size() == sizeof(TigerHash) * 2);
+
+		TigerHash retval;
+		const string_ref inp(parString);
+		retval.part_a = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(0, sizeof(TigerPartType) * 2)));
+		retval.part_b = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(sizeof(TigerPartType) * 2, sizeof(TigerPartType) * 2)));
+		retval.part_c = swap_long(dhandy::lexical_cast<TigerPartType, dhandy::tags::hex>(inp.substr(sizeof(TigerPartType) * 4, sizeof(TigerPartType) * 2)));
+		return retval;
 	}
 
 	void tiger_data (const std::string& parData, TigerHash& parHash) {

@@ -5,7 +5,7 @@
 -- Dumped from database version 9.5.2
 -- Dumped by pg_dump version 9.5.2
 
--- Started on 2016-05-18 00:47:01 CEST
+-- Started on 2016-06-03 20:30:32 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -160,6 +160,8 @@ CREATE TABLE sets (
     creation timestamp with time zone DEFAULT now() NOT NULL,
     app_name character varying NOT NULL,
     content_type character(1) DEFAULT 'G'::bpchar NOT NULL,
+    disk_label text NOT NULL,
+    fs_uuid text NOT NULL,
     CONSTRAINT chk_sets_type CHECK (((type = 'C'::bpchar) OR (type = 'D'::bpchar) OR (type = 'V'::bpchar) OR (type = 'B'::bpchar) OR (type = 'F'::bpchar) OR (type = 'H'::bpchar) OR (type = 'Z'::bpchar) OR (type = 'O'::bpchar)))
 );
 
@@ -309,7 +311,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2016-05-18 00:47:01 CEST
+-- Completed on 2016-06-03 20:30:33 CEST
 
 --
 -- PostgreSQL database dump complete

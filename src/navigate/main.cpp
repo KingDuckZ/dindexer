@@ -19,7 +19,6 @@
 #include "commandprocessor.hpp"
 #include "dindexer-common/settings.hpp"
 #include "entrypath.hpp"
-#include "dbsource.hpp"
 #include "dindexerConfig.h"
 #include "linereader.hpp"
 #include "listdircontent.hpp"
@@ -27,11 +26,10 @@
 #include <ciso646>
 #include <string>
 #include <vector>
-#include <cassert>
 #include <boost/range/algorithm/copy.hpp>
 
 namespace {
-	void do_navigation ( din::DBSource& parDB );
+	void do_navigation ( dindb::Backend& parDB );
 
 	bool on_exit ( void );
 	void on_pwd ( const din::EntryPath& parDirMan );
@@ -53,17 +51,16 @@ int main (int parArgc, char* parArgv[]) {
 	}
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
-	din::DBSource db_source(settings.db);
-
-	do_navigation(db_source);
+	do_navigation(settings.backend_plugin.backend());
 	return 0;
 }
 
@@ -81,7 +78,7 @@ namespace {
 		boost::copy(ls_result, std::ostream_iterator<std::string>(std::cout, "\n"));
 	}
 
-	void do_navigation (din::DBSource& parDB) {
+	void do_navigation (dindb::Backend& parDB) {
 		const std::string prompt;
 		din::ListDirContent ls(&parDB);
 		din::LineReader lines(&ls);
@@ -92,7 +89,7 @@ namespace {
 		din::EntryPath dir_man;
 		proc.add_command("exit", &on_exit, 0);
 		proc.add_command("cd", std::function<void(const std::string&)>(std::bind(&din::EntryPath::push_piece, &dir_man, std::placeholders::_1)), 1);
-		proc.add_command("disconnect", std::function<void()>(std::bind(&din::DBSource::disconnect, &parDB)), 0);
+		proc.add_command("disconnect", std::function<void()>(std::bind(&dindb::Backend::disconnect, std::ref(parDB))), 0);
 		proc.add_command("pwd", std::function<void()>(std::bind(&on_pwd, std::ref(dir_man))), 0);
 		proc.add_command("ls", std::function<void()>(std::bind(on_ls, std::ref(ls), std::ref(dir_man))), 0);
 		do {

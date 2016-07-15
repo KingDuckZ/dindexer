@@ -18,7 +18,7 @@
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include "dindexer-machinery/set_listing.hpp"
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #include "filesearcher.hpp"
 #include "pathname.hpp"
 #include <utility>

@@ -19,7 +19,7 @@
 
 #include "dindexerConfig.h"
 #include "findactions.h"
-#include "helpers/lengthof.h"
+#include "duckhandy/lengthof.h"
 #include "builtin_feats.h"
 #include "damerau_levenshtein.h"
 #include <string.h>

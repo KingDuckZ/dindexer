@@ -18,9 +18,9 @@
 #include "dindexer-common/commandline.hpp"
 #include "dindexerConfig.h"
 #include "gitinfo.h"
-#include "helpers/lengthof.h"
-#include "helpers/stringize.h"
-#include "helpers/infix_iterator.hpp"
+#include "duckhandy/lengthof.h"
+#include "duckhandy/stringize.h"
+#include "duckhandy/infix_iterator.hpp"
 #include <boost/program_options.hpp>
 #include <ostream>
 #include <utility>

@@ -20,7 +20,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 
 typedef uint32_t Character;
 

@@ -17,7 +17,7 @@
 
 #include "findactions.h"
 #include "dindexerConfig.h"
-#include "helpers/lengthof.h"
+#include "duckhandy/lengthof.h"
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>

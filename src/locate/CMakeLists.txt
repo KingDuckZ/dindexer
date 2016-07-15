@@ -3,7 +3,6 @@ project(${bare_name}-locate CXX)
 add_executable(${PROJECT_NAME}
 	main.cpp
 	commandline.cpp
-	postgre_locate.cpp
 	hash.cpp
 )
 

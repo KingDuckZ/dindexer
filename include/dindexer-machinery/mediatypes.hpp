@@ -18,7 +18,7 @@
 #ifndef id700AFD0F33634ACC88079BB8853A9E13
 #define id700AFD0F33634ACC88079BB8853A9E13
 
-#include "helpers/compatibility.h"
+#include "duckhandy/compatibility.h"
 #include "enum.h"
 #include <string>
 

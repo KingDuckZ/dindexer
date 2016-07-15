@@ -23,15 +23,18 @@
 #include <string>
 #include <vector>
 
+namespace dindb {
+	class Backend;
+} //namespace dindb
+
 namespace din {
 	class EntryPath;
-	class DBSource;
 
 	class ListDirContent {
 		using ListType = std::vector<std::string>;
 		using CachedItemType = std::pair<std::string, ListType>;
 	public:
-		explicit ListDirContent ( DBSource* parDB );
+		explicit ListDirContent ( dindb::Backend* parDB );
 		~ListDirContent ( void ) noexcept = default;
 
 		const ListType& ls ( const EntryPath& parDir ) const;
@@ -41,7 +44,7 @@ namespace din {
 		const ListType& last_cached_item ( const std::string& parCurrPath ) const;
 
 		mutable boost::circular_buffer<CachedItemType> m_cache;
-		DBSource* m_db;
+		dindb::Backend* m_db;
 	};
 } //namespace din
 

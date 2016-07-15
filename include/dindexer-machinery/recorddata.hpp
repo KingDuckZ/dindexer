@@ -34,7 +34,7 @@ namespace mchlib {
 		typedef boost::flyweight<std::string, boost::flyweights::no_locking, MimeStringTag> mime_string;
 
 		FileRecordData ( void ) = default;
-		FileRecordData ( const char* parPath, std::time_t parATime, std::time_t parMTime, uint64_t parLevel, bool parIsDir, bool parIsSymLink ) :
+		FileRecordData ( const char* parPath, std::time_t parATime, std::time_t parMTime, uint16_t parLevel, bool parIsDir, bool parIsSymLink ) :
 			hash {},
 			abs_path(parPath),
 			mime_full(),
@@ -87,9 +87,21 @@ namespace mchlib {
 		bool operator== ( const FileRecordData& parOther ) const;
 #endif
 
-		boost::string_ref path ( void ) const { return boost::string_ref(abs_path).substr(path_offset); }
-		boost::string_ref mime_type ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_type_offset, mime_type_length); }
-		boost::string_ref mime_charset ( void ) const { return boost::string_ref(mime_full.get()).substr(mime_charset_offset, mime_charset_length); }
+		boost::string_ref path ( void ) const {
+			assert(abs_path.data());
+			return boost::string_ref(abs_path).substr(path_offset);
+		}
+
+		boost::string_ref mime_type ( void ) const {
+			assert(mime_full.get().data());
+			return boost::string_ref(mime_full.get()).substr(mime_type_offset, mime_type_length);
+		}
+
+		boost::string_ref mime_charset ( void ) const {
+			assert(mime_full.get().data());
+			return boost::string_ref(mime_full.get()).substr(mime_charset_offset, mime_charset_length);
+		}
+
 		void set_mime_parts ( boost::string_ref parType, boost::string_ref parCharset ) {
 			const auto& mime = mime_full.get();
 			{
@@ -130,15 +142,13 @@ namespace mchlib {
 		bool hash_valid;
 	};
 
-	struct SetRecordData {
-		boost::string_ref name;
+	struct SetRecordDataFull {
+		std::string name;
+		std::string disk_label;
+		std::string fs_uuid;
+		uint32_t disk_number;
 		char type;
 		char content_type;
-	};
-
-	struct SetRecordDataFull : public SetRecordData {
-		std::string name;
-		uint32_t disk_number;
 	};
 
 #if !defined(NDEBUG)

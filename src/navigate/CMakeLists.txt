@@ -5,7 +5,6 @@ add_executable(${PROJECT_NAME}
 	commandline.cpp
 	commandprocessor.cpp
 	entrypath.cpp
-	dbsource.cpp
 	linereader.cpp
 	listdircontent.cpp
 )

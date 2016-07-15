@@ -18,8 +18,7 @@
 #include "commandline.hpp"
 #include "dindexer-common/settings.hpp"
 #include "dindexerConfig.h"
-#include "tag_postgres.hpp"
-#include "dindexer-common/split_tags.hpp"
+#include "dindexer-core/split_tags.hpp"
 #include "glob2regex/glob2regex.hpp"
 #include "enum.h"
 #include <iostream>
@@ -47,40 +46,34 @@ namespace {
 		return retval;
 	}
 
-	din::OwnerSetInfo make_owner_set_info (const boost::program_options::variables_map& parVM) {
-		din::OwnerSetInfo set_info;
-		if (parVM.count("set")) {
-			set_info.is_valid = true;
-			set_info.group_id = parVM["set"].as<uint32_t>();
-		}
-		else {
-			set_info.is_valid = false;
-			set_info.group_id = 0;
-		}
-		return set_info;
+	dindb::GroupIDType make_owner_set_info (const boost::program_options::variables_map& parVM) {
+		if (parVM.count("set"))
+			return parVM["set"].as<dindb::GroupIDType>();
+		else
+			return dindb::InvalidGroupID;
 	}
 
-	int tag_files (const dinlib::SettingsDB& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+	int tag_files (dindb::Backend& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
 		using boost::lexical_cast;
 		using boost::string_ref;
 
-		const din::OwnerSetInfo set_info = make_owner_set_info(parVM);
+		const auto set_info = make_owner_set_info(parVM);
 
 		switch (parMode) {
 		case TaggingMode::ID:
 		{
-			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			auto ids_string = dincore::split_tags(parVM["ids"].as<std::string>());
 			std::vector<uint64_t> ids;
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
-			din::tag_files(parDB, ids, parTags, set_info);
+			parDB.tag_files(ids, parTags, set_info);
 			return 0;
 		}
 
 		case TaggingMode::Glob:
 		{
 			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
-			din::tag_files(parDB, regexes, parTags, set_info);
+			parDB.tag_files(regexes, parTags, set_info);
 			return 0;
 		}
 
@@ -90,7 +83,7 @@ namespace {
 		}
 	}
 
-	int delete_tags (const dinlib::SettingsDB& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
+	int delete_tags (dindb::Backend& parDB, TaggingMode parMode, const boost::program_options::variables_map& parVM, const std::vector<boost::string_ref>& parTags) {
 		using boost::lexical_cast;
 		using boost::string_ref;
 
@@ -99,14 +92,14 @@ namespace {
 		switch (parMode) {
 		case TaggingMode::ID:
 		{
-			auto ids_string = dinlib::split_tags(parVM["ids"].as<std::string>());
+			auto ids_string = dincore::split_tags(parVM["ids"].as<std::string>());
 			std::vector<uint64_t> ids;
 			ids.reserve(ids_string.size());
 			std::transform(ids_string.begin(), ids_string.end(), std::back_inserter(ids), &lexical_cast<uint64_t, string_ref>);
 			if (parVM.count("alltags"))
-				din::delete_all_tags(parDB, ids, make_owner_set_info(parVM));
+				parDB.delete_all_tags(ids, make_owner_set_info(parVM));
 			else
-				din::delete_tags(parDB, ids, parTags, make_owner_set_info(parVM));
+				parDB.delete_tags(ids, parTags, make_owner_set_info(parVM));
 			return 0;
 		}
 
@@ -114,9 +107,9 @@ namespace {
 		{
 			const auto regexes(globs_to_regex_list(parVM["globs"].as<std::vector<std::string>>()));
 			if (parVM.count("alltags"))
-				din::delete_all_tags(parDB, regexes, make_owner_set_info(parVM));
+				parDB.delete_all_tags(regexes, make_owner_set_info(parVM));
 			else
-				din::delete_tags(parDB, regexes, parTags, make_owner_set_info(parVM));
+				parDB.delete_tags(regexes, parTags, make_owner_set_info(parVM));
 			return 0;
 		}
 
@@ -154,20 +147,21 @@ int main (int parArgc, char* parArgv[]) {
 	assert(id_mode xor glob_mode);
 
 	dinlib::Settings settings;
-	{
-		const bool loaded = dinlib::load_settings(CONFIG_FILE_PATH, settings);
-		if (not loaded) {
-			std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ", quitting\n";
-			return 1;
-		}
+	try {
+		dinlib::load_settings(CONFIG_FILE_PATH, settings);
+	}
+	catch (const std::runtime_error& err) {
+		std::cerr << "Can't load settings from " << CONFIG_FILE_PATH << ":\n";
+		std::cerr << err.what() << '\n';
+		return 1;
 	}
 
 	const auto master_tags_string = vm["tags"].as<std::string>();
-	const std::vector<boost::string_ref> tags = dinlib::split_tags(master_tags_string);
+	const std::vector<boost::string_ref> tags = dincore::split_tags(master_tags_string);
 	const auto mode = (glob_mode ? TaggingMode::Glob : TaggingMode::ID);
 
 	if (not vm.count("delete"))
-		return tag_files(settings.db, mode, vm, tags);
+		return tag_files(settings.backend_plugin.backend(), mode, vm, tags);
 	else
-		return delete_tags(settings.db, mode, vm, tags);
+		return delete_tags(settings.backend_plugin.backend(), mode, vm, tags);
 }

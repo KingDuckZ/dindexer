@@ -4,7 +4,6 @@ include(WithMediaAutodetect)
 
 add_executable(${PROJECT_NAME}
 	main.cpp
-	dbbackend.cpp
 	commandline.cpp
 )
 
