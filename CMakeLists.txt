@@ -109,7 +109,6 @@ target_include_directories(${bare_name}-inc
 	INTERFACE ${CMAKE_SOURCE_DIR}/include
 )
 
-
 if (NOT DINDEXER_CXX11_ABI AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
 	message(STATUS "CXX11 ABI disabled (_GLIBCXX_USE_CXX11_ABI=0)")
 	add_definitions(
@@ -122,6 +121,12 @@ if (NOT DINDEXER_CXX11_ABI AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
 	)
 endif()
 
+list(FIND DINDEXER_ENABLED_BACKENDS "redis" redis_found_index)
+if (${redis_found_index} GREATER -1)
+	set(DINDEXER_WITH_REDIS ON)
+endif()
+unset(redis_found_index)
+
 #Libraries
 add_subdirectory(src/pq)
 add_subdirectory(src/common)
@@ -131,7 +136,9 @@ add_subdirectory(lib/glob2regex)
 add_subdirectory(src/backends)
 add_subdirectory(src/core)
 add_shared_git_project(lib/duckhandy)
-add_shared_git_project(lib/incredis EXCLUDE_FROM_ALL)
+if (DINDEXER_WITH_REDIS)
+	add_shared_git_project(lib/incredis EXCLUDE_FROM_ALL)
+endif()
 
 #Actions
 add_subdirectory(src/main)

@@ -2,7 +2,7 @@ language: cpp
 script:
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on ..
+  - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on -DDINDEXER_ENABLED_BACKENDS=postgresql,redis ..
   - cmake --build .
   - ctest
   - cpack
@@ -23,6 +23,7 @@ gcc_deps: &gcc_deps
     - libpq-dev
     - libpq5
     - rpm
+    - hiredis-dev
   sources:
     - ubuntu-toolchain-r-test
 

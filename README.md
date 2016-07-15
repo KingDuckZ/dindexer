@@ -6,6 +6,8 @@ Latest stable release is __0.1.5b__.
 [![dindexer on Diaspora*](http://i.imgur.com/DcBZykA.png)](https://mondiaspora.net/tags/dindexer)
 Follow [my posts on Diaspora](https://mondiaspora.net/tags/dindexer) for the latest development news and to post your comments about the project.
 
+_CLONING FASTER_: This project uses flat_git. Just run `ruby tools/flat_git.rb <some_empty_dir>` instead of `git submodule init` and you should be good to go. More info [in the wiki](https://github.com/KingDuckZ/dindexer/wiki/flat_git)
+
 ##		What is dindexer?			##
 ###		Purpose						###
 dindexer (from "Disc Indexer") is a program to help you keep track of where your files are as you back them up on external media. It's like updatedb/locate, but it's designed for never changing removable media, such as DVDs and BluRays.
@@ -37,12 +39,14 @@ As dindexer needs to write data to a PostgreSQL database, you need to configure 
 
     %YAML 1.2
     ---
-    db_settings:
-        username: bob_db
-        password: my_secret_db_password
-        dbname: dindexerdb
-        port: 5432
-        address: 127.0.0.1
+	backend_name: postgresql
+    postgresql_settings:
+		connection:
+			username: bob_db
+			password: my_secret_db_password
+			dbname: dindexerdb
+			port: 5432
+			address: 127.0.0.1
 
 ##		Actions						##
 Actions are just executable files located in a directory that is searched by dindexer. dindexer will list available actions when invoked with no parameters.
