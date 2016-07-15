@@ -16,7 +16,6 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 )
 target_include_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-	PUBLIC ${CMAKE_SOURCE_DIR}/src/incredis
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -121,11 +121,13 @@ if (NOT DINDEXER_CXX11_ABI AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
 	)
 endif()
 
-list(FIND DINDEXER_ENABLED_BACKENDS "redis" redis_found_index)
+string(REPLACE "," ";" backend_list "${DINDEXER_ENABLED_BACKENDS}")
+list(FIND backend_list "redis" redis_found_index)
 if (${redis_found_index} GREATER -1)
 	set(DINDEXER_WITH_REDIS ON)
 endif()
 unset(redis_found_index)
+unset(backend_list)
 
 #Libraries
 add_subdirectory(src/pq)
