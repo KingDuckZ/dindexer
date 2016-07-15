@@ -15,6 +15,15 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "King_DuckZ")
 set(CPACK_PACKAGE_NAME "${bare_name}")
 set(CPACK_STRIP_FILES ON)
 
+#Make sure this is either Debug or Release
+set(DINDEXER_SUPPORTED_BUILD_TYPES "Debug;Release")
+list(FIND DINDEXER_SUPPORTED_BUILD_TYPES "${CMAKE_BUILD_TYPE}" build_type_index)
+if (${build_type_index} LESS 0)
+	message(STATUS "Forcing build type to Release")
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+unset(build_type_index)
+
 include(GetGitRevisionDescription)
 include(Buildlibpqtypes)
 include(gccversion)
