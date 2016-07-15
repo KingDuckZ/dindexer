@@ -83,7 +83,7 @@ install:
   - |
     if [ ! -f opt/lib/libhiredis.so ]; then
       mkdir hiredis && travis_retry wget --quiet -O - https://github.com/redis/hiredis/archive/v0.13.3.tar.gz | tar --strip-components=1 -xz -C hiredis
-      (cd hiredis && make && cp libhiredis.so ${DEPS_DIR}/opt/lib)
+      (cd hiredis && make && make PREFIX=${DEPS_DIR}/opt install)
     fi
 
   - cd ${TRAVIS_BUILD_DIR}
