@@ -9,7 +9,7 @@
 	url = https://github.com/aantron/better-enums
 [submodule "lib/duckhandy"]
 	path = lib/duckhandy
-	url = https://github.com/KingDuckZ/duckhandy.git
+	url = ../duckhandy.git
 [submodule "lib/incredis"]
 	path = lib/incredis
 	url = ../incredis.git

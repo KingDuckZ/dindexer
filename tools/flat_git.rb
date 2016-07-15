@@ -30,6 +30,7 @@ For more information, please refer to <http://unlicense.org/>
 require 'shellwords'
 require 'pathname'
 require 'yaml'
+require 'uri'
 
 GIT="git"
 
@@ -55,6 +56,7 @@ def call_git(parTokens, parCaptureStdout=true, work_dir: nil)
 		raise ScriptError, "Invalid parTokens received in call_git() function"
 	end
 
+	#puts "#{GIT}#{git_c_param} #{command_line}"
 	if parCaptureStdout then
 		return `#{GIT}#{git_c_param} #{command_line}`.chomp
 	else
@@ -79,6 +81,16 @@ def current_remote_url()
 	return remote_url
 end
 
+def make_git_address(parBaseRemoteUrl, parSuffix)
+	regex_protocol = /^\w+:\/\//
+	m = regex_protocol.match(parBaseRemoteUrl)
+	if m then
+		URI.join(parBaseRemoteUrl + "/", parSuffix).to_s
+	else
+		Pathname.new(File.join(parBaseRemoteUrl, parSuffix)).cleanpath.to_s
+	end
+end
+
 def submodules_info(parBaseRemoteUrl)
 	regex_submodule = /^submodule\.(.+?)\.([^.]+)$/
 	submodules = Hash.new{ |hash, key| hash[key] = SubmoduleInfo.new }
@@ -89,7 +101,7 @@ def submodules_info(parBaseRemoteUrl)
 		new_value = call_git(["config", "--file", ".gitmodules", sanitized(line)])
 		case m[2]
 		when "url" then
-			submodules[m[1]].url = is_absolute_url?(new_value) ? new_value : File.join(parBaseRemoteUrl, new_value)
+			submodules[m[1]].url = is_absolute_url?(new_value) ? new_value : make_git_address(parBaseRemoteUrl, new_value)
 			submodules[m[1]].name = File.basename(new_value, ".git")
 		when "path" then
 			submodules[m[1]].path = new_value
@@ -123,7 +135,6 @@ class FlatGit
 		end
 
 		@clone_dir_abs = Pathname.new(parCloneDir).realpath
-		@clone_dir = parCloneDir
 	end
 
 	def clone_submodules()
@@ -139,13 +150,12 @@ class FlatGit
 		submodules_info(current_remote_url()).each_value do |submod|
 			next unless submod.status == "-"
 
-			guessed_clone_dir = File.join(@clone_dir, submod.name)
 			abs_guessed_clone_dir = File.join(@clone_dir_abs, submod.name)
 			if inplace_submodules.include?(submod.name) then
 				success = call_git(["submodule", "update", "--init", sanitized(submod.path)], false)
 				return false unless success
 			else
-				if !File.exists?(guessed_clone_dir) || Dir.entries(guessed_clone_dir).empty? then
+				if !File.exists?(abs_guessed_clone_dir) || (File.directory?(abs_guessed_clone_dir) && Dir.entries(abs_guessed_clone_dir).empty?) then
 					success = call_git(["clone", sanitized(submod.url)], false, work_dir: sanitized(@clone_dir_abs))
 					return false unless success
 
@@ -171,9 +181,18 @@ class FlatGit
 	end
 end
 
-unless ARGV.length == 1 then
-	$stderr.puts "Wrong number of arguments"
-	exit 2
+def main(parArgv)
+	unless ARGV.length == 1 then
+		$stderr.puts "Wrong number of arguments"
+		exit 2
+	end
+
+	flat_git = FlatGit.new(ARGV[0])
+	if flat_git.clone_submodules() then
+		return 0
+	else
+		return 1
+	end
 end
 
-exit(FlatGit.new(ARGV[0]).clone_submodules() ? 1 : 0)
+exit(main(ARGV))
