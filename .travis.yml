@@ -69,7 +69,7 @@ install:
     if [[ "${BOOST_URL}" != "" ]] && [ ! -d opt/include/boost ]; then
       echo "Downloading boost ${BOOST_VERSION}...";
       mkdir boost && travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C boost;
-      (cd boost && ./bootstrap.sh && ./b2 install --ignore-site-config --with-filesystem --with-program_options --with-system --prefix=${DEPS_DIR}/opt) > /dev/null
+      (cd boost && ./bootstrap.sh && ./b2 install --ignore-site-config --with-filesystem --with-program_options --with-system --with-regex --prefix=${DEPS_DIR}/opt) > /dev/null
     fi
 
   # Install yaml-cpp
