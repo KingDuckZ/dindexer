@@ -1,6 +1,6 @@
 project(${bare_name}-backend-redis CXX)
 
-set(DINDEXER_REDIS_SCRIPTS_PATH "${CMAKE_INSTALL_PREFIX}/${bare_name}/redis" CACHE STRING "Path where Lua scripts for Redis are stored")
+set(DINDEXER_REDIS_SCRIPTS_PATH "usr/share/${bare_name}/redis" CACHE STRING "Path where Lua scripts for Redis are stored")
 
 find_package(Boost 1.53.0 REQUIRED COMPONENTS regex)
 
