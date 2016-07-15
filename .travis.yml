@@ -23,7 +23,6 @@ gcc_deps: &gcc_deps
     - libpq-dev
     - libpq5
     - rpm
-    - libhiredis-dev
     - libev-dev
   sources:
     - ubuntu-toolchain-r-test
@@ -78,6 +77,13 @@ install:
     if [ ! -f opt/lib/libyaml-cpp.so ]; then
       mkdir yaml-cpp && travis_retry wget --quiet -O - https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.5.3.tar.gz | tar --strip-components=1 -xz -C yaml-cpp
       (cd yaml-cpp && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=on -DCMAKE_INSTALL_PREFIX=${DEPS_DIR}/opt . && cmake --build . && make install)
+    fi
+
+  # Install hiredis
+  - |
+    if [ ! -f opt/lib/libhiredis.so ]; then
+      mkdir hiredis && travis_retry wget --quiet -O - https://github.com/redis/hiredis/archive/v0.13.3.tar.gz | tar --strip-components=1 -xz -C hiredis
+      (cd hiredis && make && cp libhiredis.so ${DEPS_DIR}/opt/lib)
     fi
 
   - cd ${TRAVIS_BUILD_DIR}
