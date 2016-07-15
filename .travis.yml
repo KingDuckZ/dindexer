@@ -24,6 +24,7 @@ gcc_deps: &gcc_deps
     - libpq5
     - rpm
     - libhiredis-dev
+    - libev-dev
   sources:
     - ubuntu-toolchain-r-test
 
