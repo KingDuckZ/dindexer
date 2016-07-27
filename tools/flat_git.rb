@@ -127,7 +127,7 @@ end
 class FlatGit
 	def initialize(parCloneDir)
 		unless File.exists?(parCloneDir) && File.directory?(parCloneDir) then
-			raise ArgumentError, "Specified path doesn't exist or is not a valid directory"
+			raise ArgumentError, "Specified path \"#{parCloneDir}\" doesn't exist or is not a valid directory"
 		end
 
 		if is_inside_git_repo(sanitized(parCloneDir)) then
@@ -179,20 +179,66 @@ class FlatGit
 		end
 		return true
 	end
+
+	def show_status()
+		submodules_info(current_remote_url()).each_value do |submod|
+			if submod.status == "-" then
+				puts "#{submod.name} is not initialized"
+			elsif submod.status == "+" || submod.status == " " then
+				print "#{submod.name} is initialized"
+
+				flattened = false
+				if File.file?(File.join(submod.path, ".git")) then
+					reported_abs_path = call_git(["rev-parse", "--show-toplevel"], work_dir: sanitized(submod.path))
+					reported_rel_path = Pathname.new(reported_abs_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
+					flattened = true if reported_rel_path.start_with?("../")
+				end
+				if flattened then
+					print ", has local changes" if submod.status == "+"
+					puts " and seems to be flattened"
+				else
+					print " inplace"
+					print " and has local changes" if submod.status == "+"
+					Dir.chdir(submod.path) do |path|
+						if File.file?(".gitmodules") then
+							puts ", checking its submodules..."
+							show_status()
+						else
+							puts
+						end
+					end
+				end
+			else
+				puts "#{submod.name} reports unknown \"#{submod.status}\" status"
+			end
+		end
+		return true
+	end
 end
 
 def main(parArgv)
-	unless ARGV.length == 1 then
+	unless ARGV.length > 0 then
 		$stderr.puts "Wrong number of arguments"
-		exit 2
+		$stderr.puts "\t#{File.basename(__FILE__, ".rb")} (clone|status) [arguments...]"
+		return 2
 	end
 
-	flat_git = FlatGit.new(ARGV[0])
-	if flat_git.clone_submodules() then
-		return 0
-	else
-		return 1
+	clone_dir = (ARGV.size > 1 ? ARGV[1] : "..")
+	flat_git = FlatGit.new(clone_dir)
+
+	case ARGV[0]
+	when "status" then
+		return (flat_git.show_status() ? 0 : 1)
+	when "clone" then
+		if ARGV.size != 2 then
+			$stderr.puts "Missing path to directory where flattened submodules will be cloned"
+			return 2
+		end
+		return (flat_git.clone_submodules() ? 0 : 1)
 	end
+
+	$stderr.puts "Unknown command"
+	return 2
 end
 
 exit(main(ARGV))
