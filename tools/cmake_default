@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+#see: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-which-directory-it-is-stored-in
+script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+exec "$script_path/export_compile_commands" \
+	-DBUILD_TESTING=ON \
+	-DPBL_WITH_TESTS=OFF \
+	-DDINDEXER_WITH_BUILD_DATE=ON \
+	-DDINDEXER_WITH_NICE_MEDIA_TYPES=OFF \
+	-DDINDEXER_NATIVE_RELEASE=ON \
+	-DDINDEXER_CXX11_ABI=OFF \
+	-DDINDEXER_DB_OWNER_NAME=dindexer-user
