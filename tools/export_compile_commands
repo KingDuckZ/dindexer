@@ -22,16 +22,30 @@ if [ -z "$project_path" ]; then
 	exit 1
 fi
 
-config_name=$(pwd | sed -r "s_$build_dir/$project_name/([^/]+).*\$_\1_")
+config_name=$(pwd | sed -r "s@$build_dir/$project_name/([^/_]+_)?([^/]+).*\$@\2@")
+compiler_name=$(pwd | sed -r "s@$build_dir/$project_name/([^/_]+_)?([^/]+).*\$@\1@")
+compiler_option=""
+if [ -n "$compiler_name" ]; then
+	compiler_name="${compiler_name%?}"
+	case "$compiler_name" in
+	"clang")
+			compiler_option="CXX=clang++ CC=clang"
+		;;
+	"gcc")
+			compiler_option="CXX=g++ CC=gcc"
+		;;
+	esac
+fi
+
 config_option=""
 if [ -n "$config_name" ]; then
 	config_name="$(tr '[:lower:]' '[:upper:]' <<< ${config_name:0:1})${config_name:1}"
 	config_option="-DCMAKE_BUILD_TYPE=$config_name"
 fi
 
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "$config_option" $@ "$project_path"
+eval $compiler_option cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "$config_option" $@ "$project_path"
 
-if [ -f "$project_path/$json_file" ]; then
+if [ -h "$project_path/$json_file" ]; then
 	unlink "$project_path/$json_file"
 fi
 work_dir="$PWD"

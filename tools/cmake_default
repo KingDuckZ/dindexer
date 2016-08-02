@@ -10,4 +10,6 @@ exec "$script_path/export_compile_commands" \
 	-DDINDEXER_WITH_NICE_MEDIA_TYPES=OFF \
 	-DDINDEXER_NATIVE_RELEASE=ON \
 	-DDINDEXER_CXX11_ABI=OFF \
-	-DDINDEXER_DB_OWNER_NAME=dindexer-user
+	-DDINDEXER_DB_OWNER_NAME=dindexer-user \
+	-DDINDEXER_ENABLED_BACKENDS=redis,postgresql \
+	-DDINDEXER_CONFIG_FILE=$(realpath --no-symlinks --canonicalize-missing $PWD/..)/dindexer.yml
