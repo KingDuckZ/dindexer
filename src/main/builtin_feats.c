@@ -52,6 +52,7 @@ void print_builtin_feats() {
 #else
 	printf("WITH_NICE_MEDIA_TYPES = no\n");
 #endif
+	printf("PLATFORM_ARCH = \"%s\"\n", PLATFORM_ARCH);
 }
 
 void print_version() {
