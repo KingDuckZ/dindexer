@@ -34,30 +34,31 @@ include(shared_git_project)
 include(TargetArch)
 include(CMakeDependentOption)
 
+find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system)
+find_package(PostgreSQL 8.3 REQUIRED)
+find_package(YamlCpp 0.5.1 REQUIRED)
+find_package(Qt5Qml 5.1 REQUIRED)
+
 target_architecture(DINDEXER_ARCH)
 if (DINDEXER_ARCH MATCHES "arm.*")
 	set(is_arm ON)
 endif()
+
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
+	set(compiler_is_gnuxx_5plus ON)
+endif()
+
 cmake_dependent_option(DINDEXER_NATIVE_RELEASE "Pass the -march=native flag to the compiler for release builds" OFF "NOT is_arm" OFF)
+option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
+option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
+cmake_dependent_option(DINDEXER_WITH_DESKTOP_QT5_GUI "Enable the Qt5 GUI for desktop" ON "Qt5Qml_FOUND" OFF)
+cmake_dependent_option(DINDEXER_CXX11_ABI "Controls if _GLIBCXX_USE_CXX11_ABI gets set to 0 or not" ON "compiler_is_gnuxx_5plus" OFF)
+
 if(DINDEXER_NATIVE_RELEASE)
 	set(march_flag "-march=native")
 else()
 	set(march_flag "")
 endif()
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
-	set(compiler_is_gnuxx_5plus ON)
-endif()
-
-find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system)
-find_package(PostgreSQL 8.3 REQUIRED)
-find_package(YamlCpp 0.5.1 REQUIRED)
-import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}" "-O3 ${march_flag}")
-find_package(Qt5Qml 5.1 REQUIRED)
-
-option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
-option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
-cmake_dependent_option(DINDEXER_WITH_DESKTOP_QT5_GUI "Enable the Qt5 GUI for desktop" ON "Qt5Qml_FOUND" OFF)
-cmake_dependent_option(DINDEXER_CXX11_ABI "Controls if _GLIBCXX_USE_CXX11_ABI gets set to 0 or not" ON "compiler_is_gnuxx_5plus" OFF)
 
 set(DINDEXER_COPYRIGHT_YEARS "2015,2016")
 set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
@@ -150,6 +151,7 @@ unset(redis_found_index)
 unset(backend_list)
 
 #Libraries
+import_libpqtypes_project("${PostgreSQL_INCLUDE_DIRS}" "-O3 ${march_flag}")
 add_subdirectory(src/pq)
 add_subdirectory(src/common)
 add_subdirectory(src/machinery)
