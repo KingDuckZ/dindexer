@@ -159,6 +159,7 @@ add_subdirectory(src/delete)
 add_subdirectory(src/locate)
 add_subdirectory(src/navigate)
 add_subdirectory(src/tag)
+add_subdirectory(src/gui)
 
 #Tests
 if (BUILD_TESTING)
