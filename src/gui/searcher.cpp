@@ -18,9 +18,7 @@
 #include "searcher.hpp"
 #include "glob2regex/glob2regex.hpp"
 #include "backends/db_backend.hpp"
-#if !defined(NDEBUG)
-#   include <iostream>
-#endif
+#include <iostream>
 #include <string>
 #include <algorithm>
 
