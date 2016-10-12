@@ -38,7 +38,7 @@ include(set_switchable)
 find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system)
 find_package(PostgreSQL 8.3 REQUIRED)
 find_package(YamlCpp 0.5.1 REQUIRED)
-find_package(Qt5Qml 5.1 REQUIRED)
+find_package(Qt5Qml 5.1)
 
 target_architecture(DINDEXER_ARCH)
 if (DINDEXER_ARCH MATCHES "arm.*")
