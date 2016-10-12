@@ -2,7 +2,7 @@ language: cpp
 script:
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on -DDINDEXER_ENABLED_BACKENDS=postgresql,redis ..
+  - cmake -DBUILD_TESTING=ON -DDINDEXER_WITH_BUILD_DATE=on -DPBL_WITH_TESTS=off -DDINDEXER_WITH_NICE_MEDIA_TYPES=on -DDINDEXER_ENABLED_BACKENDS=postgresql,redis -DDINDEXER_WITH_DESKTOP_QT5_GUI=OFF ..
   - cmake --build .
   - ctest
   - cpack
