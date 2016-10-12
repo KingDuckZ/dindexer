@@ -33,6 +33,7 @@ include(timestamp)
 include(shared_git_project)
 include(TargetArch)
 include(CMakeDependentOption)
+include(set_switchable)
 
 find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system)
 find_package(PostgreSQL 8.3 REQUIRED)
@@ -49,10 +50,10 @@ if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION_MAJOR EQUAL "5")
 endif()
 
 cmake_dependent_option(DINDEXER_NATIVE_RELEASE "Pass the -march=native flag to the compiler for release builds" OFF "NOT is_arm" OFF)
-option(DINDEXER_DEBUG_CFG_FILE "Enable to set the config file path to the build path" OFF)
 option(DINDEXER_WITH_MEDIA_AUTODETECT "Enable code that tries to autodetect the media type and sets --type automatically" ON)
 cmake_dependent_option(DINDEXER_WITH_DESKTOP_QT5_GUI "Enable the Qt5 GUI for desktop" ON "Qt5Qml_FOUND" OFF)
 cmake_dependent_option(DINDEXER_CXX11_ABI "Controls if _GLIBCXX_USE_CXX11_ABI gets set to 0 or not" ON "compiler_is_gnuxx_5plus" OFF)
+option(DINDEXER_INST_MODE "Set some paths to the value that is expected for the layout of the installed version of ${bare_name} (make install)" OFF)
 
 if(DINDEXER_NATIVE_RELEASE)
 	set(march_flag "-march=native")
@@ -61,8 +62,21 @@ else()
 endif()
 
 set(DINDEXER_COPYRIGHT_YEARS "2015,2016")
-set(DINDEXER_ACTIONS_PATH "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path")
+set_switchable(PREFIX DINDEXER INFIX INST NAME CONFIG_FILE
+	ONVALUE "$HOME/.config/${bare_name}.yml" CACHE STRING "Path to the config file"
+	OFFVALUE "${PROJECT_BINARY_DIR}/${bare_name}.yml" CACHE STRING "Path to the config file for debug runs (non-install mode)"
+)
+set_switchable(PREFIX DINDEXER INFIX INST NAME ACTIONS_PATH
+	ONVALUE "share/${bare_name}/actions" CACHE STRING "Actions search path"
+	OFFVALUE "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path for debug runs (non-install mode)"
+)
+string(REGEX MATCH "[^/].*" ACTIONS_INST_PATH_INSTALL "${DINDEXER_INST_ACTIONS_PATH}")
 string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
+if (DINDEXER_INST_MODE)
+	message(STATUS "Install mode enabled")
+else()
+	message(STATUS "Install mode disabled")
+endif()
 set(DINDEXER_DB_OWNER_NAME "$ENV{USER}" CACHE STRING "Name that will be used as the DB owner name")
 set(PROJECT_VERSION_BETA "1")
 
@@ -75,19 +89,11 @@ set(DINDEXER_PUB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(PBL_WITH_TESTS OFF)
 get_git_head_revision(GIT_REFSPEC PROJECT_VERSION_GIT)
 
-if ("${DINDEXER_CONFIG_FILE}" STREQUAL "")
-	if (DINDEXER_DEBUG_CFG_FILE)
-		set(DINDEXER_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/${bare_name}.yml CACHE STRING "Path to the config file" FORCE)
-	else()
-		set(DINDEXER_CONFIG_FILE "$HOME/.config/${bare_name}.yml" CACHE STRING "Path to the config file" FORCE)
-	endif()
-endif()
-message(STATUS "Config file set to \"${DINDEXER_CONFIG_FILE}\"")
+message(STATUS "Config file set to \"${DINDEXER_CURR_CONFIG_FILE}\"")
+message(STATUS "Actions search path set to: \"${DINDEXER_CURR_ACTIONS_PATH}\"")
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${bare_name}-inc INTERFACE)
-
-message(STATUS "Actions search path set to: \"${DINDEXER_ACTIONS_PATH}\"")
 
 configure_file(
 	"${PROJECT_SOURCE_DIR}/src/${bare_name}Config.h.in"

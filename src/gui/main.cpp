@@ -17,6 +17,7 @@
 
 #include "searcher.hpp"
 #include "dindexerConfig.h"
+#include "dindexer-guiConfig.h"
 #include "dindexer-common/settings.hpp"
 #include <QApplication>
 #include <QtCore/QUrl>
@@ -24,10 +25,46 @@
 #include <cassert>
 #include <iostream>
 
+//namespace {
+//	std::string replace_dindexer_path (const char* parPath, const std::map<std::string, std::string>& parDict) a_pure;
+//
+//	std::string replace_dindexer_path (const char* parPath, const std::map<std::string, std::string>& parDict) {
+//		assert(parPath);
+//		std::string retval(parPath);
+//
+//		std::size_t from = 0;
+//		while ((from = retval.find('%', from)) != std::string::npos) {
+//			if (retval.size() - 1 == from)
+//				break;
+//			if ('%' == retval[from + 1]) {
+//				from += 2;
+//				continue;
+//			}
+//
+//			const auto to = retval.find('%', from + 1);
+//			if (std::string::npos == to)
+//				break;
+//
+//			assert(to - from + 1 > 2);
+//			const auto& val = parDict.at(retval.substr(from + 1, to - from - 1));
+//			retval.replace(from, to - from + 1, val);
+//		}
+//		if (not retval.empty() and retval.back() != '/')
+//			retval += '/';
+//		return retval;
+//	}
+//} //unnamed namespace
+
 int main (int parArgc, char* parArgv[]) {
 	QApplication app(parArgc, parArgv);
 	QQmlApplicationEngine engine;
-	engine.load(QUrl::fromLocalFile("/home/michele/dev/code/cpp/dindexer/src/gui/qml/mainwin.qml"));
+	//const auto qml_path = replace_dindexer_path(
+	//		QML_PATH,
+	//		{ {"APP_PATH", QCoreApplication::applicationDirPath().toStdString()} }
+	//) + "mainwin.qml";
+
+	//engine.load(QUrl::fromLocalFile(QString::fromUtf8(qml_path.c_str(), qml_path.size())));
+	engine.load(QUrl::fromLocalFile(QML_PATH "/mainwin.qml"));
 
 	dinlib::Settings settings;
 	try {

@@ -37,6 +37,11 @@ void print_builtin_feats() {
 #else
 	printf("NDEBUG = no (Debug build)\n");
 #endif
+#if defined(DINDEXER_INST_MODE)
+	printf("INSTALL_MODE = yes\n");
+#else
+	printf("INSTALL_MODE = no\n");
+#endif
 	printf("Built on %s (CMake %s)\n", CMAKE_SYSTEM, CMAKE_VERSION);
 	printf("C compiler = %s %s\n", CMAKE_C_COMPILER_ID, CMAKE_C_COMPILER_VERSION);
 	printf("C++ compiler = %s %s\n", CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION);

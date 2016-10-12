@@ -117,7 +117,7 @@ These are the options understood by cmake. At runtime you might be able to see w
 * **DINDEXER_ACTIONS_PATH** Search path for dindexer actions
 * **DINDEXER_CONFIG_FILE** Full path to the yaml configuration file
 * **DINDEXER_CXX11_ABI** Set this to off to force newer gcc (5+) to keep using the old ABI - useful on Gentoo if you built your system libraries with gcc 4 and you are trying to build dindexer with gcc 5
-* **DINDEXER_DEBUG_CFG_FILE** If set to on, DINDEXER_CONFIG_FILE will be set to a path that is more appropriate for development environments
+* **DINDEXER_INST_MODE** If set to on, paths will be set to the value that is assumed to be valid for a system-wide installed version of dindexer
 * **DINDEXER_NATIVE_RELEASE** Set to on to pass `--march=native` to the compiler
 * **DINDEXER_WITH_BUILD_DATE** If set to on, the current date will be hardcoded into the final binary - warning: if set to on, some files will need to be rebuilt every day just because the date has changed
 * **DINDEXER_WITH_MEDIA_AUTODETECT** Enable code that detects the inserted media type, eg: CD-Rom or DVD - requires libblkid
