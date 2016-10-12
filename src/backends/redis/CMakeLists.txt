@@ -30,9 +30,9 @@ configure_file(
 	${CMAKE_CURRENT_BINARY_DIR}/redisConfig.h
 )
 set(LUA_SCRIPTS
-	tag_if_in_set.lua
-	dele_tag_if_in_set.lua
-	dele_hash.lua
+	lua/tag_if_in_set.lua
+	lua/dele_tag_if_in_set.lua
+	lua/dele_hash.lua
 )
 
 install(TARGETS ${PROJECT_NAME}
