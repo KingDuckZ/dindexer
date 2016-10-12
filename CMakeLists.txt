@@ -70,8 +70,7 @@ set_switchable(PREFIX DINDEXER INFIX INST NAME ACTIONS_PATH
 	ONVALUE "share/${bare_name}/actions" CACHE STRING "Actions search path"
 	OFFVALUE "${CMAKE_CURRENT_BINARY_DIR}/src" CACHE STRING "Actions search path for debug runs (non-install mode)"
 )
-string(REGEX MATCH "[^/].*" ACTIONS_INST_PATH_INSTALL "${DINDEXER_INST_ACTIONS_PATH}")
-string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_ACTIONS_PATH}")
+string(REGEX MATCH "[^/].*" ACTIONS_PATH_INSTALL "${DINDEXER_CURR_ACTIONS_PATH}")
 if (DINDEXER_INST_MODE)
 	message(STATUS "Install mode enabled")
 else()
