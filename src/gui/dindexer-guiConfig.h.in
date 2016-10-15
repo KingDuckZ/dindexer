@@ -20,10 +20,14 @@
 
 #cmakedefine DINDEXER_INST_MODE
 
-#if defined(DINDEXER_INST_MODE)
-#	define QML_PATH "@CMAKE_INSTALL_PREFIX@/@DINDEXER_CURR_QML_PATH@"
+#if DIN_QRC_ENABLED
+#	define QML_PATH ":"
 #else
-#	define QML_PATH "@DINDEXER_CURR_QML_PATH@"
+#	if defined(DINDEXER_INST_MODE)
+#		define QML_PATH "@CMAKE_INSTALL_PREFIX@/@DINDEXER_CURR_QML_PATH@"
+#	else
+#		define QML_PATH "@DINDEXER_CURR_QML_PATH@"
+#	endif
 #endif
 
 #endif
