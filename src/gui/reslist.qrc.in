@@ -1,5 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>qml/mainwin.qml</file>
+    @resource_list_for_qrc@
 </qresource>
 </RCC>

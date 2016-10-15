@@ -16,7 +16,7 @@ find_package(Qt5Widgets 5.1 REQUIRED)
 add_executable(${PROJECT_NAME}
 	main.cpp
 	searcher.cpp
-	$<$<AND:$<CONFIG:Release>,$<BOOL:${DINDEXER_ENABLE_QRC}>>:reslist.qrc>
+	$<$<AND:$<CONFIG:Release>,$<BOOL:${DINDEXER_ENABLE_QRC}>>:${CMAKE_CURRENT_BINARY_DIR}/reslist.qrc>
 )
 
 set(qml_files
@@ -45,10 +45,15 @@ target_compile_definitions(${PROJECT_NAME}
 	PRIVATE DIN_QRC_ENABLED=$<AND:$<CONFIG:Release>,$<BOOL:${DINDEXER_ENABLE_QRC}>>
 )
 
+if (DINDEXER_ENABLE_QRC)
+	set(resource_list_for_qrc "")
+endif()
 get_directory_property(clean_qml_list ADDITIONAL_MAKE_CLEAN_FILES)
 foreach(current_qml ${qml_files})
 	get_filename_component(qml_basename "${current_qml}" NAME)
-	if (NOT DINDEXER_ENABLE_QRC)
+	if (DINDEXER_ENABLE_QRC)
+		set(resource_list_for_qrc "${resource_list_for_qrc}\t<file>${current_qml}</file>\n")
+	else()
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${current_qml}" "${CMAKE_BINARY_DIR}/${DINDEXER_CURR_QML_PATH}/${qml_basename}" COPYONLY)
 	endif()
 	list(APPEND clean_qml_list "${CMAKE_BINARY_DIR}/${DINDEXER_CURR_QML_PATH}/${qml_basename}")
@@ -62,6 +67,13 @@ configure_file(
 	"${PROJECT_NAME}Config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.h"
 )
+if (DINDEXER_ENABLE_QRC)
+	configure_file(
+		"reslist.qrc.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/reslist.qrc"
+	)
+	unset(resource_list_for_qrc)
+endif()
 
 install(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
