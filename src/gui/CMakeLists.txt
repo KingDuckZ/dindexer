@@ -12,15 +12,19 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt5Core 5.1 REQUIRED)
 find_package(Qt5Qml 5.1 REQUIRED)
 find_package(Qt5Widgets 5.1 REQUIRED)
+find_package(Qt5Quick 5.1 REQUIRED)
 
 add_executable(${PROJECT_NAME}
 	main.cpp
 	searcher.cpp
 	$<$<AND:$<CONFIG:Release>,$<BOOL:${DINDEXER_ENABLE_QRC}>>:${CMAKE_CURRENT_BINARY_DIR}/reslist.qrc>
+	icon_provider.cpp
+	result_list_model.cpp
 )
 
 set(qml_files
 	qml/mainwin.qml
+	qml/FileList.qml
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -36,6 +40,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE Qt5::Qml
 	PRIVATE Qt5::Widgets
 	PRIVATE Qt5::Core
+	PRIVATE Qt5::Quick
 	PRIVATE glob2regex
 )
 

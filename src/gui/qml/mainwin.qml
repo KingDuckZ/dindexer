@@ -38,6 +38,9 @@ ApplicationWindow {
 		}
 	}
 
+	FileList {
+	}
+
 	statusBar: StatusBar {
 		RowLayout {
 			Label {

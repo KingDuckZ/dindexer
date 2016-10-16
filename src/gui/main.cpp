@@ -19,9 +19,12 @@
 #include "dindexerConfig.h"
 #include "dindexer-guiConfig.h"
 #include "dindexer-common/settings.hpp"
+#include "icon_provider.hpp"
+#include "result_list_model.hpp"
 #include <QApplication>
 #include <QtCore/QUrl>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <cassert>
 #include <iostream>
 
@@ -58,11 +61,15 @@
 int main (int parArgc, char* parArgv[]) {
 	QApplication app(parArgc, parArgv);
 	QQmlApplicationEngine engine;
-	//const auto qml_path = replace_dindexer_path(
-	//		QML_PATH,
-	//		{ {"APP_PATH", QCoreApplication::applicationDirPath().toStdString()} }
-	//) + "mainwin.qml";
+	din::ResultListModel result_list_model;
 
+	{
+		QQmlContext* ctxt = engine.rootContext();
+		assert(ctxt);
+		ctxt->setContextProperty("resultListModel", &result_list_model);
+	}
+
+	engine.addImageProvider(QLatin1String("theme"), new din::IconProvider);
 	//engine.load(QUrl::fromLocalFile(QString::fromUtf8(qml_path.c_str(), qml_path.size())));
 	engine.load(QUrl::fromLocalFile(QML_PATH "/mainwin.qml"));
 
