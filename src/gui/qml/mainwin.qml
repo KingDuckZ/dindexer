@@ -27,18 +27,23 @@ ApplicationWindow {
 		}
 	}
 
-	Rectangle {
+	RowLayout {
 		id: rectagleMain
-		TextField {
-			id: searchBox
-			maximumLength: 256
-			placeholderText: qsTr("Locate glob");
-			text: "*.ogg"
-			onEditingFinished: if (text.length >= 1) { locate(text); }
-		}
-	}
 
-	FileList {
+		Row {
+			TextField {
+				id: searchBox
+				maximumLength: 256
+				placeholderText: qsTr("Locate glob");
+				text: "*.ogg"
+				onEditingFinished: if (text.length >= 1) { locate(text); }
+			}
+		}
+
+		Row {
+			FileList {
+			}
+		}
 	}
 
 	statusBar: StatusBar {
