@@ -32,5 +32,8 @@ target_compile_features(${PROJECT_NAME}
 #see https://cmake.org/pipermail/cmake/2007-May/014350.html
 #and http://stackoverflow.com/questions/6093547/what-do-r-x86-64-32s-and-r-x86-64-64-relocation-mean/6093910#6093910
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
-	set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+	#see https://github.com/CarloWood/cmaketest/blob/master/bar.cmake
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		POSITION_INDEPENDENT_CODE ON #Compile this object code position independent.
+	)
 endif()
