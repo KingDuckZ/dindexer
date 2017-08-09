@@ -30,6 +30,7 @@ namespace dindb {
 	public:
 		BackendRedis ( BackendRedis&& ) = default;
 		BackendRedis ( std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths );
+		BackendRedis ( std::string&& parPath, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths );
 		virtual ~BackendRedis ( void ) noexcept;
 
 		virtual void connect ( void ) override;

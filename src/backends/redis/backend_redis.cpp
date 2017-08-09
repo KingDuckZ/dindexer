@@ -41,6 +41,7 @@ namespace dindb {
 			std::string address;
 			uint16_t port;
 			uint16_t database;
+			bool sock_mode;
 		};
 
 		std::string read_script (const dincore::SearchPaths& parSearch, const char* parName) {
@@ -70,20 +71,31 @@ namespace YAML {
 			node["address"] = parSettings.address;
 			node["port"] = parSettings.port;
 			node["database"] = parSettings.database;
+			node["sock_mode"] = parSettings.sock_mode;
 			return node;
 		}
 
 		static bool decode (const Node& parNode, dindb::RedisConnectionSettings& parSettings) {
-			if (not parNode.IsMap() or parNode.size() != 2) {
+			if (not parNode.IsMap() or parNode.size() < 2) {
 				return false;
 			}
 
+			if (parNode["sock_mode"])
+				parSettings.sock_mode = parNode["sock_mode"].as<bool>();
+			else
+				parSettings.sock_mode = false;
+
 			parSettings.address = parNode["address"].as<std::string>();
-			parSettings.port = parNode["port"].as<uint16_t>();
+			if (parNode["port"])
+				parSettings.port = parNode["port"].as<uint16_t>();
+			else
+				parSettings.port = 6379;
+
 			if (parNode["database"])
 				parSettings.database = parNode["database"].as<uint16_t>();
 			else
 				parSettings.database = 0;
+
 			return true;
 		}
 	};
@@ -92,6 +104,16 @@ namespace YAML {
 namespace dindb {
 	BackendRedis::BackendRedis(std::string&& parAddress, uint16_t parPort, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths) :
 		m_redis(std::move(parAddress), parPort),
+		m_tag_if_in_set(),
+		m_lua_script_paths(std::move(parLuaPaths)),
+		m_database(parDatabase)
+	{
+		if (parConnect)
+			this->connect();
+	}
+
+	BackendRedis::BackendRedis(std::string&& parPath, uint16_t parDatabase, bool parConnect, dincore::SearchPaths&& parLuaPaths) :
+		m_redis(std::move(parPath)),
 		m_tag_if_in_set(),
 		m_lua_script_paths(std::move(parLuaPaths)),
 		m_database(parDatabase)
@@ -299,13 +321,23 @@ extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig)
 	dincore::SearchPaths lua_paths(std::move(vec));
 	lua_paths.add_path(REDIS_SCRIPTS_PATH);
 
-	return new dindb::BackendRedis(
-		std::move(config.address),
-		config.port,
-		config.database,
-		true,
-		std::move(lua_paths)
-	);
+	if (config.sock_mode) {
+		return new dindb::BackendRedis(
+			std::move(config.address),
+			config.database,
+			true,
+			std::move(lua_paths)
+		);
+	}
+	else {
+		return new dindb::BackendRedis(
+			std::move(config.address),
+			config.port,
+			config.database,
+			true,
+			std::move(lua_paths)
+		);
+	}
 }
 
 extern "C" void dindexer_destroy_backend (dindb::Backend* parDele) {
