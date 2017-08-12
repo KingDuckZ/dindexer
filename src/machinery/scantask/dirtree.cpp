@@ -96,9 +96,10 @@ namespace mchlib {
 			fastf::FileSearcher::ConstCharVecType ext, ignore;
 
 			searcher.SetFollowSymlinks(true);
+			auto root_path = PathName(string_ref(m_root));
 			searcher.SetCallback(
 				fastf::FileSearcher::CallbackType(
-					std::bind(&add_path, std::ref(parData), PathName(string_ref(m_root)), _1, _2)
+					std::bind(&add_path, std::ref(parData), std::cref(root_path), _1, _2)
 				)
 			);
 			searcher.Search(ext, ignore);
