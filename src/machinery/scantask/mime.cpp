@@ -25,8 +25,9 @@ namespace mchlib {
 	} //unnamed namespace
 
 	namespace scantask {
-		Mime::Mime (DirTreeTaskPtr parDirTree) :
-			m_file_tree_task(parDirTree)
+		Mime::Mime (DirTreeTaskPtr parDirTree, bool parIgnoreErrors) :
+			m_file_tree_task(parDirTree),
+			m_ignore_errors(parIgnoreErrors)
 		{
 			assert(m_file_tree_task);
 		}
@@ -39,9 +40,14 @@ namespace mchlib {
 			auto& list = m_file_tree_task->get_or_create();
 
 			for (auto& itm : list) {
-				itm.mime_full = mime.analyze(itm.abs_path);
-				auto mime_pair = split_mime(itm.mime_full);
-				itm.set_mime_parts(mime_pair.first, mime_pair.second);
+				try {
+					itm.mime_full = mime.analyze(itm.abs_path);
+					auto mime_pair = split_mime(itm.mime_full);
+					itm.set_mime_parts(mime_pair.first, mime_pair.second);
+				}
+				catch (const std::runtime_error&) {
+					itm.mime_full = "";
+				}
 			}
 		}
 

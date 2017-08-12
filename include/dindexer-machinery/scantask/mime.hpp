@@ -31,7 +31,7 @@ namespace mchlib {
 		public:
 			using DirTreeTaskPtr = std::shared_ptr<Base<std::vector<FileRecordData>>>;
 
-			explicit Mime ( DirTreeTaskPtr parDirTree );
+			Mime (DirTreeTaskPtr parDirTree, bool parIgnoreErrors);
 			virtual ~Mime ( void ) noexcept;
 
 		private:
@@ -39,6 +39,7 @@ namespace mchlib {
 			virtual std::vector<FileRecordData>& on_data_get ( void ) override;
 
 			DirTreeTaskPtr m_file_tree_task;
+			bool m_ignore_errors;
 		};
 	} //namespace scantask
 } //namespace mchlib

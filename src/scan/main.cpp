@@ -91,7 +91,7 @@ int main (int parArgc, char* parArgv[]) {
 	std::shared_ptr<stask::MediaType> media_type(new stask::MediaType(setbasic, def_media_type, vm.count("type"), search_path));
 	std::shared_ptr<stask::Hashing> hashing(new stask::Hashing(scan_dirtree, ignore_read_errors));
 	std::shared_ptr<stask::ContentType> content_type(new stask::ContentType(setbasic, scan_dirtree, media_type));
-	std::shared_ptr<stask::Mime> mime(new stask::Mime(scan_dirtree));
+	std::shared_ptr<stask::Mime> mime(new stask::Mime(scan_dirtree, ignore_read_errors));
 	std::shared_ptr<FileRecordDataFiller> filerecdata(new FileRecordDataFiller(mime, hashing));
 	std::shared_ptr<SetRecordDataFiller> setrecdata(new SetRecordDataFiller(media_type, content_type));
 
