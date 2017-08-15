@@ -251,4 +251,11 @@ namespace mchlib {
 	std::size_t PathName::str_path_size() const {
 		return calc_join_size(m_pool, is_absolute());
 	}
+
+	void PathName::swap (PathName& parOther) noexcept {
+		if (this != &parOther) {
+			this->m_pool.swap(parOther.m_pool);
+			std::swap(m_absolute, parOther.m_absolute);
+		}
+	}
 } //namespace mchlib

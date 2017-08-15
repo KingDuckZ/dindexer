@@ -48,6 +48,7 @@ namespace mchlib {
 		PathName& pop_right ( void );
 		bool operator!= ( const PathName& parOther ) const;
 		bool operator== ( const PathName& parOther ) const;
+		void swap (PathName& parOther) noexcept;
 
 	private:
 		static const std::string m_empty_str;

@@ -58,6 +58,7 @@ namespace mchlib {
 		const string_type* get_stringref_source ( std::size_t parIndex ) const;
 		const stringref_type& operator[] ( std::size_t parIndex ) const;
 		void pop ( void );
+		void swap (StringPool& parOther) noexcept;
 
 	private:
 		PoolType m_pool;

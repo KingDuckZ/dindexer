@@ -137,4 +137,10 @@ namespace mchlib {
 		}
 		return;
 	}
+
+	template <typename C, typename Str, typename StrRef>
+	void StringPool<C, Str, StrRef>::swap (StringPool& parOther) noexcept {
+		m_pool.swap(parOther.m_pool);
+		m_strings.swap(parOther.m_strings);
+	}
 } //namespace mchlib
