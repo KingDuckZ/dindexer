@@ -2,20 +2,22 @@
 ---
 backend_name: postgresql
 postgresql_settings:
-    connection:
-        username: your_username
-        password: your_password
-        dbname: dindexer
-        port: 5432
-        address: 200.100.200.100
+  connection:
+    username: your_username
+    password: your_password
+    dbname: dindexer
+    port: 5432
+    address: 200.100.200.100
 
 redis_settings:
-    connection:
-        address: 200.100.200.100
-        port: 6379
+  connection:
+    address: "/var/run/redis/redis.sock"
+    port: 6379
+    database: 1
+    sock_mode: true
 
-    script_paths:
-    - /home/duckz/dev/build/dindexer/Debug/src/backends/redis/lua
-    - /home/duckz/dev/build/dindexer/Release/src/backends/redis/lua
+  script_paths:
+  - /home/michele/dev/build/dindexer/debug/src/backends/redis/lua
+  - /home/michele/dev/build/dindexer/release/src/backends/redis/lua
 
-backend_paths: path to your build_dir/src/backend
+backend_paths: /home/michele/dev/build/dindexer/debug/src/backends
