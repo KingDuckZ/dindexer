@@ -37,7 +37,6 @@ namespace mchlib {
 		bool is_absolute ( void ) const { return m_absolute; }
 		std::string path ( void ) const;
 		std::size_t str_path_size ( void ) const;
-		const std::string& original_path ( void ) const { return (m_original_path ? *m_original_path : m_empty_str); }
 		std::size_t atom_count ( void ) const;
 		const boost::string_ref operator[] ( std::size_t parIndex ) const;
 		void join ( const PathName& parOther );
@@ -54,7 +53,6 @@ namespace mchlib {
 		static const std::string m_empty_str;
 
 		StringPool<char> m_pool;
-		const std::string* m_original_path;
 		bool m_absolute;
 	};
 

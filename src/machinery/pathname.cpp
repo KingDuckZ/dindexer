@@ -126,7 +126,6 @@ namespace mchlib {
 			m_pool.insert(atoms, &path);
 		}
 		else {
-			m_original_path = nullptr;
 			m_absolute = false;
 		}
 	}
