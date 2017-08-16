@@ -2,7 +2,7 @@ project(${bare_name}-core CXX)
 
 add_library(${PROJECT_NAME} SHARED
 	searchpaths.cpp
-	split_tags.cpp
+	split.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

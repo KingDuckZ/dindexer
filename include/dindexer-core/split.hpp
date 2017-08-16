@@ -15,22 +15,15 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef idABF7D6D669F445B2852C4DDFC29C701E
-#define idABF7D6D669F445B2852C4DDFC29C701E
+#ifndef id913CE9D2F60745349F39F2C82455973E
+#define id913CE9D2F60745349F39F2C82455973E
 
-#include "dindexer-core/split.hpp"
+#include <vector>
+#include <boost/utility/string_ref.hpp>
+#include "duckhandy/compatibility.h"
 
 namespace dincore {
-	std::vector<boost::string_ref> split_tags ( boost::string_ref parCommaSeparatedList ) a_pure;
-	std::vector<boost::string_ref> split_and_trim ( boost::string_ref parCommaSeparatedList, char parSeparator ) a_pure;
-
-	inline std::vector<boost::string_ref> split_tags (boost::string_ref parCommaSeparatedList) {
-		return split(parCommaSeparatedList, ',', true, true);
-	}
-
-	inline std::vector<boost::string_ref> split_and_trim (boost::string_ref parCommaSeparatedList, char parSeparator) {
-		return split(parCommaSeparatedList, parSeparator, true, true);
-	}
+	std::vector<boost::string_ref> split ( boost::string_ref parList, char parSeparator, bool parTrim, bool parDeleteEmpty ) a_pure;
 } //namespace dincore
 
 #endif

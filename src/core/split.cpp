@@ -15,7 +15,7 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dindexer-core/split_tags.hpp"
+#include "dindexer-core/split.hpp"
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -25,14 +25,6 @@
 #include <ciso646>
 
 namespace dincore {
-	std::vector<boost::string_ref> split_tags (boost::string_ref parCommaSeparatedList) {
-		return split(parCommaSeparatedList, ',', true, true);
-	}
-
-	std::vector<boost::string_ref> split_and_trim (boost::string_ref parList, char parSeparator) {
-		return split(parList, parSeparator, true, true);
-	}
-
 	std::vector<boost::string_ref> split (boost::string_ref parList, char parSeparator, bool parTrim, bool parDeleteEmpty) {
 		using OutRange = boost::iterator_range<std::string::const_iterator>;
 		using boost::token_finder;
