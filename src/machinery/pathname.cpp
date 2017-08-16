@@ -16,6 +16,7 @@
  */
 
 #include "pathname.hpp"
+#include "dindexer-core/split.hpp"
 #include <algorithm>
 #include <functional>
 #include <ciso646>
@@ -149,11 +150,14 @@ namespace mchlib {
 	void PathName::join (const char* parOther) {
 		const std::string src(parOther);
 		const boost::string_ref ref(src);
-		m_pool.insert(ref, &src);
+		this->join(ref, &src);
 	}
 
 	void PathName::join (boost::string_ref parOther, const std::string* parSource) {
-		m_pool.insert(parOther, parSource);
+		m_pool.insert(
+			dincore::split(parOther, '/', false, true),
+			parSource
+		);
 	}
 
 	PathName make_relative_path (const PathName& parBasePath, const PathName& parOtherPath) {

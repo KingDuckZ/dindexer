@@ -6,10 +6,12 @@ add_executable(${PROJECT_NAME}
 	test_glob2regex.cpp
 	test_tiger_string_conv.cpp
 	test_lexical_cast.cpp
+	test_pathname.cpp
 )
 
 target_include_directories(${PROJECT_NAME} SYSTEM
 	PRIVATE ../gtest/include
+	PRIVATE ../../src/machinery
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -27,11 +27,17 @@
 #include <algorithm>
 #include <functional>
 #include <boost/iterator/transform_iterator.hpp>
+#include <cassert>
 
 namespace mchlib {
 	template <typename C, typename Str=std::basic_string<C>, typename StrRef=boost::basic_string_ref<C>>
 	class StringPool {
-		typedef std::pair<StrRef, const Str*> StringListPair;
+		struct StrRange {
+			std::size_t start;
+			std::size_t len;
+		};
+
+		typedef std::pair<StrRange, std::size_t> StringListPair;
 		typedef std::vector<std::pair<Str, std::size_t>> PoolType;
 		typedef std::vector<StringListPair> StringListType;
 		typedef std::function<StrRef(const StringListPair&)> FuncGetFirst;
@@ -46,7 +52,7 @@ namespace mchlib {
 		~StringPool ( void ) noexcept = default;
 
 		template <typename ItR>
-		void update ( ItR parDataBeg, ItR parDataEnd );
+		void update ( ItR parDataBeg, ItR parDataEnd, const std::vector<const string_type*>& parBaseStrings );
 		void update ( const StringPool& parOther );
 		void insert ( const std::vector<stringref_type>& parStrings, const string_type* parBaseString );
 		void insert ( stringref_type parString, const string_type* parBaseString );
@@ -56,11 +62,13 @@ namespace mchlib {
 		const_iterator begin ( void ) const;
 		const_iterator end ( void ) const;
 		const string_type* get_stringref_source ( std::size_t parIndex ) const;
-		const stringref_type& operator[] ( std::size_t parIndex ) const;
+		stringref_type operator[] ( std::size_t parIndex ) const;
 		void pop ( void );
 		void swap (StringPool& parOther) noexcept;
 
 	private:
+		stringref_type make_stringref (const StringListPair& parStrPair) const;
+
 		PoolType m_pool;
 		StringListType m_strings;
 	};
