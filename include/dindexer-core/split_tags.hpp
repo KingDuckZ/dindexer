@@ -19,13 +19,13 @@
 #define id913CE9D2F60745349F39F2C82455973E
 
 #include <vector>
-#include <string>
 #include <boost/utility/string_ref.hpp>
 #include "duckhandy/compatibility.h"
 
 namespace dincore {
-	std::vector<boost::string_ref> split_and_trim ( const std::string& parList, char parSeparator ) a_pure;
-	std::vector<boost::string_ref> split_tags ( const std::string& parCommaSeparatedList ) a_pure;
+	std::vector<boost::string_ref> split_and_trim ( boost::string_ref parList, char parSeparator ) a_pure;
+	std::vector<boost::string_ref> split_tags ( boost::string_ref parCommaSeparatedList ) a_pure;
+	std::vector<boost::string_ref> split ( boost::string_ref parList, char parSeparator, bool parTrim, bool parDeleteEmpty ) a_pure;
 } //namespace dincore
 
 #endif
