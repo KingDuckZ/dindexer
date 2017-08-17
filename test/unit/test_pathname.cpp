@@ -66,12 +66,75 @@ TEST(machinery, pathname) {
 		EXPECT_EQ(2, attachments.atom_count());
 		EXPECT_EQ("attachments/important", attachments.path());
 	}
+
+	{
+		PathName test("/////home/duckz/////many////slashes///////////////");
+		EXPECT_EQ(4, test.atom_count());
+		EXPECT_TRUE(test.is_absolute());
+		EXPECT_EQ("/home/duckz/many/slashes", test.path());
+
+		test.join("..");
+		EXPECT_EQ(5, test.atom_count());
+		EXPECT_EQ("/home/duckz/many/slashes/..", test.path());
+
+		test.pop_right();
+		EXPECT_EQ(4, test.atom_count());
+		EXPECT_EQ("/home/duckz/many/slashes", test.path());
+		test.pop_right();
+		EXPECT_EQ(3, test.atom_count());
+		EXPECT_EQ("/home/duckz/many", test.path());
+		test.pop_right();
+		EXPECT_EQ(2, test.atom_count());
+		EXPECT_EQ("/home/duckz", test.path());
+		test.pop_right();
+		EXPECT_EQ(1, test.atom_count());
+		EXPECT_EQ("/home", test.path());
+		test.pop_right();
+		EXPECT_EQ(0, test.atom_count());
+		EXPECT_EQ("/", test.path());
+	}
 }
 
 TEST(machinery, pathname_functions) {
 	using mchlib::PathName;
-	using mchlib::make_relative_path;
+	//using mchlib::make_relative_path;
 	using mchlib::basename;
 	using mchlib::is_ancestor;
 	using mchlib::are_siblings;
+
+	PathName home("/home/duckz/");
+	PathName jpeg("pic.jpg");
+	PathName bpg("pic2.pbg");
+	PathName pics_rel("pictures/wallpapers");
+	PathName full_jpeg_path(home);
+	full_jpeg_path.join(pics_rel);
+	full_jpeg_path.join(jpeg);
+	PathName full_bpg_path(home);
+	full_bpg_path.join(pics_rel);
+	full_bpg_path.join(bpg);
+	PathName pics_abs(home);
+	pics_abs.join(pics_rel);
+
+	EXPECT_EQ(2, home.atom_count());
+	EXPECT_EQ(1, jpeg.atom_count());
+	EXPECT_EQ(2, pics_rel.atom_count());
+	EXPECT_EQ(4, pics_abs.atom_count());
+
+	EXPECT_EQ("/home/duckz/pictures/wallpapers", pics_abs.path());
+	EXPECT_EQ("/home/duckz/pictures/wallpapers/pic.jpg", full_jpeg_path.path());
+
+	EXPECT_EQ("pic.jpg", basename(full_jpeg_path));
+	EXPECT_EQ("pic.jpg", basename(jpeg));
+	EXPECT_EQ("wallpapers", basename(pics_abs));
+	EXPECT_EQ("wallpapers", basename(pics_rel));
+
+	EXPECT_FALSE(are_siblings(home, pics_rel));
+	EXPECT_FALSE(are_siblings(home, pics_abs));
+	EXPECT_TRUE(are_siblings(full_bpg_path, full_jpeg_path));
+	EXPECT_TRUE(are_siblings(bpg, jpeg));
+
+	EXPECT_TRUE(is_ancestor(home, pics_abs, 0));
+	EXPECT_FALSE(is_ancestor(home, pics_abs, 1));
+	EXPECT_TRUE(is_ancestor(home, pics_abs, 2));
+	EXPECT_TRUE(is_ancestor(home, pics_abs, 3));
 }

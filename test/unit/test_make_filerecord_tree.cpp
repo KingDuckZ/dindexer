@@ -57,7 +57,24 @@ TEST(machinery, make_filerecord_tree) {
 	};
 	std::vector<FileRecordNode> results = make_filerecord_tree(records);
 
-	for (const auto& result : results) {
-		std::cout << result.index << ' ' << records[result.index].path() << '\n';
-	}
+	//for (const auto& result : results) {
+	//	std::cout << result.index << ' ' << records[result.index].path() << '\n';
+	//}
+
+	ASSERT_EQ(6, results.size());
+	EXPECT_EQ("gtest", records[results[0].index].path());
+	EXPECT_EQ("unit", records[results[1].index].path());
+	EXPECT_EQ("unit_cli/CMakeFiles", records[results[2].index].path());
+	EXPECT_EQ("unit_cli/CTestTestfile.cmake", records[results[3].index].path());
+	EXPECT_EQ("unit_cli/Makefile", records[results[4].index].path());
+	EXPECT_EQ("unit_cli/cmake_install.cmake", records[results[5].index].path());
+
+	const std::vector<FileRecordNode>& gtest = results[0].children;
+	ASSERT_EQ(6, gtest.size());
+	EXPECT_EQ("gtest/CMakeFiles/CMakeDirectoryInformation.cmake", records[gtest[0].index].path());
+	EXPECT_EQ("gtest/CMakeFiles/gtest.dir", records[gtest[1].index].path());
+	EXPECT_EQ("gtest/CMakeFiles/gtest_main.dir/depend.internal", records[gtest[2].index].path());
+	EXPECT_EQ("gtest/CMakeFiles/gtest_main.dir/link.txt", records[gtest[3].index].path());
+	EXPECT_EQ("gtest/CMakeFiles/gtest_main.dir/src", records[gtest[4].index].path());
+	EXPECT_EQ("gtest/CMakeFiles/progress.marks", records[gtest[5].index].path());
 }
