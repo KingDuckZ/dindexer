@@ -6,6 +6,7 @@ add_executable(${PROJECT_NAME}
 	test_glob2regex.cpp
 	test_tiger_string_conv.cpp
 	test_lexical_cast.cpp
+	test_make_filerecord_tree.cpp
 	test_pathname.cpp
 )
 

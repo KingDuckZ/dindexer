@@ -59,6 +59,8 @@ namespace mchlib {
 	PathName make_relative_path ( const PathName& parBasePath, const PathName& parOtherPath );
 	std::ostream& operator<< ( std::ostream& parStream, const PathName& parPath );
 	const boost::string_ref basename ( const PathName& parPath );
+	bool is_ancestor (const PathName& parAncestor, const PathName& parChild, std::size_t parMaxLevels);
+	bool are_siblings (const PathName& parA, const PathName& parB);
 } //namespace mchlib
 
 #endif

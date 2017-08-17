@@ -218,6 +218,42 @@ namespace mchlib {
 		return parPath[sz - 1];
 	}
 
+	bool is_ancestor (const PathName& parAncestor, const PathName& parChild, std::size_t parMaxLevels) {
+		const std::size_t anc_atom_count = parAncestor.atom_count();
+		const std::size_t cld_atom_count = parChild.atom_count();
+
+		if (anc_atom_count + parMaxLevels >= cld_atom_count or not parMaxLevels) {
+			assert(not parMaxLevels or anc_atom_count <= cld_atom_count);
+			const std::size_t min_count = std::min(anc_atom_count, cld_atom_count);
+			for (std::size_t z = 0; z < min_count; ++z) {
+				if (parAncestor[z] != parChild[z])
+					return false;
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	bool are_siblings (const PathName& parA, const PathName& parB) {
+		const std::size_t atom_count = parA.atom_count();
+		if (atom_count != parB.atom_count()) {
+			return false;
+		}
+		else if (1 >= atom_count) {
+			return true;
+		}
+		else {
+			assert(atom_count > 1);
+			for (std::size_t z = 0; z < atom_count - 1; ++z) {
+				if (parA[z] != parB[z])
+					return false;
+			}
+			return true;
+		}
+	}
+
 	PathName& PathName::pop_right() {
 		m_pool.pop();
 		return *this;
