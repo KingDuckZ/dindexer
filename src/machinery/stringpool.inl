@@ -30,7 +30,9 @@ namespace mchlib {
 
 		template <typename StrRef, typename Str>
 		std::size_t start_pos (StrRef parSubstr, const Str* parData) {
+#if !defined(NDEBUG)
 			typedef decltype(parData->data()) char_type;
+#endif
 			assert(parData);
 
 			if (not parSubstr.empty()) {
