@@ -116,7 +116,7 @@ namespace din {
 		}
 
 		auto hashing = HashingTaskPtr(new stask::Hashing(file_src_task, false));
-		std::vector<FileRecordData> hashes = hashing->get_or_create();
+		const std::vector<FileRecordData>& hashes = hashing->get_or_create();
 
 		std::vector<HashNode> retval;
 		{
