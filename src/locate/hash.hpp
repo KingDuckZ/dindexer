@@ -22,7 +22,12 @@
 #include <vector>
 
 namespace din {
-	mchlib::TigerHash hash ( const std::string& parPath );
+	struct HashNode {
+		mchlib::TigerHash hash;
+		std::vector<HashNode> children;
+	};
+
+	std::vector<HashNode> hash ( const std::string& parPath );
 } //namespace din
 
 #endif

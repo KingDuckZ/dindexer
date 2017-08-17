@@ -49,6 +49,26 @@ namespace {
 		else
 			return dincore::split_tags(parVM["tags"].as<std::string>());
 	}
+
+	void collect_matching_recursively (
+		dindb::Backend& parDB,
+		const std::vector<din::HashNode>& parHashes,
+		const std::vector<boost::string_ref>& parTags,
+		std::vector<dindb::LocatedItem>& parOut
+	) {
+		for (auto& hash : parHashes) {
+			std::vector<dindb::LocatedItem> results = parDB.locate_in_db(hash.hash, parTags);
+			if (results.empty()) {
+				collect_matching_recursively(parDB, hash.children, parTags, parOut);
+			}
+			else {
+				assert(1 == results.size());
+				for (auto&& res : results) {
+					parOut.push_back(std::move(res));
+				}
+			}
+		}
+	}
 } //unnamed namespace
 
 int main (int parArgc, char* parArgv[]) {
@@ -90,8 +110,8 @@ int main (int parArgc, char* parArgv[]) {
 		const std::vector<boost::string_ref> tags = extract_tags(vm);
 
 		if (vm.count("byhash")) {
-			const auto hash = din::hash(vm["substring"].as<std::string>());
-			results = db.locate_in_db(hash, tags);
+			const auto hashes = din::hash(vm["substring"].as<std::string>());
+			collect_matching_recursively(db, hashes, tags, results);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));

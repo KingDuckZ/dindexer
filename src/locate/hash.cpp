@@ -19,6 +19,7 @@
 #include "dindexer-machinery/scantask/hashing.hpp"
 #include "dindexer-machinery/scantask/dirtree.hpp"
 #include "dindexer-machinery/recorddata.hpp"
+#include "dindexer-machinery/make_filerecord_tree.hpp"
 #include <memory>
 #include <sys/stat.h>
 #include <stdexcept>
@@ -71,16 +72,38 @@ namespace din {
 				false
 			));
 		}
+
+		void fill_hash_nodes (
+			const std::vector<mchlib::FileRecordData>& parRefData,
+			const std::vector<mchlib::FileRecordNode>& parNodesIn,
+			std::vector<din::HashNode>& parNodesOut
+		) {
+			const std::size_t sz = parNodesIn.size();
+			parNodesOut.reserve(sz);
+			for (const auto& in : parNodesIn) {
+				assert(in.index < parRefData.size());
+				const auto& data = parRefData[in.index];
+				parNodesOut.push_back(HashNode{data.hash, {}});
+			}
+
+			assert(parNodesOut.size() == sz);
+			assert(parNodesIn.size() == sz);
+			for (std::size_t z = 0; z < sz; ++z) {
+				fill_hash_nodes(parRefData, parNodesIn[z].children, parNodesOut[z].children);
+			}
+		}
 	} //unnamed namespace
 
-	mchlib::TigerHash hash (const std::string& parPath) {
+	std::vector<HashNode> hash (const std::string& parPath) {
 		using mchlib::FileRecordData;
 		using HashingTaskPtr = std::shared_ptr<stask::Hashing>;
 
 		struct stat path_stat;
-		const int retval = stat(parPath.c_str(), &path_stat);
-		if (retval) {
-			throw std::runtime_error("Can't access file \"" + parPath + "\"");
+		{
+			const int retval = stat(parPath.c_str(), &path_stat);
+			if (retval) {
+				throw std::runtime_error("Can't access file \"" + parPath + "\"");
+			}
 		}
 
 		std::shared_ptr<stask::Base<std::vector<FileRecordData>>> file_src_task;
@@ -93,6 +116,13 @@ namespace din {
 		}
 
 		auto hashing = HashingTaskPtr(new stask::Hashing(file_src_task, false));
-		return hashing->get_or_create().front().hash;
+		std::vector<FileRecordData> hashes = hashing->get_or_create();
+
+		std::vector<HashNode> retval;
+		{
+			std::vector<mchlib::FileRecordNode> tree_indices = mchlib::make_filerecord_tree(hashes);
+			fill_hash_nodes(hashes, tree_indices, retval);
+		}
+		return retval;
 	}
 } //namespace din
