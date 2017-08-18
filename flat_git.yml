@@ -1,3 +1,4 @@
 inplace_submodules:
     - pbl
     - better-enums
+    - SQLiteCpp

@@ -13,3 +13,6 @@
 [submodule "lib/incredis"]
 	path = lib/incredis
 	url = ../incredis.git
+[submodule "lib/SQLiteCpp"]
+	path = lib/SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp.git
