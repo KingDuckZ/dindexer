@@ -20,4 +20,8 @@ redis_settings:
   - /home/michele/dev/build/dindexer/debug/src/backends/redis/lua
   - /home/michele/dev/build/dindexer/release/src/backends/redis/lua
 
+sqlite_settings:
+  connection:
+    path: /home/michele/dev/build/dindexer/dindexer.db3
+
 backend_paths: /home/michele/dev/build/dindexer/debug/src/backends
