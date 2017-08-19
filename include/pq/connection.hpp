@@ -42,6 +42,7 @@ namespace pq {
 		void connect ( void );
 		void disconnect ( void );
 		ResultSet query ( const std::string& parQuery );
+		ResultSet query ( const char* parQuery );
 
 		std::string escaped_literal ( const std::string& parString );
 		std::string escaped_literal ( boost::string_ref parString );
