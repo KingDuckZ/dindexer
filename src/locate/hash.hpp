@@ -20,9 +20,11 @@
 
 #include "dindexer-machinery/tiger.hpp"
 #include <vector>
+#include <string>
 
 namespace din {
 	struct HashNode {
+		std::string path;
 		mchlib::TigerHash hash;
 		std::vector<HashNode> children;
 	};

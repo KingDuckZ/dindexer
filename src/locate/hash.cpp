@@ -78,12 +78,14 @@ namespace din {
 			const std::vector<mchlib::FileRecordNode>& parNodesIn,
 			std::vector<din::HashNode>& parNodesOut
 		) {
+			using std::string;
+
 			const std::size_t sz = parNodesIn.size();
 			parNodesOut.reserve(sz);
 			for (const auto& in : parNodesIn) {
 				assert(in.index < parRefData.size());
 				const auto& data = parRefData[in.index];
-				parNodesOut.push_back(HashNode{data.hash, {}});
+				parNodesOut.push_back(HashNode{string(data.path()), data.hash, {}});
 			}
 
 			assert(parNodesOut.size() == sz);
