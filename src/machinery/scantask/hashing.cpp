@@ -115,6 +115,16 @@ namespace mchlib {
 						throw e;
 					}
 				}
+				catch (...) { //workaround for bug in gcc 5 and 6, see:
+					//https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66145
+					if (parIgnoreErrors) {
+						it->unreadable = true;
+						it->hash = TigerHash {};
+					}
+					else {
+						throw;
+					}
+				}
 			}
 
 #if defined(INDEXER_VERBOSE)
