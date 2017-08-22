@@ -13,3 +13,6 @@
 [submodule "lib/incredis"]
 	path = lib/incredis
 	url = ../incredis.git
+[submodule "cmake/binary_resource"]
+	path = cmake/binary_resource
+	url = https://github.com/KingDuckZ/binary_resource.git

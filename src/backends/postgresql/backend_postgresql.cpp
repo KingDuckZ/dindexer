@@ -18,6 +18,7 @@
 #include "backend_postgresql.hpp"
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
+#include "create_tables.hpp"
 #include "tag.hpp"
 #include "delete.hpp"
 #include "scan.hpp"
@@ -83,6 +84,12 @@ namespace dindb {
 
 	void BackendPostgreSql::connect() {
 		m_conn->connect();
+		if (m_conn->is_connected()) {
+			pq::ResultSet res = m_conn->query("SELECT EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'files'), EXISTS(SELECT 1 FROM pg_tables WHERE tablename = 'sets');");
+			if (res.size() == 1 and res[0].size() == 2 and (res[0][0] == "f" or res[0][1] == "f")) {
+				create_tables(*m_conn);
+			}
+		}
 	}
 
 	void BackendPostgreSql::disconnect() {
