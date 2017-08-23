@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include <boost/utility/string_ref.hpp>
+#include <exception>
 
 namespace YAML {
 	class Node;
@@ -30,6 +31,11 @@ namespace dindb {
 	class Backend;
 
 	using BackendPtr = std::unique_ptr<dindb::Backend, void(*)(dindb::Backend*)>;
+
+	class SOLoadException : public std::runtime_error {
+	public:
+		explicit SOLoadException (std::string&& parMessage);
+	};
 
 	class BackendPlugin {
 	public:
