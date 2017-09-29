@@ -16,7 +16,7 @@
  */
 
 #include "create_tables.hpp"
-#include "create_tables_query.h"
+#include "create_tables_query.hpp"
 #include "pq/connection.hpp"
 #include "backend_postgresql_config.h"
 #if defined(ZLIB_FOUND)

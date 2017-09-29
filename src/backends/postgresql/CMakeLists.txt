@@ -1,4 +1,4 @@
-project(${bare_name}-backend-postgresql CXX C)
+project(${bare_name}-backend-postgresql CXX)
 
 find_package(ZLIB)
 
@@ -12,6 +12,7 @@ endif()
 make_binary_resource(${gzip}
 	INPUT ${CMAKE_BINARY_DIR}/dindexer.sql
 	ARRAY_NAME create_tables_query
+	EXTENSION .cpp
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -21,7 +22,7 @@ add_library(${PROJECT_NAME} SHARED
 	scan.cpp
 	navigate.cpp
 	backend_postgresql.cpp
-	${CMAKE_CURRENT_BINARY_DIR}/create_tables_query.c
+	${CMAKE_CURRENT_BINARY_DIR}/create_tables_query.cpp
 	create_tables.cpp
 )
 
