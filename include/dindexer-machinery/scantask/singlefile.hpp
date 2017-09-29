@@ -15,21 +15,27 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id3F3E29B28FAA44A190451198CF1FD166
-#define id3F3E29B28FAA44A190451198CF1FD166
-
-#include "dindexer-machinery/tiger.hpp"
-#include <vector>
+#include "dindexer-machinery/scantask/dirtree.hpp"
 #include <string>
 
-namespace din {
-	struct HashNode {
-		std::string path;
-		mchlib::TigerHash hash;
-		std::vector<HashNode> children;
-	};
+struct stat;
 
-	std::vector<HashNode> hash ( const std::string& parPath );
-} //namespace din
+namespace mchlib {
+	namespace scantask {
+		class SingleFileTask : public Base<std::vector<mchlib::FileRecordData>> {
+		public:
+			typedef std::vector<mchlib::FileRecordData> PathList;
 
-#endif
+			explicit SingleFileTask ( std::string parPath );
+			explicit SingleFileTask ( std::string parPath, const struct stat* parStat );
+			virtual ~SingleFileTask ( void ) noexcept = default;
+
+		private:
+			virtual void on_data_destroy ( PathList& parData ) override;
+			virtual void on_data_create ( PathList& parData ) override;
+
+			std::string m_path;
+			const struct stat* m_stat;
+		};
+	} //namespace scantask
+} //namespace mchlib

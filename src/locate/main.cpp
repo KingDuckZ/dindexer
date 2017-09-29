@@ -25,13 +25,9 @@
 #include <ciso646>
 #include <iterator>
 #include <algorithm>
+#include <iterator>
 
 namespace dindb {
-	std::ostream& operator<< (std::ostream& parStream, const LocatedItem& parItem) {
-		parStream << parItem.group_id << '\t' << parItem.id << '\t' << parItem.path;
-		return parStream;
-	}
-
 	std::ostream& operator<< (std::ostream& parStream, const LocatedSet& parItem) {
 		const decltype(parItem.dir_count) one = 1;
 		const auto dircount = std::max(parItem.dir_count, one) - one;
@@ -43,6 +39,17 @@ namespace dindb {
 } //namespace dindb
 
 namespace {
+	struct LocatedItemInfo {
+		LocatedItemInfo (dindb::LocatedItem&& parItem, std::string&& parPath) :
+			item(std::move(parItem)),
+			local_path(std::move(parPath))
+		{
+		}
+
+		dindb::LocatedItem item;
+		std::string local_path;
+	};
+
 	std::vector<boost::string_ref> extract_tags (const boost::program_options::variables_map& parVM) {
 		if (not parVM.count("tags"))
 			return std::vector<boost::string_ref>();
@@ -52,22 +59,33 @@ namespace {
 
 	void collect_matching_recursively (
 		dindb::Backend& parDB,
-		const std::vector<din::HashNode>& parHashes,
+		std::vector<din::HashNode>&& parHashes,
 		const std::vector<boost::string_ref>& parTags,
-		std::vector<dindb::LocatedItem>& parOut
+		std::vector<LocatedItemInfo>& parOut
 	) {
-		for (auto& hash : parHashes) {
+		for (auto&& hash : parHashes) {
 			std::vector<dindb::LocatedItem> results = parDB.locate_in_db(hash.hash, parTags);
 			if (results.empty()) {
-				collect_matching_recursively(parDB, hash.children, parTags, parOut);
+				collect_matching_recursively(parDB, std::move(hash.children), parTags, parOut);
 			}
 			else {
 				assert(1 == results.size());
 				for (auto&& res : results) {
-					parOut.push_back(std::move(res));
+					parOut.push_back(LocatedItemInfo(std::move(res), std::move(hash.path)));
 				}
 			}
 		}
+	}
+
+	std::ostream& operator<< (std::ostream& parStream, const LocatedItemInfo& parItem) {
+		if (not parItem.local_path.empty())
+			parStream << '"' << parItem.local_path << "\" -->\t";
+
+		parStream << "group id: " << parItem.item.group_id << '\t' <<
+			"item id: " << parItem.item.id << '\t' <<
+			'"' << parItem.item.path << '"'
+		;
+		return parStream;
 	}
 } //unnamed namespace
 
@@ -106,18 +124,25 @@ int main (int parArgc, char* parArgv[]) {
 		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedSet>(std::cout, "\n"));
 	}
 	else {
-		std::vector<dindb::LocatedItem> results;
+		std::vector<LocatedItemInfo> results;
 		const std::vector<boost::string_ref> tags = extract_tags(vm);
 
 		if (vm.count("byhash")) {
-			const auto hashes = din::hash(vm["substring"].as<std::string>());
-			collect_matching_recursively(db, hashes, tags, results);
+			auto hashes = din::hash(vm["substring"].as<std::string>());
+			collect_matching_recursively(db, std::move(hashes), tags, results);
 		}
 		else {
 			const auto search_regex = g2r::convert(vm["substring"].as<std::string>(), not vm.count("case-insensitive"));
-			results = db.locate_in_db(search_regex, tags);
+			auto located_items(db.locate_in_db(search_regex, tags));
+			results.reserve(located_items.size());
+			std::transform(
+				std::make_move_iterator(located_items.begin()),
+				std::make_move_iterator(located_items.end()),
+				std::back_inserter(results),
+				[](dindb::LocatedItem&& itm) { return LocatedItemInfo(std::move(itm), std::string()); }
+			);
 		}
-		std::copy(results.begin(), results.end(), std::ostream_iterator<dindb::LocatedItem>(std::cout, "\n"));
+		std::copy(results.begin(), results.end(), std::ostream_iterator<LocatedItemInfo>(std::cout, "\n"));
 	}
 	return 0;
 }

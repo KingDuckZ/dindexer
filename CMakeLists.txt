@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 set(bare_name "dindexer")
 project("${bare_name}-if" VERSION 0.1.5 LANGUAGES CXX C)
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/binary_resource)
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A file indexing program to help you keep track of your backed up files")
 set(CPACK_PACKAGE_VENDOR "King_DuckZ")

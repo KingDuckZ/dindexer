@@ -132,7 +132,13 @@ namespace pq {
 	}
 
 	ResultSet Connection::query (const std::string& parQuery) {
-		ResultInfo info(PQexec(m_localData->connection, parQuery.c_str()));
+		assert(not parQuery.empty());
+		return this->query(parQuery.c_str());
+	}
+
+	ResultSet Connection::query (const char* parQuery) {
+		assert(parQuery);
+		ResultInfo info(PQexec(m_localData->connection, parQuery));
 		if (not info.result)
 			throw DatabaseException("Error running query", "Error allocating result object", __FILE__, __LINE__);
 		const int ress = PQresultStatus(info.result.get());

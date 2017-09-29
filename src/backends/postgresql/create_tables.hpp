@@ -15,21 +15,15 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id3F3E29B28FAA44A190451198CF1FD166
-#define id3F3E29B28FAA44A190451198CF1FD166
+#ifndef id16D167FB279D4A9097EDB94FB43BD3B6
+#define id16D167FB279D4A9097EDB94FB43BD3B6
 
-#include "dindexer-machinery/tiger.hpp"
-#include <vector>
-#include <string>
+namespace pq {
+	class Connection;
+} //namespace pq
 
-namespace din {
-	struct HashNode {
-		std::string path;
-		mchlib::TigerHash hash;
-		std::vector<HashNode> children;
-	};
-
-	std::vector<HashNode> hash ( const std::string& parPath );
-} //namespace din
+namespace dindb {
+	void create_tables (pq::Connection& parConn);
+} //namespace dindb
 
 #endif

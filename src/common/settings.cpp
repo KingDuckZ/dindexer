@@ -49,12 +49,15 @@ namespace dinlib {
 		parOut.backend_name = settings["backend_name"].as<std::string>();
 		const std::string backend_settings_section = parOut.backend_name + "_settings";
 		if (settings[backend_settings_section]) {
-			auto settings_node = settings[backend_settings_section];
-			const std::string plugin_path = find_plugin_by_name(split_and_trim(search_paths, ':'), parOut.backend_name);
-			if (plugin_path.empty())
-				throw std::runtime_error(std::string("Unable to find any suitable plugin with the specified name \"") + parOut.backend_name + "\"");
-			parOut.backend_plugin = dindb::BackendPlugin(plugin_path, &settings_node);
-			throw_if_plugin_failed(parOut.backend_plugin, plugin_path, parOut.backend_name);
+			try {
+				auto settings_node = settings[backend_settings_section];
+				const std::string plugin_path = find_plugin_by_name(split_and_trim(search_paths, ':'), parOut.backend_name);
+				parOut.backend_plugin = dindb::BackendPlugin(plugin_path, &settings_node);
+				throw_if_plugin_failed(parOut.backend_plugin, plugin_path, parOut.backend_name);
+			}
+			catch (const dindb::SOLoadException& err) {
+				throw std::runtime_error(std::string("Unable to find any suitable plugin with the specified name \"") + err.what() + "\"");
+			}
 		}
 	}
 

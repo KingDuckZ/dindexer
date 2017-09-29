@@ -15,21 +15,10 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id3F3E29B28FAA44A190451198CF1FD166
-#define id3F3E29B28FAA44A190451198CF1FD166
+#ifndef id3885F59E78B044ABA51EBB161746354D
+#define id3885F59E78B044ABA51EBB161746354D
 
-#include "dindexer-machinery/tiger.hpp"
-#include <vector>
-#include <string>
-
-namespace din {
-	struct HashNode {
-		std::string path;
-		mchlib::TigerHash hash;
-		std::vector<HashNode> children;
-	};
-
-	std::vector<HashNode> hash ( const std::string& parPath );
-} //namespace din
+extern const unsigned char create_tables_query[];
+extern const unsigned int create_tables_query_len;
 
 #endif

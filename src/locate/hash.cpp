@@ -17,7 +17,7 @@
 
 #include "hash.hpp"
 #include "dindexer-machinery/scantask/hashing.hpp"
-#include "dindexer-machinery/scantask/dirtree.hpp"
+#include "dindexer-machinery/scantask/singlefile.hpp"
 #include "dindexer-machinery/recorddata.hpp"
 #include "dindexer-machinery/make_filerecord_tree.hpp"
 #include <memory>
@@ -31,59 +31,19 @@ namespace stask = mchlib::scantask;
 
 namespace din {
 	namespace {
-		class SingleFileTask : public stask::Base<std::vector<mchlib::FileRecordData>> {
-		public:
-			typedef std::vector<mchlib::FileRecordData> PathList;
-
-			SingleFileTask ( std::string parPath, const struct stat* parStat );
-			virtual ~SingleFileTask ( void ) noexcept = default;
-
-		private:
-			virtual void on_data_destroy ( PathList& parData ) override;
-			virtual void on_data_create ( PathList& parData ) override;
-
-			std::string m_path;
-			const struct stat* m_stat;
-		};
-
-		SingleFileTask::SingleFileTask (std::string parPath, const struct stat* parStat) :
-			m_path(std::move(parPath)),
-			m_stat(parStat)
-		{
-			assert(not m_path.empty());
-			assert(m_stat);
-		}
-
-		void SingleFileTask::on_data_destroy (PathList& parData) {
-			assert(not parData.empty());
-			parData.clear();
-		}
-
-		void SingleFileTask::on_data_create (PathList& parData) {
-			assert(parData.empty());
-			parData.reserve(1);
-			parData.push_back(mchlib::FileRecordData(
-				std::string(m_path),
-				0,
-				m_stat->st_atime,
-				m_stat->st_mtime,
-				0,
-				false,
-				false
-			));
-		}
-
 		void fill_hash_nodes (
 			const std::vector<mchlib::FileRecordData>& parRefData,
 			const std::vector<mchlib::FileRecordNode>& parNodesIn,
 			std::vector<din::HashNode>& parNodesOut
 		) {
+			using std::string;
+
 			const std::size_t sz = parNodesIn.size();
 			parNodesOut.reserve(sz);
 			for (const auto& in : parNodesIn) {
 				assert(in.index < parRefData.size());
 				const auto& data = parRefData[in.index];
-				parNodesOut.push_back(HashNode{data.hash, {}});
+				parNodesOut.push_back(HashNode{string(data.path()), data.hash, {}});
 			}
 
 			assert(parNodesOut.size() == sz);
@@ -97,6 +57,7 @@ namespace din {
 	std::vector<HashNode> hash (const std::string& parPath) {
 		using mchlib::FileRecordData;
 		using HashingTaskPtr = std::shared_ptr<stask::Hashing>;
+		using stask::SingleFileTask;
 
 		struct stat path_stat;
 		{

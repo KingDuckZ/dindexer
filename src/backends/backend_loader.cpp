@@ -21,6 +21,9 @@
 #include "backends/backend_loader.hpp"
 #include "backends/exposed_functions.hpp"
 #include "backends/backend_version.hpp"
+#include "dindexer-machinery/scantask/mime.hpp"
+#include "dindexer-machinery/scantask/singlefile.hpp"
+#include "dindexer-machinery/recorddata.hpp"
 #include <dlfcn.h>
 #include <cassert>
 #include <functional>
@@ -72,17 +75,38 @@ namespace dindb {
 			auto get_version = reinterpret_cast<GetVersionFun>(dlsym(parSOHandle, "dindexer_backend_iface_version"));
 			return get_version();
 		}
+
+		std::string get_mime_type (const std::string& parPath) {
+			using mchlib::scantask::SingleFileTask;
+			using mchlib::scantask::Mime;
+			using std::shared_ptr;
+
+			shared_ptr<SingleFileTask> file(new SingleFileTask(parPath));
+			Mime mime(file, true);
+
+			const std::vector<mchlib::FileRecordData>& result = mime.get_or_create();
+			assert(result.size() == 1);
+			boost::string_ref retval = result.front().mime_type();
+			return std::string(retval.data(), retval.size());
+		}
 	} //unnamed namespace
+
+	SOLoadException::SOLoadException (std::string&& parMessage) :
+		std::runtime_error(std::move(parMessage))
+	{
+	}
 
 	std::string backend_name (const std::string& parSOPath) {
 		assert(not parSOPath.empty());
 		using SoHandle = std::unique_ptr<void, int(*)(void*)>;
+		if (get_mime_type(parSOPath) != "application/x-sharedlib")
+			return std::string();
 
 		auto handle = SoHandle(dlopen(parSOPath.c_str(), RTLD_LAZY), &dlclose);
 		if (handle)
 			return backend_name(handle.get());
 		else
-			return std::string();
+			throw SOLoadException(dlerror());
 	}
 
 	BackendPlugin::BackendPlugin() :

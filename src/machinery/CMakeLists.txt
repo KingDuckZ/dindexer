@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME} SHARED
 	scantask/contenttype.cpp
 	scantask/mime.cpp
 	scantask/setbasic.cpp
+	scantask/singlefile.cpp
 	make_filerecord_tree.cpp
 )
 

@@ -15,21 +15,9 @@
  * along with "dindexer".  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef id3F3E29B28FAA44A190451198CF1FD166
-#define id3F3E29B28FAA44A190451198CF1FD166
+#ifndef id119764EBCC3345668A406E9A8FC1B6C7
+#define id119764EBCC3345668A406E9A8FC1B6C7
 
-#include "dindexer-machinery/tiger.hpp"
-#include <vector>
-#include <string>
-
-namespace din {
-	struct HashNode {
-		std::string path;
-		mchlib::TigerHash hash;
-		std::vector<HashNode> children;
-	};
-
-	std::vector<HashNode> hash ( const std::string& parPath );
-} //namespace din
+#cmakedefine ZLIB_FOUND
 
 #endif
