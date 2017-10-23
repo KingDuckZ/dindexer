@@ -1,11 +1,19 @@
 project(${bare_name}-backend-postgresql CXX)
 
 find_package(ZLIB)
+find_package(Boost 1.53.0 COMPONENTS iostreams)
 
 include(binary_resource)
 
-if (ZLIB_FOUND)
+if (ZLIB_FOUND AND Boost_IOSTREAMS_FOUND)
+	set(compress_bin_data ON)
+else()
+	set(compress_bin_data OFF)
+endif()
+
+if (compress_bin_data)
 	set(gzip GZIP)
+	message(STATUS "Embedded binary resources will be gzipped")
 else()
 	set(gzip "")
 endif()
@@ -13,7 +21,9 @@ make_binary_resource(${gzip}
 	INPUT ${CMAKE_BINARY_DIR}/dindexer.sql
 	ARRAY_NAME create_tables_query
 	EXTENSION .cpp
+	PREFIX extern const
 )
+unset(gzip)
 
 add_library(${PROJECT_NAME} SHARED
 	tag.cpp
@@ -37,8 +47,11 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE ${bare_name}-inc
 	PRIVATE ${bare_name}-pq
 )
-if (ZLIB_FOUND)
-	target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
+if (compress_bin_data)
+	target_link_libraries(${PROJECT_NAME}
+		PRIVATE ZLIB::ZLIB
+		PRIVATE Boost::iostreams
+	)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
