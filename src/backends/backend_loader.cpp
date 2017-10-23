@@ -42,16 +42,16 @@ namespace dindb {
 			const char* const fun_name_destroy = "dindexer_destroy_backend";
 
 			auto create = reinterpret_cast<CreateBackendFun>(dlsym(parSOHandle, fun_name_create));
-			auto destroy = reinterpret_cast<DeleteBackendFun>(dlsym(parSOHandle, fun_name_destroy));
-
 			if (not create) {
 				std::ostringstream oss;
-				oss << "Unable to find function " << fun_name_create;
+				oss << "Unable to find function " << fun_name_create << ": " << dlerror();
 				throw std::runtime_error(oss.str());
 			}
+
+			auto destroy = reinterpret_cast<DeleteBackendFun>(dlsym(parSOHandle, fun_name_destroy));
 			if (not destroy) {
 				std::ostringstream oss;
-				oss << "Unable to find function " << fun_name_destroy;
+				oss << "Unable to find function " << fun_name_destroy << ": " << dlerror();
 				throw std::runtime_error(oss.str());
 			}
 			return BackendPtr(create(parConfig), destroy);
@@ -89,6 +89,13 @@ namespace dindb {
 			boost::string_ref retval = result.front().mime_type();
 			return std::string(retval.data(), retval.size());
 		}
+
+		std::unique_ptr<void, int(*)(void*)> dlopen_or_throw (const std::string& parPath) {
+			void* const retval = dlopen(parPath.c_str(), RTLD_LAZY);
+			if (not retval)
+				throw SOLoadException(dlerror());
+			return std::unique_ptr<void, int(*)(void*)>(retval, &dlclose);
+		}
 	} //unnamed namespace
 
 	SOLoadException::SOLoadException (std::string&& parMessage) :
@@ -117,7 +124,7 @@ namespace dindb {
 	}
 
 	BackendPlugin::BackendPlugin (const std::string& parSOPath, const YAML::Node* parConfig) :
-		m_lib(dlopen(parSOPath.c_str(), RTLD_LAZY), &dlclose),
+		m_lib(dlopen_or_throw(parSOPath)),
 		m_backend(load_backend(m_lib.get(), parConfig)),
 		m_name(backend_name(m_lib.get())),
 		m_iface_ver(backend_iface_version(m_lib.get()))
