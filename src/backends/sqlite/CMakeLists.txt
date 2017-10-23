@@ -9,6 +9,8 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED
 	backend_sqlite.cpp
+	db_functions.cpp
+	time_t_to_timestamp.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -23,6 +23,7 @@
 #include "dindexerConfig.h"
 #include "duckhandy/stringize.h"
 #include "SQLiteCpp/SQLiteCpp.h"
+#include "db_functions.hpp"
 #include <utility>
 #include <yaml-cpp/yaml.h>
 #include <array>
@@ -59,8 +60,19 @@ access_time DATETIME,
 modify_time DATETIME,
 unreadable INTEGER NOT NULL,
 mimetype TEXT NOT NULL,
-charset TEXT NOT NULL,
-tags TEXT NOT NULL
+charset TEXT NOT NULL
+);)";
+
+		const char g_create_table_file_tags[] = R"(CREATE TABLE file_tags(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+tag TEXT NOT NULL,
+file_id INTEGER NOT NULL
+);)";
+
+		const char g_create_table_set_tags[] = R"(CREATE TABLE set_tags(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+tag TEXT NOT NULL,
+set_id INTEGER NOT NULL
 );)";
 
 		struct SqliteConnectionSettings {
@@ -79,7 +91,7 @@ namespace YAML {
 		}
 
 		static bool decode (const Node& parNode, dindb::SqliteConnectionSettings& parSettings) {
-			if (not parNode.IsMap() or parNode.size() < 2) {
+			if (not parNode.IsMap() or parNode.size() < 1) {
 				return false;
 			}
 
@@ -105,10 +117,11 @@ namespace dindb {
 		using SQLite::Database;
 		using SQLite::OPEN_READONLY;
 		using SQLite::OPEN_CREATE;
+		using SQLite::OPEN_READWRITE;
 
 		assert(not m_db);
 		if (not m_db)
-			m_db.reset(new Database(m_db_path, (m_read_only ? OPEN_READONLY : OPEN_CREATE)));
+			m_db.reset(new Database(m_db_path, (m_read_only ? OPEN_READONLY : OPEN_CREATE bitor OPEN_READWRITE)));
 
 		assert(m_db);
 		if (not m_read_only) {
@@ -116,6 +129,10 @@ namespace dindb {
 				m_db->exec(g_create_table_files);
 			if (not m_db->tableExists("sets"))
 				m_db->exec(g_create_table_sets);
+			if (not m_db->tableExists("file_tags"))
+				m_db->exec(g_create_table_file_tags);
+			if (not m_db->tableExists("set_tags"))
+				m_db->exec(g_create_table_set_tags);
 		}
 	}
 
@@ -153,100 +170,11 @@ namespace dindb {
 	}
 
 	void BackendSQLite::write_files (const std::vector<mchlib::FileRecordData>& parData, const mchlib::SetRecordDataFull& parSetData, const std::string& parSignature) {
-		//using dhandy::lexical_cast;
-		//using boost::string_ref;
-
-		//const auto data_size = static_cast<int>(parData.size());
-		//const auto group_id_int = m_redis.hincrby(PROGRAM_NAME ":indices", "set", 1);
-		//const auto file_id_int = m_redis.hincrby(PROGRAM_NAME ":indices", "files", data_size);
-
-		//const auto group_id = lexical_cast<std::string>(group_id_int);
-		//const std::string set_key = PROGRAM_NAME ":set:" + group_id;
-		//const std::string level_key = PROGRAM_NAME ":levels:" + group_id;
-		//assert(file_id_int >= data_size);
-		//const auto base_file_id = file_id_int - data_size + 1;
-
-		//auto batch = m_redis.make_batch();
-
-		//batch.hmset(
-		//	set_key,
-		//	"name", parSetData.name,
-		//	"disk_label", parSetData.disk_label,
-		//	"fs_uuid", parSetData.fs_uuid,
-		//	"type", parSetData.type,
-		//	"content_type", parSetData.content_type,
-		//	"base_file_id", lexical_cast<std::string>(base_file_id),
-		//	"item_count", lexical_cast<std::string>(parData.size()),
-		//	"dir_count", lexical_cast<std::string>(std::count_if(parData.begin(), parData.end(), [](const mchlib::FileRecordData& r){return r.is_directory;})),
-		//	"creation", lexical_cast<std::string>(std::time(nullptr)),
-		//	"app_name", parSignature
-		//);
-
-//#if !defined(NDEBUG)
-//		std::size_t inserted_count = 0;
-//#endif
-//		for (auto z = base_file_id; z < base_file_id + data_size; ++z) {
-//			const std::string file_key = PROGRAM_NAME ":file:" + lexical_cast<std::string>(z);
-//			assert(z >= base_file_id);
-//			assert(static_cast<std::size_t>(z - base_file_id) < parData.size());
-//			const auto& file_data = parData[z - base_file_id];
-//			const std::string hash = tiger_to_string(file_data.hash);
-//			batch.hmset(
-//				file_key,
-//				"hash", hash,
-//				"path", file_data.path(),
-//				"size", lexical_cast<std::string>(file_data.size),
-//				"level", lexical_cast<std::string>(file_data.level),
-//				"mime_type", file_data.mime_type(),
-//				"mime_charset", file_data.mime_charset(),
-//				"is_directory", (file_data.is_directory ? '1' : '0'),
-//				"is_symlink", (file_data.is_symlink ? '1' : '0'),
-//				"unreadable", (file_data.unreadable ? '1' : '0'),
-//				"hash_valid", (file_data.hash_valid ? '1' : '0'),
-//				"group_id", group_id,
-//				"atime", lexical_cast<std::string>(file_data.atime),
-//				"mtime", lexical_cast<std::string>(file_data.mtime)
-//			);
-//
-//			batch.sadd(
-//				PROGRAM_NAME ":hash:" + hash,
-//				lexical_cast<std::string>(z)
-//			);
-//
-//			batch.zadd(level_key, redis::IncRedisBatch::ZADD_None, false, static_cast<double>(file_data.level), file_key);
-//#if !defined(NDEBUG)
-//			++inserted_count;
-//#endif
-//		}
-//		assert(inserted_count == parData.size());
-//
-//		batch.throw_if_failed();
+		write_to_db(*m_db, parData, parSetData, parSignature);
 	}
 
 	bool BackendSQLite::search_file_by_hash (mchlib::FileRecordData& parItem, mchlib::SetRecordDataFull& parSet, const mchlib::TigerHash& parHash) {
-//		using boost::empty;
-//
-//		const std::string hash_key = PROGRAM_NAME ":hash:" + tiger_to_string(parHash);
-//		auto hash_reply = m_redis.srandmember(hash_key);
-//		if (not hash_reply) {
-//			return false;
-//		}
-//		else {
-//			const auto file_key = PROGRAM_NAME ":file:" + *hash_reply;
-//			auto set_key_and_file_item = redis::range_as<FileRecordDataWithGroup>(m_redis.hscan(file_key));
-//			parItem = std::move(set_key_and_file_item.second);
-//			assert(parItem.hash == parHash);
-//			const std::string group_key = PROGRAM_NAME ":set:" + set_key_and_file_item.first;
-//
-//			auto scan_range = m_redis.hscan(group_key);
-//			if (empty(scan_range)) {
-//				return false;
-//			}
-//			else {
-//				parSet = redis::range_as<mchlib::SetRecordDataFull>(m_redis.hscan(group_key));
-//				return true;
-//			}
-//		}
+		return read_from_db(*m_db, parItem, parSet, parHash);
 	}
 
 	std::vector<LocatedItem> BackendSQLite::locate_in_db (const std::string& parSearch, const TagList& parTags) {
@@ -282,7 +210,7 @@ namespace dindb {
 	}
 } //namespace dindb
 
-extern "C" dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig) {
+extern "C" [[gnu::used]] dindb::Backend* dindexer_create_backend (const YAML::Node* parConfig) {
 	if (not parConfig)
 		return nullptr;
 
@@ -302,7 +230,7 @@ extern "C" void dindexer_destroy_backend (dindb::Backend* parDele) {
 }
 
 extern "C" const char* dindexer_backend_name() {
-	return "redis";
+	return "sqlite";
 }
 
 extern "C" int dindexer_backend_iface_version() {
